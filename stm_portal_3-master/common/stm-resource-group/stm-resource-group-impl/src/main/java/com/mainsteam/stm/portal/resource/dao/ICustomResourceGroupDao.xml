@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+        
+<mapper namespace="com.mainsteam.stm.portal.resource.dao.ICustomResourceGroupDao">
+	
+	<insert id="insertCustomGroup" parameterType="com.mainsteam.stm.portal.resource.po.CustomGroupPo" >
+		insert into STM_CUSTOM_GROUP
+		(GROUP_ID,GROUP_NAME,GROUP_ENTRYID,GROUP_ENTRYDATETIME,GROUP_TYPE,GROUP_PID,GROUP_SORT)
+		values(
+			#{id},
+			#{name},
+			#{entryId},
+			#{entryDatetime},
+			#{groupType},
+			#{pid},
+			#{sort}
+		)
+	</insert>
+	
+	
+	<insert id="batchCustomGroupResource" parameterType="com.mainsteam.stm.portal.resource.po.CustomGroupResourcePo">
+		insert into STM_CUSTOM_GROUP_RESOURCE
+		(GROUP_ID,RESOURCE_ID)
+		values(
+			#{groupId},
+			#{resourceID}
+		)
+	</insert>
+	
+	<select id="getList" resultType="com.mainsteam.stm.portal.resource.po.CustomGroupPo" parameterType="com.mainsteam.stm.portal.resource.po.CustomGroupPo">
+		select GROUP_ID as id,
+		       GROUP_NAME as name,
+		       GROUP_DESC as description,
+		       GROUP_ENTRYID as entryId,
+		       GROUP_ENTRYDATETIME as entryDatetime,
+		       GROUP_TYPE as groupType,
+		       GROUP_PID as pid,
+		       GROUP_SORT as sort
+		  from STM_CUSTOM_GROUP where GROUP_TYPE='USER' and GROUP_ENTRYID=#{entryId}
+	</select>
+	
+	<select id="getCustomGroup" resultType="com.mainsteam.stm.portal.resource.po.CustomGroupPo" parameterType="Long">
+		select GROUP_ID as id,
+			GROUP_NAME as name,
+			GROUP_ENTRYID as entryId,
+			GROUP_ENTRYDATETIME as entryDatetime,
+			GROUP_DESC as description,
+			GROUP_TYPE as groupType,
+			GROUP_PID as pid,
+			GROUP_SORT as sort 
+		from STM_CUSTOM_GROUP where GROUP_ID=#{id}
+	</select>
+	
+	<select id="getGroupResourceIdsByGroup" resultType="String" parameterType="Long">
+		select RESOURCE_ID
+		  from STM_CUSTOM_GROUP_RESOURCE
+		  where GROUP_ID=#{id}
+	</select>
+	
+	<select id="checkGroupNameIsExsit" resultType="Integer" parameterType="com.mainsteam.stm.portal.resource.po.CustomGroupPo">
+		select count(*)
+		  from STM_CUSTOM_GROUP
+		  where GROUP_TYPE=#{groupType}
+		    and GROUP_NAME=#{name}
+		    and GROUP_ENTRYID=#{entryId}
+		<if test="pid != null">
+		    and GROUP_PID=#{pid}
+		</if>
+	</select>
+	
+	<update id="updateGroup" parameterType="com.mainsteam.stm.portal.resource.po.CustomGroupPo">
+		update STM_CUSTOM_GROUP set
+			GROUP_NAME=#{name},
+			GROUP_ENTRYID=#{entryId},
+			GROUP_ENTRYDATETIME=#{entryDatetime}, 
+			GROUP_TYPE=#{groupType}
+		where GROUP_ID=#{id}
+	</update>
+	
+	<delete id="deleteGroupResource" parameterType="Long">
+		delete from STM_CUSTOM_GROUP_RESOURCE where GROUP_ID=#{id}
+	</delete>
+	
+	<delete id="deleteGroup" parameterType="Long">
+		delete from STM_CUSTOM_GROUP where GROUP_ID=#{id}
+	</delete>
+	
+
+	
+	<delete id="deleteResourceFromGroup" parameterType="com.mainsteam.stm.portal.resource.bo.CustomGroupBo">
+		delete from STM_CUSTOM_GROUP_RESOURCE where GROUP_ID=#{id} and RESOURCE_ID in
+		 <foreach item="item" index="index" collection="resourceInstanceIds" open="(" separator="," close=")">  
+  			#{item}  
+ 		 </foreach>  
+	</delete>
+	
+	<select id="selectResourceNumberIsZeroGroup" resultType="Long">
+		SELECT GROUP_ID FROM STM_CUSTOM_GROUP WHERE GROUP_ID NOT IN
+			(SELECT DISTINCT group_ID FROM STM_CUSTOM_GROUP_RESOURCE) and GROUP_TYPE='USER'
+	</select>
+
+	<delete id="deleteGroupAndResourceRelationById">
+		delete from STM_CUSTOM_GROUP_RESOURCE where RESOURCE_ID in
+		 <foreach item="ids" index="index" collection="array" open="(" separator="," close=")">  
+  			#{ids}
+ 		 </foreach> 
+	</delete>
+	
+	<select id="checkGroupResourceRelationIsExsit" resultType="Integer" parameterType="com.mainsteam.stm.portal.resource.po.CustomGroupResourcePo">
+		select count(*)
+		  from STM_CUSTOM_GROUP_RESOURCE
+		  where GROUP_ID=#{groupId} and RESOURCE_ID=#{resourceID}
+	</select>
+	
+	<select id="getMaxSortByEntryId" resultType="Integer" parameterType="Long">
+		select max(GROUP_SORT) from STM_CUSTOM_GROUP where GROUP_ENTRYID = #{entryId}
+	</select>
+	
+	<select id="getChildGroupsById" resultType="com.mainsteam.stm.portal.resource.po.CustomGroupPo" parameterType="map">
+		select 
+			GROUP_ID as id,
+			GROUP_NAME as name,
+			GROUP_DESC as description,
+			GROUP_ENTRYID as entryId,
+			GROUP_ENTRYDATETIME as entryDatetime,
+			GROUP_TYPE as groupType,
+			GROUP_PID as pid,
+			GROUP_SORT as sort
+		from STM_CUSTOM_GROUP where GROUP_TYPE='USER' and GROUP_ENTRYID = #{entryId}
+		<if test="parentGroupId != null">
+			and GROUP_PID = #{parentGroupId}
+		</if>
+		<if test="parentGroupId == null">
+			and GROUP_PID is Null
+		</if>
+	</select>
+	
+	<update id="updateGroupSort" parameterType="map">
+		update STM_CUSTOM_GROUP set GROUP_SORT = #{sort} where GROUP_ID=#{groupId}
+	</update>
+	
+</mapper>

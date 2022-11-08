@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.ipmanage.impl.dao.IpMainMapper">
+	<select id="getIPList" resultType="com.mainsteam.stm.ipmanage.bo.IpMain" parameterType="com.mainsteam.stm.ipmanage.bo.IpMain">
+		select * from ip_main 
+		<where>
+			ip1=#{ip1}
+			<if test="ip2!=null and ip2!=''">
+				and ip2=#{ip2}
+			</if>
+			<if	test="ip3!=null and ip3!=''">
+				and ip3=#{ip3}
+			</if>
+			<if	test="ip4!=null and ip4!=''">
+				and ip4=#{ip4}
+			</if>
+			<if test="ip4Start!=null and ip4Start!=''">
+				and <![CDATA[ ip4 >=  ]]>#{ip4Start}
+			</if>
+			<if test="ip4End!=null and ip4End!=''">
+				and #{ip4End} <![CDATA[  >=  ]]> ip4
+			</if>
+			<if test="depart_id!=null and depart_id!=''">
+				and depart_id=#{depart_id}
+			</if>
+		</where>
+		<!-- order by ip -->
+	</select>
+	<select id="getSameIp" parameterType="java.lang.Long" resultType="com.mainsteam.stm.ipmanage.bo.IpMain">
+		select * from ip_main where ip=#{ip}
+	</select>
+	<insert id="insert" parameterType="com.mainsteam.stm.ipmanage.bo.IpMain">
+		INSERT INTO `ip_main` ( `ip`, `long_value`, `mac`, `mask32`, `depart`, `depart_id`, `ip1`, `ip2`, `ip3`, `ip4`, `create_time`, `update_time`, `create_type`, `has_subnet`, `extr1`, `extr2`, `extr3`, `extr4`)
+		 VALUES (#{ip}, #{long_value}, #{mac}, #{mask32}, #{depart}, #{depart_id}, #{ip1}, #{ip2}, #{ip3}, #{ip4}, #{create_time}, #{update_time}, #{create_type}, #{has_subnet}, #{extr1}, #{extr2}, #{extr3}, #{extr4});
+	</insert>
+	<update id="update" parameterType="com.mainsteam.stm.ipmanage.bo.IpMain">
+		UPDATE `ip_main` SET 
+		`depart`=#{depart}, 
+		`depart_id`=#{depart_id},   
+		`update_time`=#{update_time},  
+		`has_subnet`=#{has_subnet}, 
+		 WHERE (`id`=#{id});
+	</update>
+	<update id="resetDepart" parameterType="java.lang.Integer">
+		UPDATE `ip_main` SET  
+		`depart`=null, 
+		`depart_id`=null,   
+		`update_time`=now(),  
+		 WHERE (`depart_id`=#{departId});
+	</update>
+	<delete id="del" parameterType="java.lang.Integer">
+		delete from ip_main where id =#{id}
+	</delete>
+</mapper>

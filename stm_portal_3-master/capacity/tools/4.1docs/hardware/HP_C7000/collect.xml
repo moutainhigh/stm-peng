@@ -1,0 +1,559 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">
+    <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0"></GlobalMetricSetting>
+    <PluginClassAliasList>
+        <PluginClassAlias id="uptimeProcessor" class="com.mainsteam.stm.plugin.common.UptimeProcessor"/>
+        <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+        <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+        <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+        <PluginClassAlias id="columnPasteProcessor" class="com.mainsteam.stm.plugin.common.ColumnPasteProcessor"/>
+        <PluginClassAlias id="RegularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+        <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+        <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+        <PluginClassAlias id="tableConverter" class="com.mainsteam.stm.plugin.common.TableResultSetConverter"/>
+        <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+        <PluginClassAlias id="ChangeRateProcessor" class="com.mainsteam.stm.plugin.common.ChangeRateProcessor"/>
+        <PluginClassAlias id="processConverter" class="com.mainsteam.stm.plugin.common.ProcessResultSetConverter"/>
+        <PluginClassAlias id="FormatProcessor" class="com.mainsteam.stm.plugin.common.FormatProcessor"/>
+        <PluginClassAlias id="rowFilterProcessor" class="com.mainsteam.stm.plugin.common.RowFilterProcessor"/>
+    </PluginClassAliasList>
+    <MetricPlugin metricid="PowerSubsystem" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="SHOW ENCLOSURE STATUS"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Power Subsystem:\s+Status:\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,1;0" key=""/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="availableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="Enclosure" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="SHOW ENCLOSURE STATUS"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Enclosure:\s+Status:\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,正常;异常" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="InternalData" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="SHOW ENCLOSURE STATUS"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Enclosure:[\S\s]+?Internal Data\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,正常;异常" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="Redundancy" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="SHOW ENCLOSURE STATUS"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Enclosure:[\S\s]+?Redundancy\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,正常;异常" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="OnboardAdministrator" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="SHOW ENCLOSURE STATUS"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Onboard Administrator:\s+Status:\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,正常;异常" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="CoolingSubsystem" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="SHOW ENCLOSURE STATUS"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Cooling Subsystem:\s+Status:\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,正常;异常" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="model" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show fru"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Enclosure\s+Model: (.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="Manufacturer" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show fru"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Enclosure[\r\n]+[\S\s]+?Manufacturer: (.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="SerialNumber" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show fru"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Enclosure[\r\n]+[\S\s]+?Serial Number: (.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="PartNumber" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show fru"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Enclosure[\r\n]+[\S\s]+?Part Number: (.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <!--子资源采集-->
+    <MetricPlugin metricid="BladeId" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="BladeId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show server status all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Blade #(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="BladeId"/>
+            <Parameter type="" key="ValueColumnTitle" value="BladeId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="BladeName" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="BladeId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show server status all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Blade #(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="select ('Blade ' + BladeId) as BladeName, BladeId" key="SELECT"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="BladeId"/>
+            <Parameter type="" key="IndexColumnTitle" value="BladeId"/>
+            <Parameter type="" key="ValueColumnTitle" value="BladeName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="BladeInternalData" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="internalData"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show server status all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="BladeId" key="BladeId" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="Blade #${BladeId} Status:[\S\s]+?Internal Data\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,1;0" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="BladeProcessor" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="BladeProcessor"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show server status all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="BladeId" key="BladeId" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="Blade #${BladeId} Status:[\S\s]+?Management Processor\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,1;0" key=""/>
+            </PluginDataHandler>            
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="BladeIO" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="BladeIO"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show server status all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="BladeId" key="BladeId" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="Blade #${BladeId} Status:[\S\s]+?I/O Configuration\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,1;0" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="BladePower" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="BladePower"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show server status all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="BladeId" key="BladeId" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="Blade #${BladeId} Status:[\S\s]+?Power:\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="On,1;0" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="BladeCooling" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="BladeCooling"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show server status all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="BladeId" key="BladeId" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="Blade #${BladeId} Status:[\S\s]+?Cooling\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,1;0" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="BladeLocation" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="BladeLocation"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show server status all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="BladeId" key="BladeId" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="Blade #${BladeId} Status:[\S\s]+?Location\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,1;0" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="BladeDeviceFailure" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="BladeDeviceFailure"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show server status all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="BladeId" key="BladeId" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="Blade #${BladeId} Status:[\S\s]+?Device Failure\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,1;0" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="BladeDeviceDegraded" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="BladeDeviceDegraded"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show server status all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="BladeId" key="BladeId" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="Blade #${BladeId} Status:[\S\s]+?Device Degraded\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,1;0" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="BladeiLONetwork" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="BladeiLONetwork"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show server status all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="BladeId" key="BladeId" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="Blade #${BladeId} Status:[\S\s]+?iLO Network\s*(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,1;0" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <!--风扇子资源-->
+    <MetricPlugin metricid="FanId" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="FanId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show enclosure fan all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Fan #(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="FanId"/>
+            <Parameter type="" key="ValueColumnTitle" value="FanId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="FanName" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="FanId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show enclosure fan all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Fan #(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="select ('Fan ' + FanId) as FanName, FanId" key="SELECT"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="FanId"/>
+            <Parameter type="" key="IndexColumnTitle" value="FanId"/>
+            <Parameter type="" key="ValueColumnTitle" value="FanName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="FanStatus" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="FanStatus"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show enclosure fan all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="FanId" key="FanId" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="Fan #${FanId} information:\s+Status:\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,1;0" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="FanInternalData" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="FanInternalData"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show enclosure fan all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="FanId" key="FanId" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="Fan #${FanId} information:[\S\s]+?Internal Data\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,1;0" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="FanLocation" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="FanLocation"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show enclosure fan all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="FanId" key="FanId" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="Fan #${FanId} information:[\S\s]+?Location\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,1;0" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="FanFailure" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="FanFailure"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show enclosure fan all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="FanId" key="FanId" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="Fan #${FanId} information:[\S\s]+?Device Failure\s*(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,1;0" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="FanDegraded" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="FanDegraded"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show enclosure fan all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="FanId" key="FanId" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="Fan #${FanId} information:[\S\s]+?Device Degraded\s*(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,1;0" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="FanMissing" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="FanMissing"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show enclosure fan all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="FanId" key="FanId" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="Fan #${FanId} information:[\S\s]+?Missing Device\s*(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,1;0" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <!--电源子资源-->
+    <MetricPlugin metricid="PowerId" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="PowerId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show enclosure powersupply all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Power Supply #(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="PowerId"/>
+            <Parameter type="" key="ValueColumnTitle" value="PowerId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="PowerName" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="PowerId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show enclosure powersupply all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Power Supply #(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="select ('Power Supply ' + PowerId) as PowerName, PowerId" key="SELECT"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="PowerId"/>
+            <Parameter type="" key="IndexColumnTitle" value="PowerId"/>
+            <Parameter type="" key="ValueColumnTitle" value="PowerName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="PowerStatus" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="PowerStatus"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show enclosure powersupply all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="PowerId" key="PowerId" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="Power Supply #${PowerId} Information:\s+Status:\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,1;0" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ACInputStatus" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="ACInputStatus"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show enclosure powersupply all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="PowerId" key="PowerId" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="Power Supply #${PowerId} Information:[\S\s]+?AC Input Status:\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,1;0" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="PowerFailure" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="PowerFailure"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show enclosure powersupply all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="PowerId" key="PowerId" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="Power Supply #${PowerId} Information:[\S\s]+?Device Failure\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,1;0" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="PowerInternalData" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="PowerInternalData"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show enclosure powersupply all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="PowerId" key="PowerId" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="Power Supply #${PowerId} Information:[\S\s]+?Internal Data\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="OK,1;0" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="PowerOutput" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="PowerOutput"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show enclosure powersupply all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="PowerId" key="PowerId" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="Power Supply #${PowerId} Information:[\S\s]+?Current Power Output:\s+(\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="PowerCapacity" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="PowerCapacity"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show enclosure powersupply all"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="PowerId" key="PowerId" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="Power Supply #${PowerId} Information:[\S\s]+?Output Capacity:\s*(\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+</MetricPlugins>

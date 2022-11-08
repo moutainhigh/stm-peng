@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                    http://www.springframework.org/schema/context
+                    http://www.springframework.org/schema/context/spring-context-2.5.xsd
+                    ">
+	<bean id="metricExecutor" class="com.mainsteam.stm.executor.MetricExecutorImpl" init-method="start">
+		<property name="capacityService" ref="capacityService"/>
+		<property name="requestClient" ref="pluginRequestClient"/>
+		<property name="pluginRequestGenerator" ref="pluginRequestGenerator" />
+	</bean>
+	<bean id="batchNumberGenerator" class="com.mainsteam.stm.executor.sequence.PluginRequestBatchNumberGenerator" init-method="start">
+	</bean>
+	<bean id="idGenerator" class="com.mainsteam.stm.executor.sequence.PluginRequestIdGenerator" init-method="start">
+	</bean>	
+	
+	<bean id="metricExecutorMBean" class="com.mainsteam.stm.executor.MetricRpcExecutor">
+		<property name="metricExecutor" ref="metricExecutor" />
+		<property name="capacityService" ref="capacityService"/>
+		<property name="resourceInstanceService" ref="resourceInstanceService" />
+	</bean>	
+	
+	<bean id="pluginRequestGenerator" class="com.mainsteam.stm.executor.generate.PluginRequestGenerator">
+		<property name="capacityService" ref="capacityService"/>
+		<property name="batchNumberGenerator" ref="batchNumberGenerator"/>
+		<property name="idGenerator" ref="idGenerator"/>
+		<property name="resourceInstanceService" ref="resourceInstanceService" />
+		<property name="pluginInitParameterGenerator" ref="pluginInitParameterGenerator"/>
+		<property name="pluginConvertParameterGenerator" ref="pluginConvertParameterGenerator"/>
+		<property name="pluginProcessParameterGenerator" ref="pluginProcessParameterGenerator"/>
+		<property name="modulePropService" ref="modulePropService"/>
+		<property name="callbackFactory" ref="pluginRequestLazyGeneratorCallbackFactory"/>
+	</bean>
+	
+	<bean id="pluginInitParameterGenerator" class="com.mainsteam.stm.executor.generate.detail.PluginInitParameterGenerator">
+	</bean>
+	<bean id="pluginConvertParameterGenerator" class="com.mainsteam.stm.executor.generate.detail.PluginConvertParameterGenerator">
+		<property name="valueGenerator" ref="parameterValueGenerator"/>
+	</bean>
+	<bean id="pluginProcessParameterGenerator" class="com.mainsteam.stm.executor.generate.detail.PluginProcessParameterGenerator">
+		<property name="valueGenerator" ref="parameterValueGenerator"/>
+	</bean>
+	<bean id="pluginResultMetaInfoGenerator" class="com.mainsteam.stm.executor.generate.detail.PluginResultMetaInfoGenerator">
+	</bean>
+	<bean id="pluginExecutorParameterGenerator" class="com.mainsteam.stm.executor.generate.detail.PluginExecutorParameterGenerator">
+		<property name="valueGenerator" ref="parameterValueGenerator"/>
+	</bean>		
+	<bean id="parameterValueGenerator" class="com.mainsteam.stm.executor.generate.detail.ParameterValueGenerator">
+		<property name="modulePropService" ref="modulePropService"/>
+	</bean>
+	<bean id="pluginRequestLazyGeneratorCallbackFactory" class="com.mainsteam.stm.executor.generate.callback.PluginRequestLazyGeneratorCallbackFactory">
+		<property name="pluginInitParameterGenerator" ref="pluginInitParameterGenerator"/>
+		<property name="pluginConvertParameterGenerator" ref="pluginConvertParameterGenerator"/>
+		<property name="pluginProcessParameterGenerator" ref="pluginProcessParameterGenerator"/>
+		<property name="pluginResultMetaInfoGenerator" ref="pluginResultMetaInfoGenerator"/>
+		<property name="pluginExecutorParameterGenerator" ref="pluginExecutorParameterGenerator"/>
+	</bean>	
+</beans>

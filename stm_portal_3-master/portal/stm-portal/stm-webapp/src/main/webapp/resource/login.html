@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>ITManager</title>
+    <link href="third/bootstrap-3.2.0/css/bootstrap.css" rel="stylesheet">
+    <link href="third/jquery-ui-1.11.1.custom/jquery-ui.css" rel="stylesheet">
+    <link href="third/jquery-easyui-1.4/themes/blue/easyui.css" rel="stylesheet" id="skin_easyui">
+    <link href="third/jquery-easyui-1.4/themes/icon.css" rel="stylesheet">
+    <!-- <link href="themes/blue/css/oc.css" rel="stylesheet" id="skin_oc"> -->
+    <link href="themes/blue/css/login.css" rel="stylesheet" id="skin_login">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="Bookmark" href="favicon.ico">
+    <script src="third/oc.third.js" type="text/javascript"></script>
+    <!--[if IE]>
+    <script type="text/javascript">
+        document.write("<script src='third/oc.third1x.js'>" + "<" + "/script>");
+    </script>
+    <![endif]-->
+    <script src="third/particles.js-master/particles.min.js"></script>
+
+</head>
+<body class="login-body">
+<div id="particles-js">
+    <div class="login-panel">
+        <div class="login-panelbox">
+            <div class="login-logo"></div>
+            <div class="login-bg" id="loginFormDiv">
+                <!--BUG #40876 firefox较老版本-登录时，带用户名密码 huangping 2017/7/4 start-->
+                <!--<form id="loginForm" style="display:block;">-->
+                <form id="loginForm" style="display:block;" method="post">
+                    <!--BUG #40876 firefox较老版本-登录时，带用户名密码 huangping 2017/7/4 end-->
+                    <div class="a-expired" id="licenseTipInfo" style="display: none;">
+                        <span id="tipInfoSpan">您的产品授权文件不存在或已经过期！</span>
+                        <a href="javascript:void(0);" id="LicenseActiveBtn"
+                           style="font-weight: bold; color: #F60;">立即激活</a>
+                    </div>
+                    <div class="login-left">
+                        <div class="login-line">
+                            <span>用户名</span>
+                            <input name="account" type="text" required
+                                   class=" login-text-panel login-input-username"
+                                   autocomplete="off"/>
+                        </div>
+                        <div class="login-line">
+                            <span>密码</span><input name="password" type="password" required
+                                                  class="login-text-panel login-input-password" autocomplete="off"/>
+                        </div>
+                        <div id="verificationCode" class="login-line"></div>
+
+
+                        <!--       <div class="login-text-panel">
+       <span class="login-text">是否极简模式：</span>
+       <input name="isSimple" type="checkbox" value="1"/>
+     </div> -->
+                    </div>
+                    <div class="login-btn-box">
+                        <div class="login-btn-wrap">
+                            <div class="login-mode"></div>
+                            <div class="login-memory selected"></div>
+                        </div>
+                    </div>
+                    <div class="login-line">
+                        <button class="login-btn">登&nbsp;录</button>
+                    </div>
+                </form>
+            </div>
+           <!-- <div class="copyright"></div>-->
+        </div>
+    </div>
+ 
+</div>
+    <div class="copyright"></div>
+<script src="third/jquery.cookie.js"></script>
+<script src="third/crypto-js-3.1.6/crypto-js.js"></script>
+<script src="js/oc.js"></script>
+<script src="js/ui/oc.ui.js"></script>
+<script src="login.js"></script>
+<script>
+oc.util.ajax({
+	url:oc.resource.getUrl('system/skin/get.htm'),
+	successMsg:null,
+	failureMsg:'',
+	success:function(d){
+		var data=$.parseJSON(d.data);
+		var skin = data.selected;
+		var skin_login=$("#skin_login");
+		if(skin != null && skin != undefined && skin != ""){
+			switch (skin) {
+			case "darkgreen":
+					skin_login.attr("href","themes/default/css/login.css");
+				break;
+			default:
+				skin_login.attr("href","themes/"+skin+"/css/login.css");
+				break;
+			}
+		}
+	}
+});
+</script>
+</body>
+</html>

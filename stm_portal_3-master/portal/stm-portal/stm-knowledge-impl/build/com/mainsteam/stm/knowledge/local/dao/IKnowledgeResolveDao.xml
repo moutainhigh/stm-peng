@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.knowledge.local.dao.IKnowledgeResolveDao">
+	<select id="queryKnowledgeResolve" parameterType="long" resultType="com.mainsteam.stm.knowledge.bo.KnowledgeResolveBo">
+		SELECT 
+			ksrr.KNOWLEDGE_ID "knowledgeId",ksrr.RESOLVE_CONTENT "resolveContent",ksrr.RESOLVE_ID "id", ksrr.RESOLVE_TITLE "resolveTitle" ,ksrr.RESOLVE_TYPE "isScript"
+		FROM STM_KNG_source_resolve_rel ksrr
+		WHERE ksrr.KNOWLEDGE_ID = #{knowledgeId}
+	</select>
+	
+	<select id="getResolve" parameterType="long" resultType="com.mainsteam.stm.knowledge.bo.KnowledgeResolveBo">
+		SELECT 
+			ksrr.KNOWLEDGE_ID "knowledgeId",ksrr.RESOLVE_CONTENT "resolveContent",ksrr.RESOLVE_ID "id", ksrr.RESOLVE_TITLE "resolveTitle" ,ksrr.RESOLVE_TYPE "isScript"
+		FROM STM_KNG_source_resolve_rel ksrr
+		WHERE ksrr.RESOLVE_ID = #{resolveId}
+	</select>
+	<insert id="insertKnowledgeResolve" parameterType="com.mainsteam.stm.knowledge.bo.KnowledgeResolveBo">
+		INSERT INTO STM_KNG_SOURCE_RESOLVE_REL(KNOWLEDGE_ID,RESOLVE_ID,RESOLVE_TITLE,RESOLVE_CONTENT,RESOLVE_TYPE)
+		 VALUES 
+		 (#{knowledgeId,jdbcType=NUMERIC},#{id,jdbcType=NUMERIC},#{resolveTitle,jdbcType=VARCHAR},#{resolveContent,jdbcType=VARCHAR},#{isScript,jdbcType=NUMERIC})
+	</insert>
+	<insert id="saveResolveEvaluation" parameterType="com.mainsteam.stm.knowledge.bo.ResolveEvaluationBo">
+		INSERT INTO STM_KNG_EVALUATE (RESOLVE_ID,SCORE,CONTENT,EVALUATE_TIME)
+		 VALUES
+		  (#{resolveId,jdbcType=NUMERIC},#{score,jdbcType=NUMERIC},#{content,jdbcType=VARCHAR},#{evaluateTime,jdbcType=DATE})
+	</insert>
+	
+	<delete id="deleteKnowledgeResolve" parameterType="long">
+		delete from STM_KNG_SOURCE_RESOLVE_REL where RESOLVE_ID = #{resolveId}
+	</delete>
+	<delete id="deleteResolveByKnowledge" parameterType="long">
+		delete from STM_KNG_SOURCE_RESOLVE_REL where RESOLVE_ID = #{knowledgeId}
+	</delete>
+	<update id="updateKnowledgeResolve" parameterType="com.mainsteam.stm.knowledge.bo.KnowledgeResolveBo">
+		UPDATE STM_KNG_SOURCE_RESOLVE_REL r SET r.KNOWLEDGE_ID = #{knowledgeId,jdbcType=NUMERIC},r.RESOLVE_TITLE=#{resolveTitle,jdbcType=VARCHAR},r.RESOLVE_CONTENT=#{resolveContent,jdbcType=VARCHAR},r.RESOLVE_TYPE=#{isScript,jdbcType=NUMERIC} WHERE r.RESOLVE_ID = #{id,jdbcType=NUMERIC}
+	</update>
+</mapper>

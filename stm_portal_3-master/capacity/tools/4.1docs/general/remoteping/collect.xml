@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">
+    <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0"></GlobalMetricSetting>
+    <PluginClassAliasList>
+        <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+        <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+        <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+        <PluginClassAlias id="RegularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+        <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+    </PluginClassAliasList>
+    <MetricPlugin metricid="Name" collectType="SSH" pluginid="RemotePingSSHPlugin">
+        <PluginResultMetaInfo columns="sourceIp"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+            <Parameter type="" key="returnParameterValue" value="IP"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="sourceIp" collectType="SSH" pluginid="RemotePingSSHPlugin">
+        <PluginResultMetaInfo columns="sourceIp"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="NOT_EMPTY_srcIP" value="IP"/>
+            <Parameter type="DiscoveryInfo" key="NOT_EMPTY_srcIP" value="srcIP"/>
+            <Parameter type="" key="returnParameterValue" value="NOT_EMPTY_srcIP"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="distIP" collectType="SSH" pluginid="RemotePingSSHPlugin">
+        <PluginResultMetaInfo columns="distIp"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="distIP" value="distIP"/>
+            <Parameter type="" key="returnParameterValue" value="distIP"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="availability" collectType="SSH" pluginid="RemotePingSSHPlugin">
+        <PluginResultMetaInfo columns="resultInfo"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="distIP" value="distIP"/>
+            <Parameter type="DiscoveryInfo" key="NOT_EMPTY_srcIP" value="IP"/>
+            <Parameter type="DiscoveryInfo" key="NOT_EMPTY_srcIP" value="srcIP"/>
+            <Parameter type="" key="Linux" value="ping -c 10 -i 0.2 -W 3 -n -q -I ${NOT_EMPTY_srcIP} ${distIP}"/>
+            <Parameter type="" key="SunOS" value="ping -s -A inet -I 1 ${distIP} 56 5"/>
+            <Parameter type="" key="HP-UX" value="ping -I 1 ${distIP} 56 -n 5 -m 10"/>
+            <Parameter type="" key="Cisco" value="ping ${distIP}"/>
+            <Parameter type="" key="CiscoExtend" value="ping ${distIP} source ${NOT_EMPTY_srcIP} repeat 10 timeout 3"/>
+            <Parameter type="" key="Huawei" value="ping -c 10 -t 3000 -q -a ${NOT_EMPTY_srcIP} ${distIP}"/>
+            <Parameter type="" key="H3C" value="ping -c 10 -t 3000 -q -a ${NOT_EMPTY_srcIP} ${distIP}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="deviceType" key="deviceType" type="DiscoveryInfo"/>
+                <Parameter type="" key="REGULAR" value="(\d*\.?\d+)%\s+packet\s+loss"/>
+                <Parameter type="Optional" key="Cisco" value="Success rate is (\d+) percent"/>
+                <Parameter type="Optional" key="CiscoExtend" value="Success rate is (\d+) percent"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="deviceType" key="deviceType" type="DiscoveryInfo"/>
+                <Parameter value="SELECT (resultInfo !=100?'1':'0') as avail" key="SELECT"/>
+                <Parameter value="SELECT (resultInfo !=0?'1':'0') as avail" key="Cisco" type="Optional"/>
+                <Parameter value="SELECT (resultInfo !=0?'1':'0') as avail" key="CiscoExtend" type="Optional"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="availableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="discardRate" collectType="SSH" pluginid="RemotePingSSHPlugin">
+        <PluginResultMetaInfo columns="resultInfo"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="distIP" value="distIP"/>
+            <Parameter type="DiscoveryInfo" key="NOT_EMPTY_srcIP" value="IP"/>
+            <Parameter type="DiscoveryInfo" key="NOT_EMPTY_srcIP" value="srcIP"/>
+            <Parameter type="" key="Linux" value="ping -c 10 -i 0.2 -W 3 -n -q -I ${NOT_EMPTY_srcIP} ${distIP}"/>
+            <Parameter type="" key="SunOS" value="ping -s -A inet -I 1 ${distIP} 56 5"/>
+            <Parameter type="" key="HP-UX" value="ping -I 1 ${distIP} 56 -n 5 -m 10"/>
+            <Parameter type="" key="Cisco" value="ping ${distIP}"/>
+            <Parameter type="" key="CiscoExtend" value="ping ${distIP} source ${NOT_EMPTY_srcIP} repeat 10 timeout 3"/>
+            <Parameter type="" key="Huawei" value="ping -c 10 -t 3000 -q -a ${NOT_EMPTY_srcIP} ${distIP}"/>
+            <Parameter type="" key="H3C" value="ping -c 10 -t 3000 -q -a ${NOT_EMPTY_srcIP} ${distIP}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="deviceType" key="deviceType" type="DiscoveryInfo"/>
+                <Parameter type="" key="REGULAR" value="(\d*\.?\d+)%\s+packet\s+loss"/>
+                <Parameter type="Optional" key="Cisco" value="Success rate is (\d+) percent"/>
+                <Parameter type="Optional" key="CiscoExtend" value="Success rate is (\d+) percent"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="deviceType" key="deviceType" type="DiscoveryInfo"/>
+                <Parameter value="SELECT resultInfo as discardRate" key="SELECT"/>
+                <Parameter value="SELECT (100 - resultInfo) as discardRate" key="Cisco" type="Optional"/>
+                <Parameter value="SELECT (100 - resultInfo) as discardRate" key="CiscoExtend" type="Optional"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="responseTime" collectType="SSH" pluginid="RemotePingSSHPlugin">
+        <PluginResultMetaInfo columns="resultInfo"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="distIP" value="distIP"/>
+            <Parameter type="DiscoveryInfo" key="NOT_EMPTY_srcIP" value="IP"/>
+            <Parameter type="DiscoveryInfo" key="NOT_EMPTY_srcIP" value="srcIP"/>
+            <Parameter type="" key="Linux" value="ping -c 10 -i 0.2 -W 3 -n -q -I ${NOT_EMPTY_srcIP} ${distIP}"/>
+            <Parameter type="" key="SunOS" value="ping -s -A inet -I 1 ${distIP} 56 5"/>
+            <Parameter type="" key="HP-UX" value="ping -I 1 ${distIP} 56 -n 5 -m 10"/>
+            <Parameter type="" key="Cisco" value="ping ${distIP}"/>
+            <Parameter type="" key="CiscoExtend" value="ping ${distIP} source ${NOT_EMPTY_srcIP} repeat 10 timeout 3"/>
+            <Parameter type="" key="Huawei" value="ping -c 10 -t 3000 -q -a ${NOT_EMPTY_srcIP} ${distIP}"/>
+            <Parameter type="" key="H3C" value="ping -c 10 -t 3000 -q -a ${NOT_EMPTY_srcIP} ${distIP}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="deviceType" key="deviceType" type="DiscoveryInfo"/>
+                <Parameter type="" key="REGULAR" value="min/avg/max/mdev\s*=\s*\S+/(\S+)/\S+/\S+"/>
+                <Parameter type="Optional" key="HP-UX" value="min/avg/max(?:[/\S+]*)\s*=\s*\S+/(\S+)/\S+"/>
+                <Parameter type="Optional" key="Cisco" value="min/avg/max(?:[/\S+]*)\s*=\s*\S+/(\S+)/\S+"/>
+                <Parameter type="Optional" key="CiscoExtend" value="min/avg/max(?:[/\S+]*)\s*=\s*\S+/(\S+)/\S+"/>
+                <Parameter type="Optional" key="Huawei" value="min/avg/max(?:[/\S+]*)\s*=\s*\S+/(\S+)/\S+"/>
+                <Parameter type="Optional" key="H3C" value="min/avg/max(?:[/\S+]*)\s*=\s*\S+/(\S+)/\S+"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="Name" collectType="TELNET" pluginid="RemotePingTelnetPlugin">
+        <PluginResultMetaInfo columns="sourceIp"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+            <Parameter type="" key="returnParameterValue" value="IP"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="sourceIp" collectType="TELNET" pluginid="RemotePingTelnetPlugin">
+        <PluginResultMetaInfo columns="sourceIp"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="NOT_EMPTY_srcIP" value="IP"/>
+            <Parameter type="DiscoveryInfo" key="NOT_EMPTY_srcIP" value="srcIP"/>
+            <Parameter type="" key="returnParameterValue" value="NOT_EMPTY_srcIP"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="distIP" collectType="TELNET" pluginid="RemotePingTelnetPlugin">
+        <PluginResultMetaInfo columns="distIp"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="distIP" value="distIP"/>
+            <Parameter type="" key="returnParameterValue" value="distIP"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="availability" collectType="TELNET" pluginid="RemotePingTelnetPlugin">
+        <PluginResultMetaInfo columns="resultInfo"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="distIP" value="distIP"/>
+            <Parameter type="DiscoveryInfo" key="NOT_EMPTY_srcIP" value="IP"/>
+            <Parameter type="DiscoveryInfo" key="NOT_EMPTY_srcIP" value="srcIP"/>
+            <Parameter type="" key="Linux" value="ping -c 10 -i 0.2 -W 3 -n -q -I ${NOT_EMPTY_srcIP} ${distIP}"/>
+            <Parameter type="" key="SunOS" value="ping -s -A inet -I 1 ${distIP} 56 5"/>
+            <Parameter type="" key="HP-UX" value="ping -I 1 ${distIP} 56 -n 5 -m 10"/>
+            <Parameter type="" key="Cisco" value="ping ${distIP}"/>
+            <Parameter type="" key="CiscoExtend" value="ping ${distIP} source ${NOT_EMPTY_srcIP} repeat 10 timeout 3"/>
+            <Parameter type="" key="Huawei" value="ping -c 10 -t 3000 -q -a ${NOT_EMPTY_srcIP} ${distIP}"/>
+            <Parameter type="" key="H3C" value="ping -c 10 -t 3000 -q -a ${NOT_EMPTY_srcIP} ${distIP}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="deviceType" key="deviceType" type="DiscoveryInfo"/>
+                <Parameter type="" key="REGULAR" value="(\d*\.?\d+)%\s+packet\s+loss"/>
+                <Parameter type="Optional" key="Cisco" value="Success rate is (\d+) percent"/>
+                <Parameter type="Optional" key="CiscoExtend" value="Success rate is (\d+) percent"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="deviceType" key="deviceType" type="DiscoveryInfo"/>
+                <Parameter value="SELECT (resultInfo !=100?'1':'0') as avail" key="SELECT"/>
+                <Parameter value="SELECT (resultInfo !=0?'1':'0') as avail" key="Cisco" type="Optional"/>
+                <Parameter value="SELECT (resultInfo !=0?'1':'0') as avail" key="CiscoExtend" type="Optional"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="availableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="discardRate" collectType="TELNET" pluginid="RemotePingTelnetPlugin">
+        <PluginResultMetaInfo columns="resultInfo"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="distIP" value="distIP"/>
+            <Parameter type="DiscoveryInfo" key="NOT_EMPTY_srcIP" value="IP"/>
+            <Parameter type="DiscoveryInfo" key="NOT_EMPTY_srcIP" value="srcIP"/>
+            <Parameter type="" key="Linux" value="ping -c 10 -i 0.2 -W 3 -n -q -I ${NOT_EMPTY_srcIP} ${distIP}"/>
+            <Parameter type="" key="SunOS" value="ping -s -A inet -I 1 ${distIP} 56 5"/>
+            <Parameter type="" key="HP-UX" value="ping -I 1 ${distIP} 56 -n 5 -m 10"/>
+            <Parameter type="" key="Cisco" value="ping ${distIP}"/>
+            <Parameter type="" key="CiscoExtend" value="ping ${distIP} source ${NOT_EMPTY_srcIP} repeat 10 timeout 3"/>
+            <Parameter type="" key="Huawei" value="ping -c 10 -t 3000 -q -a ${NOT_EMPTY_srcIP} ${distIP}"/>
+            <Parameter type="" key="H3C" value="ping -c 10 -t 3000 -q -a ${NOT_EMPTY_srcIP} ${distIP}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="deviceType" key="deviceType" type="DiscoveryInfo"/>
+                <Parameter type="" key="REGULAR" value="(\d*\.?\d+)%\s+packet\s+loss"/>
+                <Parameter type="Optional" key="Cisco" value="Success rate is (\d+) percent"/>
+                <Parameter type="Optional" key="CiscoExtend" value="Success rate is (\d+) percent"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="deviceType" key="deviceType" type="DiscoveryInfo"/>
+                <Parameter value="SELECT resultInfo as discardRate" key="SELECT"/>
+                <Parameter value="SELECT (100 - resultInfo) as discardRate" key="Cisco" type="Optional"/>
+                <Parameter value="SELECT (100 - resultInfo) as discardRate" key="CiscoExtend" type="Optional"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="responseTime" collectType="TELNET" pluginid="RemotePingTelnetPlugin">
+        <PluginResultMetaInfo columns="resultInfo"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="distIP" value="distIP"/>
+            <Parameter type="DiscoveryInfo" key="NOT_EMPTY_srcIP" value="IP"/>
+            <Parameter type="DiscoveryInfo" key="NOT_EMPTY_srcIP" value="srcIP"/>
+            <Parameter type="" key="Linux" value="ping -c 10 -i 0.2 -W 3 -n -q -I ${NOT_EMPTY_srcIP} ${distIP}"/>
+            <Parameter type="" key="SunOS" value="ping -s -A inet -I 1 ${distIP} 56 5"/>
+            <Parameter type="" key="HP-UX" value="ping -I 1 ${distIP} 56 -n 5 -m 10"/>
+            <Parameter type="" key="Cisco" value="ping ${distIP}"/>
+            <Parameter type="" key="CiscoExtend" value="ping ${distIP} source ${NOT_EMPTY_srcIP} repeat 10 timeout 3"/>
+            <Parameter type="" key="Huawei" value="ping -c 10 -t 3000 -q -a ${NOT_EMPTY_srcIP} ${distIP}"/>
+            <Parameter type="" key="H3C" value="ping -c 10 -t 3000 -q -a ${NOT_EMPTY_srcIP} ${distIP}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="deviceType" key="deviceType" type="DiscoveryInfo"/>
+                <Parameter type="" key="REGULAR" value="min/avg/max/mdev\s*=\s*\S+/(\S+)/\S+/\S+"/>
+                <Parameter type="Optional" key="HP-UX" value="min/avg/max(?:[/\S+]*)\s*=\s*\S+/(\S+)/\S+"/>
+                <Parameter type="Optional" key="Cisco" value="min/avg/max(?:[/\S+]*)\s*=\s*\S+/(\S+)/\S+"/>
+                <Parameter type="Optional" key="CiscoExtend" value="min/avg/max(?:[/\S+]*)\s*=\s*\S+/(\S+)/\S+"/>
+                <Parameter type="Optional" key="Huawei" value="min/avg/max(?:[/\S+]*)\s*=\s*\S+/(\S+)/\S+"/>
+                <Parameter type="Optional" key="H3C" value="min/avg/max(?:[/\S+]*)\s*=\s*\S+/(\S+)/\S+"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+</MetricPlugins>

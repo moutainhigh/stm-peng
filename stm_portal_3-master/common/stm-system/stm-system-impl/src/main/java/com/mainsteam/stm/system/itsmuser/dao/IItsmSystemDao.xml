@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.system.itsmuser.dao.IItsmSystemDao">
+	
+	<insert id="saveItsmSystem" parameterType="com.mainsteam.stm.system.itsmuser.bo.ItsmSystemBo">
+	    insert into STM_THIRDSYS_BASIC(ID,NAME,WSDL_URL,DESCRIBLE,IS_OPEN) values (#{id},#{name}, #{wsdlURL}, #{describle},#{isOpen})
+	</insert>
+	<select id="queryItsmSystem" resultType="com.mainsteam.stm.system.itsmuser.bo.ItsmSystemBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		SELECT 
+			BASIC.ID AS id,
+			BASIC.NAME AS name,
+			BASIC.WSDL_URL AS wsdlURL,
+			BASIC.DESCRIBLE AS describle,
+			BASIC.STATE AS state,
+			BASIC.IS_OPEN AS isOpen
+		FROM STM_THIRDSYS_BASIC BASIC
+		<trim prefix="where" prefixOverrides="and | or">
+			<if test="condition != null">
+				<if test="condition.id != 0">
+					AND BASIC.ID = #{condition.id}
+				</if>
+			</if>
+		</trim>
+	</select>
+	<select id="queryAllItsmSystem" resultType="com.mainsteam.stm.system.itsmuser.bo.ItsmSystemBo">
+		SELECT 
+			BASIC.ID AS id,
+			BASIC.NAME AS name,
+			BASIC.WSDL_URL AS wsdlURL,
+			BASIC.DESCRIBLE AS describle,
+			BASIC.STATE AS state,
+			BASIC.IS_OPEN AS isOpen
+		FROM STM_THIRDSYS_BASIC BASIC
+	</select>
+	<delete id="batchDel">
+		DELETE FROM STM_THIRDSYS_BASIC WHERE ID = #{id}
+	</delete>
+	<select id="getItsmSystemById" resultType="com.mainsteam.stm.system.itsmuser.bo.ItsmSystemBo" parameterType="long">
+		SELECT 
+			THIRDSYS.ID,
+			THIRDSYS.NAME,
+			THIRDSYS.WSDL_URL AS wsdlURL,
+			THIRDSYS.DESCRIBLE AS describle,
+			THIRDSYS.STATE AS state,
+			THIRDSYS.IS_OPEN AS isOpen
+		FROM STM_THIRDSYS_BASIC THIRDSYS
+		WHERE THIRDSYS.ID=#{id}
+	</select>
+	<update id="updateItsmSystem" parameterType="com.mainsteam.stm.system.itsmuser.bo.ItsmSystemBo">
+		update STM_THIRDSYS_BASIC set
+			NAME = #{name},
+			WSDL_URL = #{wsdlURL},
+			DESCRIBLE = #{describle}
+		where id = #{id}
+	</update>
+	<update id="updateSystemStartState" parameterType="com.mainsteam.stm.system.itsmuser.bo.ItsmSystemBo">
+		update STM_THIRDSYS_BASIC set
+			IS_OPEN = #{isOpen}
+		where id = #{id}
+	</update>
+	<update id="updateSyncState" parameterType="com.mainsteam.stm.system.itsmuser.bo.ItsmSystemBo">
+		update STM_THIRDSYS_BASIC set
+			STATE = #{state}
+		where id = #{id}
+	</update>
+	<select id="countWsdlUrl" parameterType="com.mainsteam.stm.system.itsmuser.bo.ItsmSystemBo" resultType="int">
+		select count(*) from STM_THIRDSYS_BASIC
+		where WSDL_URL = #{wsdlURL}
+		<if test="id != null">
+			and ID != #{id}
+		</if>
+	</select>
+</mapper>

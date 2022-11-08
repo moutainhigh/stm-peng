@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<jboss>
+	<!-- 服务可用性 发布日期 发布时操作系统版本 启动时间 JBoss版本-->
+	<jmx id="server" objectName="jboss.system:type=Server" attribute="Started,BuildDate,BuildOS,BuildJVM,StartDate,Version"></jmx>
+	
+	<!-- JVM启动时间 JVM最后采样时间 最大堆大小 最小堆大小-->
+	<jmx id="jvm" objectName="jboss.management.local:J2EEServer=Local,j2eeType=JVM,*" attribute="stats"></jmx>
+	
+	<!-- JVM内存利用率 已使用内存 空闲的内存 主机名 主机操作系统 操作系统版本 最大内存 总内存 JVM名称 Java版本 活动线程数 活动线程组数量-->
+	<jmx id="serverInfo" objectName="jboss.system:type=ServerInfo" 
+		attribute="FreeMemory,HostName,OSName,OSVersion,MaxMemory,TotalMemory,JavaVMName,JavaVersion,ActiveThreadCount,ActiveThreadGroupCount"></jmx>
+	
+	<!-- 实例名称 HomeDir-->
+	<jmx id="serverConfig" objectName="jboss.system:type=ServerConfig" attribute="ServerName,HomeDir,JBossHome"></jmx>	
+	
+	<!-- 系统状态码-->
+	<jmx id="systemProperties" objectName="jboss:type=Service,name=SystemProperties" attribute="State"></jmx>
+	
+	<!-- Web服务端口 连接协议 连接编码格式 连接策略 连接最大http头寸 连接转发端口 连接端口 连接数 连接超时时间 存活时间 最小备用线程数 最大备用线程数 最大传输数 最大请求存活数-->
+	<jmx id="connector" objectName="jboss.web:type=Connector,*" attribute="port,protocol,URIEncoding,strategy,maxHttpHeaderSize,redirectPort,acceptCount,connectionTimeout,keepAliveTimeout,minSpareThreads,maxSpareThreads,maxPostSize,maxKeepAliveRequests"></jmx>	
+	
+	<!-- 线程池名称 线程组名称 锁模式 最大队列大小 队列大小 池数量 最大池大小 最小池大小-->
+	<jmx id="threadPool" objectName="jboss.system:service=ThreadPool" 
+		attribute="Name,ThreadGroupName,BlockingMode,MaximumQueueSize,QueueSize,PoolNumber,MaximumPoolSize,MinimumPoolSize"></jmx>
+	
+	<!-- JBoss最大线程数 JBoss当前繁忙的线程 JBoss当前线程个数-->
+	<jmx id="thread" objectName="jboss.web:type=ThreadPool,*" attribute="maxThreads,currentThreadsBusy,currentThreadCount"></jmx>
+	
+	<!-- JMS当前连接数 JMS总连接数 JMS最高连接数 JMS允许的最大连接数-->
+	<jmx id="jms" objectName="jboss.jca:service=ManagedConnectionPool,*" 
+		attribute="InUseConnectionCount,ConnectionCreatedCount,MaxConnectionsInUseCount,AvailableConnectionCount"></jmx>
+	
+	<!-- 连接协议 连接编码格式 连接策略 连接最大http头寸 连接转发端口 连接端口 连接数 连接超时时间 存活时间 最小备用线程数 最大备用线程数 最大传输数 最大请求存活数-->
+	<!--
+	<jmx id="connectorInfo" objectName="jboss.web:type=Connector,port=${port},*" 
+		attribute="protocol,URIEncoding,strategy,maxHttpHeaderSize,redirectPort,port,acceptCount,connectionTimeout,keepAliveTimeout,minSpareThreads,maxSpareThreads,maxPostSize,maxKeepAliveRequests"></jmx>
+	-->
+	
+	<!-- 正在使用中的连接数-->
+	<jmx id="inUseConnection" objectName="jboss.jca:service=CachedConnectionManager" attribute="InUseConnections"></jmx>
+	
+	<!-- 服务器提供商 服务器版本 父类 对象名 事件提供者状态 状态可管理性 是否提供统计-->
+	<jmx id="serverProvider" objectName="jboss.management.local:name=Local,j2eeType=J2EEServer" 
+		attribute="serverVendor,serverVersion,parent,objectName,eventProvider,stateManageable,statisticsProvider"></jmx>
+
+		
+	<!-- 子资源-->
+	
+	<!-- webApp-->
+	<!-- Web应用可用状态 应用名称 上下文根目录-->
+	<jmx id="webApp" objectName="jboss.web:j2eeType=WebModule,J2EEApplication=none,J2EEServer=none,*" 
+		attribute="state,path"></jmx>
+		
+	<!-- 当前总会话数 活动的会话数 最大活动会话数-->
+	<jmx id="webAppSession" objectName="jboss.web:type=Manager,*" attribute="sessionCounter,activeSessions,maxActive"></jmx>
+	
+	
+	<!-- JDBC连接池-->
+	<!-- JDBC连接池可用状态 活动的连接数 连接池名称 最大连接数 最小连接数-->
+	<jmx id="jdbc" objectName="jboss.jca:service=ManagedConnectionPool,*" attribute="StateString,InUseConnectionCount,PoolJndiName,MaxSize,MinSize,ManagedConnectionFactoryName"></jmx>
+</jboss>

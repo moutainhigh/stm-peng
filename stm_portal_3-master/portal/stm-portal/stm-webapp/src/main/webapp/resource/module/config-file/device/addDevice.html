@@ -1,0 +1,60 @@
+<div id="configAddDiveForm">
+	<form class="oc-form col1 h-pad-mar backupHistoryForm">
+		<div style="text-align:left;" class="form-group h-pad-mar window-hbg">
+			<div>
+				<input name="nameOrIpAddress" type='text' value="输入设备名称或IP地址" hidden=true/>
+				<input name="IpAddress" type='text' value="输入设备名称或IP地址"/>
+				<a href='javascript:void(0);' id='searchByNameOrIpAddressBtn' class='easyui-linkbutton' data-options="iconCls:'icon-search'"></a>
+			</div>
+           </div>
+	</form>
+</div>
+<div id="pickGrid" class="configFileChoose" style="height:290px;"></div>
+<script type="text/javascript">
+	$(function(){
+		var $ipAddress = $('[name=IpAddress]');
+		$ipAddress.on('focus',function(){if($(this).val()=="") $(this).val("输入设备名称或IP地址"); else $(this).val("");})
+        .on('blur',function(){if($(this).val()=="") $(this).val("输入设备名称或IP地址");});
+		var columns=[[
+		 	         {field:'id',title:'id',checkbox:true,width:30},
+			         {field:'intanceName',title:'设备名称',width:80},
+			         {field:'ipAddress',title:'IP地址',sortable:true,width:80},
+			         {field:'resourceTypeId',title:'资源类型',sortable:true,width:80}
+		         ]];
+		var cfg = {
+			selector:"#pickGrid",
+			leftColumns:columns,
+			rightColumns:columns,
+			isInteractive:true,
+			leftUrl:oc.resource.getUrl('portal/config/device/getAllExceptionResourceInstanceList.htm')
+		}
+		var pickGrid = oc.ui.pickgrid(cfg);
+		$('[name=IpAddress]').keypress(function(e){
+			var code=event.keyCode; 
+			if(13==code){
+				SearchIp();
+			}
+		}); 
+		var searchBtn = $("#searchByNameOrIpAddressBtn").on('click',function(e){
+			SearchIp();
+		});
+ 		function SearchIp(){
+			oc.util.ajax({
+				url: oc.resource.getUrl('portal/config/device/getAllExceptionResourceInstanceList.htm'),
+				data:{searchKey:$ipAddress.val()=="输入设备名称或IP地址"?"":$ipAddress.val()},
+				successMsg:null,
+				success:function(data){
+					pickGrid.loadData('left',data);
+				}
+			});
+			
+		}; 
+		//命名空间
+		oc.ns('oc.module.config.device');
+		oc.module.config.device={
+				getRightRows:function(){
+				return pickGrid.getRightRows();
+			}
+		};
+	});
+</script>

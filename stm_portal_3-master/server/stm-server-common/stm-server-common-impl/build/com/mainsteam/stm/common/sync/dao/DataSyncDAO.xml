@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.common.sync.dao.DataSyncDAO">
+	
+	<insert id="saveSync"  parameterType="com.mainsteam.stm.common.sync.DataSyncPO">
+	    INSERT INTO STM_DATA_SYNC(ID,SYNC_TYPE,DATA,STATE,CREATE_TIME)
+	    VALUES (#{id},#{type},#{data},#{state},#{createTime})
+	</insert>
+	
+	<delete id="deleteSync">
+		DELETE FROM STM_DATA_SYNC WHERE ID=#{id}
+	</delete>
+
+	<delete id="deleteBatch">
+		DELETE FROM STM_DATA_SYNC
+	  	WHERE ID in
+				<foreach collection="list" item="item" open="(" close=")" separator=",">
+						#{item}
+				</foreach>
+	</delete>
+	
+	<update id="updateSync" parameterType="com.mainsteam.stm.common.sync.DataSyncPO">
+		UPDATE STM_DATA_SYNC SET UPDATE_TIME=#{updateTime},STATE=#{state} WHERE ID=#{id}
+	</update>
+	
+	<update id="updateForRunnings">
+		UPDATE STM_DATA_SYNC SET UPDATE_TIME=#{updateTime},STATE=0
+		WHERE ID in <foreach collection="ides" index="id" open="(" close=")" separator=",">#{id}</foreach>
+	</update>
+	
+	<update id="updateForRunning">
+		UPDATE STM_DATA_SYNC SET UPDATE_TIME=#{updateTime},STATE=0 WHERE ID = #{id}
+	</update>
+	
+	
+	<sql id="AlarmSyncAlias">
+		ID as ID,
+		DATA as data,
+		SYNC_TYPE as type,
+		STATE as state,
+		CREATE_TIME	as creatTime,
+		UPDATE_TIME	as updateTime
+	</sql>
+	
+	<select id="selectList" resultType="com.mainsteam.stm.common.sync.DataSyncPO">
+		SELECT <include refid="AlarmSyncAlias"/>
+		FROM STM_DATA_SYNC WHERE SYNC_TYPE=#{type}
+		ORDER BY CREATE_TIME
+	</select>
+
+	<select id="selectBatch" resultType="com.mainsteam.stm.common.sync.DataSyncPO">
+		SELECT <include refid="AlarmSyncAlias"/>
+		FROM STM_DATA_SYNC
+		WHERE SYNC_TYPE
+		IN <foreach collection="list" item="typeEnum" index="index" open="(" close=")" separator=",">#{typeEnum}</foreach>
+		ORDER BY CREATE_TIME
+	</select>
+	
+	<select id="selectListLimit" resultType="com.mainsteam.stm.common.sync.DataSyncPO">
+		SELECT <include refid="AlarmSyncAlias"/>
+		FROM STM_DATA_SYNC WHERE SYNC_TYPE=#{condition}
+		ORDER BY CREATE_TIME
+	</select>
+	
+	<select id="catchOne" resultType="com.mainsteam.stm.common.sync.DataSyncPO">
+		SELECT <include refid="AlarmSyncAlias"/>
+		FROM STM_DATA_SYNC WHERE SYNC_TYPE=#{type}
+		ORDER BY CREATE_TIME DESC LIMIE 0,1
+	</select>
+</mapper>

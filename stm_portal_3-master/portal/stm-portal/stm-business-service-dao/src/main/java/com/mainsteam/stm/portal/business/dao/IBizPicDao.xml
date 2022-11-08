@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.portal.business.dao.IBizPicDao">
+	<resultMap type="com.mainsteam.stm.portal.business.bo.BizPicBo" id="bizPicBoMap">
+		<id column="id" property="id"/>
+		<result column="IMG_TYPE" property="imgType"/>
+		<result column="FILE_ID" property="fileId"/>
+		<result column="UPLOAD_ID" property="uploadId"/>
+	</resultMap>
+	
+	<delete id="delByFiledIds">
+		DELETE FROM STM_BIZ_PIC
+		WHERE FILE_ID IN
+		<foreach collection="ids" item="item" index="index" open="(" separator="," close=")">  
+         #{item}  
+      	</foreach>  
+	</delete>
+	<insert id="insert" parameterType="com.mainsteam.stm.portal.business.bo.BizPicBo">
+		INSERT INTO STM_BIZ_PIC(ID, IMG_TYPE, FILE_ID,UPLOAD_ID) VALUES (
+		#{id},#{imgType},#{fileId},#{uploadId})
+	</insert>
+	<select id="getList" resultMap="bizPicBoMap">
+		SELECT * FROM STM_BIZ_PIC
+	</select>
+	<select id="getByType" parameterType="java.util.Map" resultMap="bizPicBoMap">
+		SELECT * FROM STM_BIZ_PIC WHERE IMG_TYPE = #{imgType}
+	</select>
+</mapper>

@@ -1,0 +1,131 @@
+<style>
+#topoEdit-body{
+	height:500px;
+	overflow-x:hidden;
+}
+</style>
+<div id="topo" unselectable="on" onselectstart="return false;" style="-moz-user-select:none;">
+	<div class="topo-content"></div>
+</div>
+<script type="text/javascript">
+oc.resource.loadScripts([
+	"resource/third/echarts3.0/liquidfill.js",
+	"resource/third/echarts3.0/echarts.js",
+   "resource/module/topo/graph/layout.js",
+   "resource/module/topo/util/colorpicker.js",
+   "resource/module/topo/contextMenu/DeviceManagerDia.js",
+   "resource/module/topo/contextMenu/NewSubTopoDia.js",
+   "resource/module/topo/contextMenu/QueryNode.js",
+   "resource/module/topo/backboard/smallWindow/uploadImg.js",
+   "resource/module/topo/util/FormUtil.js",
+   "resource/module/topo/util/Tools.js",
+   "resource/module/topo/topo_new.js",
+   "resource/module/topo/contextMenu/TopoMenu.js",
+   "resource/module/topo/backboard/backboard.js",
+   "resource/module/topo/contextMenu/TopoHideListDia.js",
+   "resource/module/topo/contextMenu/NavMenu.js",
+   "resource/module/topo/contextMenu/TopoNewTip.js",
+   "resource/module/topo/backboard/smallWindow/AttrTip.js",
+   "resource/module/topo/util/Dashboard.js",
+   "resource/module/topo/contextMenu/TopoSizerBar.js",
+   "resource/module/topo/api/TopoFlow.js",
+   "resource/module/topo/api/TopoDeviceGlow.js",
+   "resource/third/canvas/raphael.js",
+   "resource/module/topo/util/svg.js",
+   "resource/module/topo/util/svg.draggable.min.js",
+   "resource/module/topo/findResult/findResult.js",
+   "resource/module/topo/util/BendLine.js",
+   "resource/module/topo/contextMenu/TopoClipboard.js"
+ ],function(){
+	 var $root = $("#topo");
+	oc.ns("oc.topo");
+	//初始化加载topo的首页
+	eve.unbind("topo.*");
+	eve.unbind("topo.group.title.btn");
+	eve.unbind("oc.*");
+	eve.unbind("element.click");
+	eve.unbind("element.dblclick");
+	eve.unbind("element.drag.beforemove");
+	eve.unbind("element.contextmenu");
+	eve.unbind("sizerbar.*");
+	eve.unbind("svg_mouse_down");
+	eve.unbind("svg_mouse_up");
+	eve.unbind("svg_mouse_move");
+	eve.unbind("oc.ui.target.valuechange");
+	eve.unbind("svg.*");
+	oc.topo.mapViewer=null;
+	oc.topo.tips=new TopoNewTip();
+	oc.topo.map={};
+	//拓扑剪贴板
+	oc.topo.clipboard=new TopoClipboard();
+	//多链路
+	oc.topo.multilink={number:{},resetNumber:function(){this.number={}}};
+	if(!oc.topo.findResultDia){
+		oc.topo.findResultDia=new FindResultDia();
+	}
+	$.extend($.fn.validatebox.defaults.rules, {    
+	    ipmask: {    
+	        validator: function(value,param){
+	        	var reg = new RegExp("^(254|252|248|240|224|192|128|0)\\.0\\.0\\.0$|^(255\\.(254|252|248|240|224|192|128|0)\\.0\\.0)$|^(255\\.255\\.(254|252|248|240|224|192|128|0)\\.0)$|^(255\\.255\\.255\\.(254|252|248|240|224|192|128|0))$");
+	            return reg.test(value);  
+	        },    
+	        message: "子网掩码不合法"  
+	    }    
+	});
+	function init(){
+		$.post(oc.resource.getUrl("topo/help/currentTheme.htm"),function(tm){
+			oc.topo.theme=tm.theme;
+			$.get(oc.resource.getUrl("topo/help/initTopo.htm"),function(){
+				new TopoGraph({callBack:function(){
+					$.post(oc.resource.getUrl("topo/find/result.htm"),{
+						index:0
+					},function(msg){
+						if(msg.isRunning && msg.type!="single"){
+							oc.topo.findResultDia.show();
+							oc.topo.findResultDia.start();
+						}
+						oc.topo.topoIsRunning=msg.isRunning;
+					},"json");
+				}},$root.find(".topo-content"));
+			});
+		},"json");
+	}
+	oc.topo.util={
+		jumpTo:function(idx){
+			$('#mainMenuDiv').find('a[rightMark=rights][rightid=' + idx + ']').trigger('click');
+		},
+		//取值为""-主版本,"HLJ"-黑龙江招生考试,"GF"-北京高法,"FTMS"-添加北京地图到各个子地图
+		module:""
+	};
+	switch(oc.topo.util.module){
+	case "HLJ":
+		oc.resource.loadScript("resource/module/topo/contextMenu/TopoNavHLJ.js",function(){
+			init();
+		});
+		break;
+	case "FTMS":
+		oc.resource.loadScripts(["resource/module/topo/map/BeijingMap.js","resource/module/topo/contextMenu/TopoNav.js"],function(){
+			init();
+			new BeijingMap();
+		});
+		break;
+	case "test":
+		oc.resource.loadScripts(["resource/module/topo/map/TopoMapView.js","resource/module/topo/map/BeijingMap.js"], function(){
+			if(!oc.topo.mapViewer){
+				oc.topo.mapViewer=new TopoMapView({
+				});
+				oc.topo.mapViewer.show();
+			}else{
+				oc.topo.mapViewer.show();
+			}
+			new BeijingMap();
+		});
+		break;
+	default:
+		oc.resource.loadScript("resource/module/topo/contextMenu/TopoNav.js",function(){
+			init();
+		});
+	}
+	
+});
+</script>

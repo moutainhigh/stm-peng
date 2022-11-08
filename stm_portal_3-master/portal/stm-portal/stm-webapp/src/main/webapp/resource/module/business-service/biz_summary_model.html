@@ -1,0 +1,100 @@
+<div id="biz-main" class="biz-main addoc-biz-mainbg easyui-layout" style="height: 100%;">
+	<div class="biz-alarm" data-options="region:'north'">
+      <div class="locate-left">
+		<label  class="light" >告警级别：</label>
+		<label  class="light" ><a><span  class="alert-ico redlight"></span> 致命</a></label>
+		<label  class="light" ><a><span  class="alert-ico orangelight"></span>严重</a></label>
+		<label  class="light" ><a><span  class="alert-ico yellowlight"></span>警告</a></label>
+		<label  class="light" ><a><span  class="alert-ico lightnormal"></span>正常</a></label>
+        </div>
+        <div class="biz-fr locate-right">
+		<a id="tableModel" title="列表" class="biz-fr biz-list"> <i class="fa fa-list function-cio"></i></a>
+		<a id="addBiz" title="新建业务" class=" biz-add"><i class="fa fa-plus-square"></i></a>
+        </div>
+	</div>
+	<div id="biz-left" class="biz-left" data-options="region:'west'" style="width: 30%; height: 100%;">
+		<div class="hchats-box response-speed">
+			<div class="biz-comm-title"><i class="fa fa-bar-chart font16"></i>业务响应速度</div>
+			<div class="biz-comm-content" id="biz-response"></div>
+		</div>
+		<div class="hchats-box alarm-box">
+			<div class="biz-comm-title">
+				<span><i class="fa fa-pie-chart font16"></i>业务告警次数</span>
+				<input type="button" id="alarm-time" class="biz-fr ocv-selectTime" value="最近7天" style="margin-top: -3px;" selectVal="1"/>
+			</div>
+			<div class="biz-comm-content" id="alarm-num"></div>
+		</div>
+	</div>
+	<div id="biz-center" class="biz-center" data-options="region:'center'" style="width: 50%; height: 100%;">
+		<div id="healthy-box" class="healthy-box">
+			<div class="biz-comm-title">
+            <i class="fa fa-medkit font16"></i>业务健康度</div>
+			<div class="biz-comm-content">
+				<img id="biz-disk" class="biz-disk" src="" />
+				<div class="biz-grades biz-hide">
+					<span class="grades-num">
+					</span>分
+				</div>
+				<div class="biz-degree biz-users biz-hide" data-angle="75" data-grade=""></div>
+				<div class="biz-degree biz-door biz-hide" data-angle="120" data-grade=""></div>
+				<div class="biz-degree biz-app biz-hide" data-angle="27" data-grade=""></div>
+				<div class="biz-degree biz-statistics biz-hide" data-angle="150" data-grade=""></div>
+				<div class="biz-degree biz-monitor biz-hide" data-angle="-4" data-grade=""></div>
+				<div class="biz-scan biz-hide"></div>
+			</div>
+		</div>
+		<div id="operation-box" class="operation-box">
+			<div class="operation-head">
+				<span class="operation-title"><i class="fa fa-table font16"></i>业务运行情况</span>
+				<!--<a class="biz-fr operation-edit" href="javascript:;"></a>-->
+				<!-- <a id="operation-time" class="biz-fr operation-time fa fa-clock-o" href="javascript:;"></a> -->
+				<input type="button" id="operation-time" class="biz-fr ocv-selectTime" value="最近7天" style="margin-top: 9px;" selectVal="1"/>
+			</div>
+			<div id="biz-operation" class=""></div>
+		</div>
+	</div>
+	<div id="bix-right" class="bix-right" data-options="region:'east'" style="width:20%; height: 100%;">
+		<div class="biz-capacity">
+			<ul id="tabs" class="tabs">
+				<li class="active" title="存储容量">存储容量</li>
+				<li title="数据库容量">数据库容量</li>
+				<li title="带宽容量">带宽容量</li>
+				<li title="计算容量">计算容量</li>
+			</ul>
+			<div id="cap-tabs-wrap" class="cap-tabs-wrap">
+				<div class="cap-tag">
+					<div id="storage"></div>
+				</div>
+				<div class="cap-tag biz-hide">
+					<div id="database"></div>
+				</div>
+				<div class="cap-tag biz-hide">
+					<div id="bandwidth"></div>
+				</div>
+				<div class="cap-tag biz-hide">
+					<div id="calculate"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+    <!--<button id="editNode">节点编辑</button>-->
+</div>
+<script type="text/javascript" src="module/business-service/js/biz_summary_model.js"></script>
+ <script type="text/javascript">
+$(function(){
+	$('#addBiz').on('click',function(){
+		  oc.resource.loadScript('resource/module/business-service/js/biz_base_info.js',function(){
+			  oc.module.biz.baseinfo.open({
+				  type:'add',
+				  id:null,
+				  name:null
+			  });
+		  });
+	});
+	/* BUG #50754 业务管理：业务视图页面返回页面错误 */
+	var summaryIds = oc.index.indexLayout.data("bizIds");
+    if(summaryIds && summaryIds.length > 0) {
+        oc.index.indexLayout.data("bizIds", new Array());
+    }
+});
+</script>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.profile.fault.dao.ProfileFaultDao">
+	<sql id="profileFaultAlias">
+		profile_id as profileId,
+		profile_name as profileName,
+		profile_desc as profileDesc,
+		is_use as isUse,
+		resource_id as resourceId,
+		parent_resource_id as parentResourceId,
+		domain_id as domainId,
+		create_user as createUser,
+		update_user as updateUser,
+		create_time as createTime,
+		update_time as updateTime,
+		alarm_level as alarmLevel,
+		snapshot_script_id as snapshotScriptId,
+		recovery_script_id as recoveryScriptId
+	</sql>
+
+	<select id="pageSelectProfileFault"
+		parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page"
+		resultType="com.mainsteam.stm.profilelib.fault.obj.Profilefault">
+		select <include refid="profileFaultAlias"></include> from stm_profilelib_fault
+	</select>
+	<select id="getProfileFault" parameterType="long"
+		resultType="com.mainsteam.stm.profilelib.fault.obj.ProfileFaultRelation">
+		select <include refid="profileFaultAlias"></include> from stm_profilelib_fault where profile_id = #{profieId}
+	</select>
+	
+	<select id="queryProfilefaultByInstanceAndMetric" parameterType="map" resultType="com.mainsteam.stm.profilelib.fault.obj.Profilefault">
+		SELECT
+		 	pff.profile_id as profileId,
+			pff.profile_name as profileName,
+			pff.profile_desc as profileDesc,
+			pff.is_use as isUse,
+			pff.resource_id as resourceId,
+			pff.parent_resource_id as parentResourceId,
+			pff.domain_id as domainId,
+			pff.create_user as createUser,
+			pff.update_user as updateUser,
+			pff.create_time as createTime,
+			pff.update_time as updateTime,
+			pff.alarm_level as alarmLevel,
+			pff.snapshot_script_id as snapshotScriptId,
+			pff.recovery_script_id as recoveryScriptId
+		 from stm_profilelib_fault pff
+		 LEFT JOIN stm_profilelib_fault_instance pffi on pffi.profile_id = pff.profile_id
+		 LEFT JOIN stm_profilelib_fault_metric pffm on pffm.profile_id = pff.profile_id
+		 WHERE pffi.instance_id = #{instanceId} and pffm.metric_id = #{metricId}
+	</select>
+	
+	<insert id="insertProfileFault" parameterType="com.mainsteam.stm.profilelib.fault.obj.Profilefault">
+		INSERT INTO stm_profilelib_fault
+		 (profile_id,profile_name,profile_desc,is_use,resource_id,parent_resource_id,domain_id,create_user,update_user,create_time,update_time ,alarm_level,snapshot_script_id,recovery_script_id)
+		 VALUES
+		  (#{profileId},#{profileName},#{profileDesc},#{isUse},#{resourceId},#{parentResourceId},#{domainId},#{createUser},#{updateUser},#{createTime},#{updateTime},#{alarmLevel},#{snapshotScriptId},#{recoveryScriptId})
+	</insert>
+	
+	<update id="updateProfileFault" parameterType="com.mainsteam.stm.profilelib.fault.obj.Profilefault">
+		UPDATE stm_profilelib_fault SET
+			profile_name = #{profileName},
+			profile_desc = #{profileDesc},
+			is_use = #{isUse},
+			resource_id = #{resourceId},
+			parent_resource_id = #{parentResourceId},
+			domain_id = #{domainId},
+			update_user = #{updateUser},
+			update_time = #{updateTime},
+			alarm_level = #{alarmLevel},
+			snapshot_script_id = #{snapshotScriptId},
+			recovery_script_id = #{recoveryScriptId}
+		where  profile_id = #{profileId}
+	</update>
+	
+	<update id="updateProfileFaultState" parameterType="long">
+		UPDATE stm_profilelib_fault SET is_use = (CASE is_use WHEN 0 THEN 1  WHEN 1 THEN 0 END) where  profile_id = #{profileId}
+	</update>
+	
+	<delete id="batchDeleteProfileFault">
+		DELETE FROM stm_profilelib_fault where profile_id IN
+		<foreach item="id" index="index" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+</mapper>

@@ -1,0 +1,683 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.home.layout.dao.IHomeLayoutDao">
+   
+   
+   
+   
+   
+  <resultMap id="ResultMap" type="com.mainsteam.stm.home.layout.bo.HomeLayoutBo">
+     
+     
+     
+     
+     
+    <id column="ID" property="id" jdbcType="BIGINT"/>
+     
+     
+     
+     
+     
+    <result column="NAME" property="name" jdbcType="VARCHAR"/>
+     
+     
+     
+     
+     
+    <result column="REFRESH_TIME" property="refreshTime" jdbcType="INTEGER"/>
+     
+     
+     
+     
+     
+    <result column="USER_ID" property="userId" jdbcType="BIGINT"/>
+     
+     
+     
+     
+     
+    <result column="LAYOUT_TYPE" property="layoutType" jdbcType="TINYINT"/>
+     
+     
+     
+     
+     
+    <result column="LAYOUT" property="layout" jdbcType="LONGVARCHAR"/>
+     
+     
+     
+     
+     
+    <result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP"/>
+     
+     
+     
+     
+     
+    <result column="TEMPID" property="tempId" jdbcType="TINYINT"/>
+     
+     
+     
+     
+     
+    <result column="COPY_USER_ID" property="copyUserId" jdbcType="BIGINT"/>
+  
+  
+  
+  
+  
+  </resultMap>
+   
+   
+   
+   
+   
+  <sql id="Column_List">
+        ID, NAME, REFRESH_TIME, USER_ID, LAYOUT_TYPE, LAYOUT, CREATE_TIME,TEMPID, COPY_USER_ID
+    </sql>
+   
+   
+   
+   
+   
+  <select id="get" resultMap="ResultMap" parameterType="com.mainsteam.stm.home.layout.bo.HomeLayoutBo">
+    	SELECT  
+     
+     
+     
+     
+     
+    <include refid="Column_List"/>
+        FROM STM_HOME_LAYOUT
+         
+     
+     
+     
+     
+     
+    <where>
+        	 
+       
+       
+       
+       
+       
+      <if test="id &gt; 0">
+        		AND ID = #{id,jdbcType=BIGINT}
+        	</if>
+        	 
+       
+       
+       
+       
+       
+      <if test="userId &gt; 0">
+        		AND USER_ID = #{userId,jdbcType=BIGINT}
+        	</if>
+        	 
+       
+       
+       
+       
+       
+      <if test="layoutType &gt; 0">
+        		AND LAYOUT_TYPE = #{layoutType,jdbcType=TINYINT}
+        	</if>
+        	 
+       
+       
+       
+       
+       
+      <if test="tempId &gt; 0">
+        		AND TEMPID = #{tempId,jdbcType=TINYINT}
+        	</if>
+        
+    
+    
+    
+    
+    
+    </where>
+    
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="getById" resultMap="ResultMap" parameterType="java.lang.Long">
+        SELECT  
+     
+     
+     
+     
+     
+    <include refid="Column_List"/>
+        FROM STM_HOME_LAYOUT
+        WHERE ID = #{id,jdbcType=BIGINT}
+    
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="getByUserId" resultMap="ResultMap" parameterType="java.lang.Long">
+    	SELECT  
+     
+     
+     
+     
+     
+    <include refid="Column_List"/>
+        FROM STM_HOME_LAYOUT
+         
+     
+     
+     
+     
+     
+    <where>
+        	 
+       
+       
+       
+       
+       
+      <if test="_parameter &gt; 0">
+        		AND USER_ID = #{userId,jdbcType=BIGINT}
+        	</if>
+        	AND LAYOUT_TYPE = 1
+        
+    
+    
+    
+    
+    
+    </where>
+    
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="getTemplateByUserId" resultMap="ResultMap" parameterType="java.lang.Long">
+    	SELECT  
+     
+     
+     
+     
+     
+    <include refid="Column_List"/>
+        FROM STM_HOME_LAYOUT
+        WHERE USER_ID = #{userId,jdbcType=BIGINT}
+        	AND LAYOUT_TYPE = 2
+    
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="getTemplates" resultMap="ResultMap">
+    	SELECT  
+     
+     
+     
+     
+     
+    <include refid="Column_List"/>
+        FROM STM_HOME_LAYOUT
+        WHERE  LAYOUT_TYPE = 2
+    
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="getTempsById" resultMap="ResultMap" parameterType="com.mainsteam.stm.home.layout.vo.HomeLayoutVo">
+    			SELECT DISTINCT(A.ID),
+		 A.ID id, NAME name
+        FROM STM_HOME_LAYOUT A LEFT JOIN STM_HOME_LAYOUT_DOMAIN B
+        ON  A.ID=B.LAYOUT_ID WHERE  LAYOUT_TYPE = 1
+		 
+     
+     
+     
+     
+     
+    <if test="domains == null ">
+		AND A.USER_ID = #{userId,jdbcType=BIGINT}
+	</if>
+	 
+     
+     
+     
+     
+     
+    <if test="domains != null ">
+	AND ( B.DOMAIN_ID IN
+	 
+       
+       
+       
+       
+       
+      <foreach collection="domains" item="domainid" index="index" open="(" close=")" separator=",">
+				#{domainid}
+			</foreach>
+			OR A.USER_ID = #{userId,jdbcType=BIGINT})
+	
+    
+    
+    
+    
+    
+    </if>
+	
+	AND A.id NOT IN( SELECT LAYOUT_ID FROM STM_HOME_LAYOUT_SLIDE WHERE user_id=#{userId,jdbcType=BIGINT})
+         AND A.id NOT IN( SELECT DEFAULT_LAYOUT_ID FROM STM_HOME_LAYOUT_DEFAULT WHERE USER_ID=#{userId,jdbcType=BIGINT})
+	ORDER BY  A.ID DESC
+    
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="pageSelect" resultType="com.mainsteam.stm.home.layout.bo.HomeLayoutBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="mysql">
+			SELECT DISTINCT(A.ID) aid,
+		 A.ID id, NAME NAME, REFRESH_TIME  refreshTime , A.USER_ID  userId, LAYOUT_TYPE  layoutType, 
+		 LAYOUT , 
+		 A.COPY_USER_ID  copyUserId,
+		 	A.CREATE_TIME   createTime, 
+		 		TEMPID tempId,
+		 	IF(A.CREATE_TIME='0000-00-00
+		00:00:00',NULL,DATE_FORMAT(A.CREATE_TIME,'%Y-%m-%d %H:%i'))   createTimeStr
+		
+        FROM STM_HOME_LAYOUT A LEFT JOIN STM_HOME_LAYOUT_DOMAIN B
+        ON  A.ID=B.LAYOUT_ID WHERE  LAYOUT_TYPE = 1
+	 
+     
+     
+     
+     
+     
+    <if test="condition!=null">
+	 
+       
+       
+       
+       
+       
+      <if test="condition.domainids == null ">
+	AND A.USER_ID = #{condition.userId,jdbcType=BIGINT}
+	</if>
+	 
+       
+       
+       
+       
+       
+      <if test="condition.domainids != null ">
+	AND (B.DOMAIN_ID IN
+	 
+         
+         
+         
+         
+         
+        <foreach collection="condition.domainids " item="domainid" index="index" open="(" close=")" separator=",">
+				#{domainid}
+			</foreach>
+			OR A.USER_ID = #{condition.userId,jdbcType=BIGINT})
+	
+      
+      
+      
+      
+      
+      </if>
+
+    
+    
+    
+    
+    
+    </if>
+
+
+	
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="pageSelect" resultType="com.mainsteam.stm.home.layout.bo.HomeLayoutBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oracle">
+		SELECT DISTINCT(A.ID) aid,
+		 A.ID id, NAME name, REFRESH_TIME  refreshTime , A.USER_ID  userId,
+		  LAYOUT_TYPE  layoutType, to_char(LAYOUT)  layout, 	 A.COPY_USER_ID  copyUserId,
+		  	A.CREATE_TIME   createTime,
+		  	TEMPID tempId,
+		   decode(A.CREATE_TIME,'0000-00-00 00:00:00',null,to_char(A.CREATE_TIME,'yyyy-MM-dd HH24:mi'))   createTimeStr
+		
+        FROM STM_HOME_LAYOUT A LEFT JOIN STM_HOME_LAYOUT_DOMAIN B
+        ON  A.ID=B.LAYOUT_ID WHERE  LAYOUT_TYPE = 1
+		 
+     
+     
+     
+     
+     
+    <if test="condition!=null">
+	 
+       
+       
+       
+       
+       
+      <if test="condition.domainids == null ">
+	AND A.USER_ID = #{condition.userId,jdbcType=BIGINT}
+	</if>
+	 
+       
+       
+       
+       
+       
+      <if test="condition.domainids != null ">
+	AND ( B.DOMAIN_ID IN
+	 
+         
+         
+         
+         
+         
+        <foreach collection="condition.domainids " item="domainid" index="index" open="(" close=")" separator=",">
+				#{domainid}
+			</foreach>
+			OR A.USER_ID = #{condition.userId,jdbcType=BIGINT})
+	
+      
+      
+      
+      
+      
+      </if>
+
+    
+    
+    
+    
+    
+    </if>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="pageSelect" resultType="com.mainsteam.stm.home.layout.bo.HomeLayoutBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="dm">
+		SELECT DISTINCT(A.ID) aid,
+		 A.ID id, NAME name, REFRESH_TIME  refreshTime , A.USER_ID  userId,
+		  LAYOUT_TYPE  layoutType, to_char(LAYOUT)  layout, 	 A.COPY_USER_ID  copyUserId,
+		  	A.CREATE_TIME   createTime,
+		  	TEMPID tempId,
+		   decode(to_char(A.CREATE_TIME,'yyyy-MM-dd HH24:mi:ss'),'0000-00-00 00:00:00',null,to_char(A.CREATE_TIME,'yyyy-MM-dd HH24:mi'))   createTimeStr
+		
+        FROM STM_HOME_LAYOUT A LEFT JOIN STM_HOME_LAYOUT_DOMAIN B
+        ON  A.ID=B.LAYOUT_ID WHERE  LAYOUT_TYPE = 1
+		 
+     
+     
+     
+     
+     
+    <if test="condition!=null">
+	 
+       
+       
+       
+       
+       
+      <if test="condition.domainids == null ">
+	AND A.USER_ID = #{condition.userId,jdbcType=BIGINT}
+	</if>
+	 
+       
+       
+       
+       
+       
+      <if test="condition.domainids != null ">
+	AND ( B.DOMAIN_ID IN
+	 
+         
+         
+         
+         
+         
+        <foreach collection="condition.domainids " item="domainid" index="index" open="(" close=")" separator=",">
+				#{domainid}
+			</foreach>
+			OR A.USER_ID = #{condition.userId,jdbcType=BIGINT})
+	
+      
+      
+      
+      
+      
+      </if>
+
+    
+    
+    
+    
+    
+    </if>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+  <select id="pageSelect" resultType="com.mainsteam.stm.home.layout.bo.HomeLayoutBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oscar">
+
+		SELECT DISTINCT(A.ID) aid,
+		 A.ID id, NAME name, REFRESH_TIME  refreshTime , A.USER_ID  userId,
+		  LAYOUT_TYPE  layoutType, to_char(LAYOUT)  layout, 	 A.COPY_USER_ID  copyUserId,
+		  	A.CREATE_TIME   createTime,
+		  	TEMPID tempId,
+		   decode(A.CREATE_TIME,'0000-00-00 00:00:00',null,to_char(A.CREATE_TIME,'yyyy-MM-dd HH24:mi'))   createTimeStr
+
+		
+        FROM STM_HOME_LAYOUT A LEFT JOIN STM_HOME_LAYOUT_DOMAIN B
+        ON  A.ID=B.LAYOUT_ID WHERE  LAYOUT_TYPE = 1
+	 
+     
+     
+     
+     
+     
+    <if test="condition!=null">
+	 
+       
+       
+       
+       
+       
+      <if test="condition.domainids != null ">
+	AND ( B.DOMAIN_ID IN
+	 
+         
+         
+         
+         
+         
+        <foreach collection="condition.domainids " item="domainid" index="index" open="(" close=")" separator=",">
+				#{domainid}
+			</foreach>
+			OR A.USER_ID = #{condition.userId,jdbcType=BIGINT})
+	
+      
+      
+      
+      
+      
+      </if>
+	 
+       
+       
+       
+       
+       
+      <if test="condition.domainids == null ">
+	AND A.USER_ID = #{condition.userId,jdbcType=BIGINT}
+	</if>
+    
+    
+    
+    
+    
+    </if>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <insert id="insert" parameterType="com.mainsteam.stm.home.layout.bo.HomeLayoutBo">
+        INSERT INTO STM_HOME_LAYOUT (
+     
+     
+     
+     
+     
+    <include refid="Column_List"/>)
+        VALUES (
+        	#{id,jdbcType=BIGINT}, 
+        	#{name,jdbcType=VARCHAR}, 
+        	#{refreshTime,jdbcType=INTEGER}, 
+            #{userId,jdbcType=BIGINT}, 
+            #{layoutType,jdbcType=TINYINT}, 
+            #{layout,jdbcType=LONGVARCHAR}, 
+            #{createTime,jdbcType=TIMESTAMP},
+            #{tempId,jdbcType=TINYINT}, 
+             #{copyUserId,jdbcType=BIGINT})
+           
+    
+  
+  
+  
+  
+  
+  </insert>
+   
+   
+   
+   
+   
+  <update id="updateLayout" parameterType="com.mainsteam.stm.home.layout.bo.HomeLayoutBo">
+        UPDATE STM_HOME_LAYOUT
+        SET LAYOUT = #{layout,jdbcType=LONGVARCHAR}
+        WHERE ID = #{id,jdbcType=BIGINT}
+        	AND USER_ID = #{userId,jdbcType=BIGINT}
+    </update>
+   
+   
+   
+   
+   
+  <update id="updateBaseInfo" parameterType="com.mainsteam.stm.home.layout.bo.HomeLayoutBo">
+        UPDATE STM_HOME_LAYOUT
+        SET NAME = #{name,jdbcType=VARCHAR},
+            REFRESH_TIME = #{refreshTime,jdbcType=INTEGER}
+
+        WHERE ID = #{id,jdbcType=BIGINT}
+        	AND USER_ID = #{userId,jdbcType=BIGINT}
+        	
+    </update>
+   
+   
+   
+   
+   
+  <update id="updateLayoutInfo" parameterType="com.mainsteam.stm.home.layout.bo.HomeLayoutBo">
+        UPDATE STM_HOME_LAYOUT
+        SET 
+              layout=#{layout,jdbcType=LONGVARCHAR}
+        WHERE ID = #{id,jdbcType=BIGINT}
+        	
+    </update>
+   
+   
+   
+   
+   
+  <delete id="delete" parameterType="com.mainsteam.stm.home.layout.bo.HomeLayoutBo">
+		DELETE FROM STM_HOME_LAYOUT
+		WHERE ID = #{id,jdbcType=BIGINT}
+        	AND USER_ID = #{userId,jdbcType=BIGINT}
+	</delete>
+</mapper>

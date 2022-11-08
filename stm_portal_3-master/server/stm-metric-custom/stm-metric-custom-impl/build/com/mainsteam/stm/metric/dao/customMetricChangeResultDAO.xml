@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.metric.dao.CustomMetricChangeResultDAO">
+	<sql id="customMetricChangeApplyColumn"> 
+		CHANGE_ID,DCS_GROUP_ID,RESULT_STATE,OPERATE_TIME
+	</sql>
+	<sql id="customMetricChangeApplyColumnValue">
+		#{change_id},#{dcs_group_id},#{result_state},#{operate_time}
+	</sql>
+	<sql id="table">
+		 STM_CUSTOM_METRIC_CHANGE_RESULT
+	</sql>
+	<sql id="selectSql">
+		select <include refid="customMetricChangeApplyColumn"/>
+		from   <include refid="table"/>
+	</sql>
+	<insert id="insertMetricChangeApply" 
+		parameterType="com.mainsteam.stm.metric.dao.pojo.CustomMetricChangeResultDO">
+		insert into <include refid="table"/>
+		(<include refid="customMetricChangeApplyColumn"/>) 
+		values(<include refid="customMetricChangeApplyColumnValue"/>) 
+	</insert>
+	<delete id="removeMetricChangeApplyByDate" parameterType="java.util.Date"> 
+		delete from <include refid="table"/> where OPERATE_TIME &lt;= #{operate_time}
+    </delete>
+	<select id="getMetricChangeApplyDOs" 
+		resultType="com.mainsteam.stm.metric.dao.pojo.CustomMetricChangeResultDO">
+		<include refid="selectSql"/> where CHANGE_ID in 
+		<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+		#{item}<if test="index%900&gt;898">) OR CHANGE_ID IN('-1'</if>
+		</foreach>
+	</select>
+	<update id="updateMetricChangeApplyState" parameterType="com.mainsteam.stm.metric.dao.pojo.CustomMetricChangeResultDO">
+		update <include refid="table"/> set RESULT_STATE=1,OPERATE_TIME=#{operate_time} where CHANGE_ID = #{change_id} and DCS_GROUP_ID=#{dcs_group_id}
+	</update>
+ </mapper>

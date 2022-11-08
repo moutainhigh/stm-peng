@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mainsteam.stm.portal.inspect.dao.IInspectReportFileDao" >
+
+    <resultMap id="BaseResultMap" type="com.mainsteam.stm.portal.inspect.bo.InspectReportFileBo" >
+        <id column="INSPECT_REPORT_ID" property="inspectReportId" jdbcType="BIGINT" />
+        <result column="FILE_ID" property="fileId" jdbcType="BIGINT" />
+        <result column="REP_GENERATE_TIME" property="repGenerateTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <sql id="Column_List" >
+        INSPECT_REPORT_ID, FILE_ID, REP_GENERATE_TIME
+    </sql>
+
+    <select id="getByReportId" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        SELECT <include refid="Column_List" />
+        FROM STM_INSPECT_REPORT_FILE
+        WHERE INSPECT_REPORT_ID = #{inspectReportId,jdbcType=BIGINT}
+    </select>
+
+    <insert id="insert" parameterType="com.mainsteam.stm.portal.inspect.bo.InspectReportFileBo" >
+        INSERT INTO STM_INSPECT_REPORT_FILE (<include refid="Column_List" />)
+        VALUES (
+            #{inspectReportId,jdbcType=BIGINT},
+            #{fileId,jdbcType=BIGINT},
+            #{repGenerateTime,jdbcType=TIMESTAMP})
+    </insert>
+
+    <delete id="deleteByReportId" parameterType="com.mainsteam.stm.portal.inspect.bo.InspectReportFileBo">
+        DELETE FROM STM_INSPECT_REPORT_FILE
+        WHERE INSPECT_REPORT_ID = #{inspectReportId,jdbcType=BIGINT}
+    </delete>
+</mapper>

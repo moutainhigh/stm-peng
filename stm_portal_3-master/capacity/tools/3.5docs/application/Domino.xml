@@ -1,0 +1,1466 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<!-- 
+	devicetype:			设备类型名称
+	ismulticoltype:		是否允许采集方式多选
+	majortype:			主要分类（可以理解为设备类型）
+	minortype:			次要分类
+	manufacturer:		厂商
+	devicetype_zh:		设备类型中文描述
+	 -->
+	<devicetypeinfo devicetype="AS_DOMINO" ismulticoltype="false" majortype="application" minortype="LotusDominoServer" manufacturer="IBM" devicetype_zh="Lotus Domino">
+		<!-- 该设备类型定义的命令，用于合并命令执行 -->
+		<commands>
+			<!--domino主资源-->
+			<command coltype="WMI" comid="get_mainResource" command="domino_perf.ps1 ${InstallPath}+${DataPath}" />
+			<command coltype="WMI" comid="get_mainInfo" command="domino_info.ps1 ${InstallPath}+${DataPath}" />
+			<command coltype="WMI" comid="get_mainConf" command="domino_conf.ps1 ${InstallPath}+${DataPath}" />
+			<command coltype="WMI" comid="get_mainAvail" command="domino_avail.ps1 ${InstallPath}+${DataPath}" />
+			<command coltype="WMI" comid="get_mainDir" command="domino_dir.ps1 ${InstallPath}+${DataPath}" />
+			<command coltype="WMI" comid="get_mainTask" command="domino_task.ps1 ${InstallPath}+${DataPath}" />
+			<command coltype="WMI" comid="get_DominoNsf" command="domino_nsf.ps1 ${InstallPath}+${DataPath}" />
+			<!--主机说明-->
+			<command coltype="WMI" comid="systemInfo" command="root\cimv2::select description from Win32_OperatingSystem"/>
+			<!--操作系统版本-->
+			<command coltype="WMI" comid="osVersion" command="root\cimv2::select version from Win32_OperatingSystem"/>
+			<!--MAC地址 -->
+			<command coltype="WMI" comid="macAddress" command="root\cimv2::select macaddress from Win32_NetworkAdapter WHERE macaddress!=null"/>
+			<!--主机名称-->
+			<command coltype="WMI" comid="hostname" command="root\cimv2::select Name from Win32_ComputerSystem"/>
+			
+			<command coltype="CLI" comid="get_nsf" command="/tmp/domino/domino_nsf.sh /local/notesdata@/opt/ibm/lotus/bin" />
+			<command coltype="CLI" comid="get_common" command="/tmp/domino/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin" />
+			<command coltype="CLI" comid="get_avail" command="/tmp/domino/domino_avail.sh /local/notesdata@/opt/ibm/lotus/bin" />
+			<command coltype="CLI" comid="get_dir" command="/tmp/domino/domino_dir.sh /local/notesdata@/opt/ibm/lotus/bin" />
+			<command coltype="CLI" comid="get_task" command="/tmp/domino/domino_task.sh /local/notesdata@/opt/ibm/lotus/bin" />
+			
+			<!-- CLI方式操作系统、系统可管理内存、主机名称 -->
+			<command coltype="CLI" comid="chk_common" command="/tmp/os.sh" />
+			<command coltype="CLI" comid="chk_memcpu" command="/tmp/appinfo.sh lotus" />
+			
+		</commands>
+		
+		<!-- 描述该类设备的所有指标采集,一行对应一个指标 -->
+		<resources>
+			<!--MAC地址-->
+			<resource kpiid="A1macAddress" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="macAddress" select="" merge="join" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_spstatu_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.equals(&quot;不可用&quot;)" alertdesc5="服务器端口不可用"
+					alertcontin="1" alertype="" circle="5" storefactor="1" />
+				
+			</resource>
+			
+			<!--主机名称-->
+			<resource kpiid="A1hostName" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="hostname" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_spstatu_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1" />
+				
+			</resource>
+			<!--可用性-->
+			<resource kpiid="A1Availability" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainAvail" select="&lt;avail&gt;(.*)&lt;/avail&gt;" merge="" deal=""/>	
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_spstatu_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1" />
+				
+			</resource>
+		
+			<!-- 一个resource值一个特定的kpi指标,如CPU利用率，kpiid：指标id，coltype：采集方式，value：结果计算表达式（默认为$d1） ，valuetype(Integer/Float/String)：采集值类型，unit：单位 -->
+			<!-- 服务器端口状态 -->
+			<resource kpiid="A1ServerPortStatus" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainAvail" select="&lt;serverstatus&gt;(.*)&lt;/serverstatus&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_spstatu_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.equals(&quot;不可用&quot;)" alertdesc5="服务器端口不可用"
+					alertcontin="1" alertype="" circle="5" storefactor="1" />
+				<translations>
+					<translation source="1" dest="可用"/>
+					<translation source="0" dest="不可用"/>
+				</translations>
+				
+			</resource>
+			
+			<!-- 服务状态(可用性)-->
+			<resource kpiid="A1ServerStatus" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainAvail" select="&lt;avail&gt;(.*)&lt;/avail&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_serstatus_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.equals(&quot;不可用&quot;)" alertdesc5="服务不可用"
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				<translations>
+					<translation source="1" dest="可用"/>
+					<translation source="0" dest="不可用"/>
+				</translations>
+				
+			</resource>
+			
+			<!-- AMGR状态 -->
+			<resource kpiid="A1AMGRStatus" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainAvail" select="&lt;amgrstatus&gt;(.*)&lt;/amgrstatus&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_amgrstatu_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.equals(&quot;不可用&quot;)" alertdesc5="AMGR不可用"
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				<translations>
+					<translation source="1" dest="可用"/>
+					<translation source="0" dest="不可用"/>
+				</translations>
+				
+			</resource>
+			
+			<!-- HTTP状态 -->
+			<resource kpiid="A1HTTPStatus" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainAvail" select="&lt;httpstatus&gt;(.*)&lt;/httpstatus&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_httpstatu_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.equals(&quot;不可用&quot;)" alertdesc5="HTTP不可用"
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				<translations>
+					<translation source="1" dest="可用"/>
+					<translation source="0" dest="不可用"/>
+				</translations>
+				
+			</resource>
+			
+			<!-- Lotus Domino CPU利用率 -->
+			<resource kpiid="A1appCpuRate" coltype="WMI" value="$d1*100" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainResource" select="&lt;appcpurate&gt;(.*)&lt;/appcpurate&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_ldcpurate_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;60"
+					alertdesc3="Lotus Domino CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;90" alertdesc4="Lotus Domino CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- Lotus Domino 内存利用率 -->
+			<resource kpiid="A1appMemRate" coltype="WMI" value="$d1*100" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainResource" select="&lt;appmemrate&gt;(.*)&lt;/appmemrate&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_ldmemrate_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;60"
+					alertdesc3="Lotus Domino内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;90" alertdesc4="Lotus Domino内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 系统CPU利用率 -->
+			<resource kpiid="A1cpuRate" coltype="WMI" value="" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainResource" select="&lt;cpurate&gt;(.*)&lt;/cpurate&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_cpurate_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;60"
+					alertdesc3="系统CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;90" alertdesc4="系统CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 系统内存利用率 -->
+			<resource kpiid="A1memRate" coltype="WMI" value="" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainResource" select="&lt;memrate&gt;(.*)&lt;/memrate&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_memrate_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;60"
+					alertdesc3="系统内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;90" alertdesc4="系统内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- SESSION数 -->
+			<resource kpiid="A1sessioncount" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainResource" select="&lt;sessioncount&gt;(.*)&lt;/sessioncount&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_sesscount_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;150"
+					alertdesc3="SESSION数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;200" alertdesc4="SESSION数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 丢弃的会话数 -->
+			<resource kpiid="A1DropSessionCount" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainResource" select="&lt;dropsessioncount&gt;(.*)&lt;/dropsessioncount&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_dsoncount_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;50"
+					alertdesc3="丢弃的会话数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;100" alertdesc4="丢弃的会话数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- HTTP CPU利用率 -->
+			<resource kpiid="A1HttpCPURate" coltype="WMI" value="$d1*100" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainResource" select="&lt;httpcpurate&gt;(.*)&lt;/httpcpurate&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_httpcpu_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;50"
+					alertdesc3="HTTP CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;=100" alertdesc4="HTTP CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- HTTP 内存利用率 -->
+			<resource kpiid="A1HttpMemRate" coltype="WMI" value="$d1*100" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainResource" select="&lt;httpmemrate&gt;(.*)&lt;/httpmemrate&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_httpmem_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;30"
+					alertdesc3="HTTP 内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;50" alertdesc4="HTTP 内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- HTTP响应时间 -->
+			<resource kpiid="A1HttpResponseTime" coltype="WMI" value="" valuetype="Integer" unit="ms">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainResource" select="&lt;httpresponsetime&gt;(.*)&lt;/httpresponsetime&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_httptime_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;2000"
+					alertdesc3="HTTP响应时间超过${trigervalue1}ms,当前值为${value}ms" alertexp4="${value}&gt;3000" alertdesc4="HTTP响应时间超过${trigervalue1}ms,当前值为${value}ms" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 数据目录占用文件系统百分比
+			<resource kpiid="A1DataDirUtilRatio" coltype="WMI" value="" valuetype="Float" unit="%">
+				
+				<collects>
+					<collect exeorder="10" comid="get_mainResource" select="&lt;userate&gt;(.*)&lt;/userate&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_datadirur_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;80"
+					alertdesc3="数据目录占用文件系统百分比超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;90" alertdesc4="数据目录占用文件系统百分比超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			-->
+			
+			<!-- 数据目录所在文件系统的利用率
+			<resource kpiid="A1FileSysUtilRatio" coltype="WMI" value="" valuetype="Float" unit="%">
+				
+				<collects>
+					<collect exeorder="10" comid="get_mainResource" select="&lt;diruserate&gt;(.*)&lt;/diruserate&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_filesysr_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;70"
+					alertdesc3="数据目录所在文件系统的利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;90" alertdesc4="数据目录所在文件系统的利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			-->
+			
+			<!-- 数据目录中子目录数
+			<resource kpiid="A1DataDirSubDirCt" coltype="WMI" value="" valuetype="Integer" unit="个">
+				
+				<collects>
+					<collect exeorder="10" comid="get_mainResource" select="&lt;subdircount&gt;(.*)&lt;/subdircount&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_datadsud_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;1000"
+					alertdesc3="数据目录中子目录数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;2000" alertdesc4="数据目录中子目录数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			-->
+			
+			<!-- 数据目录中文件数 
+			<resource kpiid="A1DataDirFileCount" coltype="WMI" value="" valuetype="Integer" unit="个">
+				
+				<collects>
+					<collect exeorder="10" comid="get_mainResource" select="&lt;filecount&gt;(.*)&lt;/filecount&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_datadirfc_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;1000"
+					alertdesc3="数据目录中文件数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;2000" alertdesc4="数据目录中文件数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			-->
+			
+			<!-- 服务器名 -->
+			<resource kpiid="A1ServerName" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainConf" select="&lt;name&gt;(.*)&lt;/name&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_servname_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 服务器标题 -->
+			<resource kpiid="A1ServerTitle" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainConf" select="&lt;title&gt;(.*)&lt;/title&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_servtitle_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 服务器端口
+			<resource kpiid="A1ServerPort" coltype="WMI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_mainResource" select="&lt;port&gt;(.*)&lt;/port&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_servport_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			-->
+			
+			<!-- 数据目录名称 -->
+			<resource kpiid="A1DataDirectoryName" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainConf" select="&lt;datapath&gt;(.*)&lt;/datapath&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_datdirname_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 数据库数量 -->
+			<resource kpiid="A1NSFCount" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainConf" select="&lt;nsfcount&gt;(.*)&lt;/nsfcount&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_nsfcount_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 数据目录数量 -->
+			<resource kpiid="A1DataDirCount" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainDir" select="&lt;datasubdircount&gt;(.*)&lt;/datasubdircount&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_datdircnt_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 物理内存总量 -->
+			<resource kpiid="A1TotalMemSize" coltype="WMI" value="" valuetype="Integer" unit="MB">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainConf" select="&lt;memorysize&gt;(.*)&lt;/memorysize&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_tlmemsize_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 版本 -->
+			<resource kpiid="A1Version" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainInfo" select="&lt;version&gt;(.*)&lt;/version&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_version_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 操作系统 -->
+			<resource kpiid="A1operationSystem" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainInfo" select="&lt;osinfo&gt;(.*)&lt;/osinfo&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_os_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 连续运行时间 -->
+			<resource kpiid="A1AppUptime" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainConf" select="&lt;uptime&gt;(.*)&lt;/uptime&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_appuptime_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 活动Task数 -->
+			<resource kpiid="A1ActiveTaskCount" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainInfo" select="&lt;activetaskcount&gt;(.*)&lt;/activetaskcount&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_acttakcnt_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 资源显示名称 
+			<resource kpiid="A1ResDisplayName" coltype="WMI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_mainResource" select="&lt;name&gt;(.*)&lt;/name&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_disname_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			-->
+			<!-- HTTP 端口 -->
+			<resource kpiid="A1HttpPort" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainInfo" select="&lt;httpport&gt;(.*)&lt;/httpport&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_httpport_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 数据目录所在分区剩余容量 
+			<resource kpiid="A1FreeFileSysSpace" coltype="WMI" value="" valuetype="Integer" unit="MB">
+				
+				<collects>
+					<collect exeorder="10" comid="get_mainInfo" select="&lt;free&gt;(.*)&lt;/free&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_ffilsyssp_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			-->
+			<!-- 数据目录所在分区总容量 
+			<resource kpiid="A1ToFileSysSpace" coltype="WMI" value="" valuetype="Integer" unit="MB">
+				
+				<collects>
+					<collect exeorder="10" comid="get_mainInfo" select="&lt;size&gt;(.*)&lt;/size&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_tlfilsysp_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			-->
+			
+			<!-- 以下是子资源  -->
+			<!-- 数据目录ID -->
+			<resource kpiid="A1DataDirID" coltype="WMI" value="" valuetype="Integer" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainDir" select="&lt;data&gt;($key)\\t.*\\t.*\\t.*\\t.*\\t.*&lt;/data&gt;" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_DatadirId_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1" />
+				
+			</resource>
+			<!-- 数据目录全路径 -->
+			<resource kpiid="A1DirFullName" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainDir" select="&lt;data&gt;$key\\t(.*)\\t.*\\t.*\\t.*\\t.*&lt;/data&gt;" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_dirfname_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 目录中文件数 -->
+			<resource kpiid="A1DirFileCount" coltype="WMI" value="" valuetype="Integer" unit="个" >
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainDir" select="&lt;data&gt;$key\\t.*\\t.*\\t(.*)\\t.*\\t.*&lt;/data&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_dirfilcnt_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;1000"
+					alertdesc3="目录中文件数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;2000" alertdesc4="目录中文件数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 数据子目录名称 -->
+			<resource kpiid="A1datachilddirname" coltype="WMI" value="" valuetype="String" unit="" >
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainDir" select="&lt;data&gt;$key\\t.*\\t.*\\t.*\\t(.*)\\t.*&lt;/data&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_datcldirn_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 目录大小 -->
+			<resource kpiid="A1Size" coltype="WMI" value="" valuetype="Integer" unit="KB">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainDir" select="&lt;data&gt;$key\\t.*\\t(.*)\\t.*\\t.*\\t.*&lt;/data&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_size_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 目录中子目录数 -->
+			<resource kpiid="A1SubDirectoryCount" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainDir" select="&lt;data&gt;$key\\t.*\\t.*\\t.*\\t.*\\t(.*)&lt;/data&gt;" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_subdircnt_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;1000"
+					alertdesc3="目录中子目录数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;2000" alertdesc4="目录中子目录数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			<!--数据库子资源 -->
+			<!-- NSF ID-->
+			<resource kpiid="A1NsfID" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_DominoNsf" select="&lt;nsf&gt;($key)\\t.*\\t.*\\t.*\\t.*&lt;/nsf&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_nsfid_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!-- 数据库标题 -->
+			<resource kpiid="A1Title" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_DominoNsf" select="&lt;nsf&gt;$key\\t.*\\t(.*)\\t.*\\t.*&lt;/nsf&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_title_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 所在数据目录全路径 -->
+			<resource kpiid="A1NsfDirFullName" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_DominoNsf" select="&lt;nsf&gt;$key\\t.*\\t.*\\t(.*)\\t.*&lt;/nsf&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_dirflname_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 数据库名称 -->
+			<resource kpiid="A1DataBaseName" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_DominoNsf" select="&lt;nsf&gt;$key\\t(.*)\\t.*\\t.*\\t.*&lt;/nsf&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_dbname_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 数据库文档量 -->
+			<resource kpiid="A1DocumentCount" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_DominoNsf" select="&lt;nsf&gt;$key\\t.*\\t.*\\t.*\\t(.*)&lt;/nsf&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_doccount_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;45000"
+					alertdesc3="数据库文档量超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;50000" alertdesc4="数据库文档量超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- Task ID-->
+			<resource kpiid="A1EnabledID" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainTask" select="&lt;task&gt;($key)\\t.*\\t.*\\t.*&lt;/task&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_enableID_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- TASK启用状态 -->
+			<resource kpiid="A1EnabledState" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainTask" select="&lt;task&gt;$key\\t.*\\t.*\\t(.*)&lt;/task&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_enbdstate_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.equals(&quot;不可用&quot;)" alertdesc5="Task不可用"
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				<translations>
+					<translation source="1" dest="可用"/>
+					<translation source="0" dest="不可用"/>
+				</translations>
+				
+			</resource>
+			
+			<!-- TASK名称 -->
+			<resource kpiid="A1TaskName" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainTask" select="&lt;task&gt;$key\\t(.*)\\t.*\\t.*&lt;/task&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_taskname_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 活动状态 -->
+			<resource kpiid="A1RunStatus" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_mainTask" select="&lt;task&gt;$key\\t.*\\t(.*)\\t.*&lt;/task&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_runstatus_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.equals(&quot;不可用&quot;)" alertdesc5="活动不可用"
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				<translations>
+					<translation source="1" dest="可用"/>
+					<translation source="0" dest="不可用"/>
+				</translations>
+				
+			</resource>
+			
+			<!-- 主机说明-->
+			<resource kpiid="A1SystemInfo" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="systemInfo" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_sysInfo_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<!--操作系统版本-->
+			<resource kpiid="A1OsVersion" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="osVersion" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_osVersion_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!--CLI方式采集-->
+			<resource kpiid="A1ServerPortStatus" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_avail" select="&lt;serverstatus&gt;(.*)&lt;/serverstatus&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_spstatu_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.equals(&quot;不可用&quot;)" alertdesc5="服务器端口不可用"
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				<translations>
+					<translation source="0" dest="可用"/>
+					<translation source="1" dest="不可用"/>
+				</translations>
+				
+			</resource>
+			<resource kpiid="A1ServerStatus" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_avail" select="&lt;avail&gt;(.*)&lt;/avail&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_serstatus_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.equals(&quot;不可用&quot;)" alertdesc5="服务器不可用"
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				<translations>
+					<translation source="0" dest="可用"/>
+					<translation source="1" dest="不可用"/>
+				</translations>
+				
+			</resource>
+			<resource kpiid="A1AMGRStatus" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_avail" select="&lt;amgrstatus&gt;(.*)&lt;/amgrstatus&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_amgrstatu_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.equals(&quot;不可用&quot;)" alertdesc5="AMGR不可用"
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				<translations>
+					<translation source="0" dest="可用"/>
+					<translation source="1" dest="不可用"/>
+				</translations>
+				
+			</resource>
+			
+			<resource kpiid="A1HTTPStatus" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_avail" select="&lt;httpstatus&gt;(.*)&lt;/httpstatus&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_httpstatu_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.equals(&quot;不可用&quot;)" alertdesc5="HTTP不可用"
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				<translations>
+					<translation source="0" dest="可用"/>
+					<translation source="1" dest="不可用"/>
+				</translations>
+				
+			</resource>
+			
+			<resource kpiid="A1appCpuRate" coltype="CLI" value="" valuetype="Float" unit="%">
+				
+				<collects>
+					<collect exeorder="10" comid="get_common" select="&lt;appcpurate&gt;(.*)&lt;/appcpurate&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_ldcpurate_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;60"
+					alertdesc3="Lotus Domino CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;90" alertdesc4="Lotus Domino CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<resource kpiid="A1appMemRate" coltype="CLI" value="" valuetype="Float" unit="%">
+				
+				<collects>
+					<collect exeorder="10" comid="get_common" select="&lt;appmemrate&gt;(.*)&lt;/appmemrate&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_ldmemrate_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;60"
+					alertdesc3="Lotus Domino内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;90" alertdesc4="Lotus Domino内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<resource kpiid="A1cpuRate" coltype="CLI" value="" valuetype="Float" unit="%">
+				
+				<collects>
+					<collect exeorder="10" comid="get_common" select="&lt;cpurate&gt;(.*)&lt;/cpurate&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_cpurate_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;60"
+					alertdesc3="系统CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;90" alertdesc4="系统CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<resource kpiid="A1memRate" coltype="CLI" value="" valuetype="Float" unit="%">
+				
+				<collects>
+					<collect exeorder="10" comid="get_common" select="&lt;memrate&gt;(.*)&lt;/memrate&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_memrate_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;60"
+					alertdesc3="系统内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;90" alertdesc4="系统内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			<resource kpiid="A1sessioncount" coltype="CLI" value="" valuetype="Integer" unit="个">
+				
+				<collects>
+					<collect exeorder="10" comid="get_common" select="&lt;sessioncount&gt;(.*)&lt;/sessioncount&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_sesscount_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;150"
+					alertdesc3="SESSION数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;200" alertdesc4="SESSION数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			<resource kpiid="A1DropSessionCount" coltype="CLI" value="" valuetype="Integer" unit="个">
+				
+				<collects>
+					<collect exeorder="10" comid="get_common" select="&lt;dropsessioncount&gt;(.*)&lt;/dropsessioncount&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_dsoncount_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;50"
+					alertdesc3="丢弃的会话数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;100" alertdesc4="丢弃的会话数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			<resource kpiid="A1HttpCPURate" coltype="CLI" value="" valuetype="Float" unit="%">
+				
+				<collects>
+					<collect exeorder="10" comid="get_common" select="&lt;httpcpurate&gt;(.*)&lt;/httpcpurate&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_httpcpu_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;50"
+					alertdesc3="HTTP CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;=100" alertdesc4="HTTP CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			<resource kpiid="A1HttpMemRate" coltype="CLI" value="" valuetype="Float" unit="%">
+				
+				<collects>
+					<collect exeorder="10" comid="get_common" select="&lt;httpmemrate&gt;(.*)&lt;/httpmemrate&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_httpmem_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;30"
+					alertdesc3="HTTP 内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;50" alertdesc4="HTTP 内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<resource kpiid="A1HttpResponseTime" coltype="CLI" value="" valuetype="Integer" unit="ms">
+				
+				<collects>
+					<collect exeorder="10" comid="get_common" select="&lt;httpresponsetime&gt;(.*)&lt;/httpresponsetime&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_httptime_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;2000"
+					alertdesc3="HTTP响应时间超过${trigervalue1}ms,当前值为${value}ms" alertexp4="${value}&gt;3000" alertdesc4="HTTP响应时间超过${trigervalue1}ms,当前值为${value}ms" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!--
+			<resource kpiid="A1DataDirUtilRatio" coltype="CLI" value="" valuetype="Float" unit="%">
+				
+				<collects>
+					<collect exeorder="10" comid="get_common" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_datadirur_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;80"
+					alertdesc3="数据目录占用文件系统百分比超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;90" alertdesc4="数据目录占用文件系统百分比超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			<resource kpiid="A1FileSysUtilRatio" coltype="CLI" value="" valuetype="Float" unit="%">
+				
+				<collects>
+					<collect exeorder="10" comid="get_mainResource" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_filesysr_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;70"
+					alertdesc3="数据目录所在文件系统的利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;90" alertdesc4="数据目录所在文件系统的利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			<resource kpiid="A1DataDirSubDirCt" coltype="CLI" value="" valuetype="Integer" unit="个">
+				
+				<collects>
+					<collect exeorder="10" comid="get_mainResource" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_datadsud_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;1000"
+					alertdesc3="数据目录中子目录数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;2000" alertdesc4="数据目录中子目录数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			<resource kpiid="A1DataDirFileCount" coltype="CLI" value="" valuetype="Integer" unit="个">
+				
+				<collects>
+					<collect exeorder="10" comid="get_mainResource" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_datadirfc_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;1000"
+					alertdesc3="数据目录中文件数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;2000" alertdesc4="数据目录中文件数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			-->
+			<resource kpiid="A1ServerName" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_common" select="&lt;name&gt;(.*)&lt;/name&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_servname_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<resource kpiid="A1macAddress" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_common" select="&lt;macaddress&gt;(.*)&lt;/macaddress&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_servname_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!--主机名称-->
+			<resource kpiid="A1hostName" coltype="CLI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="get_common" select="&lt;hostname&gt;(.*)&lt;/hostname&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a1_spstatu_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1" />
+				
+			</resource>
+			
+			<resource kpiid="A1ServerTitle" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_common" select="&lt;title&gt;(.*)&lt;/title&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_servtitle_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+		
+			<resource kpiid="A1DataDirectoryName" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_common" select="&lt;datapath&gt;(.*)&lt;/datapath&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_datdirname_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<resource kpiid="A1NSFCount" coltype="CLI" value="" valuetype="Integer" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_common" select="&lt;nsfcount&gt;(.*)&lt;/nsfcount&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_nsfcount_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<resource kpiid="A1DataDirCount" coltype="CLI" value="" valuetype="Integer" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_common" select="&lt;datasubdircount&gt;(.*)&lt;/datasubdircount&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_datdircnt_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<resource kpiid="A1TotalMemSize" coltype="CLI" value="" valuetype="Integer" unit="MB">
+				
+				<collects>
+					<collect exeorder="10" comid="get_common" select="&lt;memorysize&gt;(.*)&lt;/memorysize&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_tlmemsize_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<resource kpiid="A1Version" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_common" select="&lt;version&gt;(.*)&lt;/version&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_version_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<resource kpiid="A1operationSystem" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;os&gt;(.*)&lt;/os&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_os_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<resource kpiid="A1AppUptime" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_common" select="&lt;uptime&gt;(.*)&lt;/uptime&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_appuptime_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<resource kpiid="A1ActiveTaskCount" coltype="CLI" value="" valuetype="Integer" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_common" select="&lt;activetaskcount&gt;(.*)&lt;/activetaskcount&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_acttakcnt_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--
+			<resource kpiid="A1ResDisplayName" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_mainResource" select="&lt;name&gt;(.*)&lt;/name&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_disname_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			-->
+			<resource kpiid="A1HttpPort" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_common" select="&lt;httpport&gt;(.*)&lt;/httpport&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_httpport_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--
+			<resource kpiid="A1FreeFileSysSpace" coltype="CLI" value="$d1*1024" valuetype="Integer" unit="GB">
+				
+				<collects>
+					<collect exeorder="10" comid="get_mainResource" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_ffilsyssp_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<resource kpiid="A1ToFileSysSpace" coltype="CLI" value="$d1*1024" valuetype="Integer" unit="GB">
+				
+				<collects>
+					<collect exeorder="10" comid="get_mainResource" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_tlfilsysp_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			-->
+			
+			<!-- 以下是子资源-->
+			<!-- 数据目录ID -->
+			<resource kpiid="A1DataDirID" coltype="CLI" value="" valuetype="Integer" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_dir" select="&lt;data&gt;($key)@\w+@\d+@\d+@\d+@.*&lt;/data&gt;" merge="" deal="" />
+				</collects>
+				
+				<kpipolicy table="res_a1_DatadirId_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			<!-- 数据目录全路径 -->
+			<resource kpiid="A1DirFullName" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_dir" select="&lt;data&gt;$key@\w+@\d+@\d+@\d+@(.*)&lt;/data&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_dirfname_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!-- 目录中文件数 -->
+			<resource kpiid="A1DirFileCount" coltype="CLI" value="" valuetype="Integer" unit="个">
+				
+				<collects>
+					<collect exeorder="10" comid="get_dir" select="&lt;data&gt;$key@\w+@\d+@\d+@(\d+)@.*&lt;/data&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_dirfilcnt_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;1000"
+					alertdesc3="目录中文件数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;2000" alertdesc4="目录中文件数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			<!-- 数据子目录名称 -->
+			<resource kpiid="A1datachilddirname" coltype="ClI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_dir" select="&lt;data&gt;$key@(\w+)@\d+@\d+@\d+@.*&lt;/data&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_datcldirn_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!-- 目录大小 -->
+			<resource kpiid="A1Size" coltype="CLI" value="" valuetype="Integer" unit="KB">
+				
+				<collects>
+					<collect exeorder="10" comid="get_dir" select="&lt;data&gt;$key@\w+@(\d+)@\d+@\d+@.*&lt;/data&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_size_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!-- 目录中子目录数 -->
+			<resource kpiid="A1SubDirectoryCount" coltype="CLI" value="" valuetype="Integer" unit="个">
+				
+				<collects>
+					<collect exeorder="10" comid="get_dir" select="&lt;data&gt;$key@\w+@\d+@(\d+)@\d+@.*&lt;/data&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_subdircnt_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;1000"
+					alertdesc3="目录中子目录数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;2000" alertdesc4="目录中子目录数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			
+			<!-- nsf子资源-->
+			<!-- NSF ID-->
+			<resource kpiid="A1NsfID" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_nsf" select="&lt;nsf&gt;($key)@[\S.]*@[\S ]*@.*@\d+&lt;/nsf&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_nsfid_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!-- 数据库标题 -->
+			<resource kpiid="A1Title" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_nsf" select="&lt;nsf&gt;$key@[\S.]*@([\S ]*)@.*@\d+&lt;/nsf&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_title_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!-- 所在数据目录全路径 -->
+			<resource kpiid="A1NsfDirFullName" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_nsf" select="&lt;nsf&gt;$key@[\S.]*@[\S ]*@(.*)@\d+&lt;/nsf&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_dirflname_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!-- 数据库名称 -->
+			<resource kpiid="A1DataBaseName" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_nsf" select="&lt;nsf&gt;$key@([\S.]*)@[\S ]*@.*@\d+&lt;/nsf&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_dbname_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!-- 数据库文档量 -->
+			<resource kpiid="A1DocumentCount" coltype="CLI" value="" valuetype="Integer" unit="个">
+				
+				<collects>
+					<collect exeorder="10" comid="get_nsf" select="&lt;nsf&gt;$key@[\S.]*@[\S ]*@.*@(\d+)&lt;/nsf&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_doccount_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- Task ID-->
+			<resource kpiid="A1EnabledID" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_task" select="&lt;task&gt;($key)@\w+@\d@\d&lt;/task&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_enableID_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- TASK启用状态 -->
+			
+			<resource kpiid="A1EnabledState" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_task" select="&lt;task&gt;$key@\w+@\d@(\d)&lt;/task&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_enbdstate_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.equals(&quot;不可用&quot;)" alertdesc5="Task不可用"
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				<translations>
+					<translation source="1" dest="启用"/>
+					<translation source="0" dest="禁用"/>
+				</translations>
+			</resource>
+			<resource kpiid="A1TaskName" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_task" select="&lt;task&gt;$key@(\w+)@\d@\d&lt;/task&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_taskname_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<resource kpiid="A1RunStatus" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="get_task" select="&lt;task&gt;$key@\w+@(\d)@\d&lt;/task&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a1_runstatus_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.equals(&quot;不可用&quot;)" alertdesc5="活动不可用"
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				<translations>
+					<translation source="1" dest="可用"/>
+					<translation source="0" dest="不可用"/>
+				</translations>
+			</resource>
+			<!-- 主机说明-->
+			<resource kpiid="A1SystemInfo" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;systeminfo&gt;(.*)&lt;/systeminfo&gt;" merge="" deal="" />
+				</collects>
+				
+				<kpipolicy table="res_a1_sysInfo_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<!--操作系统版本-->
+			<resource kpiid="A1OsVersion" coltype="CLI" value="" valuetype="String" unit="" >
+				
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;osversion&gt;(.*)&lt;/osversion&gt;" merge="" deal="" />
+				</collects>
+				
+				<kpipolicy table="res_a1_osVersion_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			
+		</resources>
+			
+			
+		
+		
+	</devicetypeinfo>
+</root>

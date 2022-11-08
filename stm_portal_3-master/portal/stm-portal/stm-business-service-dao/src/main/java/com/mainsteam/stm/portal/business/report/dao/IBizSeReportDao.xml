@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.portal.business.report.dao.IBizSerReportDao">
+	<select id="getBizSerReportsBySearchKey" parameterType="map"
+		resultType="com.mainsteam.stm.portal.business.report.obj.BizSerReport">
+		SELECT A.ID, A.NAME, B.ID AS USERID,B.NAME AS USERNAME FROM STM_BIZ_MAIN A
+		LEFT JOIN STM_SYS_USER B ON B.ID = A.ENTRY_ID
+		WHERE 1=1 
+		<if test="searchKey!='' and searchKey!=null">
+			AND (A.NAME LIKE CONCAT('%', #{searchKey}, '%') OR  B.NAME LIKE CONCAT('%', #{searchKey}, '%'))
+		</if>
+	</select>
+	
+	<select id="getBizSerReport" resultType="com.mainsteam.stm.portal.business.report.obj.BizSerReport"
+		parameterType="long">
+		SELECT A.ID, A.NAME, B.ID AS USERID,B.NAME AS USERNAME FROM STM_BIZ_MAIN A
+		LEFT JOIN STM_SYS_USER B ON B.ID = A.ENTRY_ID
+		WHERE A.ID = #{id}
+	</select>
+	
+	<select id="getBizSerReportsByIds" resultType="com.mainsteam.stm.portal.business.report.obj.BizSerReport">
+		SELECT A.ID, A.NAME, B.ID AS USERID,B.NAME AS USERNAME FROM STM_BIZ_MAIN A
+		LEFT JOIN STM_SYS_USER B ON B.ID = A.ENTRY_ID
+		WHERE A.ID IN
+		 <foreach item="ids" index="index" collection="array" open="(" separator="," close=")">  
+  			#{ids}
+ 		 </foreach> 
+	</select>
+</mapper>

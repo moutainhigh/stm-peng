@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.profilelib.dao.ProfileChangeHistoryDAO">
+	 
+	 <select id="getHistoryByPO" 
+		resultType="com.mainsteam.stm.profilelib.po.ProfileChangeHistoryPO"
+		parameterType="com.mainsteam.stm.profilelib.po.ProfileChangeHistoryPO">
+		SELECT
+		profile_change_history_id AS profileChangeHistoryId,
+		profile_change_id AS profileChangeId,
+		DCS_GroupId AS dcsGroupId,
+		result_state AS resultState,
+		operate_time AS operateTime
+		FROM
+		STM_PROFILELIB_CHANGE_HISTORY
+		<trim prefix="where" prefixOverrides="and">
+			<if test="profileChangeId > 0"> and profile_change_id =#{profileChangeId}</if>
+			<if test="dcsGroupId != null"> and DCS_GroupId = #{dcsGroupId}</if>
+			<if test="resultState != null"> and result_state= #{resultState}</if>
+		</trim>
+	</select>
+	
+	 <select id="getAllHistory" 
+		resultType="com.mainsteam.stm.profilelib.po.ProfileChangeHistoryPO" >
+		SELECT
+		profile_change_history_id AS profileChangeHistoryId,
+		profile_change_id AS profileChangeId,
+		DCS_GroupId AS dcsGroupId,
+		result_state AS resultState,
+		operate_time AS operateTime
+		FROM
+		STM_PROFILELIB_CHANGE_HISTORY where result_state = '0'
+	</select>
+	
+	<select id="getHistoryByProfileChangeIds" 
+		resultType="com.mainsteam.stm.profilelib.po.ProfileChangeHistoryPO"
+		parameterType="java.util.List">
+		SELECT
+		profile_change_history_id AS profileChangeHistoryId,
+		profile_change_id AS profileChangeId,
+		DCS_GroupId AS dcsGroupId,
+		result_state AS resultState,
+		operate_time AS operateTime
+		FROM
+		STM_PROFILELIB_CHANGE_HISTORY
+		where profile_change_id in
+		<foreach  item="item" index="index" collection="list" open="(" separator="," close=")">
+			 #{item} <if test="index%900>898">) OR profile_change_id IN('-1'</if>
+		</foreach>
+	</select>
+	 <insert id="insertProfileChangeHistory" 
+		parameterType="com.mainsteam.stm.profilelib.po.ProfileChangeHistoryPO">
+		insert into stm_profilelib_change_history
+		(profile_change_history_id,profile_change_id, DCS_GroupId, result_state, operate_time) 
+		values (#{profileChangeHistoryId}, #{profileChangeId}, #{dcsGroupId}, #{resultState}, #{operateTime} ) </insert>
+	
+	 <update id="updateProfileChangeHistory" 
+		parameterType="com.mainsteam.stm.profilelib.po.ProfileChangeHistoryPO">
+		update  STM_PROFILELIB_CHANGE_HISTORY
+		set operate_time =#{operateTime}, result_state = #{resultState}
+		<trim prefix="where" prefixOverrides="and">
+			<if test="profileChangeHistoryId > 0"> and profile_change_history_id =#{profileChangeHistoryId}</if>
+			<if test="profileChangeId > 0"> and profile_change_id = #{profileChangeId}</if>
+			<if test="dcsGroupId > 0"> and DCS_GroupId= #{dcsGroupId}</if>
+		</trim>
+	    </update>
+</mapper>

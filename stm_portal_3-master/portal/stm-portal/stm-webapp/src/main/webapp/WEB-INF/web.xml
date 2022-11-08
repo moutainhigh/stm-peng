@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         version="3.0">
+
+    <display-name>STM</display-name>
+    <description>STM</description>
+
+    <context-param>
+        <param-name>webAppRootKey</param-name>
+        <param-value>webName.root</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>
+            classpath*:META-INF/services/public-*-beans.xml,
+            classpath*:META-INF/services/portal-*-beans.xml
+        </param-value>
+    </context-param>
+
+    <!-- 系统启动监听器 begin-->
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+    <listener>
+        <listener-class>org.springframework.web.util.IntrospectorCleanupListener</listener-class>
+    </listener>
+    <!-- 系统启动监听器 end-->
+    <listener>
+        <listener-class>com.mainsteam.stm.system.um.login.web.listener.SessionListener</listener-class>
+    </listener>
+
+
+    <!-- 解密用户名密码 -->
+    <filter>
+        <filter-name>loginUPFilter</filter-name>
+        <filter-class>com.mainsteam.stm.system.um.login.web.filter.LoginUPFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>loginUPFilter</filter-name>
+        <url-pattern>/system/login/login.htm</url-pattern>
+        <url-pattern>/system/login/updatePasswordByUserName.htm</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>loginFilter</filter-name>
+        <filter-class>com.mainsteam.stm.system.um.login.web.filter.LoginFilter</filter-class>
+        <init-param>
+            <param-name>loginPath</param-name>
+            <param-value>/resource/login.html</param-value>
+        </init-param>
+        <init-param>
+            <param-name>login.ignore</param-name>
+            <!-- BUG #41343 第一次访问独立页面会跳转至登录首页 huangping 2017/7/5 start-->
+            <!--<param-value>system/login/getKaptchaImage.htm;system/login/updatePasswordByUserName.htm;alarm/specialAlarm/getParentResourceCriticalAlarm.htm;system/image/getLoginLogo.htm;system/image/getLoginLofiInputStream.htm;system/login/login.htm;system/login/loginOut.htm;resource/login.html;system/license/checkLicense.htm;resource/login-active.html;system/license/getDatFile.htm;system/license/importLicense.htm;system/skin/get.htm;system/simplemode/get.htm;system/IBSLogin/fromIBSLogin.htm;resource/module.html;resource/resource-detail.html</param-value>-->
+            <param-value>
+                system/login/getKaptchaImage.htm;system/login/updatePasswordByUserName.htm;alarm/specialAlarm/getParentResourceCriticalAlarm.htm;system/image/getLoginLogo.htm;system/image/getLoginLofiInputStream.htm;system/login/login.htm;system/login/loginOut.htm;resource/login.html;system/license/checkLicense.htm;resource/login-active.html;system/license/getDatFile.htm;system/license/importLicense.htm;system/skin/get.htm;system/simplemode/get.htm;system/IBSLogin/fromIBSLogin.htm;resource/module.html;resource/getCategoryMapper.htm;resource/resource-detail.html
+            </param-value>
+            <!-- BUG #41343 第一次访问独立页面会跳转至登录首页 huangping 2017/7/5 end-->
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>loginFilter</filter-name>
+        <url-pattern>*.html</url-pattern>
+        <url-pattern>*.htm</url-pattern>
+        <url-pattern>/</url-pattern>
+    </filter-mapping>
+    <!-- 字符编码过滤器 -->
+    <filter>
+        <filter-name>encodingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+        <async-supported>true</async-supported>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+        <init-param>
+            <param-name>forceEncoding</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>encodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <!-- 解压缩GZIP的js文件 -->
+    <filter>
+        <filter-name>GzipJsFilter</filter-name>
+        <filter-class>com.mainsteam.stm.home.filter.GzipJsFilter</filter-class>
+        <init-param>
+            <param-name>headers</param-name>
+            <param-value>Content-Encoding=gzip</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>GzipJsFilter</filter-name>
+        <url-pattern>*.gzjs</url-pattern>
+    </filter-mapping>
+
+    <!-- 静态资源路径
+    <filter>
+        <filter-name>urlRewriteFilter</filter-name>
+        <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+        <init-param>
+            <param-name>confPath</param-name>
+            <param-value>/WEB-INF/classes/conf/urlRewriteConfig.xml</param-value>
+        </init-param>
+        <init-param>
+            <param-name>logLevel</param-name>
+            <param-value>error</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>urlRewriteFilter</filter-name>
+        <url-pattern>*.html</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+    </filter-mapping> -->
+
+    <!-- 权限控制
+    <filter>
+    </filter>
+    <filter-mapping>
+        <filter-name>authentication</filter-name>
+        <url-pattern>/</url-pattern>
+    </filter-mapping>-->
+
+    <!-- spring mvc -->
+    <servlet>
+        <servlet-name>stmServlet</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath:META-INF/services/oc-servlet.xml</param-value>
+        </init-param>
+        <init-param>
+            <param-name>publishEvents</param-name>
+            <param-value>false</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>stmServlet</servlet-name>
+        <url-pattern>*.htm</url-pattern>
+    </servlet-mapping>
+
+    <!-- Web Services Config Start-->
+    <servlet>
+        <servlet-name>CXFServices</servlet-name>
+        <servlet-class>org.apache.cxf.transport.servlet.CXFServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>CXFServices</servlet-name>
+        <url-pattern>/soap/*</url-pattern>
+    </servlet-mapping>
+    <!-- Web Services Config End-->
+
+
+    <!-- SSO server config Start-->
+    <servlet>
+        <servlet-name>ssoServer</servlet-name>
+        <servlet-class>com.mainsteam.stm.sso.server.servlet.SSOAuthServer</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ssoServer</servlet-name>
+        <url-pattern>/sso/*</url-pattern>
+    </servlet-mapping>
+    <!-- SSO server config End-->
+
+    <session-config>
+        <!-- 单位分钟 -->
+        <session-timeout>30</session-timeout>
+    </session-config>
+
+    <!-- 缺省首页 -->
+    <welcome-file-list>
+        <welcome-file>/resource/index.html</welcome-file>
+    </welcome-file-list>
+
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Security-Constraint</web-resource-name>
+            <url-pattern>/*</url-pattern>
+            <http-method>PUT</http-method>
+            <http-method>DELETE</http-method>
+            <http-method>HEAD</http-method>
+            <http-method>OPTIONS</http-method>
+            <http-method>TRACE</http-method>
+        </web-resource-collection>
+        <auth-constraint>
+        </auth-constraint>
+    </security-constraint>
+    <login-config>
+        <auth-method>BASIC</auth-method>
+    </login-config>
+
+</web-app>

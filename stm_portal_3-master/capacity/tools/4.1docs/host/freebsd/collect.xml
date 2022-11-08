@@ -1,0 +1,2435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">
+    <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0">
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="hostType" parameterProperty="DefaultValue" propertyValue="FreeBSD"/>
+    </GlobalMetricSetting>
+    <PluginClassAliasList>
+        <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+        <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+        <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+        <PluginClassAlias id="columnPasteProcessor" class="com.mainsteam.stm.plugin.common.ColumnPasteProcessor"/>
+        <PluginClassAlias id="RegularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+        <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+        <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+        <PluginClassAlias id="tableConverter" class="com.mainsteam.stm.plugin.common.TableResultSetConverter"/>
+        <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+        <PluginClassAlias id="ChangeRateProcessor" class="com.mainsteam.stm.plugin.common.ChangeRateProcessor"/>
+        <PluginClassAlias id="processConverter" class="com.mainsteam.stm.plugin.common.ProcessResultSetConverter"/>
+        <PluginClassAlias id="uptimeProcessor" class="com.mainsteam.stm.plugin.common.UptimeProcessor"/>
+        <PluginClassAlias id="FormatProcessor" class="com.mainsteam.stm.plugin.common.FormatProcessor"/>
+        <PluginClassAlias id="rowFilterProcessor" class="com.mainsteam.stm.plugin.common.RowFilterProcessor"/>
+        <PluginClassAlias id="columnAddProcessor" class="com.mainsteam.stm.plugin.common.ColumnAddProcessor"/>
+        <PluginClassAlias id="HostTimeProcessor" class="com.mainsteam.stm.plugin.common.HostTimeProcessor"/>
+   		<PluginClassAlias id="subInstAvailableProcessor" class="com.mainsteam.stm.plugin.common.SubInstAvailableProcessor"/>
+    </PluginClassAliasList>
+    <MetricPlugin metricid="protocolAvailability" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="name"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;uname"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (count(name)) as availability"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="availability" value="0,16;1"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="protocolAvailability" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="name"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;uname"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (count(name)) as availability"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="availability" value="0,16;1"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="availability" collectType="" pluginid="IcmpPlugin">
+        <PluginResultMetaInfo columns="ip,isAlive,ResponseTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT isAlive"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="icmpDelayTime" collectType="" pluginid="IcmpPlugin">
+        <PluginResultMetaInfo columns="ip,isAlive,ResponseTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ResponseTime"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sysUpTime" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;uptime"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="up\s*([^,]+[,]*[^,]*),\s*\d+\s*user"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="uptimeProcessor"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sysUpTime" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;uptime"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="up\s*([^,]+[,]*[^,]*),\s*\d+\s*user"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="uptimeProcessor"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="systemInfo" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;uname -a"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="systemInfo" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;uname -a"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="macAddress" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ifconfig -a |grep ether"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="ether[\s]*(.+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="rowFilterProcessor">
+                <Parameter value="" key="MacAddress"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="macAddress" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ifconfig -a |grep ether"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="ether[\s]*(.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ip" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ifconfig -a | grep -w 'inet' | grep -v 127.0.0.1"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="inet\s*([\d\.]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ip" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ifconfig -a | grep -w 'inet' | grep -v 127.0.0.1"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="inet\s*([\d\.]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="osVersion" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;uname -r"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="osVersion" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;uname -r"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="numOfProcess" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -Ao 'state' | sed -n '2,$p'|wc -l"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="numOfProcess" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -Ao 'state' | sed -n '2,$p'|wc -l"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="numOfZombieProcess" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -Ao 'state' | grep 'Z' | wc -l"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="numOfZombieProcess" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -Ao 'state' | grep 'Z' | wc -l"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="numOfCurrentUser" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;who |wc -l"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="numOfCurrentUser" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;who |wc -l"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalFSSpace" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="totalFSSpace"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;df -m"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\d+)\s+\d+\s+\d+\s+\d+%"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(totalFSSpace)/1024) as totalFSSpace"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalFSSpace" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="totalFSSpace"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;df -m"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\d+)\s+\d+\s+\d+\s+\d+%"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(totalFSSpace)/1024) as totalFSSpace"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="usedSwapSpace" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="totalSwapSpaceSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;swapinfo -k"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d+\s+(\d+)\s+\d+\s+\d+%"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (totalSwapSpaceSize/1024) as usedSwapSpace"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="usedSwapSpace" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="totalSwapSpaceSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;swapinfo -k"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d+\s+(\d+)\s+\d+\s+\d+%"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (totalSwapSpaceSize/1024) as usedSwapSpace"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuNum" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;sysctl hw.ncpu"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="hw.ncpu:\s*(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuNum" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;sysctl hw.ncpu"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="hw.ncpu:\s*(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalMemSize" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="totalMemSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;sysctl hw.physmem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="hw.physmem:\s*(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (totalMemSize/1024/1024/1024) as totalMemSize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalMemSize" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="totalMemSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;sysctl hw.physmem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="hw.physmem:\s*(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (totalMemSize/1024/1024/1024) as totalMemSize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="numOfHardDisk" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;sysctl -n kern.disks | awk '{ i=1;while(i&lt;=NF) {print $i;i++}}'  |grep da | wc -l"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(.+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="numOfHardDisk" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;sysctl -n kern.disks | awk '{ i=1;while(i&lt;=NF) {print $i;i++}}'  |grep da | wc -l"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(.+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalHardDiskSpace" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="totalHardDiskSpace"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;diskinfo -v `sysctl -n kern.disks` | grep bytes"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\d+)\s*# mediasize in bytes"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (totalHardDiskSpace/1024/1024/1024) as totalHardDiskSpace"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalHardDiskSpace" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="totalHardDiskSpace"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;diskinfo -v `sysctl -n kern.disks` | grep bytes"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\d+)\s*# mediasize in bytes"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (totalHardDiskSpace/1024/1024/1024) as totalHardDiskSpace"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifNum" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="ifInfo"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;netstat -ib |grep -v lo |grep Link"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(.+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (count(ifInfo)) as ifNum"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifNum" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="ifInfo"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;netstat -ib |grep -v lo |grep Link"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(.+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (count(ifInfo)) as ifNum"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="Name" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;hostname"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="Name" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;hostname"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="numOfFileSystem" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="numberOfFileSystem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;df -k | wc -l"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(.+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (numberOfFileSystem-1) as numOfFileSystem"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="numOfFileSystem" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="numberOfFileSystem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;df -k | wc -l"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(.+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (numberOfFileSystem-1) as numOfFileSystem"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalSwSpSize" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="totalSwapSpaceSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;swapinfo -k"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\d+)\s+\d+\s+\d+\s+\d+%"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (totalSwapSpaceSize/1024/1024) as totalSwSpSize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalSwSpSize" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="totalSwapSpaceSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;swapinfo -k"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\d+)\s+\d+\s+\d+\s+\d+%"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (totalSwapSpaceSize/1024/1024) as totalSwSpSize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;vmstat -h 1 3 | sed -n '3,$p'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\d+)\s*[\r\n]"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (100-avg(cpuRate)) as cpuRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;vmstat -h 1 3 | sed -n '3,$p'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\d+)\s*[\r\n]"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (100-avg(cpuRate)) as cpuRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuLoad15m" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;uptime"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="load averages:\s*[\d\.]+,\s*[\d\.]+,\s*([\d\.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuLoad15m" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;uptime"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="load averages:\s*[\d\.]+,\s*[\d\.]+,\s*([\d\.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuLoad5m" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;uptime"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="load averages:\s*[\d\.]+,\s*([\d\.]+),\s*[\d\.]+"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuLoad5m" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;uptime"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="load averages:\s*[\d\.]+,\s*([\d\.]+),\s*[\d\.]+"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuLoad1m" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;uptime"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="load averages:\s*([\d\.]+),\s*[\d\.]+,\s*[\d\.]+"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuLoad1m" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;uptime"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="load averages:\s*([\d\.]+),\s*[\d\.]+,\s*[\d\.]+"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuUserModeTimePer" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;vmstat -h 1 3 | sed -n '3,$p'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*(\d+)\s*\d+\s*\d+\s*"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (avg(cpuRate)) as cpuUserModeTimePer"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuUserModeTimePer" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;vmstat -h 1 3 | sed -n '3,$p'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*(\d+)\s*\d+\s*\d+\s*"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (avg(cpuRate)) as cpuUserModeTimePer"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuIdleTimePer" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;vmstat -h 1 3 | sed -n '3,$p'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*(\d+)\s*"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (avg(cpuRate)) as cpuIdleTimePer"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuIdleTimePer" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;vmstat -h 1 3 | sed -n '3,$p'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*(\d+)\s*"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (avg(cpuRate)) as cpuIdleTimePer"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuSysModeTimePer" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;vmstat -h 1 3 | sed -n '3,$p'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*(\d+)\s*\d+\s*"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (avg(cpuRate)) as cpuSysModeTimePer"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuSysModeTimePer" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;vmstat -h 1 3 | sed -n '3,$p'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*(\d+)\s*\d+\s*"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (avg(cpuRate)) as cpuSysModeTimePer"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuWaitTimePer" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;iostat | sed -n '3,$p'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d+\s*\d+\s*\d+\.\d+\s*\d+\s*\d+\.\d+\s*\d+\.\d+\s*\d+\s*\d+\.\d+\s*\d+\.\d+\s*\d+\s*\d+\.\d+\s*\d+\s*\d+\s*\d+\s*(\d+)\s*\d+"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuWaitTimePer" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;iostat | sed -n '3,$p'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d+\s*\d+\s*\d+\.\d+\s*\d+\s*\d+\.\d+\s*\d+\.\d+\s*\d+\s*\d+\.\d+\s*\d+\.\d+\s*\d+\s*\d+\.\d+\s*\d+\s*\d+\s*\d+\s*(\d+)\s*\d+"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memPageInRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;vmstat -h 1 3 | sed -n '3,$p'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d+\s*\d+\s*(\d+)\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (avg(cpuRate)) as memPageInRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memPageInRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;vmstat -h 1 3 | sed -n '3,$p'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d+\s*\d+\s*(\d+)\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (avg(cpuRate)) as memPageInRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memPageOutRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;vmstat -h 1 3 | sed -n '3,$p'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d+\s*\d+\s*\d+\s*(\d+)\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (avg(cpuRate)) as memPageOutRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memPageOutRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;vmstat -h 1 3 | sed -n '3,$p'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d+\s*\d+\s*\d+\s*(\d+)\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (avg(cpuRate)) as memPageOutRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memPoolUsed" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="totalMemSize,cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;sysctl hw.physmem"/>
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;vmstat -h 1 3 | sed -n '3,$p'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="hw.physmem:\s*(\d+)"/>
+                <Parameter type="" key="REGULAR" value="\d+M\s*(\d+)M"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (totalMemSize/1024/1024/1024-avg(cpuRate)/1024) as memPoolUsed"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memPoolUsed" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="totalMemSize,cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;sysctl hw.physmem"/>
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;vmstat -h 1 3 | sed -n '3,$p'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="hw.physmem:\s*(\d+)"/>
+                <Parameter type="" key="REGULAR" value="\d+M\s*(\d+)M"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (totalMemSize/1024/1024/1024-avg(cpuRate)/1024) as memPoolUsed"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="totalMemSize,cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;sysctl hw.physmem"/>
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;vmstat -h 1 3 | sed -n '3,$p'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="hw.physmem:\s*(\d+)"/>
+                <Parameter type="" key="REGULAR" value="\d+M\s*(\d+)M"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (((totalMemSize-avg(cpuRate)*1024*1024)/totalMemSize)*100) as memRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="totalMemSize,cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;sysctl hw.physmem"/>
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;vmstat -h 1 3 | sed -n '3,$p'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="hw.physmem:\s*(\d+)"/>
+                <Parameter type="" key="REGULAR" value="\d+M\s*(\d+)M"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (((totalMemSize-avg(cpuRate)*1024*1024)/totalMemSize)*100) as memRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memPoolFree" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;vmstat -h 1 3 | sed -n '3,$p'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d+M\s*(\d+)M"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (avg(cpuRate)/1024) as memPoolFree"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memPoolFree" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;vmstat -h 1 3 | sed -n '3,$p'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d+M\s*(\d+)M"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (avg(cpuRate)/1024) as memPoolFree"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="freeFSSpace" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="totalFSSpace"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;df -m"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d+\s*\d+\s*(\d+)\s*[\d\.]+%"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(totalFSSpace)/1024) as freeFSSpace"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="freeFSSpace" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="totalFSSpace"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;df -m"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d+\s*\d+\s*(\d+)\s*[\d\.]+%"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(totalFSSpace)/1024) as freeFSSpace"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="swapSpaceRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="column1,column2"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;vmstat -h 1 3 | sed -n '3,$p'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d+\s*\d+\s*(\d+)\s*(\d+)\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (avg(column1)+avg(column2)) as swapSpaceRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="swapSpaceRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="column1,column2"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;vmstat -h 1 3 | sed -n '3,$p'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d+\s*\d+\s*(\d+)\s*(\d+)\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (avg(column1)+avg(column2)) as swapSpaceRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="swapSpaceRatio" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;swapinfo -k"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d\.]+)%"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="swapSpaceRatio" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;swapinfo -k"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d\.]+)%"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifName" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="ifName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;netstat -ib |grep -v lo |grep Link"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\S+)\s*\d+\s*&lt;Link"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="ifName"/>
+            <Parameter type="" key="ValueColumnTitle" value="ifName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifName" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="ifName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;netstat -ib |grep -v lo |grep Link"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\S+)\s*\d+\s*&lt;Link"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="ifName"/>
+            <Parameter type="" key="ValueColumnTitle" value="ifName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifMAC" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="ifInfo"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;netstat -ib |grep -v lo |grep Link"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="${ifName}\s+.+?\s+([\w\:]+)"/>
+                <Parameter type="ResourceProperty" key="ifName" value="ifName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifMAC" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="ifInfo"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;netstat -ib |grep -v lo |grep Link"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="${ifName}\s+.+?\s+([\w\:]+)"/>
+                <Parameter type="ResourceProperty" key="ifName" value="ifName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifIPAddress" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="ifIpAddress"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ifconfig -a"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="${ifName}:[\S\s]+?inet\s+([^\s]+)\s+"/>
+                <Parameter type="ResourceProperty" key="ifName" value="ifName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifIPAddress" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="ifIpAddress"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ifconfig -a"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="${ifName}:[\S\s]+?inet\s+([^\s]+)\s+"/>
+                <Parameter type="ResourceProperty" key="ifName" value="ifName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifNetmask" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="ifIpAddress"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ifconfig -a"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="${ifName}:[\S\s]+?netmask\s+(\S+)"/>
+                <Parameter type="ResourceProperty" key="ifName" value="ifName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="IP" key="ifIpAddress"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifNetmask" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="ifIpAddress"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ifconfig -a"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="${ifName}:[\S\s]+?netmask\s+(\S+)"/>
+                <Parameter type="ResourceProperty" key="ifName" value="ifName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="IP" key="ifIpAddress"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifBroadcast" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="ifIpAddress"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ifconfig -a"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="${ifName}:[\S\s]+?broadcast\s+(\S+)"/>
+                <Parameter type="ResourceProperty" key="ifName" value="ifName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifBroadcast" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="ifIpAddress"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ifconfig -a"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="${ifName}:[\S\s]+?broadcast\s+(\S+)"/>
+                <Parameter type="ResourceProperty" key="ifName" value="ifName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifInDiscards" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="ifInfo"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;netstat -ib |grep -v lo |grep Link"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="${ifName}.+?[\w:]+\s*\d+\s*\d+\s*(\d+)\s*\d+\s*\d+\s*\d+\s*\d+\s*[\d\.]+\s*"/>
+                <Parameter type="ResourceProperty" key="ifName" value="ifName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifInDiscards" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="ifInfo"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;netstat -ib |grep -v lo |grep Link"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="${ifName}.+?[\w:]+\s*\d+\s*\d+\s*(\d+)\s*\d+\s*\d+\s*\d+\s*\d+\s*[\d\.]+\s*"/>
+                <Parameter type="ResourceProperty" key="ifName" value="ifName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifInOctetsSpeed" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="ifInOctetsSpeed"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;netstat -ib |grep -v lo |grep Link"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="${ifName}.+?[\w:]+\s*\d+\s*\d+\s*\d+\s*(\d+)\s*\d+\s*\d+\s*\d+\s*[\d\.]+\s*"/>
+                <Parameter type="ResourceProperty" key="ifName" value="ifName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/>
+                <Parameter type="" key="MOD" value="2^32,2^64">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (ifInOctetsSpeed*8) as ifInOctetsSpeed"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifInOctetsSpeed" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="ifInOctetsSpeed"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;netstat -ib |grep -v lo |grep Link"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="${ifName}.+?[\w:]+\s*\d+\s*\d+\s*\d+\s*(\d+)\s*\d+\s*\d+\s*\d+\s*[\d\.]+\s*"/>
+                <Parameter type="ResourceProperty" key="ifName" value="ifName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/>
+                <Parameter type="" key="MOD" value="2^32,2^64">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (ifInOctetsSpeed*8) as ifInOctetsSpeed"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifOutOctetsSpeed" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="ifOutOctetsSpeed"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;netstat -ib |grep -v lo |grep Link"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="${ifName}.+?[\w:]+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*(\d+)\s*[\d\.]+\s*"/>
+                <Parameter type="ResourceProperty" key="ifName" value="ifName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/>
+                <Parameter type="" key="MOD" value="2^32,2^64">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (ifOutOctetsSpeed*8) as ifOutOctetsSpeed"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifOutOctetsSpeed" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="ifOutOctetsSpeed"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;netstat -ib |grep -v lo |grep Link"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="${ifName}.+?[\w:]+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*(\d+)\s*[\d\.]+\s*"/>
+                <Parameter type="ResourceProperty" key="ifName" value="ifName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/>
+                <Parameter type="" key="MOD" value="2^32,2^64">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (ifOutOctetsSpeed*8) as ifOutOctetsSpeed"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifInErrors" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="ifInfo"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;netstat -ib |grep -v lo |grep Link"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="${ifName}.+?[\w:]+\s*\d+\s*(\d+)\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*[\d\.]+\s*"/>
+                <Parameter type="ResourceProperty" key="ifName" value="ifName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifInErrors" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="ifInfo"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;netstat -ib |grep -v lo |grep Link"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="${ifName}.+?[\w:]+\s*\d+\s*(\d+)\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*[\d\.]+\s*"/>
+                <Parameter type="ResourceProperty" key="ifName" value="ifName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifOutErrors" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="ifInfo"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;netstat -ib |grep -v lo |grep Link"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="${ifName}.+?[\w:]+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*(\d+)\s*\d+\s*[\d\.]+\s*"/>
+                <Parameter type="ResourceProperty" key="ifName" value="ifName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifOutErrors" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="ifInfo"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;netstat -ib |grep -v lo |grep Link"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="${ifName}.+?[\w:]+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*(\d+)\s*\d+\s*[\d\.]+\s*"/>
+                <Parameter type="ResourceProperty" key="ifName" value="ifName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifCollideRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="ifInfo"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;netstat -ib |grep -v lo |grep Link"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="${ifName}.+?[\w:]+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*([\d\.]+)\s*"/>
+                <Parameter type="ResourceProperty" key="ifName" value="ifName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifCollideRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="ifInfo"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;netstat -ib |grep -v lo |grep Link"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="${ifName}.+?[\w:]+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*([\d\.]+)\s*"/>
+                <Parameter type="ResourceProperty" key="ifName" value="ifName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileSysName" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="fileSysName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;df -m"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d+%\s*(\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="fileSysName"/>
+            <Parameter type="" key="ValueColumnTitle" value="fileSysName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileSysName" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="fileSysName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;df -m"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d+%\s*(\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="fileSysName"/>
+            <Parameter type="" key="ValueColumnTitle" value="fileSysName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileSysTotalSize" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="fileSysTotalSize,fileSysName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;df -m"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="ResourceProperty" key="childid" value="fileSysName"/>
+                <Parameter type="" key="REGULAR" value="(\d+)\s*\d+\s*\d+\s*\d+%\s*(${childid})"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT fileSysTotalSize,fileSysName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="fileSysName"/>
+            <Parameter type="" key="ValueColumnTitle" value="fileSysTotalSize"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileSysTotalSize" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="fileSysTotalSize,fileSysName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;df -m"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="ResourceProperty" key="childid" value="fileSysName"/>
+                <Parameter type="" key="REGULAR" value="(\d+)\s*\d+\s*\d+\s*\d+%\s*(${childid})"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT fileSysTotalSize,fileSysName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="fileSysName"/>
+            <Parameter type="" key="ValueColumnTitle" value="fileSysTotalSize"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileSysFreeSize" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="fileSysFreeSize,fileSysName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;df -m"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="ResourceProperty" key="childid" value="fileSysName"/>
+                <Parameter type="" key="REGULAR" value=".+?\s*\d+\s*\d+\s*(\d+)\s*\d+%\s*(${childid})"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT fileSysFreeSize,fileSysName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="fileSysName"/>
+            <Parameter type="" key="ValueColumnTitle" value="fileSysFreeSize"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileSysFreeSize" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="fileSysFreeSize,fileSysName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;df -m"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="ResourceProperty" key="childid" value="fileSysName"/>
+                <Parameter type="" key="REGULAR" value=".+?\s*\d+\s*\d+\s*(\d+)\s*\d+%\s*(${childid})"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT fileSysFreeSize,fileSysName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="fileSysName"/>
+            <Parameter type="" key="ValueColumnTitle" value="fileSysFreeSize"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileSysUsedSize" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="fileSysUsedSize,fileSysName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;df -m"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="ResourceProperty" key="childid" value="fileSysName"/>
+                <Parameter type="" key="REGULAR" value="\d+\s*(\d+)\s*\d+\s*\d+%\s*(${childid})"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT fileSysUsedSize,fileSysName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="fileSysName"/>
+            <Parameter type="" key="ValueColumnTitle" value="fileSysUsedSize"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileSysUsedSize" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="fileSysUsedSize,fileSysName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;df -m"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="ResourceProperty" key="childid" value="fileSysName"/>
+                <Parameter type="" key="REGULAR" value="\d+\s*(\d+)\s*\d+\s*\d+%\s*(${childid})"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT fileSysUsedSize,fileSysName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="fileSysName"/>
+            <Parameter type="" key="ValueColumnTitle" value="fileSysUsedSize"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileSysRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="fileSysInfo,fileSysName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;df -m"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="ResourceProperty" key="childid" value="fileSysName"/>
+                <Parameter type="" key="REGULAR" value=".+?\s*\d+\s*\d+\s*\d+\s*(\d+)%\s*(${childid})"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="fileSysInfo" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="fileSysName"/>
+            <Parameter type="" key="ValueColumnTitle" value="fileSysInfo"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileSysRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="fileSysInfo,fileSysName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;df -m"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="ResourceProperty" key="childid" value="fileSysName"/>
+                <Parameter type="" key="REGULAR" value=".+?\s*\d+\s*\d+\s*\d+\s*(\d+)%\s*(${childid})"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="fileSysInfo" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="fileSysName"/>
+            <Parameter type="" key="ValueColumnTitle" value="fileSysInfo"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileSysAvailability" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="fileSysTotalSize,fileSysName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;df -m"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="ResourceProperty" key="childid" value="fileSysName"/>
+                <Parameter type="" key="REGULAR" value="(\d+)\s*\d+\s*\d+\s*\d+%\s*(${childid})"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT fileSysTotalSize,fileSysName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="fileSysTotalSize" value="anyValue,1;1"/>
+            </PluginDataHandler>
+             <PluginDataHandler classKey="subInstAvailableProcessor">
+                <Parameter key="IndexColumn" value="fileSysName"/>
+                <Parameter key="ValueColumn" value="fileSysTotalSize"/>
+                <Parameter type="ResourceProperty" key="IndexKey" value="fileSysName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="fileSysName"/>
+            <Parameter type="" key="ValueColumnTitle" value="fileSysTotalSize"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileSysAvailability" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="fileSysTotalSize,fileSysName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;df -m"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="ResourceProperty" key="childid" value="fileSysName"/>
+                <Parameter type="" key="REGULAR" value="(\d+)\s*\d+\s*\d+\s*\d+%\s*(${childid})"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT fileSysTotalSize,fileSysName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="fileSysTotalSize" value="anyValue,1;1"/>
+            </PluginDataHandler>
+             <PluginDataHandler classKey="subInstAvailableProcessor">
+                <Parameter key="IndexColumn" value="fileSysName"/>
+                <Parameter key="ValueColumn" value="fileSysTotalSize"/>
+                <Parameter type="ResourceProperty" key="IndexKey" value="fileSysName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="fileSysName"/>
+            <Parameter type="" key="ValueColumnTitle" value="fileSysTotalSize"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="hardDiskName" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="hardDiskName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;sysctl -n kern.disks | awk '{ i=1;while(i&lt;=NF) {print $i;i++}}'  |grep da"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="hardDiskName"/>
+            <Parameter type="" key="ValueColumnTitle" value="hardDiskName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="hardDiskName" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="hardDiskName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;sysctl -n kern.disks | awk '{ i=1;while(i&lt;=NF) {print $i;i++}}'  |grep da"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="hardDiskName"/>
+            <Parameter type="" key="ValueColumnTitle" value="hardDiskName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="hardDiskTotalSize" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="hardDiskTotalSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;diskinfo ${childid}"/>
+            <Parameter type="ResourceProperty" key="childid" value="hardDiskName"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\w+\s*\d+\s*(\d+)\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (hardDiskTotalSize/1024/1024/1024) as hardDiskTotalSize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="hardDiskTotalSize" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="hardDiskTotalSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;diskinfo ${childid}"/>
+            <Parameter type="ResourceProperty" key="childid" value="hardDiskName"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\w+\s*\d+\s*(\d+)\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (hardDiskTotalSize/1024/1024/1024) as hardDiskTotalSize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="hardDiskAvailability" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="hardDiskTotalSize,TSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;diskinfo ${childid}"/>
+            <Parameter type="ResourceProperty" key="childid" value="hardDiskName"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\w+\s*\d+\s*(\d+)\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*(\d+)\s*"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="TSize" value="anyValue,1;1"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="subInstAvailableProcessor">
+                <Parameter key="IndexColumn" value="hardDiskTotalSize"/>
+                <Parameter key="ValueColumn" value="TSize"/>
+                <Parameter type="ResourceProperty" key="IndexKey" value="hardDiskTotalSize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="hardDiskTotalSize"/>
+            <Parameter type="" key="ValueColumnTitle" value="TSize"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="hardDiskTotalSize"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="hardDiskAvailability" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="hardDiskTotalSize,TSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;diskinfo ${childid}"/>
+            <Parameter type="ResourceProperty" key="childid" value="hardDiskName"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\w+\s*\d+\s*(\d+)\s*\d+\s*\d+\s*\d+\s*\d+\s*\d+\s*(\d+)\s*"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="TSize" value="anyValue,1;1"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="subInstAvailableProcessor">
+                <Parameter key="IndexColumn" value="hardDiskTotalSize"/>
+                <Parameter key="ValueColumn" value="TSize"/>
+                <Parameter type="ResourceProperty" key="IndexKey" value="hardDiskTotalSize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="hardDiskTotalSize"/>
+            <Parameter type="" key="ValueColumnTitle" value="TSize"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="hardDiskTotalSize"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="processId" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="pid,command"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -aux | sed -n '2,$p' | awk '{print $2,$11}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\w+)\s(\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="pid"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="processId" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="pid,command"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -aux | sed -n '2,$p' | awk '{print $2,$11}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\w+)\s(\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="pid"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="processCommand" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="pid,command"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -aux | sed -n '2,$p' | awk '{print $2,$11}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\w+)\s(\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="command"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="processCommand" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="pid,command"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -aux | sed -n '2,$p' | awk '{print $2,$11}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\w+)\s(\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="command"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="userName" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="pid,user,command"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -aux | sed -n '2,$p' | awk '{print $2,$1,$11}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\w+)\s(\w+)\s(\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="user"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="userName" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="pid,user,command"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -aux | sed -n '2,$p' | awk '{print $2,$1,$11}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\w+)\s(\w+)\s(\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="user"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="procMulCpuRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="pid,cpuRate,command"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -aux | sed -n '2,$p' | awk '{print $2,$3,$11}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\w+)\s(\d+\.\d+)\s(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="cpuRate"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="procMulCpuRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="pid,cpuRate,command"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -aux | sed -n '2,$p' | awk '{print $2,$3,$11}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\w+)\s(\d+\.\d+)\s(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="cpuRate"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="procMulMemRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="pid,memRate,command"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -aux | sed -n '2,$p' | awk '{print $2,$4,$11}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\w+)\s(\d+\.\d+)\s(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="memRate"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="procMulMemRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="pid,memRate,command"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -aux | sed -n '2,$p' | awk '{print $2,$4,$11}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\w+)\s(\d+\.\d+)\s(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="memRate"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="processAvail" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="pid,avail,command"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -aux | sed -n '2,$p' | awk '{print $2,$8,$11}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\w+)\s(\S+)\s(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT pid,(avail != null?'1':'0') as avail,command"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="avail"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="processAvail" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="pid,avail,command"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -aux | sed -n '2,$p' | awk '{print $2,$8,$11}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\w+)\s(\S+)\s(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT pid,(avail != null?'1':'0') as avail,command"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="avail"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <!--新增物理内存和虚拟内存两个指标-->
+    <MetricPlugin metricid="processPhysicalMem" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="pid,physicalMem,command"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -aux | sed -n '2,$p' | awk '{print $2,$6,$11}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\w+)\s(\S+)\s(\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="physicalMem"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="processPhysicalMem" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="pid,physicalMem,command"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -aux | sed -n '2,$p' | awk '{print $2,$6,$11}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\w+)\s(\S+)\s(\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="physicalMem"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="processVirtualMap" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="pid,physicalMem,command"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -aux | sed -n '2,$p' | awk '{print $2,$5,$11}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\w+)\s(\S+)\s(\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="physicalMem"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="processVirtualMap" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="pid,physicalMem,command"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -aux | sed -n '2,$p' | awk '{print $2,$5,$11}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\w+)\s(\S+)\s(\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="physicalMem"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuId" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="cpuId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;sysctl hw.model"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="hw.model:.+?\s+(\d+)\s+@"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="cpuId"/>
+            <Parameter type="" key="ValueColumnTitle" value="cpuId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuId" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="cpuId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;sysctl hw.model"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="hw.model:.+?\s+(\d+)\s+@"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="cpuId"/>
+            <Parameter type="" key="ValueColumnTitle" value="cpuId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuName" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="cpuId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;sysctl hw.model"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="hw.model:.+?\s+(\d+)\s+@"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ('CPU' + cpuId) as cpuName, cpuId"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="cpuId"/>
+            <Parameter type="" key="ValueColumnTitle" value="cpuName"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="cpuId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuName" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="cpuId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;sysctl hw.model"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="hw.model:.+?\s+(\d+)\s+@"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ('CPU' + cpuId) as cpuName, cpuId"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="cpuId"/>
+            <Parameter type="" key="ValueColumnTitle" value="cpuName"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="cpuId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuModel" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="cpuModel,cpuId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;sysctl hw.model"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="ResourceProperty" key="childid" value="cpuId"/>
+                <Parameter type="" key="REGULAR" value="hw.model:(.+?)\s+(${childid})\s+@"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="cpuId"/>
+            <Parameter type="" key="ValueColumnTitle" value="cpuModel"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="cpuId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuModel" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="cpuModel,cpuId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;sysctl hw.model"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="ResourceProperty" key="childid" value="cpuId"/>
+                <Parameter type="" key="REGULAR" value="hw.model:(.+?)\s+(${childid})\s+@"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="cpuId"/>
+            <Parameter type="" key="ValueColumnTitle" value="cpuModel"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="cpuId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuSpeed" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="cpuId,cpuSpeed"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;sysctl hw.model"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="ResourceProperty" key="childid" value="cpuId"/>
+                <Parameter type="" key="REGULAR" value="hw.model:.+?\s+(${childid})\s+@\s+([\d\.]+)GHz"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="cpuId"/>
+            <Parameter type="" key="ValueColumnTitle" value="cpuSpeed"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="cpuId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuSpeed" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="cpuId,cpuSpeed"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;sysctl hw.model"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="ResourceProperty" key="childid" value="cpuId"/>
+                <Parameter type="" key="REGULAR" value="hw.model:.+?\s+(${childid})\s+@\s+([\d\.]+)GHz"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="cpuId"/>
+            <Parameter type="" key="ValueColumnTitle" value="cpuSpeed"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="cpuId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuAvailability" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="cpuModel,cpuId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;sysctl hw.model"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="ResourceProperty" key="childid" value="cpuId"/>
+                <Parameter type="" key="REGULAR" value="hw.model:(.+?)\s+(${childid})\s+@"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="cpuModel" value="anyValue,1;1"/>
+            </PluginDataHandler>
+             <PluginDataHandler classKey="subInstAvailableProcessor">
+                <Parameter key="IndexColumn" value="cpuId"/>
+                <Parameter key="ValueColumn" value="cpuModel"/>
+                <Parameter type="ResourceProperty" key="IndexKey" value="cpuId"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="cpuId"/>
+            <Parameter type="" key="ValueColumnTitle" value="cpuModel"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="cpuId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuAvailability" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="cpuModel,cpuId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;sysctl hw.model"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="ResourceProperty" key="childid" value="cpuId"/>
+                <Parameter type="" key="REGULAR" value="hw.model:(.+?)\s+(${childid})\s+@"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="cpuModel" value="anyValue,1;1"/>
+            </PluginDataHandler>
+             <PluginDataHandler classKey="subInstAvailableProcessor">
+                <Parameter key="IndexColumn" value="cpuId"/>
+                <Parameter key="ValueColumn" value="cpuModel"/>
+                <Parameter type="ResourceProperty" key="IndexKey" value="cpuId"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="cpuId"/>
+            <Parameter type="" key="ValueColumnTitle" value="cpuModel"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="cpuId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fullProcess" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="userName,processId,procMulCpuRate,procMulMemRate,processVirtualMap,processPhysicalMem,procMulStat,procMulStime,processCommand"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -aux | sed -n '2,$p' | awk '{print $1,$2,$3,$4,$5,$6,$8,$9,$11}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\w+)\s(\d+)\s(\d+\.\d+)\s(\d+\.\d+)\s(\d+)\s(\d+)\s(\S+)\s(\S+)\s(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="tableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="fullProcess" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="userName,processId,procMulCpuRate,procMulMemRate,processVirtualMap,processPhysicalMem,procMulStat,procMulStime,processCommand"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -aux | sed -n '2,$p' | awk '{print $1,$2,$3,$4,$5,$6,$8,$9,$11}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\w+)\s(\d+)\s(\d+\.\d+)\s(\d+\.\d+)\s(\d+)\s(\d+)\s(\S+)\s(\S+)\s(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="tableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="netstat" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="proto,localAddress,foreignAddress,state"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;netstat -anf inet &amp;&amp; netstat -anf inet6 | grep -E 'udp|tcp|icm' | awk '{print $1,$2,$3,$4,$5,$6}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\w+)\s+\d+\s+\d+\s+(\S+)\s+(\S+)\s+(\S*)\n"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="tableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="netstat" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="proto,localAddress,foreignAddress,state"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;netstat -anf inet &amp;&amp; netstat -anf inet6 | grep -E 'udp|tcp|icm' | awk '{print $1,$2,$3,$4,$5,$6}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\w+)\s+\d+\s+\d+\s+(\S+)\s+(\S+)\s+(\S*)\r\n"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="tableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <!-- 文件指标 -->
+    <MetricPlugin metricid="fullFile" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="fileSize,fileModifyTime,fileName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="path" value="path"/>
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ls -AlT '${path}' | grep '^-'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\S{10}\s+\d+\s+\S+\s+\S+\s+(\d+)\s+(\S+\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+\d{4})\s(.+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="HostTimeProcessor">
+                <Parameter type="" key="ColumnName" value="fileModifyTime"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="tableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="fullFile" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="fileSize,fileModifyTime,fileName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="path" value="path"/>
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ls -AlT '${path}' | grep '^-'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\S{10}\s+\d+\s+\S+\s+\S+\s+(\d+)\s+(\S+\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+\d{4})\s(.+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="HostTimeProcessor">
+                <Parameter type="" key="ColumnName" value="fileModifyTime"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="tableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="filePath" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="fileSize,fileModifyTime,filePath"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" key="path" value="filePath"/>
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ls -AlT '${path}' | grep '^-'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\S{10}\s+\d+\s+\S+\s+\S+\s+(\d+)\s+(\S+\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+\d{4})\s(.+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT filePath"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="filePath" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="fileSize,fileModifyTime,filePath"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" key="path" value="filePath"/>
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ls -AlT '${path}' | grep '^-'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\S{10}\s+\d+\s+\S+\s+\S+\s+(\d+)\s+(\S+\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+\d{4})\s(.+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT filePath"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileName" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="fileSize,fileModifyTime,filePath"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" key="path" value="filePath"/>
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ls -AlT '${path}' | grep '^-'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\S{10}\s+\d+\s+\S+\s+\S+\s+(\d+)\s+(\S+\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+\d{4})\s(.+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT filePath"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileName" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="fileSize,fileModifyTime,filePath"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" key="path" value="filePath"/>
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ls -AlT '${path}' | grep '^-'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\S{10}\s+\d+\s+\S+\s+\S+\s+(\d+)\s+(\S+\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+\d{4})\s(.+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT filePath"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileSize" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="fileSize,fileModifyTime,filePath"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" key="path" value="filePath"/>
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ls -AlT '${path}' | grep '^-'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\S{10}\s+\d+\s+\S+\s+\S+\s+(\d+)\s+(\S+\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+\d{4})\s(.+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT fileSize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileSize" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="fileSize,fileModifyTime,filePath"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" key="path" value="filePath"/>
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ls -AlT '${path}' | grep '^-'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\S{10}\s+\d+\s+\S+\s+\S+\s+(\d+)\s+(\S+\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+\d{4})\s(.+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT fileSize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileModifyTime" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="fileSize,fileModifyTime,filePath"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" key="path" value="filePath"/>
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ls -AlT '${path}' | grep '^-'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\S{10}\s+\d+\s+\S+\s+\S+\s+(\d+)\s+(\S+\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+\d{4})\s(.+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="HostTimeProcessor">
+                <Parameter type="" key="ColumnName" value="fileModifyTime"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT fileModifyTime"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileModifyTime" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="fileSize,fileModifyTime,filePath"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" key="path" value="filePath"/>
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ls -AlT '${path}' | grep '^-'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\S{10}\s+\d+\s+\S+\s+\S+\s+(\d+)\s+(\S+\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+\d{4})\s(.+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT fileModifyTime"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileMD5" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" key="path" value="filePath"/>
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;md5sum '${path}' | awk '{print $1}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileMD5" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" key="path" value="filePath"/>
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;md5sum '${path}' | awk '{print $1}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileAvail" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="fileSize,fileModifyTime,filePath"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" key="path" value="filePath"/>
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ls -AlT '${path}' | grep '^-'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\S{10}\s+\d+\s+\S+\s+\S+\s+(\d+)\s+(\S+\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+\d{4})\s(.+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="HostTimeProcessor">
+                <Parameter type="" key="ColumnName" value="fileModifyTime"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT count(filePath) as fileAvail"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileAvail" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="fileSize,fileModifyTime,filePath"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" key="path" value="filePath"/>
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ls -AlT '${path}' | grep '^-'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\S{10}\s+\d+\s+\S+\s+\S+\s+(\d+)\s+(\S+\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+\d{4})\s(.+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT count(filePath) as fileAvail"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifStatus" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="ifInfo"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ifconfig -a"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="ifName" key="ifName" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="${ifName}*:.*\&lt;(\w+),"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (ifInfo=='UP'?'1':'0') as ifInfo"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifStatus" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="ifInfo"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ifconfig -a"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter value="ifName" key="ifName" type="ResourceProperty"/>
+                <Parameter type="" key="REGULAR" value="${ifName}*:.*\&lt;(\w+),"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (ifInfo=='UP'?'1':'0') as ifInfo"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="fulldiedProcess" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="procMulStat,userName,processId,procMulCpuRate,procMulMemRate,processVirtualMap,processPhysicalMem,procMulStime,processCommand"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -aux | awk '{print $8,$1,$2,$3,$4,$5,$6,$9,$11}' | grep -e '^[Zz]'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\S+)\s(\w+)\s(\d+)\s(\d+\.\d+)\s(\d+\.\d+)\s(\d+)\s(\d+)\s(\S+)\s(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="tableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="fulldiedProcess" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="procMulStat,userName,processId,procMulCpuRate,procMulMemRate,processVirtualMap,processPhysicalMem,procMulStime,processCommand"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="setenv LANG en_US.UTF-8;ps -aux | awk '{print $8,$1,$2,$3,$4,$5,$6,$9,$11}' | grep -e '^[Zz]'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\S+)\s(\w+)\s(\d+)\s(\d+\.\d+)\s(\d+\.\d+)\s(\d+)\s(\d+)\s(\S+)\s(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="tableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+</MetricPlugins>

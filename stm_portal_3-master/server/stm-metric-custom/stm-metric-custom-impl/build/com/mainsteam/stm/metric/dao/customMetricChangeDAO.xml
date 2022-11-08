@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.metric.dao.CustomMetricChangeDAO">
+	<sql id="customMetricChangeColumn"> 
+		CHANGE_ID,METRIC_ID,OPERATEMODE,INSTANCE_ID,PLUGIN_ID,OCCUR_TIME,CHANGE_TIME,OPERATE_STATE
+	</sql>
+	<sql id="customMetricChangeColumnValue">
+		#{change_id},#{metric_id},#{operateMode},#{instance_id},#{plugin_id},#{occur_time},#{change_time},#{operate_state}
+	</sql>
+	<sql id="table">
+		 STM_CUSTOM_METRIC_CHANGE
+	</sql>
+	<sql id="selectSql">
+		select <include refid="customMetricChangeColumn"/>
+		from   <include refid="table"/>
+	</sql>
+	<insert id="insertMetricChange" 
+		parameterType="com.mainsteam.stm.metric.dao.pojo.CustomMetricChangeDO">
+		insert into <include refid="table"/>
+		(<include refid="customMetricChangeColumn"/>) 
+		values(<include refid="customMetricChangeColumnValue"/>) 
+	</insert>
+	<delete id="removeMetricChangeByDate" parameterType="java.util.Date"> 
+		delete from <include refid="table"/> where OCCUR_TIME &lt;= #{occur_time}
+    </delete>
+	<select id="getMetricChangeDOs" 
+		resultType="com.mainsteam.stm.metric.dao.pojo.CustomMetricChangeDO">
+		<include refid="selectSql"/> where OPERATE_STATE = 0 order by CHANGE_ID ASC
+	</select>
+	<update id="updateMetricChangeState" parameterType="com.mainsteam.stm.metric.dao.pojo.CustomMetricChangeDO">
+		update <include refid="table"/> set OPERATE_STATE=1,OCCUR_TIME=#{occur_time} where CHANGE_ID = #{change_id}
+	</update>
+ </mapper>

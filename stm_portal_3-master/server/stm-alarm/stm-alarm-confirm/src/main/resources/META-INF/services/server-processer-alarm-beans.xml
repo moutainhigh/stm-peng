@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+
+	<bean id="alarmConfirmSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_ALARM_CONFIRM"/>
+	</bean>
+
+	<bean id="alarmConfirmDAO" class="com.mainsteam.stm.alarm.confirm.dao.AlarmConfirmDAOImpl">
+		<property name="session" ref="sqlSession" ></property>
+	</bean>
+
+	<!-- 告警确认服务 -->
+	<bean id="alarmConfirmService" class="com.mainsteam.stm.alarm.confirm.AlarmConfirmServiceImpl">
+		<property name="alarmConfirmDAO" ref="alarmConfirmDAO" />
+		<property name="alarmEventService" ref="alarmEventService"/>
+		<property name="alarmNotifyService" ref="alarmNotifyService"/>
+		<property name="sequence" ref="alarmConfirmSeq"></property>
+		<property name="systemConfigApi" ref="systemConfigApi"></property>
+		<property name="alarmConfirmCacheUtils" ref="alarmConfirmCacheUtils" />
+		<property name="dataSyncService" ref="dataSyncService"></property>
+		<property name="alarmEventTemplateService" ref="alarmEventTemplateService"></property>
+		<property name="capacityService" ref="capacityService"></property>
+ 	</bean>
+
+	<bean id="alarmConfirmCacheUtils" class="com.mainsteam.stm.alarm.cache.AlarmConfirmCacheUtils"></bean>
+	
+</beans>

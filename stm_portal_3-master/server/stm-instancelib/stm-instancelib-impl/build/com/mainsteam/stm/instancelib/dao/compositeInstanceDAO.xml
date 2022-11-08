@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.instancelib.dao.CompositeInstanceDAO">
+	
+	<select id="getCompositeInstanceById" resultType="com.mainsteam.stm.instancelib.dao.pojo.CompositeInstanceDO">
+		select INSTANCEID,INSTANCENAME,INSTANCETYPE
+		from STM_INSTANCELIB_COMPOSITE_MAIN
+		where INSTANCEID=#{instanceId}
+	</select>
+	
+	<select id="getCompositeInstanceByInstanceType" resultType="com.mainsteam.stm.instancelib.dao.pojo.CompositeInstanceDO">
+		select INSTANCEID,INSTANCENAME,INSTANCETYPE
+		from STM_INSTANCELIB_COMPOSITE_MAIN
+		where INSTANCETYPE=#{instanceType}
+	</select>
+	
+	<select id="getCompositeInstanceLikeName" resultType="com.mainsteam.stm.instancelib.dao.pojo.CompositeInstanceDO">
+		select INSTANCEID,INSTANCENAME,INSTANCETYPE
+		from STM_INSTANCELIB_COMPOSITE_MAIN
+		where INSTANCENAME like CONCAT('%',#{instanceName},'%')
+	</select>
+	<select id="getCompositeInstanceByContainInstanceId" resultType="com.mainsteam.stm.instancelib.dao.pojo.CompositeInstanceDO">
+		  SELECT oic.INSTANCEID, oic.INSTANCENAME,oic.INSTANCETYPE
+			FROM stm_instancelib_composite_main oic
+			WHERE
+				oic.instanceid IN (
+					SELECT ic.instanceid FROM stm_instancelib_collection ic WHERE ic.containInstanceid = #{containInstanceId}
+				)
+	</select>
+	
+	<insert id="insertCompositeInstance"  parameterType="com.mainsteam.stm.instancelib.dao.pojo.CompositeInstanceDO">
+	    insert into STM_INSTANCELIB_COMPOSITE_MAIN
+	           (INSTANCEID,INSTANCENAME,INSTANCETYPE) 
+	    VALUES (#{instanceId}, #{instanceName}, #{instanceType})
+	</insert>
+	
+	<update id="updateCompositeInstance" parameterType="com.mainsteam.stm.instancelib.dao.pojo.CompositeInstanceDO">
+		update STM_INSTANCELIB_COMPOSITE_MAIN
+		set INSTANCENAME=#{instanceName},INSTANCETYPE=#{instanceType}
+		where INSTANCEID=#{instanceId}
+	</update>
+	
+	<delete id="removeCompositeInstanceById" >
+		delete from STM_INSTANCELIB_COMPOSITE_MAIN  where INSTANCEID=#{instanceId}
+	</delete>
+	
+</mapper>

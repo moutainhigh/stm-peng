@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.portal.netflow.dao.IDeviceDao">
+
+	<insert id="saveDeviceByManager">
+		insert
+		CONF_DEVICE(name,ip,type,resource_id,vender,active)
+		value(#{name},#{ip},#{type},#{resourceId},#{manufacturers},1)
+	</insert>
+
+	<update id="updateSaveDeviceByManager">
+		update CONF_DEVICE set name = #{name},type =
+		#{type},resource_id = #{resourceId},vender = #{manufacturers},active =
+		1 where
+		ip = #{ip}
+	</update>
+
+	<select id="getDeviceByManager" resultType="java.util.Map">
+		select resource_id,ip
+		from CONF_DEVICE where resource_id
+		is not null
+	</select>
+
+	<select id="queryDeviceByManager"
+		resultType="com.mainsteam.stm.portal.netflow.bo.ResourceDeviceBo"
+		parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		select id dbId,name,ip,type,resource_id id,vender
+		manufacturers
+		from
+		CONF_DEVICE
+		where resource_id
+		is not null
+		<if test="condition.deviceType != null">
+			AND (name like concat('%',#{condition.deviceType},'%') OR
+			ip like
+			concat('%',#{condition.deviceType},'%'))
+		</if>
+		<choose>
+			<when test="condition.name != null">
+				order by ${condition.name} ${condition.type}
+			</when>
+			<otherwise>
+				order by name asc
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="addInterfaceByManager">
+		insert
+		CONF_INTERFACE(device_id,interface_index,name,resource_interface_id,IN_SPEED,state)
+		value(#{deviceId},#{index},#{name},#{interfaceId},#{ifSpeed},2)
+	</insert>
+
+	<update id="updateInterface">
+		update CONF_INTERFACE set name =
+		#{name},resource_interface_id = #{interfaceId},IN_SPEED =
+		#{ifSpeed},state = 2
+		where device_id = #{deviceId} and interface_index
+		= #{index}
+	</update>
+
+	<select id="isInterfaceByManager" resultType="java.lang.Integer">
+		select
+		resource_interface_id from
+		CONF_INTERFACE where state = 2 and
+		resource_interface_id in
+		<foreach collection="interfaceIds" item="item" index="in"
+			open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+	<delete id="delInterfaceByManager">
+		delete from CONF_INTERFACE where
+		resource_interface_id in
+		<foreach collection="interfaceIds" item="item" index="in"
+			open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<delete id="delDeviceByManager">
+		delete from CONF_DEVICE where resource_id in
+		<foreach collection="ids" item="item" index="in" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<delete id="delDeviceByManagerByInterface">
+		delete from CONF_INTERFACE where device_id in(select id from
+		CONF_DEVICE where resource_id in
+		<foreach collection="ids" item="item" index="in" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+		)
+	</delete>
+
+	<select id="device_queryInterfaceCount" resultType="java.lang.Integer">
+		select
+		count(1) from CONF_INTERFACE where state = 2 and resource_interface_id
+		is not null
+	</select>
+</mapper>

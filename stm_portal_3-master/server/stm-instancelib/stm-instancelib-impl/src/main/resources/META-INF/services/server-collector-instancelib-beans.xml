@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                    http://www.springframework.org/schema/context
+                    http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+	<bean id="discoverPropService" class="com.mainsteam.stm.instancelib.service.impl.CollectorDiscoverPropServiceImpl" >
+		<property name="cache" ref="collectorResourceInstanceCache"></property>	
+	</bean>
+	
+	<bean id="modulePropService" class="com.mainsteam.stm.instancelib.service.impl.CollectorModulePropServiceImpl">
+		<property name="cache" ref="collectorResourceInstanceCache"></property>
+	</bean>
+
+	<!-- 资源实例 -->
+    <bean id="resourceInstanceService" class="com.mainsteam.stm.instancelib.service.impl.CollectorResourceInstanceServiceImpl" init-method="init" >
+		<property name="cache" ref="collectorResourceInstanceCache"></property>
+		<property name="client" ref="OCRPClient"></property>
+		<property name="localeNodeService" ref="localNodeService"></property>
+		<property name="metricDataTransferSender" ref="metricDataTransferSender"></property>
+		<property name="resourceComparer" ref="resourceComparer"></property>
+	    <property name="instanceSeq" ref="instanceSeq"></property>
+		<property name="instancePersister" ref="instancePersister"></property> 
+		<property name="capacityService" ref="capacityService"></property>
+	</bean>
+    <bean id="resourceComparer" class="com.mainsteam.stm.instancelib.util.ResourceComparer">
+		<property name="capacityService" ref="capacityService"></property>
+	</bean>
+	<!-- 用于管理实例监听和拦截器 -->
+	<!-- <bean id="instancelibEventManager" class="com.mainsteam.stm.instancelib.interceptor.InstancelibEventManagerImpl">
+	</bean> -->
+	
+	<!-- 用于缓存 -->
+	<bean id="collectorResourceInstanceCache" class="com.mainsteam.stm.instancelib.util.CollectorResourceInstanceCache">
+		<property name="propCache" ref="propCache"></property>
+	</bean>
+	
+	<!-- 用于缓存 -->
+	<bean id="propCache" class="com.mainsteam.stm.instancelib.util.CollectorPropCache">
+	</bean>
+	
+	<!-- 用于处理器远程调用Bean -->
+	<bean id="collectorResourceInstanceSyncMBean" class="com.mainsteam.stm.instancelib.remote.CollectorResourceInstanceSync" init-method="start">
+		<property name="resourceInstanceService" ref="resourceInstanceService" />
+	</bean>
+	<bean id="collectorDiscoverPropSyncMBean" class="com.mainsteam.stm.instancelib.remote.CollectorDiscoverPropSync" init-method="start">
+		<property name="discoverPropService" ref="discoverPropService" />
+	</bean>
+	<bean id="collectorModulePropSyncMBean" class="com.mainsteam.stm.instancelib.remote.CollectorModulePropSync" init-method="start">
+		<property name="modulePropService" ref="modulePropService" />
+	</bean>
+	
+	<!-- 表 stm_instancelib_composite_main 和 stm_instancelib_resource_main 主键序列值-->
+    <bean id="instanceSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_INSTANCELIB_INSTANCE"></constructor-arg>
+	</bean>
+	
+	<!-- 用于隔离墙调用资源保存到文件持久化-->
+    <bean id="instancePersister" factory-bean="persisterFactory" factory-method="createObjectFileDatabase">
+		<constructor-arg value="instancelib" />
+	</bean>
+</beans>

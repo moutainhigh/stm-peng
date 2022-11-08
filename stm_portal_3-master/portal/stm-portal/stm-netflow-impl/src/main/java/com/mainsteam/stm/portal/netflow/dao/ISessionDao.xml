@@ -1,0 +1,1539 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.portal.netflow.dao.ISessionDao">
+
+	<select id="getallsessions" resultType="com.mainsteam.stm.portal.netflow.bo.SessionBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		select 
+			src_ip,dst_ip,
+			
+			out_flows,
+			in_flows,
+			total_flows,
+			in_speed,
+			out_speed,
+			total_speed,  
+
+			in_packages,
+			out_packages, 
+			total_packages,
+			packetInSpeed,
+			packetOutSpeed,
+			packetTotalSpeed,
+
+			connectNumberIn,
+			connectNumberOut,
+			connectNumberTotal,
+			connectNumberInSpeed,
+			connectNumberOutSpeed,
+			connectNumberTotalSpeed,
+
+			flows_rate,
+			packets_rate,
+			connects_rate,
+			flowPctge,
+			packetPctge,
+			connectPctge
+		from 
+		(
+			select 
+				src_ip,dst_ip,
+				
+				in_flows,
+				out_flows,
+				total_flows,
+				in_speed,
+				out_speed,
+				total_speed,
+
+				in_packages,
+				out_packages,
+				total_packages,
+				packetInSpeed,
+				packetOutSpeed,
+				packetTotalSpeed,
+
+				connectNumberIn,
+				connectNumberOut,
+				connectNumberTotal,
+				connectNumberInSpeed,
+				connectNumberOutSpeed,
+				connectNumberTotalSpeed,
+
+				flows_rate,
+				packets_rate,
+				connects_rate,
+				flowPctge,
+				packetPctge,
+				connectPctge
+				
+			from 
+			(
+				select 
+					intable.src_ip,intable.dst_ip,
+					
+					ifnull(in_flows,0) as in_flows,
+					ifnull(out_flows,0) as out_flows,
+					(ifnull(in_flows,0)+ifnull(out_flows,0)) as total_flows,
+					ifnull(in_flows,0)/${condition.timepart} as in_speed,
+					ifnull(out_flows,0)/${condition.timepart} as out_speed, 
+					(ifnull(in_flows,0)+ifnull(out_flows,0))/${condition.timepart} as total_speed,
+
+					ifnull(in_packages,0) as in_packages,
+					ifnull(out_packages,0) as out_packages,
+					(ifnull(in_packages,0)+ifnull(out_packages,0)) as total_packages,
+					ifnull(in_packages, 0)/${condition.timepart} as packetInSpeed,
+					ifnull(out_packages,0)/${condition.timepart} packetOutSpeed,
+					(ifnull(in_packages,0)+ifnull(out_packages,0))/${condition.timepart} as packetTotalSpeed,
+
+					ifnull(connectNumberIn,0) connectNumberIn,
+					ifnull(connectNumberOut,0) connectNumberOut,
+					(ifnull(connectNumberIn, 0)+ifnull(connectNumberOut,0)) as connectNumberTotal,
+					ifnull(connectNumberIn, 0)/${condition.timepart} as connectNumberInSpeed,
+					ifnull(connectNumberOut, 0)/${condition.timepart} as connectNumberOutSpeed,
+					(ifnull(connectNumberIn, 0)+ifnull(connectNumberOut,0))/${condition.timepart} connectNumberTotalSpeed,
+
+					(ifnull(in_flows,0)+ifnull(out_flows,0))/${condition.allsessionFlows} as flows_rate,
+					(ifnull(in_flows,0)+ifnull(out_flows,0))/${condition.allsessionFlows} as flowPctge,
+					(ifnull(in_packages,0)+ifnull(out_packages,0))/${condition.allsessionPackets} as packets_rate,
+					(ifnull(in_packages,0)+ifnull(out_packages,0))/${condition.allsessionPackets} as packetPctge,
+					(ifnull(connectNumberIn, 0)+ifnull(connectNumberOut,0)) / ${condition.allsessionConnects} as connects_rate,
+					(ifnull(connectNumberIn, 0)+ifnull(connectNumberOut,0)) / ${condition.allsessionConnects} as connectPctge
+				from 
+					(
+					select src_ip,dst_ip, sum(packet_total) as in_packages, sum(octets_total) as in_flows,
+					SUM(FLOW_TOTAL) AS connectNumberIn
+					from ANA_IF_IN_NET_APP_TOS_${condition.tableSubfixTime}  
+					<if test="condition!=null">
+					<trim prefix="where" prefixOverrides="and |or ">
+					 <if test="condition.stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{condition.stime}</if>
+					<if test="condition.etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{condition.etime}</if>
+	           		</trim>
+ 					 </if> 
+					group by src_ip,dst_ip
+					) intable left join 
+					(
+					select src_ip,dst_ip, sum(packet_total) as out_packages, sum(octets_total) as out_flows,
+					SUM(FLOW_TOTAL) AS connectNumberOut
+					from ANA_IF_OUT_NET_APP_TOS_${condition.tableSubfixTime}  
+					<if test="condition!=null">
+					<trim prefix="where" prefixOverrides="and |or ">
+					 <if test="condition.stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{condition.stime}</if>
+					<if test="condition.etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{condition.etime}</if>
+	           		</trim>
+ 					 </if>
+					 group by src_ip,dst_ip
+					) outtable 
+				on intable.src_ip = outtable.src_ip and intable.dst_ip = outtable.dst_ip 
+			)  _left
+			union 
+			select 
+				src_ip,dst_ip,
+				
+				in_flows,
+				out_flows,
+				total_flows,
+				in_speed,
+				out_speed,
+				total_speed,
+
+				in_packages,
+				out_packages,
+				total_packages,
+				packetInSpeed,
+				packetOutSpeed,
+				packetTotalSpeed,
+
+				connectNumberIn,
+				connectNumberOut,
+				connectNumberTotal,
+				connectNumberInSpeed,
+				connectNumberOutSpeed,
+				connectNumberTotalSpeed,
+
+				flows_rate,
+				packets_rate,
+				connects_rate,
+				flowPctge,
+				packetPctge,
+				connectPctge
+			from 
+			(
+				select 
+					outtable.src_ip,outtable.dst_ip,
+					
+					ifnull(in_flows,0) as in_flows,
+					ifnull(out_flows,0) as out_flows,
+					(ifnull(in_flows,0)+ifnull(out_flows,0)) as total_flows,
+					ifnull(in_flows,0)/${condition.timepart} as in_speed,
+					ifnull(out_flows,0)/${condition.timepart} as out_speed, 
+					(ifnull(in_flows,0)+ifnull(out_flows,0))/${condition.timepart} as total_speed,
+
+					ifnull(in_packages,0) as in_packages,
+					ifnull(out_packages,0) as out_packages,
+					(ifnull(in_packages,0)+ifnull(out_packages,0)) as total_packages,
+					ifnull(in_packages, 0)/${condition.timepart} packetInSpeed,
+					ifnull(out_packages, 0)/${condition.timepart} packetOutSpeed,
+					(ifnull(in_packages,0)+ifnull(out_packages,0))/${condition.timepart} packetTotalSpeed,
+					
+					ifnull(connectNumberIn,0) connectNumberIn,
+					ifnull(connectNumberOut,0) connectNumberOut,
+					(ifnull(connectNumberIn, 0)+ifnull(connectNumberOut,0)) connectNumberTotal,
+					ifnull(connectNumberIn, 0)/${condition.timepart} connectNumberInSpeed,
+					ifnull(connectNumberOut, 0)/${condition.timepart} connectNumberOutSpeed,
+					(ifnull(connectNumberIn, 0)+ifnull(connectNumberOut,0))/${condition.timepart} as connectNumberTotalSpeed,
+					
+					(ifnull(in_flows,0)+ifnull(out_flows,0))/${condition.allsessionFlows} as flows_rate,
+					(ifnull(in_flows,0)+ifnull(out_flows,0))/${condition.allsessionFlows} as flowPctge,
+					(ifnull(in_packages,0)+ifnull(out_packages,0))/${condition.allsessionPackets} as packets_rate,
+					(ifnull(in_packages,0)+ifnull(out_packages,0))/${condition.allsessionPackets} as packetPctge,
+					(ifnull(connectNumberIn, 0)+ifnull(connectNumberOut,0))/${condition.allsessionConnects} as connects_rate,
+					(ifnull(connectNumberIn, 0)+ifnull(connectNumberOut,0))/${condition.allsessionConnects} as connectPctge
+					
+				from 
+					(
+					select src_ip,dst_ip, sum(packet_total) as in_packages, sum(octets_total) as in_flows,
+					SUM(FLOW_TOTAL) AS connectNumberIn
+					from ANA_IF_IN_NET_APP_TOS_${condition.tableSubfixTime}  
+					<if test="condition!=null">
+					<trim prefix="where" prefixOverrides="and |or ">
+					 <if test="condition.stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{condition.stime}</if>
+					<if test="condition.etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{condition.etime}</if>
+	           		</trim>
+ 					 </if>
+					group by src_ip,dst_ip
+					) intable right join 
+					(
+					select src_ip,dst_ip, sum(packet_total) as out_packages, sum(octets_total) as out_flows,
+					SUM(FLOW_TOTAL) AS connectNumberOut 
+					from ANA_IF_OUT_NET_APP_TOS_${condition.tableSubfixTime}  
+					<if test="condition!=null">
+					<trim prefix="where" prefixOverrides="and |or ">
+					 <if test="condition.stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{condition.stime}</if>
+					<if test="condition.etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{condition.etime}</if>
+	           		</trim>
+ 					 </if>
+					 group by src_ip,dst_ip
+					) outtable 
+				on intable.src_ip = outtable.src_ip and intable.dst_ip = outtable.dst_ip 
+			)  _right
+		) flows
+		<trim prefix="where" prefixOverrides="and |or ">
+			<if test="condition.currentSrcIp != null">
+				 and flows.src_ip like concat('%',#{condition.currentSrcIp},'%')
+			</if>
+			<if test="condition.currentDstIp != null">
+				 and  flows.dst_ip like concat('%',#{condition.currentDstIp},'%')
+			</if>
+        </trim>
+		order by  ${condition.sort}  ${condition.order}
+	</select>
+	
+	<select id="getallsessionflows" resultType="java.lang.String" parameterType="com.mainsteam.stm.portal.netflow.bo.SessionConditionBo">
+							
+													select sum(total_flows) as total_flows from (
+															select src_ip,dst_ip,in_flows,out_flows,total_flows
+														from 
+														(
+															select intable.src_ip,intable.dst_ip,ifnull(in_flows,0) as in_flows,
+															ifnull(out_flows,0) as out_flows,
+															ifnull(in_flows,0)+ifnull(out_flows,0) as total_flows from 
+																(
+																select src_ip,dst_ip, sum(octets_total) as in_flows 
+																from ANA_IF_IN_NET_APP_TOS_${tableSubfixTime}  
+															
+																<trim prefix="where" prefixOverrides="and |or ">
+																 <if test="stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+																<if test="etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+												           		</trim>
+											 					
+																group by src_ip,dst_ip
+																) intable left join 
+																(
+																select src_ip,dst_ip ,sum(octets_total) as out_flows 
+																from ANA_IF_OUT_NET_APP_TOS_${tableSubfixTime}  
+															
+																<trim prefix="where" prefixOverrides="and |or ">
+																 <if test="stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+																<if test="etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+												           		</trim>
+											 					
+																 group by src_ip,dst_ip
+																) outtable 
+															on intable.src_ip = outtable.src_ip and intable.dst_ip = outtable.dst_ip 
+														)  _left
+														union 
+														select src_ip,dst_ip,in_flows,out_flows,total_flows
+														 from 
+														(
+															select outtable.src_ip,outtable.dst_ip,ifnull(in_flows,0) as in_flows,ifnull(out_flows,0) as out_flows,
+															ifnull(in_flows,0)+ifnull(out_flows,0) as total_flows
+															from 
+																(
+																select src_ip,dst_ip, sum(octets_total) as in_flows 
+																from ANA_IF_IN_NET_APP_TOS_${tableSubfixTime}  
+																
+																<trim prefix="where" prefixOverrides="and |or ">
+																 <if test="stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+																<if test="etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+												           		</trim>
+											 					
+																group by src_ip,dst_ip
+																) intable right join 
+																(
+																select src_ip,dst_ip, sum(octets_total) as out_flows 
+																from ANA_IF_OUT_NET_APP_TOS_${tableSubfixTime}  
+															
+																<trim prefix="where" prefixOverrides="and |or ">
+																 <if test="stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+																<if test="etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+												           		</trim>
+											 					
+																 group by src_ip,dst_ip
+																) outtable 
+															on intable.src_ip = outtable.src_ip and intable.dst_ip = outtable.dst_ip 
+														)  _right
+									
+													) flows
+	</select>
+	
+	<select id="getsessionchartdata" resultType="com.mainsteam.stm.portal.netflow.bo.SessionBo" parameterType="com.mainsteam.stm.portal.netflow.bo.SessionConditionBo">
+		select 
+			acq_time, src_ip, dst_ip,
+		
+			in_flows,
+			out_flows,
+			total_flows,
+			in_speed,
+			out_speed,
+			total_speed,
+
+			in_packages,
+			out_packages,
+			total_packages,
+			packetInSpeed,
+			packetOutSpeed,
+			packetTotalSpeed,
+
+			connectNumberIn,
+			connectNumberOut,
+			connectNumberTotal,
+			connectNumberInSpeed,
+			connectNumberOutSpeed,
+			connectNumberTotalSpeed,
+
+			flows_rate,
+			packets_rate,
+			connects_rate 
+			
+		from (
+			select 
+				acq_time, src_ip,dst_ip,
+				in_flows,
+				in_packages,
+				out_flows,
+				out_packages,
+				total_flows,
+				total_packages,
+				in_speed,
+				out_speed,
+				total_speed,
+				packetInSpeed,
+				packetOutSpeed,
+				packetTotalSpeed,
+				connectNumberIn,
+				connectNumberOut,
+				connectNumberTotal,
+				connectNumberInSpeed,
+				connectNumberOutSpeed,
+				connectNumberTotalSpeed,
+
+				flows_rate,
+				packets_rate,
+				connects_rate
+			from 
+			(
+				select  
+					intable.acq_time, intable.src_ip,intable.dst_ip,
+					
+					ifnull(in_flows,0) as in_flows,
+					ifnull(out_flows,0) as out_flows,
+					ifnull(in_flows,0)+ifnull(out_flows,0) as total_flows,
+					ifnull(in_flows,0)/${timepart} as in_speed,
+					ifnull(out_flows,0)/${timepart} as out_speed, 
+					(ifnull(in_flows,0)/${timepart})+(ifnull(out_flows,0)/${timepart}) as total_speed,
+
+					ifnull(in_packages,0) as in_packages,
+					ifnull(out_packages,0) as out_packages,
+					(ifnull(in_packages,0)+ifnull(out_packages,0)) as total_packages,
+					ifnull(in_packages/${timepart},0) packetInSpeed,
+					ifnull(out_packages/${timepart},0) packetOutSpeed,
+					ifnull(in_packages+out_packages/${timepart},0) packetTotalSpeed,
+					
+					ifnull(connectNumberIn,0) connectNumberIn,
+					ifnull(connectNumberOut,0) connectNumberOut,
+					ifnull(connectNumberIn+connectNumberOut,0) connectNumberTotal,
+					ifnull(connectNumberIn/${timepart},0) connectNumberInSpeed,
+					ifnull(connectNumberOut/${timepart},0) connectNumberOutSpeed,
+					ifnull((connectNumberIn+connectNumberOut)/${timepart},0) connectNumberTotalSpeed,
+
+					(ifnull(in_flows,0)+ifnull(out_flows,0))/${allsessionFlows} as flows_rate,
+					(ifnull(in_packages,0)+ifnull(out_packages,0)) / ${allsessionPackets} as packets_rate,
+					(ifnull(connectNumberIn,0)+ifnull(connectNumberOut, 0)) / ${allsessionConnects} as connects_rate 
+				from 
+					(
+					select acq_time,src_ip,dst_ip, sum(packet_total) as in_packages, sum(octets_total) as in_flows,
+					SUM(FLOW_TOTAL) AS connectNumberIn 
+					from ANA_IF_IN_NET_APP_TOS_${tableSubfixTime}  
+				    where  src_ip = #{currentSrcIp} and dst_ip = #{currentDstIp}
+					and acq_time in 
+					 <foreach collection="timePoints" item="time" index="index"
+			            open="(" close=")" separator=",">
+			            #{time}
+			        </foreach>  
+					
+					group by acq_time
+					) intable left join 
+					(
+					select acq_time,src_ip,dst_ip, sum(packet_total) as out_packages, sum(octets_total) as out_flows,
+					SUM(FLOW_TOTAL) AS connectNumberOut 
+					from ANA_IF_OUT_NET_APP_TOS_${tableSubfixTime}  
+					 where  src_ip = #{currentSrcIp} and dst_ip = #{currentDstIp}
+					and acq_time in 
+					 <foreach collection="timePoints" item="time" index="index"
+			            open="(" close=")" separator=",">
+			            #{time}
+			        </foreach>  
+						group by acq_time
+					) outtable 
+				on intable.acq_time = outtable.acq_time 
+			)  _left
+			union 
+			select acq_time, src_ip,dst_ip,
+				in_flows,
+				in_packages,
+				out_flows,
+				out_packages,
+				total_flows,
+				total_packages,
+				in_speed,
+				out_speed,
+				total_speed,
+				packetInSpeed,
+				packetOutSpeed,
+				packetTotalSpeed,
+				connectNumberIn,
+				connectNumberOut,
+				connectNumberTotal,
+				connectNumberInSpeed,
+				connectNumberOutSpeed,
+				connectNumberTotalSpeed,
+
+				flows_rate,
+				packets_rate,
+				connects_rate
+			from 
+			(
+				select 
+					outtable.acq_time, outtable.src_ip,outtable.dst_ip,
+					
+					ifnull(in_packages,0) as in_packages,
+					ifnull(in_flows,0) as in_flows,
+					ifnull(out_packages,0) as out_packages,
+					ifnull(out_flows,0) as out_flows,
+					ifnull(in_flows,0)+ifnull(out_flows,0) as total_flows,
+					(ifnull(in_packages,0)+ifnull(out_packages,0)) as total_packages,
+					ifnull(in_flows,0)/${timepart} as in_speed,
+					ifnull(out_flows,0)/${timepart} as out_speed, 
+					(ifnull(in_flows,0)/${timepart})+(ifnull(out_flows,0)/${timepart}) as total_speed,
+					ifnull(in_packages/${timepart},0) packetInSpeed,
+					ifnull(out_packages/${timepart},0) packetOutSpeed,
+					ifnull(in_packages+out_packages/${timepart},0) packetTotalSpeed,
+					ifnull(connectNumberIn,0) connectNumberIn,
+					ifnull(connectNumberOut,0) connectNumberOut,
+					ifnull(connectNumberIn+connectNumberOut,0) connectNumberTotal,
+					ifnull(connectNumberIn/${timepart},0) connectNumberInSpeed,
+					ifnull(connectNumberOut/${timepart},0) connectNumberOutSpeed,
+					ifnull((connectNumberIn+connectNumberOut)/${timepart},0) connectNumberTotalSpeed,
+					
+					(ifnull(in_flows,0)+ifnull(out_flows,0))/${allsessionFlows} as flows_rate,
+					(ifnull(in_packages,0)+ifnull(out_packages,0))/${allsessionPackets} as packets_rate,
+					ifnull(connectNumberIn+connectNumberOut,0)/${allsessionConnects} as connects_rate
+				from 
+					(
+					select acq_time, src_ip,dst_ip, sum(packet_total) as in_packages, sum(octets_total) as in_flows,
+					SUM(FLOW_TOTAL) AS connectNumberIn
+					from ANA_IF_IN_NET_APP_TOS_${tableSubfixTime}  
+					 where  src_ip = #{currentSrcIp} and dst_ip = #{currentDstIp}
+					and acq_time in 
+					 <foreach collection="timePoints" item="time" index="index"
+			            open="(" close=")" separator=",">
+			            #{time}
+			        </foreach>  
+					group by acq_time
+					) intable right join 
+					(
+					select acq_time, src_ip,dst_ip, sum(packet_total) as out_packages, sum(octets_total) as out_flows,
+					SUM(FLOW_TOTAL) AS connectNumberOut 
+					from ANA_IF_OUT_NET_APP_TOS_${tableSubfixTime}  
+					where  src_ip = #{currentSrcIp} and dst_ip = #{currentDstIp}
+					and acq_time in 
+					 <foreach collection="timePoints" item="time" index="index"
+			            open="(" close=")" separator=",">
+			            #{time}
+			        </foreach>  
+				group by acq_time
+					) outtable 
+				on intable.acq_time = outtable.acq_time 
+			)  _right
+		) _time order by acq_time asc
+																	
+						
+	</select>
+	
+	<!-- 会话主页面流量，包，连接数 -->
+	<select id="getSessionTotals" parameterType="com.mainsteam.stm.portal.netflow.bo.SessionConditionBo" resultType="com.mainsteam.stm.portal.netflow.bo.Whole">
+		select 
+			ifnull(sum(ifnull(total_flows, 0)), 0) as wholeFlows,
+			ifnull(sum(ifnull(packetTotal, 0)), 0) as wholePackets,
+			ifnull(sum(ifnull(connectTotal, 0)), 0) as wholeConnects
+		from 
+		(
+			select 
+				src_ip,dst_ip,in_flows,out_flows,total_flows,connectTotal,packetTotal
+			from 
+			(
+				select 
+					intable.src_ip,intable.dst_ip,ifnull(in_flows,0) as in_flows,
+					ifnull(out_flows,0) as out_flows,
+					ifnull(in_flows,0)+ifnull(out_flows,0) as total_flows,
+					ifnull(connectIn, 0) as connectIn,
+					ifnull(connectOut, 0) as connectOut,
+					(ifnull(connectIn, 0)+ifnull(connectOut, 0)) as connectTotal, 
+					ifnull(packetIn, 0) as packetIn,
+					ifnull(packetOut, 0) as packetOut,
+					(ifnull(packetIn, 0)+ifnull(packetOut, 0)) as packetTotal  
+				from 
+					(
+					select src_ip,dst_ip, sum(octets_total) as in_flows,sum(flow_total) as connectIn, sum(packet_total) as packetIn  
+					from ANA_IF_IN_NET_APP_TOS_${tableSubfixTime}  
+				
+					<trim prefix="where" prefixOverrides="and |or ">
+					 <if test="stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+					<if test="etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+	           		</trim>
+						
+					group by src_ip,dst_ip
+					) intable left join 
+					(
+					select src_ip,dst_ip ,sum(octets_total) as out_flows,sum(flow_total) as connectOut, sum(packet_total) as packetOut 
+					from ANA_IF_OUT_NET_APP_TOS_${tableSubfixTime}  
+				
+					<trim prefix="where" prefixOverrides="and |or ">
+					 <if test="stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+					<if test="etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+	           		</trim>
+						
+					 group by src_ip,dst_ip
+					) outtable 
+				on intable.src_ip = outtable.src_ip and intable.dst_ip = outtable.dst_ip 
+			)  _left
+			union 
+			select src_ip,dst_ip,in_flows,out_flows,total_flows,connectTotal,packetTotal
+			 from 
+			(
+				select 
+					outtable.src_ip,outtable.dst_ip,
+					ifnull(in_flows,0) as in_flows,
+					ifnull(out_flows,0) as out_flows,
+					ifnull(in_flows,0)+ifnull(out_flows,0) as total_flows,
+					ifnull(connectIn, 0) as connectIn,
+					ifnull(connectOut, 0) as connectOut,
+					(ifnull(connectIn, 0)+ifnull(connectOut, 0)) as connectTotal, 
+					ifnull(packetIn, 0) as packetIn,
+					ifnull(packetOut, 0) as packetOut,
+					(ifnull(packetIn, 0)+ifnull(packetOut, 0)) as packetTotal  
+				from 
+					(
+					select src_ip,dst_ip, sum(octets_total) as in_flows,sum(flow_total) as connectIn, sum(packet_total) as packetIn  
+					from ANA_IF_IN_NET_APP_TOS_${tableSubfixTime}  
+					
+					<trim prefix="where" prefixOverrides="and |or ">
+					 <if test="stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+					<if test="etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+	           		</trim>
+						
+					group by src_ip,dst_ip
+					) intable right join 
+					(
+					select src_ip,dst_ip, sum(octets_total) as out_flows,sum(flow_total) as connectOut, sum(packet_total) as packetOut  
+					from ANA_IF_OUT_NET_APP_TOS_${tableSubfixTime}  
+				
+					<trim prefix="where" prefixOverrides="and |or ">
+					 <if test="stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+					<if test="etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+	           		</trim>
+					 group by src_ip,dst_ip
+					) outtable 
+				on intable.src_ip = outtable.src_ip and intable.dst_ip = outtable.dst_ip 
+			)  _right
+	
+		) flows
+		
+	</select>
+	<!-- 会话主页面查询结束 -->
+	
+	<select id="getProtocolBySession" resultType="com.mainsteam.stm.portal.netflow.bo.SessionBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		
+		select 
+			p.name as proto_name,p.id as proto, 
+			
+			ifnull(f.in_flows,0) as in_flows,
+			ifnull(f.out_flows,0) as out_flows,
+			ifnull(f.total_flows,0) as total_flows,
+			ifnull(f.in_speed,0) as in_speed,
+			ifnull(f.out_speed,0) as out_speed,
+			ifnull(f.total_speed, 0) as total_speed,
+
+			ifnull(f.in_packages,0) as in_packages,
+			ifnull(f.out_packages,0) as out_packages,
+			ifnull(f.total_packages,0) as total_packages,
+			ifnull(f.packetInSpeed, 0) as packetInSpeed,
+			ifnull(f.packetOutSpeed, 0) as packetOutSpeed,
+			ifnull(f.packetTotalSpeed, 0) as packetTotalSpeed,
+			
+			ifnull(f.connectNumberIn, 0) as connectNumberIn,
+			ifnull(f.connectNumberOut, 0) as connectNumberOut,
+			ifnull(f.connectNumberTotal, 0) as connectNumberTotal,
+			ifnull(f.connectNumberInSpeed, 0) as connectNumberInSpeed,
+			ifnull(f.connectNumberOutSpeed, 0) as connectNumberOutSpeed,
+			ifnull(f.connectNumberTotalSpeed, 0) as connectNumberTotalSpeed,
+			
+			ifnull(f.flows_rate,0) as flows_rate,
+			ifnull(f.flows_rate,0) as flowPctge,
+			ifnull(f.packets_rate, 0) as packets_rate,
+			ifnull(f.packets_rate, 0) as packetPctge,
+			ifnull(f.connects_rate, 0) as connects_rate,
+			ifnull(f.connects_rate, 0) as connectPctge
+		from 
+			CONF_PROTOCOL p 
+		left join
+		(
+			select 
+				proto,
+				
+				in_flows,
+				out_flows,
+				total_flows,
+				in_speed,
+				out_speed,
+				total_speed,
+
+				in_packages,
+				out_packages,
+				total_packages,
+				packetInSpeed,
+				packetOutSpeed,
+				packetTotalSpeed,
+				
+				connectNumberIn,
+				connectNumberOut,
+				connectNumberTotal,
+				connectNumberInSpeed,
+				connectNumberOutSpeed,
+				connectNumberTotalSpeed,
+
+				flows_rate,
+				packets_rate,
+				connects_rate 
+
+			from 
+			(
+				select proto,
+				
+				ifnull(in_flows,0) as in_flows,
+				ifnull(out_flows,0) as out_flows,
+				(ifnull(in_flows,0)+ifnull(out_flows,0)) as total_flows,
+				ifnull(in_flows,0)/${condition.timepart} as in_speed,
+				ifnull(out_flows,0)/${condition.timepart} as out_speed,
+				(ifnull(in_flows,0)+ifnull(out_flows,0))/${condition.timepart} as total_speed,
+
+				ifnull(in_packages,0) as in_packages,
+				ifnull(out_packages,0) as out_packages,
+				(ifnull(in_packages,0)+ifnull(out_packages,0)) as total_packages,
+				ifnull(in_packages,0) / ${condition.timepart} as packetInSpeed,
+				ifnull(out_packages,0) / ${condition.timepart} as packetOutSpeed,
+				(ifnull(in_packages,0)+ifnull(out_packages,0)) / ${condition.timepart} as packetTotalSpeed,
+				
+				ifnull(connectIn, 0) as connectNumberIn,
+				ifnull(connectOut, 0) as connectNumberOut,
+				(ifnull(connectIn, 0)+ifnull(connectOut, 0)) as connectNumberTotal,
+				ifnull(connectIn, 0) / ${condition.timepart} as connectNumberInSpeed,
+				ifnull(connectOut, 0) / ${condition.timepart} as connectNumberOutSpeed,
+				(ifnull(connectIn, 0)+ifnull(connectOut, 0)) / ${condition.timepart} as connectNumberTotalSpeed,
+
+				(ifnull(in_flows,0)+ifnull(out_flows,0))/${condition.allsessionFlows} as flows_rate,
+				(ifnull(in_packages,0)+ifnull(out_packages,0))/${condition.allsessionPackets} as packets_rate,
+				(ifnull(connectIn, 0)+ifnull(connectOut, 0))/${condition.allsessionConnects} as connects_rate
+
+				from (
+					select t1.proto as proto,in_flows,in_packages,out_flows,out_packages, connectIn, connectOut 
+					from (
+						(select proto, sum(octets_total) as in_flows,sum(packet_total) as in_packages, sum(flow_total) as connectIn 
+						from ANA_IF_IN_NET_APP_TOS_${condition.tableSubfixTime}  
+						<trim prefix="where" prefixOverrides="and |or ">
+							<if test="condition.app_id!= null"> app_id=#{condition.app_id}</if>
+							<if test="condition.deviceIp != null"> AND router_ip = inet_aton(#{condition.deviceIp})</if>
+							<if test="condition.if_id!= null"> and if_in_id=#{condition.if_id}</if>
+							<if test="condition.currentSrcIp!= null"> and src_ip=#{condition.currentSrcIp}</if>
+							<if test="condition.currentDstIp!= null"> and dst_ip=#{condition.currentDstIp}</if>
+							<if test="condition.stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{condition.stime}</if>
+							<if test="condition.etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{condition.etime}</if>
+						 </trim>
+						group by proto) t1 
+						left join
+						(select proto, sum(octets_total) as out_flows,sum(packet_total) as out_packages, sum(flow_total) as connectOut 
+						from ANA_IF_OUT_NET_APP_TOS_${condition.tableSubfixTime} 
+						<trim prefix="where" prefixOverrides="and |or ">
+							<if test="condition.app_id!= null"> app_id=#{condition.app_id}</if>
+							<if test="condition.deviceIp != null"> AND router_ip = inet_aton(#{condition.deviceIp})</if>
+							<if test="condition.if_id!= null"> and if_out_id=#{condition.if_id}</if>
+							<if test="condition.currentSrcIp!= null"> and src_ip=#{condition.currentSrcIp}</if>
+							<if test="condition.currentDstIp!= null"> and dst_ip=#{condition.currentDstIp}</if>
+							<if test="condition.stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{condition.stime}</if>
+							<if test="condition.etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{condition.etime}</if>
+						 </trim>
+						group by proto) t2 
+						on t1.proto = t2.proto
+					) 
+					union
+					select t2.proto,in_flows,in_packages,out_flows,out_packages, connectIn, connectOut  
+					from (
+						(select proto, sum(octets_total) as in_flows,sum(packet_total) as in_packages, sum(flow_total) as connectIn 
+						from ANA_IF_IN_NET_APP_TOS_${condition.tableSubfixTime}  
+						<trim prefix="where" prefixOverrides="and |or ">
+							<if test="condition.app_id!= null"> app_id=#{condition.app_id}</if>
+							<if test="condition.deviceIp != null"> AND router_ip = inet_aton(#{condition.deviceIp})</if>
+							<if test="condition.if_id!= null"> and if_in_id=#{condition.if_id}</if>
+							<if test="condition.currentSrcIp!= null"> and src_ip=#{condition.currentSrcIp}</if>
+							<if test="condition.currentDstIp!= null"> and dst_ip=#{condition.currentDstIp}</if>
+							<if test="condition.stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{condition.stime}</if>
+							<if test="condition.etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{condition.etime}</if>
+						 </trim>
+						group by proto) t1 
+						right join
+						(select proto, sum(octets_total) as out_flows,sum(packet_total) as out_packages, sum(flow_total) as connectOut 
+						from ANA_IF_OUT_NET_APP_TOS_${condition.tableSubfixTime}
+						<trim prefix="where" prefixOverrides="and |or ">
+							<if test="condition.app_id!= null"> app_id=#{condition.app_id}</if>
+							<if test="condition.deviceIp != null"> AND router_ip = inet_aton(#{condition.deviceIp})</if>
+							<if test="condition.if_id!= null"> and if_out_id=#{condition.if_id}</if>
+							<if test="condition.currentSrcIp!= null"> and src_ip=#{condition.currentSrcIp}</if>
+							<if test="condition.currentDstIp!= null"> and dst_ip=#{condition.currentDstIp}</if>
+							<if test="condition.stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{condition.stime}</if>
+							<if test="condition.etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{condition.etime}</if>
+						 </trim>
+						group by proto) t2 
+						on t1.proto = t2.proto
+					) 
+				) t4
+			) t5
+		) f  on p.id = f.proto  order by ${condition.sort}  ${condition.order}
+	</select>
+	
+	<select id="getAllProtocolFlowsBySession" resultType="java.lang.String" parameterType="com.mainsteam.stm.portal.netflow.bo.SessionConditionBo">
+										select sum(total_flows) from (
+											select proto,in_flows,in_packages,out_flows,out_packages,total_flows,total_packages,
+											in_speed,out_speed from (
+												select proto,ifnull(in_flows,0) as in_flows,ifnull(in_packages,0) as in_packages,
+												ifnull(out_flows,0) as out_flows,ifnull(out_packages,0) as out_packages,
+												(ifnull(in_flows,0)+ifnull(out_flows,0)) as total_flows,
+												(ifnull(in_packages,0)+ifnull(out_packages,0)) as total_packages,
+												ifnull(in_flows,0)/${timepart} as in_speed,
+												ifnull(out_flows,0)/${timepart} as out_speed,
+												(ifnull(in_flows,0)+ifnull(out_flows,0))/${timepart} as total_speed
+												from (
+													select t1.proto as proto,in_flows,in_packages,out_flows,out_packages 
+													from (
+														(select proto, sum(octets_total) as in_flows,sum(packet_total) as in_packages
+														from ANA_IF_IN_NET_APP_TOS_${tableSubfixTime}
+														<trim prefix="where" prefixOverrides="and |or ">
+															<if test="app_id!= null"> app_id=#{app_id}</if>
+															<if test="deviceIp != null"> AND router_ip = inet_aton(#{deviceIp})</if>
+											           		 <if test="currentSrcIp != null"> AND src_ip = #{currentSrcIp}</if>
+											           		  <if test="currentDstIp != null"> AND dst_ip = #{currentDstIp}</if>
+											           		   <if test="if_id != null"> AND if_in_id = #{if_id}</if>
+															<if test="stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+															<if test="etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+														 </trim>
+														group by proto) t1 
+														left join
+														(select proto, sum(octets_total) as out_flows,sum(packet_total) as out_packages
+														from ANA_IF_OUT_NET_APP_TOS_${tableSubfixTime}
+														<trim prefix="where" prefixOverrides="and |or ">
+															<if test="app_id!= null"> app_id=#{app_id}</if>
+															<if test="deviceIp != null"> AND router_ip = inet_aton(#{deviceIp})</if>
+											           		   <if test="if_id != null"> AND if_out_id = #{if_id}</if>
+											           		   	 <if test="currentSrcIp != null"> AND src_ip = #{currentSrcIp}</if>
+											           		  <if test="currentDstIp != null"> AND dst_ip = #{currentDstIp}</if>
+															<if test="stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+															<if test="etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+														 </trim>
+														group by proto) t2 
+														on t1.proto = t2.proto
+													) 
+													union
+													select t2.proto,in_flows,in_packages,out_flows,out_packages 
+													from (
+														(select proto, sum(octets_total) as in_flows,sum(packet_total) as in_packages
+														from ANA_IF_IN_NET_APP_TOS_${tableSubfixTime} 
+														<trim prefix="where" prefixOverrides="and |or ">
+															<if test="app_id!= null"> app_id=#{app_id}</if>
+															<if test="deviceIp != null"> AND router_ip = inet_aton(#{deviceIp})</if>
+											           		   <if test="if_id != null"> AND if_in_id = #{if_id}</if>
+											           		   	 <if test="currentSrcIp != null"> AND src_ip = #{currentSrcIp}</if>
+											           		  <if test="currentDstIp != null"> AND dst_ip = #{currentDstIp}</if>
+															<if test="stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+															<if test="etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+														 </trim>
+														group by proto) t1 
+														right join
+														(select proto, sum(octets_total) as out_flows,sum(packet_total) as out_packages
+														from ANA_IF_OUT_NET_APP_TOS_${tableSubfixTime}
+														<trim prefix="where" prefixOverrides="and |or ">
+															<if test="app_id != null"> app_id=#{app_id}</if>
+															<if test="deviceIp != null"> AND router_ip = inet_aton(#{deviceIp})</if>
+											           	    <if test="if_id != null"> AND if_out_id = #{if_id}</if>
+											           	    	 <if test="currentSrcIp != null"> AND src_ip = #{currentSrcIp}</if>
+											           		  <if test="currentDstIp != null"> AND dst_ip = #{currentDstIp}</if>
+															<if test="stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+															<if test="etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+														 </trim>
+														group by proto) t2 
+														on t1.proto = t2.proto
+													) 
+												) t4
+											) t5 
+										) t6
+	</select>
+	
+	<!-- 会话协议流量，包，连接数 -->
+	<select id="getSessionProtoTotals" resultType="com.mainsteam.stm.portal.netflow.bo.Whole" parameterType="com.mainsteam.stm.portal.netflow.bo.SessionConditionBo">
+		select 
+			ifnull(sum(total_flows), 0) as wholeFlows,
+			ifnull(sum(total_packages), 0) as wholePackets,
+			ifnull(sum(connectNumberTotal), 0) as wholeConnects
+		from (
+			select 
+				proto,
+				
+				total_flows,
+				total_packages,
+				connectNumberTotal
+			from 
+			(
+				select 
+					proto,
+					
+					(ifnull(in_flows,0)+ifnull(out_flows,0)) as total_flows,
+					(ifnull(in_packages,0)+ifnull(out_packages,0)) as total_packages,
+					(ifnull(connectIn, 0)+ifnull(connectOut, 0)) as connectNumberTotal
+					
+				from (
+					select t1.proto as proto,in_flows,in_packages,out_flows,out_packages, connectIn, connectOut 
+					from (
+						(select proto, sum(octets_total) as in_flows,sum(packet_total) as in_packages,sum(flow_total) as connectIn 
+						from ANA_IF_IN_NET_APP_TOS_${tableSubfixTime}
+						<trim prefix="where" prefixOverrides="and |or ">
+							<if test="app_id!= null"> app_id=#{app_id}</if>
+							<if test="deviceIp != null"> AND router_ip = inet_aton(#{deviceIp})</if>
+			           		 <if test="currentSrcIp != null"> AND src_ip = #{currentSrcIp}</if>
+			           		  <if test="currentDstIp != null"> AND dst_ip = #{currentDstIp}</if>
+			           		   <if test="if_id != null"> AND if_in_id = #{if_id}</if>
+							<if test="stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+							<if test="etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+						 </trim>
+						group by proto) t1 
+						left join
+						(select proto, sum(octets_total) as out_flows,sum(packet_total) as out_packages,sum(flow_total) as connectOut 
+						from ANA_IF_OUT_NET_APP_TOS_${tableSubfixTime}
+						<trim prefix="where" prefixOverrides="and |or ">
+							<if test="app_id!= null"> app_id=#{app_id}</if>
+							<if test="deviceIp != null"> AND router_ip = inet_aton(#{deviceIp})</if>
+			           		   <if test="if_id != null"> AND if_out_id = #{if_id}</if>
+			           		   	 <if test="currentSrcIp != null"> AND src_ip = #{currentSrcIp}</if>
+			           		  <if test="currentDstIp != null"> AND dst_ip = #{currentDstIp}</if>
+							<if test="stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+							<if test="etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+						 </trim>
+						group by proto) t2 
+						on t1.proto = t2.proto
+					) 
+					union
+					select t2.proto,in_flows,in_packages,out_flows,out_packages, connectIn, connectOut  
+					from (
+						(select proto, sum(octets_total) as in_flows,sum(packet_total) as in_packages,sum(flow_total) as connectIn 
+						from ANA_IF_IN_NET_APP_TOS_${tableSubfixTime} 
+						<trim prefix="where" prefixOverrides="and |or ">
+							<if test="app_id!= null"> app_id=#{app_id}</if>
+							<if test="deviceIp != null"> AND router_ip = inet_aton(#{deviceIp})</if>
+			           		   <if test="if_id != null"> AND if_in_id = #{if_id}</if>
+			           		   	 <if test="currentSrcIp != null"> AND src_ip = #{currentSrcIp}</if>
+			           		  <if test="currentDstIp != null"> AND dst_ip = #{currentDstIp}</if>
+							<if test="stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+							<if test="etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+						 </trim>
+						group by proto) t1 
+						right join
+						(select proto, sum(octets_total) as out_flows,sum(packet_total) as out_packages,sum(flow_total) as connectOut 
+						from ANA_IF_OUT_NET_APP_TOS_${tableSubfixTime}
+						<trim prefix="where" prefixOverrides="and |or ">
+							<if test="app_id != null"> app_id=#{app_id}</if>
+							<if test="deviceIp != null"> AND router_ip = inet_aton(#{deviceIp})</if>
+			           	    <if test="if_id != null"> AND if_out_id = #{if_id}</if>
+			           	    	 <if test="currentSrcIp != null"> AND src_ip = #{currentSrcIp}</if>
+			           		  <if test="currentDstIp != null"> AND dst_ip = #{currentDstIp}</if>
+							<if test="stime != null"> AND ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+							<if test="etime != null"> AND ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+						 </trim>
+						group by proto) t2 
+						on t1.proto = t2.proto
+					) 
+				) t4
+			) t5 
+		) t6
+	</select>
+	
+	<select id="getProtocolChartDataBySession" resultType="com.mainsteam.stm.portal.netflow.bo.SessionBo" parameterType="com.mainsteam.stm.portal.netflow.bo.SessionConditionBo">
+		select 
+			acq_time,
+			
+			in_flows,
+			out_flows,
+			total_flows,
+			in_speed,
+			out_speed,
+			total_speed,
+
+			in_packages,
+			out_packages,
+			total_packages,
+			packetInSpeed,
+			packetOutSpeed,
+			packetTotalSpeed,
+			
+			connectNumberIn,
+			connectNumberOut,
+			connectNumberTotal,
+			connectNumberInSpeed,
+			connectNumberOutSpeed,
+			connectNumberTotalSpeed,
+			
+			flowPctge,
+			packetPctge,
+			connectPctge
+		from 
+		(
+			select 
+				acq_time,
+				
+				ifnull(in_flows,0) as in_flows,
+				ifnull(out_flows,0) as out_flows,
+				(ifnull(in_flows,0)+ifnull(out_flows,0)) as total_flows,
+				ifnull(in_flows,0)/${timepart} as in_speed,
+				ifnull(out_flows,0)/${timepart} as out_speed,
+				(ifnull(in_flows,0)+ifnull(out_flows,0))/${timepart} as total_speed,
+
+				ifnull(in_packages,0) as in_packages,
+				ifnull(out_packages,0) as out_packages,
+				(ifnull(in_packages,0)+ifnull(out_packages,0)) as total_packages,
+				ifnull(in_packages,0) / ${timepart} as packetInSpeed,
+				ifnull(out_packages,0) / ${timepart} as packetOutSpeed,
+				(ifnull(in_packages,0)+ifnull(out_packages,0)) / ${timepart} as  packetTotalSpeed,
+				
+				ifnull(connectIn ,0) as connectNumberIn,
+				ifnull(connectOut, 0) as connectNumberOut,
+				(ifnull(connectIn ,0)+ifnull(connectOut, 0)) as connectNumberTotal,
+				ifnull(connectIn ,0) / ${timepart} as connectNumberInSpeed,
+				ifnull(connectOut ,0) / ${timepart} as connectNumberOutSpeed,
+				(ifnull(connectIn ,0)+ifnull(connectOut, 0)) / ${timepart} as  connectNumberTotalSpeed,
+
+				(ifnull(in_flows,0)+ifnull(out_flows,0))/${allSessionFlows} as flows_rate,
+				(ifnull(in_packages,0)+ifnull(out_packages,0))/${allsessionPackets} as packets_rate,
+				(ifnull(connectIn ,0)+ifnull(connectOut, 0)) / ${allsessionConnects} as connects_rate
+				
+			from 
+			(
+				select 
+					t1.acq_time as acq_time,in_flows,in_packages,out_flows,out_packages, connectIn, connectOut  
+				from 
+				(
+					(select 
+						acq_time, sum(octets_total) as in_flows,sum(packet_total) as in_packages, sum(flow_toatal) as connectIn 
+					from 
+						ANA_IF_IN_NET_APP_TOS_${tableSubfixTime} 
+						<trim prefix="where" prefixOverrides="and |or ">
+							<if test="app_id != null"> app_id=#{app_id}</if>
+							 <if test="deviceIp != null"> AND router_ip = inet_aton(#{deviceIp})</if>
+							 <if test="if_id != null"> AND if_in_id = #{if_id}</if>
+							 <if test="currentproto != null"> AND proto = #{currentproto}</if>
+							  <if test="currentSrcIp != null"> AND src_ip = #{currentSrcIp}</if>
+								 <if test="currentDstIp != null"> AND dst_ip = #{currentDstIp}</if>
+								<if test="timePoints !=null">
+									 and acq_time  in 
+									 <foreach collection="timePoints" item="time" index="index"
+				          			  open="(" close=")" separator=",">
+				          			  #{time}
+				       				 </foreach> 
+								</if>
+					 </trim>
+					group by acq_time) t1 
+					left join
+					(select acq_time, sum(octets_total) as out_flows,sum(packet_total) as out_packages, sum(flow_toatal) as connectOut 
+					from ANA_IF_OUT_NET_APP_TOS_${tableSubfixTime}
+					<trim prefix="where" prefixOverrides="and |or ">
+						<if test="app_id != null"> app_id=#{app_id}</if>
+						 <if test="deviceIp != null"> AND router_ip = inet_aton(#{deviceIp})</if>
+						 <if test="if_id != null"> AND if_out_id = #{if_id}</if>
+						 <if test="currentproto != null"> AND proto = #{currentproto}</if>
+						 <if test="currentSrcIp != null"> AND src_ip = #{currentSrcIp}</if>
+						 <if test="currentDstIp != null"> AND dst_ip = #{currentDstIp}</if>
+						 <if test="timePoints !=null">
+							 and acq_time  in 
+							 <foreach collection="timePoints" item="time" index="index"
+		          			  open="(" close=")" separator=",">
+		          			  #{time}
+		       				 </foreach> 
+						 </if>
+					 </trim>
+					group by acq_time) t2 
+					on t1.acq_time= t2.acq_time
+				) 
+				union
+				select t2.acq_time,in_flows,in_packages,out_flows,out_packages, connectIn, connectOut  
+				from (
+					(select acq_time, sum(octets_total) as in_flows,sum(packet_total) as in_packages, sum(flow_toatal) as connectIn 
+					from ANA_IF_IN_NET_APP_TOS_${tableSubfixTime}
+					<trim prefix="where" prefixOverrides="and |or ">
+							<if test="app_id != null"> app_id=#{app_id}</if>
+							 <if test="deviceIp != null"> AND router_ip = inet_aton(#{deviceIp})</if>
+							 <if test="if_id != null"> AND if_in_id = #{if_id}</if>
+							 <if test="currentproto != null"> AND proto = #{currentproto}</if>
+							  <if test="currentSrcIp != null"> AND src_ip = #{currentSrcIp}</if>
+							 <if test="currentDstIp != null"> AND dst_ip = #{currentDstIp}</if>
+							<if test="timePoints !=null">
+								 and acq_time  in 
+								 <foreach collection="timePoints" item="time" index="index"
+			          			  open="(" close=")" separator=",">
+			          			  #{time}
+			       				 </foreach> 
+							</if>
+					 </trim>
+					group by acq_time) t1 
+					right join
+					(select acq_time, sum(octets_total) as out_flows,sum(packet_total) as out_packages, sum(flow_toatal) as connectOut 
+					from ANA_IF_OUT_NET_APP_TOS_${tableSubfixTime}
+					 <trim prefix="where" prefixOverrides="and |or ">
+							<if test="app_id != null"> app_id=#{app_id}</if>
+							 <if test="deviceIp != null"> AND router_ip = inet_aton(#{deviceIp})</if>
+							 <if test="if_id != null"> AND if_out_id = #{if_id}</if>
+							 <if test="currentproto != null"> AND proto = #{currentproto}</if>
+							  <if test="currentSrcIp != null"> AND src_ip = #{currentSrcIp}</if>
+							 <if test="currentDstIp != null"> AND dst_ip = #{currentDstIp}</if>
+							<if test="timePoints !=null">
+								 and acq_time  in 
+								 <foreach collection="timePoints" item="time" index="index"
+			          			  open="(" close=")" separator=",">
+			          			  #{time}
+			       				 </foreach> 
+							</if>
+					 </trim>
+					group by acq_time) t2 
+					on t1.acq_time = t2.acq_time
+				) 
+			) t4
+		) t5 order by acq_time asc
+	</select>
+	
+	<select id="getprotonamebyidbysession" resultType="java.lang.String" parameterType="java.lang.String">
+		select name from CONF_PROTOCOL where id = #{proto}
+	</select>
+	<!-- 会话协议结束 -->
+	
+	<select id="getallappbysession" resultType="com.mainsteam.stm.portal.netflow.bo.SessionBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+	
+		select 
+			app_name,app_id,
+			
+			in_flows,
+			out_flows,
+			total_flows,
+			in_speed,
+			out_speed,
+			total_speed,
+
+			in_packages,
+			out_packages,
+			total_packages,
+			packetInSpeed,
+			packetOutSpeed,
+			packetTotalSpeed,
+			
+			connectNumberIn,
+			connectNumberOut,
+			connectNumberTotal,
+			connectNumberInSpeed,
+			connectNumberOutSpeed,
+			connectNumberTotalSpeed,
+			
+			flows_rate,
+			flows_rate as flowPctge,
+			packets_rate,
+			packets_rate as packetPctge,
+			connects_rate,
+			connects_rate as connectPctge
+			
+		from (
+				select name as app_name,id as app_id,
+				ifnull(in_flows,0) as in_flows,
+				ifnull(out_flows,0) as out_flows,
+				ifnull(in_flows,0)+ifnull(out_flows,0) as total_flows,
+				ifnull(in_flows,0)/${condition.timepart} as in_speed,
+				ifnull(out_flows,0)/${condition.timepart} as out_speed,
+				ifnull(in_flows,0)/${condition.timepart}+ifnull(out_flows,0)/${condition.timepart} as total_speed,
+
+				ifnull(in_packages,0) as in_packages,
+				ifnull(out_packages,0) as out_packages, 
+				(ifnull(in_packages,0)+ifnull(out_packages,0)) as total_packages,
+				ifnull(in_packages,0)/${condition.timepart} as packetInSpeed,
+				ifnull(out_packages,0)/${condition.timepart} as packetOutSpeed,
+				(ifnull(in_packages,0)+ifnull(out_packages,0)) / ${condition.timepart} as  packetTotalSpeed,
+				
+				ifnull(connectIn, 0) as connectNumberIn,
+				ifnull(connectOut, 0) as connectNumberOut,
+				(ifnull(connectIn, 0)+ifnull(connectOut, 0)) as connectNumberTotal,
+				ifnull(connectIn, 0) / ${condition.timepart} as connectNumberInSpeed,
+				ifnull(connectOut, 0) / ${condition.timepart} as connectNumberOutSpeed,
+				(ifnull(connectIn, 0)+ifnull(connectOut, 0)) / ${condition.timepart} as  connectNumberTotalSpeed,
+
+				(ifnull(in_flows,0)+ifnull(out_flows,0))/${condition.allsessionFlows} as flows_rate,
+				(ifnull(in_packages,0)+ifnull(out_packages,0)) / ${condition.allsessionPackets} as packets_rate,
+				(ifnull(connectIn, 0)+ifnull(connectOut, 0)) / ${condition.allsessionConnects} as connects_rate
+				
+				from 
+					(
+					select 
+						t1.name,t1.id,ifnull(in_flows,0) as in_flows,ifnull(in_packages,0) as in_packages,
+						ifnull(out_flows,0) as out_flows,ifnull(out_packages,0) as out_packages,
+						ifnull(connectIn, 0) as connectIn, ifnull(connectOut, 0) as connectOut  
+					from
+					(
+						(
+							select g.name,g.id,sum(octets_total) as in_flows,sum(packet_total) as in_packages,sum(flow_total) as connectIn 
+							from CONF_APPLICATION_GROUP g left join 	
+							CONF_APPLICATION_GROUP_MAP m on g.id = m.app_group_id left join CONF_APPLICATION a
+							on m.app_id = a.id left join ANA_IF_IN_NET_APP_TOS_${condition.tableSubfixTime}  f on a.id = f.app_id 
+							<trim prefix="where" prefixOverrides="and |or ">
+								<if test="condition.app_id!= null"> f.app_id=#{condition.app_id}</if>
+								<if test="condition.deviceIp != null"> AND f.router_ip = inet_aton(#{condition.deviceIp})</if>
+								<if test="condition.if_id!= null"> and f.if_in_id=#{condition.if_id}</if>
+								<if test="condition.currentSrcIp!= null"> and f.src_ip=#{condition.currentSrcIp}</if>
+								<if test="condition.currentDstIp!= null"> and f.dst_ip=#{condition.currentDstIp}</if>
+								<if test="condition.stime != null"> AND f.ACQ_TIME <![CDATA[ > ]]> #{condition.stime}</if>
+								<if test="condition.etime != null"> AND f.ACQ_TIME <![CDATA[ <= ]]> #{condition.etime}</if>
+							 </trim>
+							group by g.id 
+						) t1 left join 
+				
+						(
+						select g.name,g.id,sum(octets_total) as out_flows,sum(packet_total) as out_packages,sum(flow_total) as connectOut  
+						from CONF_APPLICATION_GROUP g left join 		
+						CONF_APPLICATION_GROUP_MAP m on g.id = m.app_group_id left join CONF_APPLICATION a
+						on m.app_id = a.id left join ANA_IF_OUT_NET_APP_TOS_${condition.tableSubfixTime} f on a.id = f.app_id 
+						<trim prefix="where" prefixOverrides="and |or ">
+								<if test="condition.app_id!= null"> f.app_id=#{condition.app_id}</if>
+								<if test="condition.deviceIp != null"> AND f.router_ip = inet_aton(#{condition.deviceIp})</if>
+								<if test="condition.if_id!= null"> and f.if_out_id=#{condition.if_id}</if>
+								<if test="condition.currentSrcIp!= null"> and f.src_ip=#{condition.currentSrcIp}</if>
+								<if test="condition.currentDstIp!= null"> and f.dst_ip=#{condition.currentDstIp}</if>
+								<if test="condition.stime != null"> AND f.ACQ_TIME <![CDATA[ > ]]> #{condition.stime}</if>
+								<if test="condition.etime != null"> AND f.ACQ_TIME <![CDATA[ <= ]]> #{condition.etime}</if>
+							 </trim>
+						group by g.id
+						) t2 on t1.id = t2.id
+					)
+					union
+					select 
+						t2.name,t2.id,ifnull(in_flows,0) as in_flows,
+						ifnull(in_packages,0) as in_packages,ifnull(out_flows,0) as out_flows,ifnull(out_packages,0) as out_packages,
+						ifnull(connectIn ,0) as connectIn, ifnull(connectOut, 0) as connectOut  
+					from
+					(
+						(
+							select 
+								g.name,g.id,sum(octets_total) as in_flows,sum(packet_total) as in_packages,sum(flow_total) as connectIn  
+							from CONF_APPLICATION_GROUP g left join 	
+							CONF_APPLICATION_GROUP_MAP m on g.id = m.app_group_id left join CONF_APPLICATION a
+							on m.app_id = a.id left join ANA_IF_IN_NET_APP_TOS_${condition.tableSubfixTime} f on a.id = f.app_id 
+							<trim prefix="where" prefixOverrides="and |or ">
+								<if test="condition.app_id!= null"> f.app_id=#{condition.app_id}</if>
+								<if test="condition.deviceIp != null"> AND f.router_ip = inet_aton(#{condition.deviceIp})</if>
+								<if test="condition.if_id!= null"> and f.if_in_id=#{condition.if_id}</if>
+								<if test="condition.currentSrcIp!= null"> and f.src_ip=#{condition.currentSrcIp}</if>
+								<if test="condition.currentDstIp!= null"> and f.dst_ip=#{condition.currentDstIp}</if>
+								<if test="condition.stime != null"> AND f.ACQ_TIME <![CDATA[ > ]]> #{condition.stime}</if>
+								<if test="condition.etime != null"> AND f.ACQ_TIME <![CDATA[ <= ]]> #{condition.etime}</if>
+							 </trim>
+							group by g.id 
+						) t1 right join 
+				
+						(
+						select 
+							g.name,g.id,sum(octets_total) as out_flows,sum(packet_total) as out_packages,sum(flow_total) as connectOut   
+							from CONF_APPLICATION_GROUP g left join 		
+						CONF_APPLICATION_GROUP_MAP m on g.id = m.app_group_id left join CONF_APPLICATION a
+						on m.app_id = a.id left join ANA_IF_OUT_NET_APP_TOS_${condition.tableSubfixTime} f on a.id = f.app_id 
+							<trim prefix="where" prefixOverrides="and |or ">
+								<if test="condition.app_id!= null"> f.app_id=#{condition.app_id}</if>
+								<if test="condition.deviceIp != null"> AND f.router_ip = inet_aton(#{condition.deviceIp})</if>
+								<if test="condition.if_id!= null"> and f.if_out_id=#{condition.if_id}</if>
+								<if test="condition.currentSrcIp!= null"> and f.src_ip=#{condition.currentSrcIp}</if>
+								<if test="condition.currentDstIp!= null"> and f.dst_ip=#{condition.currentDstIp}</if>
+								<if test="condition.stime != null"> AND f.ACQ_TIME <![CDATA[ > ]]> #{condition.stime}</if>
+								<if test="condition.etime != null"> AND f.ACQ_TIME <![CDATA[ <= ]]> #{condition.etime}</if>
+							 </trim>
+						group by g.id
+						) t2 on t1.id = t2.id
+					)
+				)t3 
+		) t4 
+		order by ${condition.sort}  ${condition.order}
+	</select>
+	
+	<select id="getallappflowsbysession" resultType="java.lang.String" parameterType="com.mainsteam.stm.portal.netflow.bo.SessionConditionBo">
+									select 
+									  sum(ifnull(in_flows,0)+ifnull(out_flows,0)) as total_flows
+									from 
+										(
+									
+										select t1.name,ifnull(in_flows,0) as in_flows,ifnull(in_packages,0)as in_packages,ifnull(out_flows,0)as out_flows,ifnull(out_packages,0)as out_packages from
+										(
+											(
+												select g.name,g.id,sum(octets_total) as in_flows,sum(packet_total) as in_packages from CONF_APPLICATION_GROUP g left join 		
+												CONF_APPLICATION_GROUP_MAP m on g.id = m.app_group_id left join CONF_APPLICATION a
+												on m.app_id = a.id  left join ANA_IF_IN_NET_APP_TOS_${tableSubfixTime} f on a.id = f.app_id 
+												<trim prefix="where" prefixOverrides="and |or ">
+															<if test="app_id != null"> f.app_id=#{app_id}</if>
+															<if test="deviceIp != null"> AND f.router_ip = inet_aton(#{deviceIp})</if>
+											           	    <if test="if_id != null"> AND f.if_in_id = #{if_id}</if>
+											           	    	 <if test="currentSrcIp != null"> AND f.src_ip = #{currentSrcIp}</if>
+											           		  <if test="currentDstIp != null"> AND f.dst_ip = #{currentDstIp}</if>
+															<if test="stime != null"> AND f.ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+															<if test="etime != null"> AND f.ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+												</trim>
+												group by g.id 
+											) t1 left join 
+									
+											(
+											select g.name,g.id,sum(octets_total) as out_flows,sum(packet_total) as out_packages from CONF_APPLICATION_GROUP g left join 			   
+											CONF_APPLICATION_GROUP_MAP m on g.id = m.app_group_id left join CONF_APPLICATION a
+											on m.app_id = a.id left join ANA_IF_OUT_NET_APP_TOS_${tableSubfixTime} f on a.id = f.app_id 
+												<trim prefix="where" prefixOverrides="and |or ">
+															<if test="app_id != null"> f.app_id=#{app_id}</if>
+															<if test="deviceIp != null"> AND f.router_ip = inet_aton(#{deviceIp})</if>
+											           	    <if test="if_id != null"> AND f.if_out_id = #{if_id}</if>
+											           	    	 <if test="currentSrcIp != null"> AND f.src_ip = #{currentSrcIp}</if>
+											           		  <if test="currentDstIp != null"> AND f.dst_ip = #{currentDstIp}</if>
+															<if test="stime != null"> AND f.ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+															<if test="etime != null"> AND f.ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+												</trim>
+											group by g.id
+											) t2 on t1.id = t2.id
+										)
+										union
+										select t2.name,ifnull(in_flows,0)as in_flows,ifnull(in_packages,0) as in_packages,ifnull(out_flows,0) as out_flows,ifnull(out_packages,0) as out_packages from
+										(
+											(
+												select g.name,g.id,sum(octets_total) as in_flows,sum(packet_total) as in_packages from CONF_APPLICATION_GROUP g left join 		
+												CONF_APPLICATION_GROUP_MAP m on g.id = m.app_group_id left join CONF_APPLICATION a
+												on m.app_id = a.id left join ANA_IF_IN_NET_APP_TOS_${tableSubfixTime} f on a.id = f.app_id 
+													<trim prefix="where" prefixOverrides="and |or ">
+															<if test="app_id != null"> f.app_id=#{app_id}</if>
+															<if test="deviceIp != null"> AND f.router_ip = inet_aton(#{deviceIp})</if>
+											           	    <if test="if_id != null"> AND f.if_in_id = #{if_id}</if>
+											           	    	 <if test="currentSrcIp != null"> AND f.src_ip = #{currentSrcIp}</if>
+											           		  <if test="currentDstIp != null"> AND f.dst_ip = #{currentDstIp}</if>
+															<if test="stime != null"> AND f.ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+															<if test="etime != null"> AND f.ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+												</trim>
+												group by g.id 
+											) t1 right join 
+									
+											(
+											select g.name,g.id,sum(octets_total) as out_flows,sum(packet_total) as out_packages from CONF_APPLICATION_GROUP g left join 	
+											CONF_APPLICATION_GROUP_MAP m on g.id = m.app_group_id left join CONF_APPLICATION a
+											on m.app_id = a.id left join ANA_IF_OUT_NET_APP_TOS_${tableSubfixTime} f on a.id = f.app_id 
+												<trim prefix="where" prefixOverrides="and |or ">
+															<if test="app_id != null"> f.app_id=#{app_id}</if>
+															<if test="deviceIp != null"> AND f.router_ip = inet_aton(#{deviceIp})</if>
+											           	    <if test="if_id != null"> AND f.if_out_id = #{if_id}</if>
+											           	     <if test="currentSrcIp != null"> AND f.src_ip = #{currentSrcIp}</if>
+											           		  <if test="currentDstIp != null"> AND f.dst_ip = #{currentDstIp}</if>
+															<if test="stime != null"> AND f.ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+															<if test="etime != null"> AND f.ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+												</trim>
+											group by g.id
+											) t2 on t1.id = t2.id
+										)
+									)t3 
+												
+						
+	</select>
+	
+	<!-- 会话应用流量，包，连接数 -->
+	<select id="getSessionAppTotals" resultType="com.mainsteam.stm.portal.netflow.bo.Whole" parameterType="com.mainsteam.stm.portal.netflow.bo.SessionConditionBo">
+		select 
+		  	ifnull(sum(ifnull(in_flows,0)+ifnull(out_flows,0)), 0) as wholeFlows,
+		  	ifnull(sum(ifnull(in_packages, 0)+ifnull(out_packages, 0)), 0) as wholePackets,
+		  	ifnull(sum(ifnull(connectIn, 0)+ifnull(connectOut, 0)), 0) as wholeConnects
+		from 
+			(
+			select 
+				t1.name,
+				ifnull(in_flows,0) as in_flows,
+				ifnull(in_packages,0)as in_packages,
+				ifnull(out_flows,0)as out_flows,
+				ifnull(out_packages,0)as out_packages, 
+				ifnull(connectIn, 0) as connectIn, 
+				ifnull(connectOut, 0) as connectOut  
+			from
+			(
+				(
+					select 
+						g.name,g.id,sum(octets_total) as in_flows,
+						sum(packet_total) as in_packages, 
+						sum(flow_total) as connectIn  
+					from 
+						CONF_APPLICATION_GROUP g left join 		
+					CONF_APPLICATION_GROUP_MAP m on g.id = m.app_group_id left join CONF_APPLICATION a
+					on m.app_id = a.id  left join ANA_IF_IN_NET_APP_TOS_${tableSubfixTime} f on a.id = f.app_id 
+					<trim prefix="where" prefixOverrides="and |or ">
+								<if test="app_id != null"> f.app_id=#{app_id}</if>
+								<if test="deviceIp != null"> AND f.router_ip = inet_aton(#{deviceIp})</if>
+				           	    <if test="if_id != null"> AND f.if_in_id = #{if_id}</if>
+				           	    	 <if test="currentSrcIp != null"> AND f.src_ip = #{currentSrcIp}</if>
+				           		  <if test="currentDstIp != null"> AND f.dst_ip = #{currentDstIp}</if>
+								<if test="stime != null"> AND f.ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+								<if test="etime != null"> AND f.ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+					</trim>
+					group by g.id 
+				) t1 left join 
+				(
+				select 
+					g.name,g.id,sum(octets_total) as out_flows,sum(packet_total) as out_packages, sum(flow_total) as connectOut  
+				from CONF_APPLICATION_GROUP g left join 			   
+				CONF_APPLICATION_GROUP_MAP m on g.id = m.app_group_id left join CONF_APPLICATION a
+				on m.app_id = a.id left join ANA_IF_OUT_NET_APP_TOS_${tableSubfixTime} f on a.id = f.app_id 
+					<trim prefix="where" prefixOverrides="and |or ">
+								<if test="app_id != null"> f.app_id=#{app_id}</if>
+								<if test="deviceIp != null"> AND f.router_ip = inet_aton(#{deviceIp})</if>
+				           	    <if test="if_id != null"> AND f.if_out_id = #{if_id}</if>
+				           	    	 <if test="currentSrcIp != null"> AND f.src_ip = #{currentSrcIp}</if>
+				           		  <if test="currentDstIp != null"> AND f.dst_ip = #{currentDstIp}</if>
+								<if test="stime != null"> AND f.ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+								<if test="etime != null"> AND f.ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+					</trim>
+				group by g.id
+				) t2 on t1.id = t2.id
+			)
+			union
+			
+			select 
+				t2.name,ifnull(in_flows,0)as in_flows,ifnull(in_packages,0) as in_packages,ifnull(out_flows,0) as out_flows,
+				ifnull(out_packages,0) as out_packages, ifnull(connectIn, 0) as connectIn, ifnull(connectOut, 0) as connectOut   
+			from
+			(
+				(
+					select 
+						g.name,g.id,sum(octets_total) as in_flows,sum(packet_total) as in_packages, sum(flow_total) as connectIn  
+					from CONF_APPLICATION_GROUP g left join 		
+					CONF_APPLICATION_GROUP_MAP m on g.id = m.app_group_id left join CONF_APPLICATION a
+					on m.app_id = a.id left join ANA_IF_IN_NET_APP_TOS_${tableSubfixTime} f on a.id = f.app_id 
+						<trim prefix="where" prefixOverrides="and |or ">
+								<if test="app_id != null"> f.app_id=#{app_id}</if>
+								<if test="deviceIp != null"> AND f.router_ip = inet_aton(#{deviceIp})</if>
+				           	    <if test="if_id != null"> AND f.if_in_id = #{if_id}</if>
+				           	    	 <if test="currentSrcIp != null"> AND f.src_ip = #{currentSrcIp}</if>
+				           		  <if test="currentDstIp != null"> AND f.dst_ip = #{currentDstIp}</if>
+								<if test="stime != null"> AND f.ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+								<if test="etime != null"> AND f.ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+					</trim>
+					group by g.id 
+				) t1 right join 
+				(
+				select 
+					g.name,g.id,sum(octets_total) as out_flows,sum(packet_total) as out_packages, sum(flow_total) as connectOut  
+				from 
+					CONF_APPLICATION_GROUP g left join 	
+				CONF_APPLICATION_GROUP_MAP m on g.id = m.app_group_id left join CONF_APPLICATION a
+				on m.app_id = a.id left join ANA_IF_OUT_NET_APP_TOS_${tableSubfixTime} f on a.id = f.app_id 
+					<trim prefix="where" prefixOverrides="and |or ">
+								<if test="app_id != null"> f.app_id=#{app_id}</if>
+								<if test="deviceIp != null"> AND f.router_ip = inet_aton(#{deviceIp})</if>
+				           	    <if test="if_id != null"> AND f.if_out_id = #{if_id}</if>
+				           	     <if test="currentSrcIp != null"> AND f.src_ip = #{currentSrcIp}</if>
+				           		  <if test="currentDstIp != null"> AND f.dst_ip = #{currentDstIp}</if>
+								<if test="stime != null"> AND f.ACQ_TIME <![CDATA[ > ]]> #{stime}</if>
+								<if test="etime != null"> AND f.ACQ_TIME <![CDATA[ <= ]]> #{etime}</if>
+					</trim>
+				group by g.id
+				) t2 on t1.id = t2.id
+			)
+		)t3 
+						
+	</select>
+	
+	<select id="getappchartdatabysession" resultType="com.mainsteam.stm.portal.netflow.bo.SessionBo" parameterType="com.mainsteam.stm.portal.netflow.bo.SessionConditionBo">
+							
+			
+		select acq_time, ifnull(in_flows,0) as in_flows,ifnull(in_packages,0) as in_packages,
+			ifnull(out_flows,0) as out_flows,ifnull(out_packages,0) as out_packages, 
+			ifnull(in_flows,0)+ifnull(out_flows,0) as total_flows,
+			(ifnull(in_packages,0)+ifnull(out_packages,0)) as total_packages,
+			ifnull(in_flows,0)/${timepart} as in_speed,
+			ifnull(out_flows,0)/${timepart} as out_speed,
+			ifnull(in_flows,0)/${timepart}+ifnull(out_flows,0)/${timepart} as total_speed,
+			ifnull(ifnull(in_packages,0) / ${timepart}, 0) as packetInSpeed,
+			ifnull(ifnull(out_packages,0) / ${timepart}, 0) as packetOutSpeed,
+			(ifnull(out_packages,0)+ifnull(in_packages,0)) / ${timepart} as packetTotalSpeed,
+			ifnull(connectIn, 0) as connectNumberIn,
+			ifnull(connectOut, 0) as connectNumberOut,
+			(ifnull(connectIn, 0)+ifnull(connectOut, 0)) as connectNumberTotal,
+			ifnull(connectIn, 0) / ${timepart} as connectNumberInSpeed,
+			ifnull(connectOut, 0) / ${timepart} as connectNumberOutSpeed,
+			(ifnull(connectIn, 0)+ifnull(connectOut, 0)) / ${timepart} as  connectNumberTotalSpeed,
+			
+			(ifnull(in_flows,0)+ifnull(out_flows,0))/${allSessionFlows} as flows_rate,
+			(ifnull(in_flows,0)+ifnull(out_flows,0))/${allSessionFlows} as flowPctge,
+			(ifnull(in_packages,0)+ifnull(out_packages,0))/${allSessionFlows} as packets_rate,
+			(ifnull(in_packages,0)+ifnull(out_packages,0))/${allSessionFlows} as packetPctge,
+			(ifnull(connectIn,0)+ifnull(connectOut,0))/${allsessionConnects} as connects_rate,
+			(ifnull(connectIn,0)+ifnull(connectOut,0))/${allsessionConnects} as connectPctge
+			
+		from 
+			(
+		
+			select t1.acq_time,ifnull(in_flows,0) as in_flows,ifnull(in_packages,0) as in_packages,
+			ifnull(out_flows,0) as out_flows,ifnull(out_packages,0) as out_packages,
+			ifnull(connectIn, 0) as connectIn, ifnull(connectOut, 0) as connectOut  
+			from
+			(
+				(
+					select f.acq_time,g.id,sum(octets_total) as in_flows,sum(packet_total) as in_packages, sum(flow_total) as connectIn 
+					from CONF_APPLICATION_GROUP g left join
+					CONF_APPLICATION_GROUP_MAP m on g.id = m.app_group_id left join CONF_APPLICATION a
+					on m.app_id = a.id left join ANA_IF_IN_NET_APP_TOS_${tableSubfixTime} f on a.id = f.app_id 
+					 <trim prefix="where" prefixOverrides="and |or ">
+						<if test="app_id != null"> f.app_id=#{app_id}</if>
+						 <if test="deviceIp != null"> f.AND router_ip = inet_aton(#{deviceIp})</if>
+						 <if test="if_id != null"> AND f.if_in_id = #{if_id}</if>
+						 <if test="currentproto != null"> f.AND proto = #{currentproto}</if>
+						  <if test="currentSrcIp != null"> AND f.src_ip = #{currentSrcIp}</if>
+							 <if test="currentDstIp != null"> AND f.dst_ip = #{currentDstIp}</if>
+							<if test="timePoints !=null">
+								 and f.acq_time  in 
+								 <foreach collection="timePoints" item="time" index="index"
+			          			  open="(" close=")" separator=",">
+			          			  #{time}
+			       				 </foreach> 
+							</if>
+					 </trim>
+					group by acq_time
+				) t1 left join 
+		
+				(
+				select f.acq_time,g.id,sum(octets_total) as out_flows,sum(packet_total) as out_packages, sum(flow_total) as connectOut  
+				from CONF_APPLICATION_GROUP g left join 
+				CONF_APPLICATION_GROUP_MAP m on g.id = m.app_group_id left join CONF_APPLICATION a
+				on m.app_id = a.id left join ANA_IF_OUT_NET_APP_TOS_${tableSubfixTime} f on a.id = f.app_id 
+				 <trim prefix="where" prefixOverrides="and |or ">
+						<if test="app_id != null"> f.app_id=#{app_id}</if>
+						 <if test="deviceIp != null"> f.AND router_ip = inet_aton(#{deviceIp})</if>
+						 <if test="if_id != null"> AND f.if_out_id = #{if_id}</if>
+						 <if test="currentproto != null"> f.AND proto = #{currentproto}</if>
+						  <if test="currentSrcIp != null"> AND f.src_ip = #{currentSrcIp}</if>
+							 <if test="currentDstIp != null"> AND f.dst_ip = #{currentDstIp}</if>
+							<if test="timePoints !=null">
+								 and f.acq_time  in 
+								 <foreach collection="timePoints" item="time" index="index"
+			          			  open="(" close=")" separator=",">
+			          			  #{time}
+			       				 </foreach> 
+							</if>
+					 </trim>
+				group by acq_time
+				) t2 on t1.acq_time = t2.acq_time
+			)
+			union
+			select t2.acq_time,ifnull(in_flows,0) as in_flows,ifnull(in_packages,0) as in_packages,
+			ifnull(out_flows,0) as out_flows,
+			ifnull(out_packages,0) as out_packages,
+			ifnull(connectIn, 0) as connectIn, ifnull(connectOut, 0) as connectOut  
+			from
+			(
+				(
+					select f.acq_time,g.id,sum(octets_total) as in_flows,sum(packet_total) as in_packages, sum(flow_total) as connectIn  
+					from CONF_APPLICATION_GROUP g left join 
+					CONF_APPLICATION_GROUP_MAP m on g.id = m.app_group_id left join CONF_APPLICATION a
+					on m.app_id = a.id left join ANA_IF_IN_NET_APP_TOS_${tableSubfixTime} f on a.id = f.app_id 
+					 <trim prefix="where" prefixOverrides="and |or ">
+						<if test="app_id != null"> f.app_id=#{app_id}</if>
+						 <if test="deviceIp != null"> f.AND router_ip = inet_aton(#{deviceIp})</if>
+						 <if test="if_id != null"> AND f.if_in_id = #{if_id}</if>
+						 <if test="currentproto != null"> f.AND proto = #{currentproto}</if>
+						  <if test="currentSrcIp != null"> AND f.src_ip = #{currentSrcIp}</if>
+							 <if test="currentDstIp != null"> AND f.dst_ip = #{currentDstIp}</if>
+							<if test="timePoints !=null">
+								 and f.acq_time  in 
+								 <foreach collection="timePoints" item="time" index="index"
+			          			  open="(" close=")" separator=",">
+			          			  #{time}
+			       				 </foreach> 
+							</if>
+					 </trim>
+					group by acq_time
+				) t1 right join 
+		
+				(
+				select f.acq_time,g.id,sum(octets_total) as out_flows,sum(packet_total) as out_packages, sum(flow_total) as connectOut  
+				from CONF_APPLICATION_GROUP g left join 			
+				CONF_APPLICATION_GROUP_MAP m on g.id = m.app_group_id left join CONF_APPLICATION a
+				on m.app_id = a.id left join ANA_IF_OUT_NET_APP_TOS_${tableSubfixTime} f on a.id = f.app_id 
+				 <trim prefix="where" prefixOverrides="and |or ">
+						<if test="app_id != null"> f.app_id=#{app_id}</if>
+						 <if test="deviceIp != null"> f.AND router_ip = inet_aton(#{deviceIp})</if>
+						 <if test="if_id != null"> AND f.if_out_id = #{if_id}</if>
+						 <if test="currentproto != null"> f.AND proto = #{currentproto}</if>
+						  <if test="currentSrcIp != null"> AND f.src_ip = #{currentSrcIp}</if>
+							 <if test="currentDstIp != null"> AND f.dst_ip = #{currentDstIp}</if>
+							<if test="timePoints !=null">
+								 and f.acq_time  in 
+								 <foreach collection="timePoints" item="time" index="index"
+			          			  open="(" close=")" separator=",">
+			          			  #{time}
+			       				 </foreach> 
+							</if>
+					 </trim>
+				group by acq_time
+				) t2 on t1.acq_time = t2.acq_time
+			)
+		)t3 order by acq_time asc
+	</select>
+	<!-- 会话终端结束 -->
+	
+	<select id="getallnamebyidbysession" resultType="java.lang.String" parameterType="java.lang.String">
+			select name from CONF_APPLICATION_GROUP where id = #{app_id}
+	</select>
+</mapper>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="deviceDao"
+		class="com.mainsteam.stm.portal.netflow.dao.impl.DeviceDaoImpl">
+		<constructor-arg ref="portal_netflow_sqlSession"></constructor-arg>
+	</bean>
+
+	<bean id="deviceApi"
+		class="com.mainsteam.stm.portal.netflow.service.impl.DeviceImpl">
+		<property name="deviceDao" ref="deviceDao" />
+		<property name="resourceInstanceService" ref="resourceInstanceService" />
+		<property name="capacityService" ref="capacityService" />
+	</bean>
+
+	<bean id="netflowLicenseRemainCountApi"
+		class="com.mainsteam.stm.portal.netflow.service.impl.NetflowLicenseRemainCountApi">
+		<property name="deviceDao" ref="deviceDao" />
+	</bean>
+
+	<!-- 设备流量查询配置 -->
+	<bean id="deviceFlowDao"
+		class="com.mainsteam.stm.portal.netflow.dao.impl.IDeviceFlowDaoImpl">
+		<constructor-arg ref="portal_netflow_sqlSession"></constructor-arg>
+	</bean>
+
+	<bean id="deviceFlowApi"
+		class="com.mainsteam.stm.portal.netflow.service.impl.IDeviceFlowApiImpl">
+		<property name="deviceFlowDao" ref="deviceFlowDao" />
+	</bean>
+	<!-- 设备流量查询配置结束 -->
+
+	<!-- 设备的应用流量查询dao配置 -->
+	<bean id="deviceAppDao"
+		class="com.mainsteam.stm.portal.netflow.dao.impl.IDeviceAppDaoImpl">
+		<constructor-arg ref="portal_netflow_sqlSession"></constructor-arg>
+	</bean>
+	<bean id="deviceAppApi"
+		class="com.mainsteam.stm.portal.netflow.service.impl.IDeviceAppApiImpl">
+		<property name="deviceAppDao" ref="deviceAppDao" />
+	</bean>
+	<!-- 设备的应用流量查询dao配置结束 -->
+
+	<!-- 设备的协议流量查询dao配置开始 -->
+	<bean id="deviceProtoDao"
+		class="com.mainsteam.stm.portal.netflow.dao.impl.IDeviceProtoDaoImpl">
+		<constructor-arg ref="portal_netflow_sqlSession"></constructor-arg>
+	</bean>
+	<bean id="deviceProtoApi"
+		class="com.mainsteam.stm.portal.netflow.service.impl.IDeviceProtoApiImpl">
+		<property name="deviceProtoDao" ref="deviceProtoDao" />
+	</bean>
+	<!-- 设备的协议流量查询dao配置结束 -->
+
+	<!-- 设备tos流量查询dao配置开始 -->
+	<bean id="deviceTosDao"
+		class="com.mainsteam.stm.portal.netflow.dao.impl.IDeviceTosDaoImpl">
+		<constructor-arg ref="portal_netflow_sqlSession"></constructor-arg>
+	</bean>
+	<bean id="deviceTosApi"
+		class="com.mainsteam.stm.portal.netflow.service.impl.IDeviceTosApiImpl">
+		<property name="deviceTosDao" ref="deviceTosDao" />
+	</bean>
+	<!-- 设备tos流量查询dao配置结束 -->
+
+</beans>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.portal.alarm.dao.IRemoteDataQueryRecordDao">
+	
+	<insert id="insert" parameterType="com.mainsteam.stm.portal.alarm.bo.RemoteDataQueryRecord" >
+	    insert into STM_ALARM_QUERY_RECORD
+	    (RECORD_ID,REMOTE_IP,REMOTE_PORT,QUERY_TIME,LAST_ALARM_ID)
+	    values 
+	    (#{recordId},#{remoteIp}, #{remotePort}, #{queryTime}, #{lastAlarmId})
+	</insert>
+	
+	<select id="selectByIp"  resultType="com.mainsteam.stm.portal.alarm.bo.RemoteDataQueryRecord" parameterType="java.lang.String" >
+	    select
+	    RECORD_ID as recordId,
+	    REMOTE_IP as remoteIp,
+	    REMOTE_PORT as remotePort,
+	    QUERY_TIME as queryTime,
+	    LAST_ALARM_ID as lastAlarmId
+	    from STM_ALARM_QUERY_RECORD where REMOTE_IP = #{remoteIp}
+	</select>
+	
+	<update id="update" parameterType="com.mainsteam.stm.portal.alarm.bo.RemoteDataQueryRecord">
+		update STM_ALARM_QUERY_RECORD
+		<set>
+			<if test="remotePort != null"> REMOTE_PORT = #{remotePort}, </if>
+			<if test="queryTime != null"> QUERY_TIME = #{queryTime}, </if>
+			<if test="lastAlarmId != null"> LAST_ALARM_ID = #{lastAlarmId}</if>
+		</set>
+		where RECORD_ID=#{recordId}
+	</update>
+	
+	<delete id="delete" >
+		delete from STM_ALARM_QUERY_RECORD where RECORD_ID in
+		<foreach item="recordId" index="index" collection="array" open="(" separator="," close=")">
+			#{recordId}
+		</foreach>
+	</delete>
+	
+</mapper>

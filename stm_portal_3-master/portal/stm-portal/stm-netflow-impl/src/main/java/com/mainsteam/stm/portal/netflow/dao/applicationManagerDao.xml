@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.stm.portal.netflow.dao.IDeviceGroupDao">
+
+	<select id="getAllProtocols" resultType="com.mainsteam.stm.stm.portal.netflow.bo.ProtocolBo">
+		select * from
+		CONF_PROTOCOL
+	</select>
+
+	<insert id="saveApplicationGroup" useGeneratedKeys="true"
+		keyProperty="id">
+		insert CONF_APPLICATION_GROUP(NAME,PORTS,IPS,PROTOCOL_ID)
+		value(#{name},#{ports},#{ips},#{protocolId})
+	</insert>
+
+	<insert id="saveApplication">
+		insert
+		CONF_APPLICATION(id,name,protocol_id,start_ip_addr,end_ip_addr,start_port,end_port)
+		value(#{id},#{name},#{protocolId},#{startIp},#{endIp},#{startPort},#{endPort})
+	</insert>
+
+	<insert id="saveApplicationGroupMap">
+		insert
+		CONF_APPLICATION_GROUP_MAP(app_group_id,app_id)
+		value(#{groupId},#{appId});
+	</insert>
+
+	<select id="queryApplicationGroup" resultType="com.mainsteam.stm.stm.portal.netflow.bo.ApplicationBo">
+		SELECT
+		g.id,g.name,p.name
+		protocolName,group_concat(a.start_port,if(isnull(a.end_port) or
+		a.end_port = '' or a.end_port =
+		a.start_port,'','-'),if(isnull(a.end_port) or a.end_port =
+		a.start_port,'',ifnull(a.end_port,'')))
+		ports,group_concat(a.start_ip_addr,if(isnull(a.end_ip_addr) or
+		a.end_ip_addr = '','','-'),ifnull(a.end_ip_addr,'')) ips FROM
+		CONF_APPLICATION_GROUP g left join CONF_APPLICATION_GROUP_MAP m on
+		g.id = m.app_group_id left join CONF_APPLICATION a on a.id = m.app_id
+		left join CONF_PROTOCOL p on a.protocol_id = p.id
+		<trim prefix="where" prefixOverrides="and |or ">
+			<if test="condition.protocolName != null"> AND upper(g.name) like
+				concat('%',upper(#{condition.protocolName}),'%')</if>
+			<if test="condition.ips != null"> AND upper(g.name) like
+				concat(upper(#{condition.ips}),'%')</if>
+		</trim>
+		group by g.id
+		<choose>
+			<when test="condition.ports!=null">
+				order by g.name ${condition.ports}
+			</when>
+			<otherwise>
+				order by g.id desc
+			</otherwise>
+		</choose>
+
+
+	</select>
+
+	<delete id="delApplicationGroupMap">
+		delete from CONF_APPLICATION_GROUP_MAP where app_group_id in
+		<foreach collection="ids" item="item" index="in" open="("
+			separator="," close=")">#{item}</foreach>
+	</delete>
+
+	<delete id="delApplication">
+		delete from CONF_APPLICATION where id in(select
+		app_id from
+		CONF_APPLICATION_GROUP_MAP where app_group_id in
+		<foreach collection="ids" item="item" index="in" open="("
+			separator="," close=")">#{item}</foreach>
+		)
+	</delete>
+
+	<delete id="delApplicationGroup">
+		delete from CONF_APPLICATION_GROUP where id in
+		<foreach collection="ids" item="item" index="in" open="("
+			separator="," close=")">#{item}</foreach>
+	</delete>
+
+	<select id="get_application_group" resultType="com.mainsteam.stm.stm.portal.netflow.bo.ApplicationBo"
+		parameterType="java.util.HashMap">
+		select id,name,protocol_id protocolName,ports,ips
+		from
+		CONF_APPLICATION_GROUP where id = #{id}
+	</select>
+
+	<select id="application_group_getCount" resultType="java.lang.Integer"
+		parameterType="java.util.HashMap">
+		select count(1) from CONF_APPLICATION_GROUP where name =
+		#{name}
+		<if test="id!=null">
+			and id not in(#{id})
+		</if>
+	</select>
+</mapper>

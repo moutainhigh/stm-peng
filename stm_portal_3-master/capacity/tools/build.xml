@@ -1,0 +1,110 @@
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one
+   or more contributor license agreements.  See the NOTICE file
+   distributed with this work for additional information
+   regarding copyright ownership.  The ASF licenses this file
+   to you under the Apache License, Version 2.0 (the
+   "License"); you may not use this file except in compliance
+   with the License.  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing,
+   software distributed under the License is distributed on an
+   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+   KIND, either express or implied.  See the License for the
+   specific language governing permissions and limitations
+   under the License.    
+-->
+<project name="xmlencrypt" default="run" basedir=".">
+    
+    <property name="from" value="${basedir}/4.1docs" />
+    <property name="to" value="${basedir}/../cap_libs/resources" />
+    <property name="supportFilePath" value="${basedir}/supportDocs/" />
+	<property name="metricFilePath" value="${basedir}/metricDocs/" />
+	<property name="sourceNetwork" value="${basedir}/4.1docs/network" />
+	<property name="tempAdminNetwork" value="${basedir}/tempAdminNetwork/" />
+	<property name="tempOperNetwork" value="${basedir}/tempOperNetwork/" />
+	<property name="adminNetwork" value="${basedir}/adminNetwork/" />
+	<property name="operNetwork" value="${basedir}/operNetwork/" />
+    
+    <target name="translatexml">
+        <echo>"${from}"</echo>
+        <echo>"${to}"</echo>
+    	<delete dir="${to}" />
+        <java classname="com.mainsteam.stm.capvalidate.endecoder.CapEncoder">
+            <classpath>
+                <fileset dir="lib" includes="**/*.jar"></fileset>
+            </classpath>
+            <arg value="${from}"/>
+            <arg value="${to}"/>
+        </java>
+    </target>
+    <target name="outputSupportDoc">
+        <java classname="com.mainsteam.stm.output.support.execl.ExcelUtil">
+            <classpath>
+                <fileset dir="lib" includes="**/*.jar"></fileset>
+            </classpath>
+            <arg value="${basedir}/../cap_libs"/>
+            <arg value="${supportFilePath}" />
+        </java>
+    </target>
+	<target name="outputMetricsDoc">
+        <java classname="com.mainsteam.stm.output.support.execl.OutputMetricsToExcelUtil">
+            <classpath>
+                <fileset dir="lib" includes="**/*.jar"></fileset>
+            </classpath>
+            <arg value="${from}"/>
+            <arg value="${metricFilePath}" />
+        </java>
+	</target>
+	<target name="CopyNetwork">
+        <echo>"${sourceNetwork}"</echo>
+        <echo>"${tempAdminNetwork}"</echo>
+		<echo>"${tempOperNetwork}"</echo>
+    	<delete dir="${tempAdminNetwork}" />
+		<delete dir="${tempOperNetwork}" />
+        <java classname="com.mainsteam.stm.network.CreateNetwork">
+            <classpath>
+                <fileset dir="lib" includes="**/*.jar"></fileset>
+            </classpath>
+            <arg value="${sourceNetwork}"/>
+            <arg value="${tempAdminNetwork}"/>
+        	<arg value="${tempOperNetwork}"/>
+        </java>
+    </target>
+	<target name="translateAdminNetwork">
+	    <echo>"${tempAdminNetwork}"</echo>
+	    <echo>"${adminNetwork}"</echo>
+	    <delete dir="${adminNetwork}" />
+	    <java classname="com.mainsteam.stm.capvalidate.endecoder.CapEncoder">
+	        <classpath>
+	            <fileset dir="lib" includes="**/*.jar"></fileset>
+	        </classpath>
+	        <arg value="${tempAdminNetwork}"/>
+	        <arg value="${adminNetwork}"/>
+	    </java>
+	</target>
+	<target name="translateOperNetwork">
+        <echo>"${tempOperNetwork}"</echo>
+        <echo>"${operNetwork}"</echo>
+    	<delete dir="${operNetwork}" />
+        <java classname="com.mainsteam.stm.capvalidate.endecoder.CapEncoder">
+            <classpath>
+                <fileset dir="lib" includes="**/*.jar"></fileset>
+            </classpath>
+            <arg value="${tempOperNetwork}"/>
+            <arg value="${operNetwork}"/>
+        </java>
+    </target>
+    <target name="findbugs" depends="translatexml">
+        <property name="cleanivycache" value="false"/>
+    </target>
+    <target name="publish-nexus" depends="translatexml,outputSupportDoc,outputMetricsDoc,CopyNetwork,translateAdminNetwork,translateOperNetwork">
+        <property name="cleanivycache" value="false"/>
+    </target>
+
+    <target name="run" depends="translatexml,outputSupportDoc,outputMetricsDoc,CopyNetwork,translateAdminNetwork,translateOperNetwork" />
+    
+    
+</project>

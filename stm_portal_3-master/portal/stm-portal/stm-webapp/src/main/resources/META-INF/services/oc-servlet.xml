@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:util="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-3.2.xsd
+		http://www.springframework.org/schema/util 
+		http://www.springframework.org/schema/util/spring-util-3.2.xsd 
+		http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd"
+		default-autowire="byName">
+	
+    <context:property-placeholder location="classpath*:properties/*.properties" />
+    
+    <!-- 请求和回应初始化操作 -->
+    <!-- 由于HandlerAdapter初始化后的实例为RequestMappingHandlerAdapter， 所以配置AnnotationMethodHandlerAdapter是无效的（这是解决之前项目里面部分url访问爆406的问题）-->
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter" lazy-init="false">
+    	<!-- 参数格式化 -->
+		<property name="webBindingInitializer">
+			<bean class="com.mainsteam.stm.platform.web.view.BindingInitializer">
+			<!-- 实例化conversionService， 若不实例化，前端传递的数组或者集合参数将无法解析 -->
+				<property name="conversionService">
+					<bean class="org.springframework.format.support.FormattingConversionServiceFactoryBean"/>
+				</property>
+			</bean>
+		</property>
+		<!-- 以下配置暂时保留 -->
+<!-- 		配置一下对json数据的转换 -->
+		<property name="messageConverters">
+			<list>
+				<bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+					<property name="supportedMediaTypes">
+						<list>
+							<value>text/html;charset=UTF-8</value>
+						</list>
+					</property>
+				</bean>
+			</list>
+		</property>
+	</bean>
+	<!-- Spring拦截器 -->
+	<mvc:interceptors>
+    	<bean class="com.mainsteam.stm.system.auditlog.web.interceptor.ActionVisitLogInterceptor" />    
+	</mvc:interceptors>
+	
+	<mvc:annotation-driven/>
+	 <context:component-scan base-package="com.mainsteam.stm" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+	 </context:component-scan>
+	 
+	<bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="order" value="0"/>
+		<property name="defaultContentType" value="text/html"/>
+		<property name="ignoreAcceptHeader" value="true"/>
+		<property name="favorPathExtension" value="false"/>
+		<property name="favorParameter" value="true"/>
+		<property name="parameterName" value="dataType"/>
+		<property name="mediaTypes">
+			<map>
+				<entry key="json" value="application/json"/>
+				<entry key="text" value="text/plain"/>
+				<entry key="html" value="text/html"/>
+				<entry key="xml" value="application/xml"/>
+				<entry key="file" value="multipart/form-data"/>
+			</map>
+		</property>
+		<property name="defaultViews">
+			<list>
+				<bean class="com.mainsteam.stm.platform.web.view.JsonView"/>
+			</list>
+		</property>
+	</bean>
+
+	<bean class="com.mainsteam.stm.platform.web.resolver.StringResolver"></bean>
+
+	<bean class="com.mainsteam.stm.platform.web.resolver.ThrowableResolver"></bean>
+	
+	<bean class="org.springframework.web.servlet.view.BeanNameViewResolver">
+		<property name="order" value="80"></property>
+	</bean>
+	
+	
+	
+	 <!-- 文件上传表单的视图解析器 -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+	 	<property name="defaultEncoding" value="UTF-8"/>
+	 	<property name="maxUploadSize" value="30720000"/>
+	 	<!-- 
+	 	<property name="uploadTempDir" value="c:\\oc_file"/>
+	 	 -->
+  	</bean>
+</beans>

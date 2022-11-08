@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.portal.netflow.dao.alarm.IAlarmProfileDao">
+	<!-- 查询系统存在的所有的告警规则 -->
+	<select id="getAllAlarms"
+		resultType="com.mainsteam.stm.portal.netflow.bo.alarm.AlarmDataGridListBo"
+		parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		select ID as id,NAME as netflowAlarmConfigName,DESCRIPTION as
+		netflowAlarmDesc ,STATE as state from NF_ALARM_PROFILE
+		<trim prefix="where" prefixOverrides="and |or ">
+			<if test="condition.AlarmsName != null"> AND upper(name) like
+				concat('%',upper(#{condition.AlarmsName}),'%')</if>
+		</trim>
+		<choose>
+			<when test="condition.order!=null">
+				order by NAME ${condition.order}
+			</when>
+			<otherwise>
+				order by ID
+			</otherwise>
+		</choose>
+
+
+	</select>
+	<!-- 查询某个告警策略所有产生的告警 -->
+	<select id="getAllEventCount" parameterType="int" resultType="int">
+    <![CDATA[
+		select count(1) as count from NF_ALARM_EVENT where THRESHOLD_ID in (
+			select ID from NF_ALARM_THRESHOLD where PROFILE_ID = #{profileId}
+			)
+	]]>
+	</select>
+	<!-- 查询某个告警策略一个小时产生的告警 -->
+	<select id="getOneHourCount" parameterType="int" resultType="int">
+    <![CDATA[
+		select count(1) as count from NF_ALARM_EVENT where unix_timestamp(CREATE_TIME) >= unix_timestamp(date_add(now(), interval -1 hour))
+		and THRESHOLD_ID in (
+			select ID from NF_ALARM_THRESHOLD where PROFILE_ID = #{profileId}
+			)
+	]]>
+	</select>
+
+	<!-- 查询符合要求的IP分组 -->
+	<select id="getIPGroups" parameterType="java.util.Map"
+		resultType="com.mainsteam.stm.portal.netflow.bo.alarm.AlarmResourceBo">
+		select ID,NAME from CONF_IP_GROUP
+	</select>
+
+	<!-- 根据profileID查询当前存在的接口 -->
+	<select id="loadLocalInterfaces" parameterType="java.util.Map"
+		resultType="java.lang.String">
+		select DEVICE_ID from NF_ALARM_DEVICE_CRITERIA
+		WHERE
+		PROFILE_ID = #{profileID}
+	</select>
+
+	<!-- 查询所有符合要求的接口 -->
+	<select id="getInterface" parameterType="int"
+		resultType="com.mainsteam.stm.portal.netflow.bo.alarm.AlarmResourceBo">
+		select ID,NAME,resource_interface_id resourceIds from CONF_INTERFACE where state = 2
+		and
+		DEVICE_ID = #{id}
+		order by DEVICE_ID,INTERFACE_INDEX
+	</select>
+
+	<!-- 查询符合要求的接口分组 -->
+	<select id="getInterfaceGroup" parameterType="java.util.Map"
+		resultType="com.mainsteam.stm.portal.netflow.bo.alarm.AlarmResourceBo">
+		select g.ID,g.NAME,group_concat(i.resource_interface_id) resourceIds from
+		CONF_INTERFACE_GROUP_NETFLOW g left join CONF_INTERFACE i on
+		FIND_IN_SET(i.id,g.conf_interface_ids) group by g.ID order by g.ID
+	</select>
+
+	<!-- 查询所有的设备 -->
+	<select id="getDevices" parameterType="java.util.Map"
+		resultType="com.mainsteam.stm.portal.netflow.bo.alarm.AlarmResourceBo">
+		select ID,NAME from CONF_DEVICE order by ID
+	</select>
+
+	<!-- 查询所有的协议 -->
+	<select id="getProtocol" parameterType="java.util.Map"
+		resultType="com.mainsteam.stm.portal.netflow.bo.alarm.AlarmResourceBo">
+		select ID, concat(ID, ': ', NAME) as NAME from
+		CONF_PROTOCOL order by ID
+	</select>
+
+	<!-- 查询所有的符合要求的应用 -->
+	<select id="getApplications" parameterType="java.util.Map"
+		resultType="com.mainsteam.stm.portal.netflow.bo.alarm.AlarmResourceBo">
+		select ID,NAME from CONF_APPLICATION order by ID
+	</select>
+
+	<!-- 添加流量分析告警的基本信息 -->
+	<insert id="addAlarmBasic"
+		parameterType="com.mainsteam.stm.portal.netflow.bo.alarm.AlarmProfileBo"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into NF_ALARM_PROFILE
+		(NAME,DESCRIPTION,STATE,DEVICE_TYPE,FLOW_TYPE,FLOW_PARAM)
+		values(#{netflowAlarmConfigName},#{netflowAlarmDesc},1,1,1,1);
+	</insert>
+
+
+	<!-- 修改流量分析告警的基本信息 -->
+	<update id="updateAlarmBasic"
+		parameterType="com.mainsteam.stm.portal.netflow.bo.alarm.AlarmProfileBo">
+		update NF_ALARM_PROFILE SET NAME =
+		#{netflowAlarmConfigName} , DESCRIPTION= #{netflowAlarmDesc}
+		WHERE ID =
+		#{profileId}
+	</update>
+
+	<!-- 根据同一个profileID,批量插入资源 -->
+	<insert id="addAlarmResource" useGeneratedKeys="true"
+		parameterType="java.util.List">
+		insert into NF_ALARM_DEVICE_CRITERIA (PROFILE_ID,DEVICE_ID)
+		values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.id},#{item.name})
+		</foreach>
+	</insert>
+
+	<!-- 用来更新profile表中的flow_type和flow_param -->
+	<update id="netflowupdateProfile" parameterType="java.util.Map">
+		update
+		NF_ALARM_PROFILE SET FLOW_TYPE = #{flowType} , FLOW_PARAM=
+		#{flowParam} WHERE ID = #{profileId}
+	</update>
+
+	<!-- 根据同一个profileID,批量插入相关的应用 -->
+	<insert id="insertApps" useGeneratedKeys="true" parameterType="java.util.List">
+		insert into NF_ALARM_APP_CRITERIA (PROFILE_ID,APPLICATION_ID)
+		values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.name},#{item.id})
+		</foreach>
+	</insert>
+
+
+	<!--根据profileID，插入一个应用 -->
+	<insert id="insertApp" parameterType="java.util.Map">
+		insert into
+		NF_ALARM_APP_CRITERIA (PROFILE_ID,APPLICATION_ID) values
+		(#{profileId},#{appId})
+	</insert>
+
+
+	<!-- 根据同一个profileID,批量插入相关的多个协议 -->
+	<insert id="insertProtos" useGeneratedKeys="true" parameterType="java.util.List">
+		insert into NF_ALARM_PORTPROTOCOL_CRITERIA
+		(PROFILE_ID,PROTOCOL_ID,START_PORT,END_PORT)
+		values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.name},#{item.id},#{item.prefix},#{item.subfix})
+		</foreach>
+	</insert>
+
+
+	<!--根据profileID，插入一个协议 -->
+	<insert id="insertProto" parameterType="java.util.Map">
+		insert into
+		NF_ALARM_PORTPROTOCOL_CRITERIA
+		(PROFILE_ID,PROTOCOL_ID,START_PORT,END_PORT) values
+		(#{profileId},#{protoId},#{prefix},#{subfix})
+	</insert>
+
+
+	<!-- 插入一条与IP相关的信息 -->
+	<insert id="insertIP" parameterType="java.util.Map">
+		insert into
+		NF_ALARM_IP_CRITERIA (PROFILE_ID,START_IP_ADDR,END_IP_ADDR)
+		values
+		(#{profileId},#{startIp},#{endIp})
+	</insert>
+
+
+	<!-- 根据profileId，删除 NF_ALARM_DEVICE_CRITERIA表中对应的记录 -->
+	<delete id="delDevices" parameterType="int">
+		delete from
+		NF_ALARM_DEVICE_CRITERIA where PROFILE_ID = #{profileId}
+	</delete>
+
+	<!-- 根据profileId，删除 NF_ALARM_APP_CRITERIA表中对应的记录 -->
+	<delete id="delApps" parameterType="int">
+		delete from
+		NF_ALARM_APP_CRITERIA where PROFILE_ID = #{profileId}
+	</delete>
+
+	<!-- 根据profileId，删除 NF_ALARM_PORTPROTOCOL_CRITERIA表中对应的记录 -->
+	<delete id="delProtos" parameterType="int">
+		delete from
+		NF_ALARM_PORTPROTOCOL_CRITERIA where PROFILE_ID = #{profileId}
+	</delete>
+
+	<!-- 根据profileId，删除 NF_ALARM_IP_CRITERIA表中对应的记录 -->
+	<delete id="delIps" parameterType="int">
+		delete from
+		NF_ALARM_IP_CRITERIA where PROFILE_ID = #{profileId}
+	</delete>
+
+	<update id="updateStatus" parameterType="java.util.HashMap">
+		UPDATE NF_ALARM_PROFILE
+		SET state=#{status} WHERE id=#{profileId}
+	</update>
+
+
+	<select id="loadBasicAlarmInfo" parameterType="java.util.HashMap"
+		resultType="com.mainsteam.stm.portal.netflow.bo.alarm.AlarmProfileBo">
+		SELECT
+		p.id,
+		p.id as profileId,
+		p.`NAME` AS
+		netflowAlarmConfigName,
+		p.`DESCRIPTION` AS netflowAlarmDesc,
+		p.`DEVICE_TYPE` AS netflowAlarmObj,
+		p.`FLOW_TYPE` AS
+		netflowAlarmThresholdFilterInOut,
+		p.`FLOW_PARAM` AS
+		netflowAlarmThresholdFilterType,
+		pp.protocol_id AS
+		netflowAlarmProtocal,
+		CASE
+		WHEN pp.`START_PORT` = pp.`END_PORT` THEN
+		pp.`END_PORT`
+		ELSE CONCAT(pp.`START_PORT`, '-', pp.`END_PORT`)
+		END AS
+		netflowAlarmProtoPort,
+		ipp.start_ip_addr AS netflowNetworkIpAddrStart,
+		ipp.end_ip_addr AS netflowNetworkIpAddrEnd,
+		ap.application_id AS
+		netflowAlarmApp
+
+		FROM
+		NF_ALARM_PROFILE p
+		LEFT JOIN
+		NF_ALARM_PORTPROTOCOL_CRITERIA pp
+		ON p.`ID`=pp.`PROFILE_ID`
+		LEFT JOIN
+		NF_ALARM_IP_CRITERIA ipp
+		ON p.id=ipp.profile_id
+		LEFT JOIN
+		NF_ALARM_APP_CRITERIA ap
+		ON p.id=ap.profile_id
+		WHERE
+		p.`ID`=#{profileId};
+	</select>
+
+	<select id="loadThreshold" parameterType="java.util.HashMap"
+		resultType="com.mainsteam.stm.portal.netflow.bo.alarm.AlarmThresholdBo">
+
+		SELECT
+		t.`PERIOD` AS netflowAlarmThresholdMinute,
+		t.`COUNT`
+		AS netflowAlarmThresholdCount,
+		t.`VALUE` AS netflowAlarmThresholdValue,
+		t.severity as netflowAlarmThresholdLevel
+		FROM
+		NF_ALARM_THRESHOLD t
+		WHERE
+		PROFILE_ID=#{profileId} ;
+
+	</select>
+
+	<!-- 根据同一个profileID,批量插入多个阈值 -->
+	<insert id="addThresholds" useGeneratedKeys="true"
+		parameterType="java.util.List">
+		insert into NF_ALARM_THRESHOLD
+		(PROFILE_ID,VALUE,COUNT,PERIOD,SEVERITY)
+		values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.profileId},#{item.netflowAlarmThresholdValue},#{item.netflowAlarmThresholdCount},#{item.netflowAlarmThresholdMinute},#{item.netflowAlarmThresholdLevel})
+		</foreach>
+	</insert>
+
+	<!-- 根据profileId，删除 NF_ALARM_THRESHOLD表中对应的记录 -->
+	<delete id="delThresholds" parameterType="int">
+		delete from
+		NF_ALARM_THRESHOLD where PROFILE_ID = #{profileId}
+	</delete>
+
+	<!-- 根据profileId，批量删除相关的告警内容 -->
+	<delete id="delProfiles" parameterType="java.lang.String">
+		DELETE FROM NF_ALARM_PROFILE where id in
+		<foreach item="id" collection="array" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	<!-- 根据profileId,批量删除表中的接收人员 -->
+	<delete id="delRecivers" parameterType="java.lang.String">
+		DELETE FROM
+		NF_ALARM_EVENT_RECIEVER where profile_id = #{profileId}
+	</delete>
+
+	<!-- 批量插入某个告警现相关的接收人员 -->
+	<insert id="addRecivers" useGeneratedKeys="true" parameterType="java.util.List">
+		insert into NF_ALARM_EVENT_RECIEVER (PROFILE_ID,USER_ID)
+		values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.name},#{item.id})
+		</foreach>
+	</insert>
+
+	<!-- 根据profileId,更新当前告警设备的类型 -->
+	<update id="updateDeviceType" parameterType="Map">
+		update
+		NF_ALARM_PROFILE set DEVICE_TYPE = #{deviceType} WHERE ID=#{profileId}
+	</update>
+
+	<!-- 获取最近两分钟内产生的新的未处理的告警 -->
+	<select id="getAlarms"
+		resultType="com.mainsteam.stm.portal.netflow.bo.alarm.AlarmContent">
+		select ID as id,STATE as state,THRESHOLD_ID as
+		thresholdId,SERVER_NAME as serverName,
+		MODULE_NAME as
+		moduleName,CREATE_TIME as createTime,ACT_TIME as actTime,CLEAR_TIME as
+		clearTime,
+		CONFIRM_TIME as confirmTime,CONFIRM_USER as
+		confirmUser,ALARM_DETAIL as alarmDetail,CLEAR_DETAIL as clearDetail
+		from NF_ALARM_EVENT WHERE STATE = 1;
+	</select>
+
+	<!-- 当告警内容发送完成以后，修改告警记录的状态 -->
+	<delete id="updateAlarmEventState" parameterType="java.lang.String">
+		UPDATE NF_ALARM_EVENT SET STATE = 2 where ID in
+		<foreach item="id" collection="array" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	<!-- 根据thresholdID，在流量告警内容表中，去关联域表，查询当前告警内容对应的profileID和告警级别 -->
+	<select id="getPrfileLevel" parameterType="java.lang.String"
+		resultType="com.mainsteam.stm.portal.netflow.bo.alarm.AlarmResourceBo">
+		select PROFILE_ID as prefix, SEVERITY as subfix from
+		NF_ALARM_THRESHOLD WHERE ID = #{thresholdId}
+	</select>
+
+	<select id="alarm_getCount" resultType="java.lang.Integer"
+		parameterType="java.util.HashMap">
+		select count(1) from NF_ALARM_PROFILE where name = #{name}
+		<if test="id!=null">
+			and id not in(#{id})
+		</if>
+	</select>
+</mapper>

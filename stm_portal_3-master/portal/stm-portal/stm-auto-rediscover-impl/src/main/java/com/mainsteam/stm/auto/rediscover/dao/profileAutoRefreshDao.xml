@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.profilelib.dao.ProfileAutoRefreshDao">
+
+	<insert id="addAutoRefreshProfile" parameterType="com.mainsteam.stm.profilelib.obj.ProfileAutoRefresh">
+		INSERT INTO STM_PROFILELIB_AUTO_REFRESH
+			(ID,INSTANCE_ID,EXECUTE_TIME,NEXT_EXECUTE_TIME,EXECUT_REPEAT,IS_USE) VALUES 
+			(#{id},#{instanceId},#{executeTime},#{nextExecuteTime},#{executRepeat},#{isUse})
+	</insert>	
+	
+	<delete id="removeAutoRefreshProfile" parameterType="long">
+		DELETE FROM STM_PROFILELIB_AUTO_REFRESH WHERE INSTANCE_ID=#{instanceId}
+	</delete>
+	
+	<update id="updateAutoRefreshProfile"  parameterType="com.mainsteam.stm.profilelib.obj.ProfileAutoRefresh">
+		UPDATE STM_PROFILELIB_AUTO_REFRESH SET INSTANCE_ID = #{instanceId},EXECUTE_TIME=#{executeTime},NEXT_EXECUTE_TIME=#{nextExecuteTime},EXECUT_REPEAT=#{executRepeat},IS_USE=#{isUse} WHERE INSTANCE_ID=#{instanceId}
+	</update>
+	
+	<select id="getAllAutoRefreshProfile" resultType="com.mainsteam.stm.profilelib.obj.ProfileAutoRefresh">
+		SELECT ID id,INSTANCE_ID instanceId,EXECUTE_TIME executeTime,NEXT_EXECUTE_TIME nextExecuteTime,EXECUT_REPEAT executRepeat,IS_USE isUse FROM STM_PROFILELIB_AUTO_REFRESH WHERE IS_USE = 1
+	</select>
+	
+	<select id="getAutoRefreshProfileByInstance" parameterType="long" resultType="com.mainsteam.stm.profilelib.obj.ProfileAutoRefresh">
+		SELECT ID id,INSTANCE_ID instanceId,EXECUTE_TIME executeTime,NEXT_EXECUTE_TIME nextExecuteTime,EXECUT_REPEAT executRepeat,IS_USE isUse FROM STM_PROFILELIB_AUTO_REFRESH WHERE  INSTANCE_ID=#{instanceId}
+	</select>
+	
+	<select id="getAutoRefreshProfileById" parameterType="long" resultType="com.mainsteam.stm.profilelib.obj.ProfileAutoRefresh">
+		SELECT ID id,INSTANCE_ID instanceId,EXECUTE_TIME executeTime,NEXT_EXECUTE_TIME nextExecuteTime,EXECUT_REPEAT executRepeat,IS_USE isUse FROM STM_PROFILELIB_AUTO_REFRESH WHERE  ID=#{id}
+	</select>
+</mapper>

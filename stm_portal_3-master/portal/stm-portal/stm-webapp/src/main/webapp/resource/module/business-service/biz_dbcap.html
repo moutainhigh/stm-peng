@@ -1,0 +1,68 @@
+
+<div id="oc-biz_dbcap" class="oc-window-rightmenutwo oc-toolbar bor_left" >
+	<div style="margin:0px;" class="datagrid-toolbar">
+				<input type="text"  id="dbname" class="queryname_txt"/>
+				<button id="querydbBtn" class="innerbtn_bg"><span class="l-btn-icon icon-search poas_re">&nbsp;</span>查询</button>
+			</div>
+	<div class="cap_box">
+	<div id="dbdivs" style="padding-left:4px;">
+	<input type="hidden" id="bizid" />
+	<span >以下列选中资源的数据库表空间使用情况做为计算依据：</span>
+	<div class="easyui-panel" style="padding:5px 0px;" id="mydbPanel">
+	
+	</div> 
+
+	</div>
+	
+	</div>
+	<div style="height:60px;">
+	</div>
+</div>
+<!-- <script src="module/business-service/js/biz_plancap.js"></script> -->
+<script>
+
+$(function(){
+	var bizid=$("#hideid").val();
+	var panel=$("#mydbPanel");
+	var queryname=$("#queryName").val();
+	initpanl(bizid,panel,queryname);
+	function initpanl(bizid,panel,queryname){
+		panel.html("");
+		oc.util.ajax({
+			url:oc.resource.getUrl('portal/business/cap/getCalculateMetricInstanceList.htm'),
+			data:{bizId:bizid,type:2,query:queryname},
+			async:false,
+			success:function(data){
+					if(data.data){
+						for(var i=0;i<data.data.length;i++){
+							if(data.data[i].children==null){
+								var	html='<ul name="database" class="easyui-tree" data-options="animate:true,checkbox:true"><li id="'+data.data[i].id+'">'
+								+'	<span>'+data.data[i].name+'</span>'
+								+'</li></ul>';	
+							panel.append(html);
+						}else{
+						var	htmltemp='<ul name="database"  class="easyui-tree" data-options="animate:true,checkbox:true"><li id="'+data.data[i].id+'">'
+								+'	<span >'+data.data[i].name+'<input type="hidden" value="'+data.data[i].id+'"/></span>'
+							 	if(data.data[i].children!=null && data.data[i].children.length!=0){
+									var childs=data.data[i].children;
+									for(var j=0;j<childs.length;j++){
+										htmltemp+='<ul><li id="'+childs[j].id+'"><span>'+childs[j].name+'<input type="hidden" value="'+childs[j].id+'"/></span></li></ul>'
+									}
+								} 
+								+'</li></ul>';	
+								panel.append(htmltemp);
+						}
+						
+							
+						}
+						
+					}
+				}
+		});
+	}
+	
+	
+
+	
+ });  
+</script>

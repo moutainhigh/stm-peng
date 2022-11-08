@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.common.instance.dao.MetricAvailQueryDAO">
+	<select id="select" resultType="com.mainsteam.stm.common.instance.dao.obj.MetricAvailDataDO">
+		SELECT 
+			MA.INSTANCE_ID as instanceId ,
+			MA.METRIC_ID as metricId,
+			MA.METRIC_DATA as metricValue
+		FROM STM_METRIC_AVAILABLE MA,STM_INSTANCELIB_RESOURCE_MAIN i
+		WHERE 
+			MA.INSTANCE_ID = i.INSTANCEID 
+			and (i.PARENTID IS NULL or i.PARENTID &lt;=0) 
+			and i.SHOWIP IS NOT NULL 
+			and i.RESOURCEID != 'Layer2Link' 
+			and i.LIFESTATE='MONITORED' 
+			and i.DISCOVERNODE = #{condition}
+	</select>
+</mapper>

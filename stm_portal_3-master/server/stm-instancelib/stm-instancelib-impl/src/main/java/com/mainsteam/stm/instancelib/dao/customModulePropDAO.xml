@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.instancelib.dao.CustomModulePropDAO">
+	<sql id="selectModuleValueColumn">
+		INSTANCEID ,PROPKEY ,REALTIMEVALUE,USERVALUE
+	</sql>
+	<sql id="selectTable">
+		STM_INSTANCELIB_CUSTOM_MODULE
+	</sql>
+
+	<insert id="addCustomProDO"
+		parameterType="com.mainsteam.stm.instancelib.dao.pojo.CustomModulePropDO">
+		INSERT INTO <include refid="selectTable"/>(<include refid="selectModuleValueColumn"/> )
+		VALUES (#{instanceId},#{propKey},#{realtimeValue},#{userValue})
+	</insert>
+
+	<select id="getCustomPropDOsById"
+		resultType="com.mainsteam.stm.instancelib.dao.pojo.CustomModulePropDO">
+		select
+		<include refid="selectModuleValueColumn" />
+		from
+		<include refid="selectTable" />
+		WHERE INSTANCEID=#{instanceId}
+	</select>
+	<select id="getCustomPropDOsByIdAndKey"
+		resultType="com.mainsteam.stm.instancelib.dao.pojo.CustomModulePropDO">
+		select
+		<include refid="selectModuleValueColumn" />
+		from
+		<include refid="selectTable" />
+		WHERE INSTANCEID=#{instanceId} AND PROPKEY = #{propKey}
+	</select>
+	<update id="updateCustomPropDO" parameterType="com.mainsteam.stm.instancelib.dao.pojo.CustomModulePropDO">
+		UPDATE <include refid="selectTable"/> 
+		SET USERVALUE = #{userValue}
+		WHERE INSTANCEID=#{instanceId} AND PROPKEY = #{propKey}
+	</update>
+	<delete id="removeCustomProDOById">
+		DELETE FROM <include refid="selectTable"/> where INSTANCEID=#{instanceId}
+	</delete>
+	
+	<delete id="removeCustomProDOByIdAndKey">
+		DELETE FROM <include refid="selectTable"/> where INSTANCEID=#{instanceId} and PROPKEY = #{propKey}
+	</delete>
+	<select id="getCustomPropDOs" resultType="com.mainsteam.stm.instancelib.dao.pojo.CustomModulePropDO">
+		SELECT
+		<include refid="selectModuleValueColumn"/> 
+		FROM
+		<include refid="selectTable"/>
+	</select>
+	
+</mapper>

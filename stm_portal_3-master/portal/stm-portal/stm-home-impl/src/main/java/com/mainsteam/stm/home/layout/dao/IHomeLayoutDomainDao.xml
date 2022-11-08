@@ -1,0 +1,535 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.home.layout.dao.IHomeLayoutDomainDao">
+   
+   
+   
+   
+   
+  <resultMap id="ResultMap" type="com.mainsteam.stm.home.layout.bo.HomeLayoutDomainBo">
+     
+     
+     
+     
+     
+    <id column="ID" property="id" jdbcType="BIGINT"/>
+     
+     
+     
+     
+     
+    <result column="LAYOUT_ID" property="layoutId" jdbcType="BIGINT"/>
+     
+     
+     
+     
+     
+    <result column="USER_ID" property="userId" jdbcType="BIGINT"/>
+     
+     
+     
+     
+     
+    <result column="DOMAIN_ID" property="domainId" jdbcType="BIGINT"/>
+     
+     
+     
+     
+     
+    <result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP"/>
+  
+  
+  
+  
+  
+  </resultMap>
+   
+   
+   
+   
+   
+  <sql id="Column_List">
+        ID, LAYOUT_ID, USER_ID, DOMAIN_ID, CREATE_TIME
+    </sql>
+   
+   
+   
+   
+   
+  <sql id="domainColumn">
+    	A.ID,NAME,DESCRIPTION,CREATOR_ID AS CREATORID,CREATED_TIME AS CREATEDTIME,STATUS
+    </sql>
+   
+   
+   
+   
+   
+  <select id="get" resultMap="ResultMap" parameterType="com.mainsteam.stm.home.layout.bo.HomeLayoutDomainBo">
+        SELECT  
+     
+     
+     
+     
+     
+    <include refid="Column_List"/>
+        FROM STM_HOME_LAYOUT_DOMAIN
+         
+     
+     
+     
+     
+     
+    <where>
+        	 
+       
+       
+       
+       
+       
+      <if test="layoutId &gt; 0">
+        		AND LAYOUT_ID = #{layoutId,jdbcType=BIGINT}
+        	</if>
+        	 
+       
+       
+       
+       
+       
+      <if test="userId &gt; 0">
+        		AND USER_ID = #{userId,jdbcType=BIGINT}
+        	</if>
+        	 
+       
+       
+       
+       
+       
+      <if test="domainId &gt; 0">
+        		AND DOMAIN_ID = #{domainId,jdbcType=BIGINT}
+        	</if>
+        
+    
+    
+    
+    
+    
+    </where>
+    
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <insert id="insert" parameterType="com.mainsteam.stm.home.layout.bo.HomeLayoutDomainBo">
+        INSERT INTO STM_HOME_LAYOUT_DOMAIN (
+     
+     
+     
+     
+     
+    <include refid="Column_List"/>)
+        VALUES (
+        	#{id,jdbcType=BIGINT}, 
+        	#{layoutId,jdbcType=BIGINT}, 
+        	#{userId,jdbcType=BIGINT}, 
+            #{domainId,jdbcType=BIGINT}, 
+            #{createTime,jdbcType=TIMESTAMP})
+    
+  
+  
+  
+  
+  
+  </insert>
+   
+   
+   
+   
+   
+  <update id="delete" parameterType="com.mainsteam.stm.home.layout.bo.HomeLayoutDomainBo">
+    	DELETE FROM STM_HOME_LAYOUT_DOMAIN
+    	WHERE LAYOUT_ID = #{layoutId,jdbcType=BIGINT}
+    	 
+     
+     
+     
+     
+     
+    <if test="userId &gt; 0">
+            AND USER_ID = #{userId,jdbcType=BIGINT}
+    	</if>
+    
+  
+  
+  
+  
+  
+  </update>
+   
+   
+   
+   
+   
+  <select id="getDomainByLayoutId" parameterType="map" resultType="com.mainsteam.stm.system.um.domain.bo.Domain" databaseId="mysql">
+		SELECT  
+     
+     
+     
+     
+     
+    <include refid="domainColumn"/>
+		FROM STM_SYS_DOMAIN A,STM_HOME_LAYOUT_DOMAIN B
+		 
+     
+     
+     
+     
+     
+    <where>
+			AND A.ID = B.DOMAIN_ID AND B.LAYOUT_ID = #{layoutId}
+			 
+       
+       
+       
+       
+       
+      <if test="content!=null and content!=''">
+				AND NAME LIKE CONCAT('%',#{content},'%')
+			</if>
+		
+    
+    
+    
+    
+    
+    </where>
+	
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="getDomainByLayoutId" parameterType="map" resultType="com.mainsteam.stm.system.um.domain.bo.Domain" databaseId="oracle">
+		SELECT  
+     
+     
+     
+     
+     
+    <include refid="domainColumn"/>
+		FROM STM_SYS_DOMAIN A,STM_HOME_LAYOUT_DOMAIN B
+		 
+     
+     
+     
+     
+     
+    <where>
+			AND A.ID = B.DOMAIN_ID AND B.LAYOUT_ID = #{layoutId}
+			 
+       
+       
+       
+       
+       
+      <if test="content!=null and content!=''">
+				AND NAME LIKE CONCAT('%',CONCAT(#{content},'%'))
+			</if>
+		
+    
+    
+    
+    
+    
+    </where>
+	
+  
+  
+  
+  
+  
+  </select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="getDomainByLayoutId" parameterType="map" resultType="com.mainsteam.stm.system.um.domain.bo.Domain" databaseId="dm">
+		SELECT  
+     
+     
+     
+     
+     
+    <include refid="domainColumn"/>
+		FROM STM_SYS_DOMAIN A,STM_HOME_LAYOUT_DOMAIN B
+		 
+     
+     
+     
+     
+     
+    <where>
+			AND A.ID = B.DOMAIN_ID AND B.LAYOUT_ID = #{layoutId}
+			 
+       
+       
+       
+       
+       
+      <if test="content!=null and content!=''">
+				AND NAME LIKE CONCAT('%',CONCAT(#{content},'%'))
+			</if>
+		
+    
+    
+    
+    
+    
+    </where>
+	
+  
+  
+  
+  
+  
+  </select>
+  <select id="getDomainByLayoutId" parameterType="map" resultType="com.mainsteam.stm.system.um.domain.bo.Domain" databaseId="oscar">
+		SELECT  
+     
+     
+     
+     
+     
+    <include refid="domainColumn"/>
+		FROM STM_SYS_DOMAIN A,STM_HOME_LAYOUT_DOMAIN B
+		 
+     
+     
+     
+     
+     
+    <where>
+			AND A.ID = B.DOMAIN_ID AND B.LAYOUT_ID = #{layoutId}
+			 
+       
+       
+       
+       
+       
+      <if test="content!=null and content!=''">
+				AND NAME LIKE CONCAT('%',CONCAT(#{content},'%'))
+			</if>
+		
+    
+    
+    
+    
+    
+    </where>
+	
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="getUnDomainByLayoutId" parameterType="map" resultType="com.mainsteam.stm.system.um.domain.bo.Domain" databaseId="mysql">
+		SELECT  
+     
+     
+     
+     
+     
+    <include refid="domainColumn"/>
+		FROM STM_SYS_DOMAIN A
+		 
+     
+     
+     
+     
+     
+    <where>
+			AND NOT EXISTS (SELECT 1 FROM stm_home_layout_domain B WHERE A.ID = B.DOMAIN_ID AND LAYOUT_ID = #{layoutId})
+			 
+       
+       
+       
+       
+       
+      <if test="content!=null and content!=''">
+				AND NAME LIKE CONCAT('%',#{content},'%')
+			</if>
+		
+    
+    
+    
+    
+    
+    </where>
+	
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="getUnDomainByLayoutId" parameterType="map" resultType="com.mainsteam.stm.system.um.domain.bo.Domain" databaseId="oracle">
+		SELECT  
+     
+     
+     
+     
+     
+    <include refid="domainColumn"/>
+		FROM STM_SYS_DOMAIN A
+		 
+     
+     
+     
+     
+     
+    <where>
+			AND NOT EXISTS (SELECT 1 FROM stm_home_layout_domain B WHERE A.ID = B.DOMAIN_ID AND LAYOUT_ID = #{layoutId})
+			 
+       
+       
+       
+       
+       
+      <if test="content!=null and content!=''">
+				AND NAME LIKE CONCAT('%',CANCAT(#{content},'%'))
+			</if>
+		
+    
+    
+    
+    
+    
+    </where>
+	
+  
+  
+  
+  
+  
+  </select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="getUnDomainByLayoutId" parameterType="map" resultType="com.mainsteam.stm.system.um.domain.bo.Domain" databaseId="dm">
+		SELECT  
+     
+     
+     
+     
+     
+    <include refid="domainColumn"/>
+		FROM STM_SYS_DOMAIN A
+		 
+     
+     
+     
+     
+     
+    <where>
+			AND NOT EXISTS (SELECT 1 FROM stm_home_layout_domain B WHERE A.ID = B.DOMAIN_ID AND LAYOUT_ID = #{layoutId})
+			 
+       
+       
+       
+       
+       
+      <if test="content!=null and content!=''">
+				AND NAME LIKE CONCAT('%',CANCAT(#{content},'%'))
+			</if>
+		
+    
+    
+    
+    
+    
+    </where>
+	
+  
+  
+  
+  
+  
+  </select>
+  <select id="getUnDomainByLayoutId" parameterType="map" resultType="com.mainsteam.stm.system.um.domain.bo.Domain" databaseId="oscar">
+		SELECT  
+     
+     
+     
+     
+     
+    <include refid="domainColumn"/>
+		FROM STM_SYS_DOMAIN A
+		 
+     
+     
+     
+     
+     
+    <where>
+			AND NOT EXISTS (SELECT 1 FROM stm_home_layout_domain B WHERE A.ID = B.DOMAIN_ID AND LAYOUT_ID = #{layoutId})
+			 
+       
+       
+       
+       
+       
+      <if test="content!=null and content!=''">
+				AND NAME LIKE CONCAT('%',CANCAT(#{content},'%'))
+			</if>
+		
+    
+    
+    
+    
+    
+    </where>
+	
+  
+  
+  
+  
+  
+  </select>
+</mapper>

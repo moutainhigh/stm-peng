@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.ct.dao.AverageWebMapper">
+
+    
+    <select id="getList" resultType="com.mainsteam.stm.ct.bo.MsAverageWeb">
+        SELECT * from ms_average_web 
+        where create_time &gt; #{create_time}
+        <if test="resource_id != null and resource_id != ''">
+        	and resource_id =#{resource_id}
+        </if>
+          ORDER BY create_time ASC LIMIT 0,24
+    </select>
+	<insert id="insert" parameterType="com.mainsteam.stm.ct.bo.MsAverageWeb">
+		INSERT INTO `msdb`.`ms_average_web` 
+		(`first_char`, `dom_ready`, `page_ready`, `dns_select`, `tcp_collect`, `req_answer`, `send_content`, `dom_parse`, `resource_load`, `resource_id`, `create_time`) 
+		VALUES 
+		( #{first_char}, #{dom_ready},#{page_ready},#{dns_select},#{tcp_collect},#{req_answer},#{send_content},#{dom_parse},#{resource_load},#{resource_id},#{create_time});
+	</insert>
+</mapper>

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                    http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+                    http://www.springframework.org/schema/context
+                    http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+	<bean id="stateCacheUtils"
+		class="com.mainsteam.stm.state.util.StateCacheUtils">
+	</bean>
+	<bean id="stateCaculatUtils"
+		class="com.mainsteam.stm.state.util.StateCaculatUtils">
+		<constructor-arg index="0" ref="stateEngine">
+		</constructor-arg>
+		<constructor-arg index="1" ref="stateCacheUtils">
+		</constructor-arg>
+		<constructor-arg index="2" ref="flappingComputer">
+		</constructor-arg>
+		<constructor-arg index="3" ref="metricStateSelectUtil">
+		</constructor-arg>
+		<constructor-arg index="4" ref="availStateUtils">
+		</constructor-arg>
+		<constructor-arg index="5" ref="instanceStateDataCacheUtil">
+		</constructor-arg>
+		<constructor-arg index="6" ref="instanceStateComputeUtil">
+		</constructor-arg>
+	</bean>
+	
+	<bean id="profileMetricSelectUtil"
+		class="com.mainsteam.stm.state.util.ProfileMetricSelectUtil">
+		<constructor-arg index="0" ref="profileService">
+		</constructor-arg>
+		<constructor-arg index="1" ref="customMetricService">
+		</constructor-arg>
+		<constructor-arg index="2" ref="timelineService">
+		</constructor-arg>
+		<constructor-arg index="3" ref="capacityService">
+		</constructor-arg>
+	</bean>
+	
+	<bean id="performanceMetricsStateUtil"
+		class="com.mainsteam.stm.state.util.PerformanceMetricsStateUtil">
+		<constructor-arg index="0" ref="metricStateSelectUtil">
+		</constructor-arg>
+		<constructor-arg index="1" ref="resourceInstanceService">
+		</constructor-arg>
+		<constructor-arg index="2" ref="thirdPartyMetricStateService">
+		</constructor-arg>
+	</bean>
+	<bean id="metricStateSelectUtil"
+		class="com.mainsteam.stm.state.util.MetricStateSelectUtil">
+		<constructor-arg index="0" ref="profileMetricSelectUtil">
+		</constructor-arg>
+		<constructor-arg index="1" ref="capacityService">
+		</constructor-arg>
+		<constructor-arg index="2" ref="stateCacheUtils">
+		</constructor-arg>
+		<constructor-arg index="3" ref="metricStateService">
+		</constructor-arg>
+	</bean>
+	<bean id="instanceStateDataCacheUtil"
+		class="com.mainsteam.stm.state.util.InstanceStateDataCacheUtil">
+		<constructor-arg index="0" ref="instanceStateService">
+		</constructor-arg>
+		<constructor-arg index="1" ref="stateCacheUtils">
+		</constructor-arg>
+	</bean>
+	<bean id="instanceStateComputeUtil"
+		class="com.mainsteam.stm.state.util.InstanceStateComputeUtil">
+		<constructor-arg index="0" ref="stateEngine">
+		</constructor-arg>
+		<constructor-arg index="1" ref="capacityService">
+		</constructor-arg>
+		<constructor-arg index="2" ref="customMetricService">
+		</constructor-arg>
+		<constructor-arg index="3" ref="resourceInstanceService">
+		</constructor-arg>
+		<constructor-arg index="4" ref="availStateUtils">
+		</constructor-arg>
+		<constructor-arg index="5" ref="performanceMetricsStateUtil">
+		</constructor-arg>
+		<constructor-arg index="6" ref="instanceStateDataCacheUtil">
+		</constructor-arg>
+		<constructor-arg index="7" ref="metricStateSelectUtil">
+		</constructor-arg>
+		<constructor-arg index="8" ref="profileMetricSelectUtil">
+		</constructor-arg>
+	</bean>
+	<bean id="flappingComputer"
+		class="com.mainsteam.stm.state.util.FlappingComputer"></bean>
+	<bean id="availStateUtils"
+		class="com.mainsteam.stm.state.util.AvailStateUtils">
+		<constructor-arg index="0" ref="stateCacheUtils">
+		</constructor-arg>
+		<constructor-arg index="1" ref="timelineService">
+		</constructor-arg>
+		<constructor-arg index="2" ref="profileService">
+		</constructor-arg>
+		<constructor-arg index="3" ref="customMetricService">
+		</constructor-arg>
+		<constructor-arg index="4" ref="capacityService">
+		</constructor-arg>
+		<constructor-arg index="5" ref="instanceStateDataCacheUtil">
+		</constructor-arg>
+	</bean>
+
+	<bean id="collectionStateUtils" class="com.mainsteam.stm.state.util.CollectionStateUtils">
+
+		<constructor-arg ref="instanceStateDataCacheUtil"/>
+	</bean>
+</beans>

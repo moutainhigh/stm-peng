@@ -1,0 +1,42 @@
+<div class="oc-home" id="oc-home" style="height:100%;">
+	<div class="fulltool" style="z-index: 999;">
+		<a class="full-ico full-ico-scroon" title="工作台"></a> 
+		<a class="full-ico full-ico-min" title="大屏"></a> 
+		<a class="full-ico full-ico-edit costombtn" title="设置"></a>
+	</div>
+	<div class="content" style="height:100%;"></div>
+	<script type="text/javascript" src="module/home/setting/workbench.js"></script>
+	<script type="text/javascript" src="module/home/setting/screen.js"></script>
+	<script type="text/javascript" src="module/home/common/common.js"></script>
+	<script type="text/javascript">
+		(function() {
+			var home = $('#oc-home'),content=home.find('>div.content'),curActive,
+				fulltool=home.find('.fulltool:first');
+			if(oc.isSimple){
+				fulltool.hide();
+				content.load(oc.resource.getUrl('resource/module/home/screen/screen.html'),function(){
+					$(this).find('span.ico-max:first').hide();
+				});
+			}else{
+				function _click(jq,href){
+					jq.addClass('active').siblings().removeClass('active');
+					content.load(oc.resource.getUrl(href));
+				}
+				
+				fulltool.mouseleave().find(' > a:first').click(function() {//workbench
+					_click($(this),'resource/module/home/workbench/workbench.html');
+					curActive='workbench';
+				}).click().next().click(function() {//screen
+					_click($(this),'resource/module/home/screen/screen.html');
+					curActive='screen';
+				}).next().click(function() {//setting
+					if(curActive=='workbench'){
+						oc.home.setting.workbench.open();
+					}else{
+						oc.home.setting.screen.open();
+					}
+				});
+			}
+		})();
+	</script>
+</div>

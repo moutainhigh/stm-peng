@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.ipmanage.impl.dao.SegmentMapper">
+	<select id="getSegmentsByNodeID" resultType="com.mainsteam.stm.ipmanage.bo.Segment">
+		select * from segment where parent_node_id =#{parentNodeId}
+	</select>
+	<select id="getSegmentsByGroupID" resultType="com.mainsteam.stm.ipmanage.bo.Segment">
+		select * from segment where parent_group_id =#{parentGroupId}
+	</select>
+	<select id="getSegmentsByID" resultType="com.mainsteam.stm.ipmanage.bo.Segment">
+		select * from segment where parent_id =#{parentId}
+	</select>
+	<select id="selectSameSegment">
+		select * from segment 
+		<where>
+			ip1=#{ip1}
+			<if test="ip2!=null and ip2!=''">
+				and ip2=#{ip2}
+			</if>
+			<if test="ip3!=null and ip3!=''">
+				and ip3=#{ip3}
+			</if>
+		</where>
+	</select>
+	<insert id="insert" parameterType="com.mainsteam.stm.ipmanage.bo.Segment">
+		INSERT INTO `segment` ( `start_address`, `end_address`, `broadcast_address`, `parent_id`, `has_childseg`, `web_address`, `parent_node_id`, `create_time`)
+		 VALUES ( #{start_address}, #{end_address}, #{broadcast_address}, #{parent_id}, #{has_childseg}, #{web_address}, #{parent_node_id}, #{create_time});
+	</insert>
+	<delete id="del" parameterType="java.lang.Integer">
+		delete from segment where id = #{id}
+	</delete>
+	<update id="update" parameterType="com.mainsteam.stm.ipmanage.bo.Segment">
+		UPDATE `segment` SET 
+		<if test="start_address!=null and start_address!=''">
+			`start_address`=#{start_address}, 
+		</if>
+		<if test="end_address!=null and end_address!=''">
+			`end_address`=#{end_address},
+		</if>
+		<if test="broadcast_address!=null and broadcast_address!=''">
+			`broadcast_address`=#{broadcast_address}, 
+		</if>
+		<if test="web_address!=null and web_address!=''">
+			`web_address`=#{web_address}, 
+		</if>
+		<if test="parent_node_id!=null and parent_node_id!=''">
+			`parent_node_id`=#{parent_node_id},
+		</if>
+		<if test="parent_group_id!=null and parent_group_id!=''">
+			`parent_group_id`=#{parent_group_id}
+		</if>
+		WHERE (`id`=#{id});
+	</update>
+</mapper>

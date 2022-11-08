@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.instancelib.dao.ResourceInstanceDAO">
+	
+	<sql id="resourceInstanceColumn"> 
+		INSTANCEID,INSTANCENAME,INSTANCETYPE,PARENTID,RESOURCEID,
+		CATEGORYID,DISCOVERWAY,LIFESTATE,SHOWIP,DISCOVERNODE,
+		DOMAINID,INSTANCESHOWNAME,ISCORE,CREATEUSERACCOUNT
+	</sql>
+	<sql id="resourceInstanceColumnValue">
+		#{instanceId}, #{instanceName}, #{instanceType},#{parentId},
+		 #{resourceId},#{categoryId},#{discoverWay},#{lifeState},
+		 #{showIP},#{discoverNode},#{domainId},#{instanceShowName},#{isCore},#{createUserAccount}
+	</sql>
+	<sql id="table">
+		 STM_INSTANCELIB_RESOURCE_MAIN
+	</sql>
+	<sql id="selectSql">
+		select <include refid="resourceInstanceColumn"/>
+		from   <include refid="table"/>
+	</sql>
+	
+	<select id="getResourceInstanceById" resultType="com.mainsteam.stm.instancelib.dao.pojo.ResourceInstanceDO">
+	    <include refid="selectSql"/>
+		where INSTANCEID=#{instanceId}
+	</select>
+	<select id="getAllMonirotedChildrenInstanceIdByParentIds" resultType="long">
+	    select instanceId from <include refid="table"/> 
+	    where  lifeState = 'MONITORED'  and parentId in 
+	   <foreach  item="item" index="index" collection="list" open="(" separator="," close=")">
+			 #{item} 
+		</foreach>  
+	</select>
+	<select id="getAllNotMonirotedChildrenInstanceIdByParentIds" resultType="long">
+	    select instanceId from <include refid="table"/> 
+	    where  lifeState = 'NOT_MONITORED'  and parentId in 
+	   <foreach  item="item" index="index" collection="list" open="(" separator="," close=")">
+			 #{item} 
+		</foreach>  
+	</select>
+	
+	
+	<select id="getInstancesByResourceDO" 
+	resultType="com.mainsteam.stm.instancelib.dao.pojo.ResourceInstanceDO">
+		<include refid="selectSql"/>
+		<trim prefix="where" prefixOverrides="and">
+			<if test="instanceId > 0">and RESOURCEID=#{resourceId} </if>
+			<if test="instanceName != null">and INSTANCENAME =#{instanceName} </if>
+			<if test="instanceType != null">and INSTANCETYPE=#{instanceType} </if>
+			<if test="parentId != null">and PARENTID=#{parentId}</if>
+			<if test="resourceId != null">and RESOURCEID=#{resourceId}</if>
+			<if test="categoryId != null">and CATEGORYID=#{categoryId}</if>
+			<if test="discoverWay != null">and DISCOVERWAY=#{discoverWay}</if>
+			<if test="lifeState != null">and LIFESTATE=#{lifeState}</if>
+			<if test="showIP != null">and SHOWIP=#{showIP}</if>
+			<if test="discoverNode != null">and DISCOVERNODE=#{discoverNode}</if>
+			<if test="isCore != null"> ISCORE = #{isCore}</if>
+			<if test="createUserAccount != null"> CREATEUSERACCOUNT = #{createUserAccount}</if>
+		</trim>
+	</select>
+	
+	<select id="getAllParentInstance" resultType="com.mainsteam.stm.instancelib.dao.pojo.ResourceInstanceDO">
+		<include refid="selectSql"/>
+		where PARENTID is null or PARENTID = 0
+	</select> 
+	
+	<select id="getAllInstance" resultType="com.mainsteam.stm.instancelib.dao.pojo.ResourceInstanceDO">
+	   <include refid="selectSql"/>
+	    
+	</select> 
+	
+	<select id="getAllInstanceByNode" resultType="com.mainsteam.stm.instancelib.dao.pojo.ResourceInstanceDO">
+	   <include refid="selectSql"/>
+		where LifeState!='DELETED' and DISCOVERNODE=#{discoverNode} and  ((CategoryId!='Link' and CategoryId is not null) or CategoryId is null ) 
+	</select> 
+	
+	<select id="getParentResourceInstanceByNode" resultType="com.mainsteam.stm.instancelib.dao.pojo.ResourceInstanceDO">
+	    <include refid="selectSql"/>
+		where PARENTID is null and DISCOVERNODE = #{discoverNode} and LifeState!='DELETED' and  ((CategoryId!='Link' and CategoryId is not null) or CategoryId is null ) 
+	</select>
+	<select id="getExistParentInstanceByResourceId" resultType="com.mainsteam.stm.instancelib.dao.pojo.ResourceInstanceDO">
+	   select * from stm_instancelib_resource_main
+	   where (ParentId is null or ParentId = 0) 
+	   and LifeState !='DELETED' 
+	   and LifeState != 'INITIALIZE' 
+	   and RESOURCEID in 
+	   <foreach  item="item" index="index" collection="list" open="(" separator="," close=")">
+			 #{item} 
+		</foreach>  
+	</select>
+	
+	<select id="getExistChildInstanceByResourceId" resultType="com.mainsteam.stm.instancelib.dao.pojo.ResourceInstanceDO">
+	   select * from stm_instancelib_resource_main
+	   where LifeState !='DELETED' 
+	   and LifeState != 'INITIALIZE' 
+	   and RESOURCEID in 
+	   <foreach  item="item" index="index" collection="list" open="(" separator="," close=")">
+			 #{item} 
+		</foreach>  
+	</select>
+	<select id="getAllParentInstanceByDomain" resultType="com.mainsteam.stm.instancelib.dao.pojo.ResourceInstanceDO">
+	    <include refid="selectSql"/>
+		where PARENTID is null and DOMAINID = #{domainId} and LifeState!='DELETED' and  ((CategoryId!='Link' and CategoryId is not null) or CategoryId is null ) 
+	</select>
+	<select id="getAllChildrenInstanceIdbyParentIds" resultType="com.mainsteam.stm.instancelib.dao.pojo.ResourceInstanceDO">
+	    <include refid="selectSql"/>
+		where PARENTID  in <foreach  item="item" index="index" collection="list" open="(" separator="," close=")">
+			 #{item} 
+		</foreach>   
+	</select>
+	
+	<select id="getAllResourceInstanceForLink" resultType="com.mainsteam.stm.instancelib.dao.pojo.ResourceInstanceDO">
+	    <include refid="selectSql"/>
+		where categoryId = 'Link'
+	</select>
+	
+	<insert id="insertResourceInstance"  parameterType="com.mainsteam.stm.instancelib.dao.pojo.ResourceInstanceDO">
+	  insert into 
+		<include refid="table"/> 
+		(<include refid="resourceInstanceColumn"/>)
+		VALUES
+		(<include refid="resourceInstanceColumnValue"/>) 
+	</insert>
+	
+	<update id="updateResourceInstance" parameterType="com.mainsteam.stm.instancelib.dao.pojo.ResourceInstanceDO">
+		update 	
+		<include refid="table"/>  
+		<set>
+			<if test="instanceName != null"> INSTANCENAME = #{instanceName}, </if>
+			<if test="instanceShowName != null"> InstanceShowName = #{instanceShowName}, </if>
+			<if test="instanceType != null"> INSTANCETYPE = #{instanceType} ,</if>
+			<!-- <if test="parentId != null"> PARENTID = #{parentId}, </if> -->
+			<if test="resourceId != null"> RESOURCEID = #{resourceId}, </if>
+			<if test="categoryId != null"> CATEGORYID = #{categoryId}, </if>
+			<if test="discoverWay != null"> DISCOVERWAY = #{discoverWay} ,</if>
+			<if test="lifeState != null"> LIFESTATE = #{lifeState}, </if>
+			<if test="showIP != null"> SHOWIP = #{showIP}, </if>
+			<if test="discoverNode != null"> DISCOVERNODE = #{discoverNode}, </if>
+			<if test="domainId > 0"> DOMAINID = #{domainId}, </if>
+			<if test="isCore != null"> ISCORE = #{isCore}, </if>
+		</set>
+		where INSTANCEID=#{instanceId}
+	</update>
+	<delete id="removeResourceInstanceById" >
+		delete from
+		<include refid="table"/>
+		where INSTANCEID=#{instanceId}
+	</delete>
+	<update id="batchUpdateResourceInstanceToDelete">
+		UPDATE 	
+		<include refid="table"/> 
+		SET lifeState = 'DELETED'
+		where INSTANCEID=#{instanceId}
+	</update>
+</mapper>

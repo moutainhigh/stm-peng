@@ -1,0 +1,1042 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.portal.business.dao.IBizCanvasDao">
+   
+   
+   
+   
+   
+  <select id="getCanvasInfo" resultType="com.mainsteam.stm.portal.business.bo.BizCanvasBo" parameterType="long">
+		SELECT 
+		ID as id, 
+		BIZ_ID as bizId, 
+		ATTR as attr 
+		FROM STM_BIZ_CANVAS WHERE ID = #{canvasId}
+	</select>
+   
+   
+   
+   
+   
+  <select id="getCanvasInfoByBizId" resultType="com.mainsteam.stm.portal.business.bo.BizCanvasBo" parameterType="long">
+		SELECT 
+		ID as id, 
+		BIZ_ID as bizId, 
+		ATTR as attr 
+		FROM STM_BIZ_CANVAS WHERE BIZ_ID = #{bizId}
+	</select>
+   
+   
+   
+   
+   
+  <select id="getCanvasNode" resultType="com.mainsteam.stm.portal.business.bo.BizCanvasNodeBo" parameterType="long">
+		SELECT 
+		ID as id, 
+		BIZ_ID as bizId,
+		INSTANCE_ID as instanceId,
+		NODE_TYPE as nodeType,
+		SHOW_NAME as showName,
+		NAME_HIDDEN as nameHidden,
+		FILE_ID as fileId,
+		NODE_STATUS as nodeStatus,
+		STATUS_TIME as statusTime,
+		ATTR as attr
+		FROM STM_BIZ_CANVAS_NODE WHERE ID = #{canvasNodeId}
+	</select>
+   
+   
+   
+   
+   
+  <select id="getInstanceNode" resultType="com.mainsteam.stm.portal.business.bo.BizInstanceNodeBo" parameterType="long">
+		SELECT 
+		ID as id, 
+		BIZ_ID as bizId,
+		INSTANCE_ID as instanceId,
+		NODE_STATUS as nodeStatus,
+		SHOW_NAME as showName,
+		NAME_HIDDEN as nameHidden,
+		FILE_ID as fileId 
+		FROM STM_BIZ_CANVAS_NODE WHERE ID = #{canvasNodeId}
+	</select>
+   
+   
+   
+   
+   
+  <select id="getAllInstanceNode" resultType="com.mainsteam.stm.portal.business.bo.BizInstanceNodeBo">
+		SELECT 
+		ID as id, 
+		BIZ_ID as bizId,
+		INSTANCE_ID as instanceId,
+		NODE_STATUS as nodeStatus,
+		STATUS_TIME as statusTime 
+		FROM STM_BIZ_CANVAS_NODE WHERE NODE_TYPE = 1
+	</select>
+   
+   
+   
+   
+   
+  <select id="getInstanceNodesByBiz" resultType="com.mainsteam.stm.portal.business.bo.BizInstanceNodeBo">
+		SELECT 
+		ID as id, 
+		BIZ_ID as bizId,
+		INSTANCE_ID as instanceId,
+		NODE_STATUS as nodeStatus,
+		SHOW_NAME as showName,
+		STATUS_TIME as statusTime 
+		FROM STM_BIZ_CANVAS_NODE WHERE NODE_TYPE = 1 AND BIZ_ID = #{bizId}
+	</select>
+   
+   
+   
+   
+   
+  <select id="getBusinessNodesByBiz" resultType="com.mainsteam.stm.portal.business.bo.BizCanvasNodeBo">
+		SELECT 
+		ID as id, 
+		BIZ_ID as bizId,
+		INSTANCE_ID as instanceId,
+		NODE_STATUS as nodeStatus,
+		SHOW_NAME as showName,
+		STATUS_TIME as statusTime 
+		FROM STM_BIZ_CANVAS_NODE WHERE NODE_TYPE = 2 AND BIZ_ID = #{bizId} AND BIZ_ID != INSTANCE_ID
+	</select>
+   
+   
+   
+   
+   
+  <select id="getInstanceBindRelation" resultType="com.mainsteam.stm.portal.business.bo.BizNodeMetricRelBo" parameterType="long">
+		SELECT 
+		ID as id, 
+		CHILD_INSTANCE_ID as childInstanceId,
+		METRIC_ID as metricId 
+		FROM STM_BIZ_NODE_METRIC_REL WHERE NODE_ID = #{canvasNodeId}
+	</select>
+   
+   
+   
+   
+   
+  <select id="getChildInstanceBindRelation" resultType="com.mainsteam.stm.portal.business.bo.BizNodeMetricRelBo" parameterType="long">
+		SELECT 
+		ID as id, 
+		NODE_ID as nodeId,
+		CHILD_INSTANCE_ID as childInstanceId 
+		FROM STM_BIZ_NODE_METRIC_REL WHERE METRIC_ID IS NULL AND NODE_ID = #{canvasNodeId}
+	</select>
+   
+   
+   
+   
+   
+  <select id="getChildInstanceMetricBindRelation" resultType="com.mainsteam.stm.portal.business.bo.BizNodeMetricRelBo" parameterType="long">
+		SELECT 
+		ID as id, 
+		NODE_ID as nodeId,
+		CHILD_INSTANCE_ID as childInstanceId,
+		METRIC_ID as metricId 
+		FROM STM_BIZ_NODE_METRIC_REL WHERE METRIC_ID IS NOT NULL AND NODE_ID = #{canvasNodeId}
+	</select>
+   
+   
+   
+   
+   
+  <select id="getNodeIdFromBindRelation" resultType="long" parameterType="long">
+		SELECT 
+		DISTINCT NODE_ID as nodeId 
+		FROM STM_BIZ_NODE_METRIC_REL WHERE METRIC_ID IS NULL AND CHILD_INSTANCE_ID = #{childInstanceId}
+	</select>
+   
+   
+   
+   
+   
+  <select id="getAllNodeIdFromChildInstanceBindRelation" resultType="long" parameterType="long">
+		SELECT 
+		DISTINCT NODE_ID as nodeId 
+		FROM STM_BIZ_NODE_METRIC_REL WHERE CHILD_INSTANCE_ID = #{childInstanceId}
+	</select>
+   
+   
+   
+   
+   
+  <select id="getNodeIdFromBindChildMetricRelation" resultType="long" parameterType="com.mainsteam.stm.portal.business.bo.BizNodeMetricRelBo">
+		SELECT 
+		DISTINCT NODE_ID as nodeId 
+		FROM STM_BIZ_NODE_METRIC_REL WHERE METRIC_ID = #{metricId} AND CHILD_INSTANCE_ID = #{childInstanceId}
+	</select>
+   
+   
+   
+   
+   
+  <select id="getNodeIdFromBindMainMetricRelation" resultType="long" parameterType="com.mainsteam.stm.portal.business.bo.BizNodeMetricRelBo">
+		SELECT 
+		DISTINCT A.NODE_ID as nodeId 
+		FROM STM_BIZ_NODE_METRIC_REL A LEFT JOIN STM_BIZ_CANVAS_NODE B ON A.NODE_ID = B.ID
+		 WHERE A.METRIC_ID = #{metricId} AND B.INSTANCE_ID = #{childInstanceId} AND A.CHILD_INSTANCE_ID = 0
+	</select>
+   
+   
+   
+   
+   
+  <select id="getBindRelationByChildInstance" resultType="long">
+		SELECT 
+		DISTINCT NODE_ID as nodeId 
+		FROM STM_BIZ_NODE_METRIC_REL WHERE CHILD_INSTANCE_ID IN
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+					#{item}
+		 </foreach>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="getCanvasNodeIds" resultType="long" parameterType="long">
+		SELECT ID as id FROM STM_BIZ_CANVAS_NODE WHERE BIZ_ID = #{bizId}
+	</select>
+   
+   
+   
+   
+   
+  <select id="getBizIdsByInstanceId" resultType="long" parameterType="long">
+		SELECT DISTINCT BIZ_ID FROM STM_BIZ_CANVAS_NODE WHERE INSTANCE_ID = #{instanceId} AND NODE_TYPE = 1
+	</select>
+   
+   
+   
+   
+   
+  <select id="getCanvasNodes" resultType="com.mainsteam.stm.portal.business.bo.BizCanvasNodeBo" parameterType="long">
+		SELECT 
+		ID as id, 
+		BIZ_ID as bizId,
+		INSTANCE_ID as instanceId,
+		NODE_TYPE as nodeType,
+		SHOW_NAME as showName,
+		NAME_HIDDEN as nameHidden,
+		FILE_ID as fileId,
+		NODE_STATUS as nodeStatus,
+		STATUS_TIME as statusTime,
+		ATTR as attr 
+		FROM STM_BIZ_CANVAS_NODE WHERE BIZ_ID = #{bizId}
+	</select>
+   
+   
+   
+   
+   
+  <select id="getCanvasNodesByFileId" resultType="com.mainsteam.stm.portal.business.bo.BizCanvasNodeBo" parameterType="long">
+		SELECT 
+		ID as id, 
+		FILE_ID as fileId,
+		ATTR as attr 
+		FROM STM_BIZ_CANVAS_NODE WHERE FILE_ID = #{fileId}
+	</select>
+   
+   
+   
+   
+   
+  <select id="checkNodeByBizId" resultType="int" parameterType="map">
+		SELECT COUNT(*) FROM STM_BIZ_CANVAS_NODE WHERE BIZ_ID = #{bizId} AND ID IN
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+					#{item}
+		 </foreach>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="getCanvasLink" resultType="com.mainsteam.stm.portal.business.bo.BizCanvasLinkBo" parameterType="long">
+		SELECT 
+		ID as id, 
+		FROM_NODE as fromNode,
+		TO_NODE as toNode, 
+		ATTR as attr 
+		FROM STM_BIZ_CANVAS_LINK WHERE ID = #{canvasId}
+	</select>
+   
+   
+   
+   
+   
+  <select id="getCanvasLinkIdByFromNode" resultType="long">
+		SELECT ID as id FROM STM_BIZ_CANVAS_LINK WHERE FROM_NODE IN
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+					#{item}
+		 </foreach>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="getCanvasLinksByFromNode" resultType="com.mainsteam.stm.portal.business.bo.BizCanvasLinkBo">
+		SELECT 
+		ID as id, 
+		FROM_NODE as fromNode,
+		TO_NODE as toNode, 
+		ATTR as attr 
+		FROM STM_BIZ_CANVAS_LINK WHERE FROM_NODE IN
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+					#{item}
+		 </foreach>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="getCanvasLinkIdByToNode" resultType="long">
+		SELECT ID as id FROM STM_BIZ_CANVAS_LINK WHERE TO_NODE IN
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+					#{item}
+		 </foreach>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="getCanvasLinksByToNode" resultType="com.mainsteam.stm.portal.business.bo.BizCanvasLinkBo">
+		SELECT 
+		ID as id, 
+		FROM_NODE as fromNode,
+		TO_NODE as toNode, 
+		ATTR as attr 
+		FROM STM_BIZ_CANVAS_LINK WHERE TO_NODE IN
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+					#{item}
+		 </foreach>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="getCanvasLinkCountByPoints" resultType="int" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasLinkBo">
+		SELECT COUNT(*) 
+		FROM STM_BIZ_CANVAS_LINK WHERE FROM_NODE = #{fromNode} AND TO_NODE = #{toNode}
+	</select>
+   
+   
+   
+   
+   
+  <update id="updateCanvasInfo" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasBo">
+		UPDATE STM_BIZ_CANVAS
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <set>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+      <if test="attr != null"> ATTR = #{attr}, </if>
+		
+		
+    
+    
+    
+    
+    
+    
+    
+    </set>
+		WHERE ID = #{id}
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  </update>
+   
+   
+   
+   
+   
+  <update id="updateCanvasFileIdInfo" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasNodeBo">
+		UPDATE STM_BIZ_CANVAS_NODE SET
+		FILE_ID = #{fileId} 
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <if test="attr != null"> ,ATTR = #{attr} </if>
+		
+		WHERE ID = #{id}
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  </update>
+   
+   
+   
+   
+   
+  <update id="updateCanvasNodeBaseInfo" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasNodeBo">
+		UPDATE STM_BIZ_CANVAS_NODE
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <set>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+      <if test="showName != null"> SHOW_NAME = #{showName}, </if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+      <if test="nameHidden &gt;= 0"> NAME_HIDDEN = #{nameHidden}, </if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+      <if test="fileId != null"> FILE_ID = #{fileId}, </if>
+		
+		
+    
+    
+    
+    
+    
+    
+    
+    </set>
+		WHERE ID = #{id}
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  </update>
+   
+   
+   
+   
+   
+  <update id="updateCanvasNodeBaseInfoByBizId" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasNodeBo">
+		UPDATE STM_BIZ_CANVAS_NODE
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <set>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+      <if test="showName != null"> SHOW_NAME = #{showName}, </if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+      <if test="fileId != null"> FILE_ID = #{fileId}, </if>
+		
+		
+    
+    
+    
+    
+    
+    
+    
+    </set>
+		WHERE INSTANCE_ID = #{instanceId} AND NODE_TYPE = 2
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  </update>
+   
+   
+   
+   
+   
+  <update id="updateCanvasBizMainNodeFileId" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasNodeBo">
+		UPDATE STM_BIZ_CANVAS_NODE SET FILE_ID = #{fileId}
+		WHERE BIZ_ID = #{bizId} AND INSTANCE_ID = #{bizId}
+	</update>
+   
+   
+   
+   
+   
+  <update id="updateCanvasNodeStatusInfo" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasNodeBo">
+		UPDATE STM_BIZ_CANVAS_NODE
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <set>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+      <if test="nodeStatus != null"> NODE_STATUS = #{nodeStatus}, </if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+      <if test="statusTime != null"> STATUS_TIME = #{statusTime}, </if>
+		
+		
+    
+    
+    
+    
+    
+    
+    
+    </set>
+		WHERE INSTANCE_ID = #{instanceId} AND NODE_TYPE = #{nodeType}
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  </update>
+   
+   
+   
+   
+   
+  <update id="updateCanvasNodeStatusInfoByNodeId" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasNodeBo">
+		UPDATE STM_BIZ_CANVAS_NODE
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <set>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+      <if test="nodeStatus != null"> NODE_STATUS = #{nodeStatus}, </if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+      <if test="statusTime != null"> STATUS_TIME = #{statusTime}, </if>
+		
+		
+    
+    
+    
+    
+    
+    
+    
+    </set>
+		WHERE ID = #{id}
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  </update>
+   
+   
+   
+   
+   
+  <update id="updateCanvasNodeStatusById" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasNodeBo">
+		UPDATE STM_BIZ_CANVAS_NODE SET
+		NODE_STATUS = #{nodeStatus},
+		STATUS_TIME = #{statusTime} 
+		WHERE ID = #{id}
+	</update>
+   
+   
+   
+   
+   
+  <update id="updateCanvasNodeTypeInfo" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasNodeBo">
+		UPDATE STM_BIZ_CANVAS_NODE
+		SET NODE_TYPE = #{nodeType} 
+		WHERE INSTANCE_ID = #{instanceId} AND NODE_TYPE = 1
+	</update>
+   
+   
+   
+   
+   
+  <update id="updateCanvasNodeAttrInfo" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasNodeBo">
+		UPDATE STM_BIZ_CANVAS_NODE
+		SET ATTR = #{attr} 
+		WHERE ID = #{id}
+	</update>
+   
+   
+   
+   
+   
+  <update id="updateCanvasLink" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasLinkBo">
+		UPDATE STM_BIZ_CANVAS_LINK
+		SET FROM_NODE = #{fromNode},TO_NODE = #{toNode},ATTR = #{attr} 
+		WHERE ID = #{id}
+	</update>
+   
+   
+   
+   
+   
+  <insert id="insertCanvasInfo" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasBo" databaseId="mysql">
+		INSERT INTO STM_BIZ_CANVAS(BIZ_ID,ATTR)
+		VALUES(#{bizId},#{attr})
+	</insert>
+   
+   
+   
+   
+   
+  <insert id="insertCanvasInfo" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasBo" databaseId="oracle">
+		INSERT INTO STM_BIZ_CANVAS(ID,BIZ_ID,ATTR)
+		VALUES(STM_BIZ_CANVAS_SEQ.Nextval,#{bizId},#{attr})
+	</insert>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <insert id="insertCanvasInfo" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasBo" databaseId="dm">
+		INSERT INTO STM_BIZ_CANVAS(ID,BIZ_ID,ATTR)
+		VALUES(STM_BIZ_CANVAS_SEQ.Nextval,#{bizId},#{attr})
+	</insert>
+  <insert id="insertCanvasInfo" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasBo" databaseId="oscar">
+		INSERT INTO STM_BIZ_CANVAS(ID,BIZ_ID,ATTR)
+		VALUES(STM_BIZ_CANVAS_SEQ.Nextval,#{bizId},#{attr})
+	</insert>
+   
+   
+   
+   
+   
+  <insert id="insertCanvasNode" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasNodeBo">
+		INSERT INTO STM_BIZ_CANVAS_NODE(ID,BIZ_ID,INSTANCE_ID,NODE_TYPE,SHOW_NAME,NAME_HIDDEN,FILE_ID,NODE_STATUS,STATUS_TIME,ATTR)
+		VALUES(#{id},#{bizId},#{instanceId},#{nodeType},#{showName},#{nameHidden},#{fileId},#{nodeStatus},#{statusTime},#{attr})
+	</insert>
+   
+   
+   
+   
+   
+  <insert id="insertCanvasNodeBindRelation" parameterType="com.mainsteam.stm.portal.business.bo.BizNodeMetricRelBo" databaseId="mysql">
+		INSERT INTO STM_BIZ_NODE_METRIC_REL(NODE_ID,CHILD_INSTANCE_ID,METRIC_ID)
+		VALUES(#{nodeId},#{childInstanceId},#{metricId})
+	</insert>
+   
+   
+   
+   
+   
+  <insert id="insertCanvasNodeBindRelation" parameterType="com.mainsteam.stm.portal.business.bo.BizNodeMetricRelBo" databaseId="oracle">
+		INSERT INTO STM_BIZ_NODE_METRIC_REL(ID,NODE_ID,CHILD_INSTANCE_ID,METRIC_ID)
+		VALUES(STM_BIZ_NODE_METRIC_REL_SEQ.Nextval,#{nodeId},#{childInstanceId},#{metricId})
+	</insert>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <insert id="insertCanvasNodeBindRelation" parameterType="com.mainsteam.stm.portal.business.bo.BizNodeMetricRelBo" databaseId="dm">
+		INSERT INTO STM_BIZ_NODE_METRIC_REL(ID,NODE_ID,CHILD_INSTANCE_ID,METRIC_ID)
+		VALUES(STM_BIZ_NODE_METRIC_REL_SEQ.Nextval,#{nodeId},#{childInstanceId},#{metricId})
+	</insert>
+  <insert id="insertCanvasNodeBindRelation" parameterType="com.mainsteam.stm.portal.business.bo.BizNodeMetricRelBo" databaseId="oscar">
+		INSERT INTO STM_BIZ_NODE_METRIC_REL(ID,NODE_ID,CHILD_INSTANCE_ID,METRIC_ID)
+		VALUES(STM_BIZ_NODE_METRIC_REL_SEQ.Nextval,#{nodeId},#{childInstanceId},#{metricId})
+	</insert>
+   
+   
+   
+   
+   
+  <insert id="insertCanvasLink" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasLinkBo">
+		INSERT INTO STM_BIZ_CANVAS_LINK(ID,FROM_NODE,TO_NODE,ATTR)
+		VALUES(#{id},#{fromNode},#{toNode},#{attr})
+	</insert>
+   
+   
+   
+   
+   
+  <delete id="deleteCanvasInfo" parameterType="long">
+		DELETE FROM STM_BIZ_CANVAS WHERE ID = #{id}
+	</delete>
+   
+   
+   
+   
+   
+  <delete id="deleteCanvasInfoByBizId" parameterType="long">
+		DELETE FROM STM_BIZ_CANVAS WHERE BIZ_ID = #{bizId}
+	</delete>
+   
+   
+   
+   
+   
+  <delete id="deleteCanvasNode" parameterType="long">
+		DELETE FROM STM_BIZ_CANVAS_NODE WHERE ID = #{id}
+	</delete>
+   
+   
+   
+   
+   
+  <delete id="deleteCanvasNodeByBizId" parameterType="long">
+		DELETE FROM STM_BIZ_CANVAS_NODE WHERE BIZ_ID = #{bizId}
+	</delete>
+   
+   
+   
+   
+   
+  <delete id="deleteCanvasBizNodeByBizId" parameterType="long">
+		DELETE FROM STM_BIZ_CANVAS_NODE WHERE NODE_TYPE = 2 AND INSTANCE_ID = #{bizId}
+	</delete>
+   
+   
+   
+   
+   
+  <delete id="deleteCanvasNodeBindRelation" parameterType="long">
+		DELETE FROM STM_BIZ_NODE_METRIC_REL WHERE NODE_ID = #{nodeId}
+	</delete>
+   
+   
+   
+   
+   
+  <delete id="deleteCanvasLink" parameterType="long">
+		DELETE FROM STM_BIZ_CANVAS_LINK WHERE ID = #{id}
+	</delete>
+   
+   
+   
+   
+   
+  <delete id="deleteCanvasLinkByToNode" parameterType="long">
+		DELETE FROM STM_BIZ_CANVAS_LINK WHERE TO_NODE = #{toNode}
+	</delete>
+   
+   
+   
+   
+   
+  <delete id="deleteCanvasLinkByFromNode" parameterType="long">
+		DELETE FROM STM_BIZ_CANVAS_LINK WHERE FROM_NODE = #{fromNode}
+	</delete>
+   
+   
+   
+   
+   
+  <delete id="deleteBindRelationByChildInstance">
+		DELETE FROM STM_BIZ_NODE_METRIC_REL WHERE CHILD_INSTANCE_ID IN
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+					#{item}
+		 </foreach>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  </delete>
+   
+   
+   
+   
+   
+  <select id="checkNodeNameIsExsit" resultType="int" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasNodeBo">
+		SELECT COUNT(*) FROM STM_BIZ_CANVAS_NODE WHERE BIZ_ID = #{bizId} AND SHOW_NAME = #{showName}
+	</select>
+   
+   
+   
+   
+   
+  <select id="getRepeatNodeNameCount" resultType="int" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasNodeBo" databaseId="mysql">
+		SELECT COUNT(*) FROM STM_BIZ_CANVAS_NODE WHERE BIZ_ID = #{bizId} AND SHOW_NAME LIKE CONCAT('%',#{showName},'%')
+	</select>
+   
+   
+   
+   
+   
+  <select id="getRepeatNodeNameCount" resultType="int" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasNodeBo" databaseId="oracle">
+		SELECT COUNT(*) FROM STM_BIZ_CANVAS_NODE WHERE BIZ_ID = #{bizId} AND SHOW_NAME LIKE CONCAT('%',CONCAT(#{showName},'%'))
+	</select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="getRepeatNodeNameCount" resultType="int" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasNodeBo" databaseId="dm">
+		SELECT COUNT(*) FROM STM_BIZ_CANVAS_NODE WHERE BIZ_ID = #{bizId} AND SHOW_NAME LIKE CONCAT('%',CONCAT(#{showName},'%'))
+	</select>
+  <select id="getRepeatNodeNameCount" resultType="int" parameterType="com.mainsteam.stm.portal.business.bo.BizCanvasNodeBo" databaseId="oscar">
+		SELECT COUNT(*) FROM STM_BIZ_CANVAS_NODE WHERE BIZ_ID = #{bizId} AND SHOW_NAME LIKE CONCAT('%',CONCAT(#{showName},'%'))
+	</select>
+</mapper>

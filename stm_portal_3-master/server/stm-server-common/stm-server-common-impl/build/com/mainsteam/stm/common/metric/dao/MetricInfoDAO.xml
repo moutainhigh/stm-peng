@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.common.metric.dao.MetricInfoDAO">
+	<select id="selectInfoMetricOne" resultType="int">
+		SELECT COUNT(*) FROM STM_METRIC_INFO WHERE
+			INSTANCE_ID=#{resourceInstanceId} and METRIC_ID=#{metricId}
+	</select>
+	<insert id="addMetricInfoData" parameterType="com.mainsteam.stm.common.metric.obj.MetricDataPO">
+	    INSERT INTO STM_METRIC_INFO (METRIC_ID,INSTANCE_ID,TIMELINE_ID,PROFILE_ID,METRIC_DATA,COLLECT_TIME)
+	    VALUES (#{metricId},#{resourceInstanceId},#{timelineId},#{profileId},#{metricData}, #{collectTime})
+	</insert>
+	<insert id="updateMetricInfoData" parameterType="com.mainsteam.stm.common.metric.obj.MetricDataPO">
+	     UPDATE STM_METRIC_INFO
+	     SET TIMELINE_ID=#{timelineId},
+	    	PROFILE_ID=#{profileId},
+	    	METRIC_DATA=#{metricData},
+	    	COLLECT_TIME=#{collectTime}
+	    	WHERE INSTANCE_ID = #{resourceInstanceId} AND METRIC_ID = #{metricId}
+	</insert>
+	
+	<select id="getMetricInfoData" parameterType="map" resultType="com.mainsteam.stm.common.metric.obj.MetricDataPO">
+		SELECT METRIC_ID as metricID,INSTANCE_ID as resourceInstanceId,METRIC_DATA as metricdata,COLLECT_TIME as collectTime
+			FROM STM_METRIC_INFO
+		WHERE 
+			INSTANCE_ID=#{instanceID} and METRIC_ID=#{metricID}
+	</select>
+	<select id="getMetricInfoDatas" parameterType="map" resultType="com.mainsteam.stm.common.metric.obj.MetricDataPO">
+		SELECT METRIC_ID as metricID,INSTANCE_ID as resourceInstanceId,METRIC_DATA as metricdata,COLLECT_TIME as collectTime,
+			PROFILE_ID AS profileId, TIMELINE_ID AS timelineId
+			FROM STM_METRIC_INFO
+		WHERE 
+			INSTANCE_ID IN  
+		<foreach collection="instanceIDes" item="item" open="(" separator="," close=")">#{item}</foreach>
+			 
+		<if test="metricID!=null and metricID.length&gt;0">
+				and METRIC_ID in  
+			<foreach collection="metricID" item="item" open="(" separator="," close=")">#{item}</foreach>
+			
+		</if>
+	
+	</select>
+	<select id="getAllInfo" resultType="com.mainsteam.stm.common.metric.obj.MetricDataPO">
+		SELECT METRIC_ID as metricID,INSTANCE_ID as resourceInstanceId FROM STM_METRIC_INFO
+	</select>
+	
+</mapper>

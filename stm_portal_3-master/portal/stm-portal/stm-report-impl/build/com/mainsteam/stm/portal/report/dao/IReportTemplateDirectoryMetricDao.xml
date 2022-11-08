@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.portal.report.dao.IReportTemplateDirectoryMetricDao">
+	
+	<insert id="insert" parameterType="com.mainsteam.stm.portal.report.po.ReportTemplateDirectoryMetricPo">
+	    insert into STM_REP_TEMP_DIR_METRIC(
+	    		 REP_DIR_METRIC_ID
+		    	,REP_TEMP_DIR_ID
+		    	,METRIC_ID
+		    	,METRIC_SORT_TYPE
+		    	,METRIC_EXPECT_VALUE
+	    	) values (
+	    		#{reportDirectoryMetricId}
+	    		,#{reportTemplateDirectoryId}
+	    		,#{metricId}
+	    		,#{metricSortType}
+	    		,#{metricExpectValue}
+			)
+	</insert>
+	
+	<delete id="deleteMetricRelationByDirectoryId">
+		delete from STM_REP_TEMP_DIR_METRIC where  REP_TEMP_DIR_ID = #{reportTemplateDirectoryId}
+	</delete>
+	
+	<select id="select" resultType="com.mainsteam.stm.portal.report.po.ReportTemplateDirectoryMetricPo" parameterType="com.mainsteam.stm.portal.report.po.ReportTemplateDirectoryMetricPo">
+		select  
+				REP_DIR_METRIC_ID as reportDirectoryMetricId
+				,REP_TEMP_DIR_ID as reportTemplateDirectoryId
+		    	,METRIC_ID as metricId
+		    	,METRIC_SORT_TYPE as metricSortType
+		    	,METRIC_EXPECT_VALUE as metricExpectValue
+			from STM_REP_TEMP_DIR_METRIC where REP_TEMP_DIR_ID = #{reportTemplateDirectoryId}
+	</select>
+	
+</mapper>

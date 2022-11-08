@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.metric.dao.CustomMetricCollectDAO">
+
+	<sql id="customMetricCollectColumn"> 
+		metricCollectId,metricId,pluginId,paramKey,paramType,paramValue,dataProcessWay
+	</sql>
+	<sql id="customMetricCollectColumnValue">
+		#{metricCollectId},#{metricId},#{pluginId},#{paramKey},
+		#{paramType},#{paramValue},#{dataProcessWay}
+	</sql>
+	<sql id="table">
+		STM_CUSTOM_METRIC_COLLECT
+	</sql>
+	<sql id="selectSql">
+		select <include refid="customMetricCollectColumn"/>
+		from   <include refid="table"/>
+	</sql>
+	<insert id="insertMetricCollect" 
+		parameterType="com.mainsteam.stm.metric.dao.pojo.CustomMetricCollectDO">
+		insert into <include refid="table"/>
+		(<include refid="customMetricCollectColumn"/>) 
+		values
+		(<include refid="customMetricCollectColumnValue"/>)
+	</insert>
+	<update id="updateMetricCollect" 
+		parameterType="com.mainsteam.stm.metric.dao.pojo.CustomMetricCollectDO">
+		update <include refid="table"/> 
+		<set>
+			<if test="metricId != null">  metricId= #{metricId},</if>
+			<if test="pluginId != null"> pluginId=#{pluginId}, </if>
+			<if test="paramKey != null"> paramKey = #{paramKey},</if>
+			<if test="paramType != null"> paramType=#{paramType},</if>
+			<if test="paramValue != null">  paramValue =#{paramValue},</if>
+			<!-- <if test="executeOrder > 0">  executeOrder= #{executeOrder},</if> -->
+			<if test="dataProcessWay != null">  dataProcessWay= #{dataProcessWay},</if>
+		</set>	
+		where metricCollectId = #{MetricCollectId} 
+	</update>
+	
+	<delete id="removeMetricCollectById" parameterType="long"> 
+		delete from <include refid="table"/>  where metricCollectId = #{customMetricCollectId} 
+	</delete>
+	<delete id="removeMetricCollectByMetricId" parameterType="String"> 
+		delete from <include refid="table"/>  where metricId = #{metricId} 
+	</delete>
+	<delete id="removeMetricCollectByMetricIdAndPluginId" parameterType="com.mainsteam.stm.metric.dao.pojo.CustomMetricCollectDO">
+		delete from <include refid="table"/>  where metricId= #{metricId} and pluginId=#{pluginId} 
+	</delete>
+	<select id="getMetricCollectDOById" 
+		resultType="com.mainsteam.stm.metric.dao.pojo.CustomMetricCollectDO"
+		parameterType="long"> 
+		<include refid="selectSql"/> where metricCollectId = #{customMetricCollectId} order by metricCollectId
+	</select>	
+	
+	<select id="getMetricCollectDOByMetricIdAndpluginId" 
+		resultType="com.mainsteam.stm.metric.dao.pojo.CustomMetricCollectDO"
+		parameterType="java.util.Map"> 
+		<include refid="selectSql"/> where metricId = #{metricId} and pluginId = #{pluginId}  order by metricCollectId
+	</select>
+	<select id="getMetricCollectByMetricIds" resultType="com.mainsteam.stm.metric.dao.pojo.CustomMetricCollectDO" >
+		<include refid="selectSql"/> where metricId in
+		<foreach collection="list" index="index" item="item" open="(" separator="," close=")">#{item}</foreach> 
+		order by metricCollectId
+	</select>
+ </mapper>

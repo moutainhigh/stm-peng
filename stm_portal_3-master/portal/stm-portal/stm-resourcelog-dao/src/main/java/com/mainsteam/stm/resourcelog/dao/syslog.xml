@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.resourcelog.dao.SyslogDao">
+	
+	 
+  <insert id="saveStrategyRule">
+		insert into
+			STM_SYSLOG_STRATEGY_RULE(ID, STRATEGY_ID, NAME, ALARM_LEVEL, KEYWORDS, KEYWORDS_LOGIC, LOG_LEVEL, DESCRIPTION)
+		values
+			(#{id}, #{strategyId}, #{name}, #{alarmLevel}, #{keywords}, #{logicType}, #{logLevel}, #{description})
+	</insert>
+	 
+  <select id="countRuleName" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SysLogRuleBo" resultType="int">
+		select count(*) from stm_syslog_strategy_rule
+		where STRATEGY_ID = #{strategyId} and NAME = #{name}
+		 
+    <if test="id != null">
+			AND ID != #{id}
+		</if>
+	
+  </select>
+	 
+  <select id="getSysLogRule" resultType="com.mainsteam.stm.resourcelog.syslog.bo.SysLogRuleBo">
+		SELECT 
+			ID,
+			IS_OPEN AS isOpen,
+			IS_ALARM AS isAlarm,
+			NAME AS name,
+			ALARM_LEVEL AS alarmLevel,
+			KEYWORDS AS keywords,
+			LOG_LEVEL AS logLevel,
+			KEYWORDS_LOGIC AS logicType,
+			DESCRIPTION AS description,
+			STRATEGY_ID AS strategyId
+		FROM STM_SYSLOG_STRATEGY_RULE
+		WHERE STRATEGY_ID = #{id}
+	</select>
+	
+	 
+  <update id="updateRules" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SysLogRuleBo">
+		update STM_SYSLOG_STRATEGY_RULE
+		 
+    <set>
+			 
+      <if test="isOpen != null"> IS_OPEN = #{isOpen}, </if>
+			 
+      <if test="isAlarm != null"> IS_ALARM = #{isAlarm}</if>
+		
+    </set>
+		 where ID = #{id}
+	
+  </update>
+	
+	 
+  <delete id="batchRules">
+		delete from STM_SYSLOG_STRATEGY_RULE where id = #{id}
+	</delete>
+	
+	 
+  <select id="getRuleById" resultType="com.mainsteam.stm.resourcelog.syslog.bo.SysLogRuleBo" parameterType="long">
+		SELECT 
+			ID,
+			STRATEGY_ID AS strategyId,
+			IS_OPEN AS isOpen,
+			IS_ALARM AS isAlarm,
+			NAME AS name,
+			ALARM_LEVEL AS alarmLevel,
+			KEYWORDS AS keywords,
+			LOG_LEVEL AS logLevel,
+			DESCRIPTION AS description,
+			KEYWORDS_LOGIC AS logicType
+		FROM STM_SYSLOG_STRATEGY_RULE
+		WHERE ID = #{id}
+	</select>
+	
+	 
+  <update id="updateStrateRule">
+		UPDATE STM_SYSLOG_STRATEGY_RULE SET
+			NAME = #{name}, 
+			ALARM_LEVEL = #{alarmLevel}, 
+			KEYWORDS = #{keywords}, 
+			KEYWORDS_LOGIC = #{logicType}, 
+			LOG_LEVEL = #{logLevel}, 
+			DESCRIPTION = #{description}
+		WHERE ID = #{id}
+	</update>
+	 
+  <!-- mysql -->
+	 
+  <select id="getSyslogHistory" resultType="com.mainsteam.stm.resourcelog.strategy.bo.AlarmListBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="mysql">
+		select 
+			history.LEVEL as level,
+			history.KEYWORDS as keywords,
+			history.ALERT_TIME as occurredTime,
+			history.MSG as msgContent
+		from stm_syslog_syslog_history history
+		 
+    <trim prefix="where" prefixOverrides="and | or">
+			 
+      <if test="condition != null">
+				 
+        <if test="condition.id != null">
+					AND history.RESOURCE_ID = #{condition.id}
+				</if>
+				 
+        <if test="condition.level != null and condition.level != ''">
+					AND history.LEVEL like CONCAT('%',#{condition.level},'%')
+				</if>
+				 
+        <if test="condition.keyWords != null">
+					AND history.KEYWORDS like CONCAT('%',#{condition.keyWords},'%')
+				</if>
+				 
+        <if test="condition.occurredTime != null">
+					AND history.ALERT_TIME like CONCAT (DATE_FORMAT(#{condition.occurredTime},'%Y-%m-%d'),'%')
+				</if>
+				 
+        <if test="condition.startTime != null and condition.startTime != '' ">
+					 <![CDATA[ 
+						AND history.ALERT_TIME >= DATE_FORMAT(#{condition.startTime},'%Y-%m-%d %H:%i:%s')
+					]]>
+				</if>
+				 
+        <if test="condition.endTime != null and condition.endTime != '' ">
+					 <![CDATA[
+						AND history.ALERT_TIME <= DATE_FORMAT(#{condition.endTime},'%Y-%m-%d %H:%i:%s')
+					]]>
+				</if>
+			
+      </if>
+		
+    </trim>
+	
+  </select>
+	 
+  <!-- oracle -->
+	 
+  <select id="getSyslogHistory" resultType="com.mainsteam.stm.resourcelog.strategy.bo.AlarmListBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oracle">
+		select 
+			history."LEVEL" as "level",
+			history.KEYWORDS as keywords,
+			ALERT_TIME as occurredTime,
+			history.MSG as msgContent
+		from stm_syslog_syslog_history history
+		 
+    <trim prefix="where" prefixOverrides="and | or">
+			 
+      <if test="condition != null">
+				 
+        <if test="condition.id != null">
+					AND history.RESOURCE_ID = #{condition.id}
+				</if>
+				 
+        <if test="condition.level != null and condition.level != ''">
+					AND history."LEVEL" like '%'||#{condition.level}||'%'
+				</if>
+				 
+        <if test="condition.keyWords != null">
+					AND history.KEYWORDS like '%'||#{condition.keyWords}||'%'
+				</if>
+				 
+        <if test="condition.occurredTime != null">
+					AND to_char(ALERT_TIME, 'yyyy-MM-dd') = to_char(#{condition.occurredTime},'yyyy-MM-dd')
+				</if>
+				 
+        <if test="condition.startTime != null and condition.startTime != '' ">
+					 <![CDATA[ 
+						AND to_char(ALERT_TIME, 'yyyy-MM-dd HH24:mi:ss') >= #{condition.startTime}
+					]]>
+				</if>
+				 
+        <if test="condition.endTime != null and condition.endTime != '' ">
+					 <![CDATA[
+						AND to_char(ALERT_TIME, 'yyyy-MM-dd HH24:mi:ss') <= #{condition.endTime}
+					]]>
+				</if>
+			
+      </if>
+		
+    </trim>
+	
+  </select>
+	 
+  <!-- mysql -->
+	 
+  <select id="getSyslogHistory" resultType="com.mainsteam.stm.resourcelog.strategy.bo.AlarmListBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="dm">
+		select 
+			history."LEVEL" as "level",
+			history.KEYWORDS as keywords,
+			ALERT_TIME as occurredTime,
+			history.MSG as msgContent
+		from stm_syslog_syslog_history history
+		 
+    <trim prefix="where" prefixOverrides="and | or">
+			 
+      <if test="condition != null">
+				 
+        <if test="condition.id != null">
+					AND history.RESOURCE_ID = #{condition.id}
+				</if>
+				 
+        <if test="condition.level != null and condition.level != ''">
+					AND history."LEVEL" like '%'||#{condition.level}||'%'
+				</if>
+				 
+        <if test="condition.keyWords != null">
+					AND history.KEYWORDS like '%'||#{condition.keyWords}||'%'
+				</if>
+				 
+        <if test="condition.occurredTime != null">
+					AND to_char(ALERT_TIME, 'yyyy-MM-dd') = to_char(#{condition.occurredTime},'yyyy-MM-dd')
+				</if>
+				 
+        <if test="condition.startTime != null and condition.startTime != '' ">
+					 <![CDATA[ 
+						AND to_char(ALERT_TIME, 'yyyy-MM-dd HH24:mi:ss') >= #{condition.startTime}
+					]]>
+				</if>
+				 
+        <if test="condition.endTime != null and condition.endTime != '' ">
+					 <![CDATA[
+						AND to_char(ALERT_TIME, 'yyyy-MM-dd HH24:mi:ss') <= #{condition.endTime}
+					]]>
+				</if>
+			
+      </if>
+		
+    </trim>
+	
+  </select>
+  <insert id="saveStrategyRuleList" parameterType="java.util.List" databaseId="mysql">
+		insert into
+			STM_SYSLOG_STRATEGY_RULE(ID, STRATEGY_ID, NAME, ALARM_LEVEL, KEYWORDS, KEYWORDS_LOGIC, LOG_LEVEL, DESCRIPTION,IS_OPEN,IS_ALARM)
+		values
+		 
+    <foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id}, #{item.strategyId}, #{item.name}, #{item.alarmLevel}, #{item.keywords}, #{item.logicType}, #{item.logLevel}, #{item.description},#{item.isOpen},#{item.isAlarm})
+		</foreach>
+	
+  </insert>
+	 
+  <!-- oracle -->
+	 
+  <insert id="saveStrategyRuleList" parameterType="java.util.List" databaseId="oracle">
+		insert into
+			STM_SYSLOG_STRATEGY_RULE(ID, STRATEGY_ID, NAME, ALARM_LEVEL, KEYWORDS, KEYWORDS_LOGIC, LOG_LEVEL, DESCRIPTION,IS_OPEN,IS_ALARM)
+		 
+    <foreach collection="list" item="item" index="index" open="(" separator="union" close=")">
+		select
+			#{item.id}, #{item.strategyId}, #{item.name}, #{item.alarmLevel}, #{item.keywords}, #{item.logicType}, #{item.logLevel}, #{item.description},#{item.isOpen},#{item.isAlarm}
+		from dual
+		</foreach>
+	
+  </insert>
+	 
+  <insert id="saveStrategyRuleList" parameterType="java.util.List" databaseId="dm">
+		insert into
+			STM_SYSLOG_STRATEGY_RULE(ID, STRATEGY_ID, NAME, ALARM_LEVEL, KEYWORDS, KEYWORDS_LOGIC, LOG_LEVEL, DESCRIPTION,IS_OPEN,IS_ALARM)
+		 
+    <foreach collection="list" item="item" index="index" open="(" separator="union" close=")">
+		select
+			#{item.id}, #{item.strategyId}, #{item.name}, #{item.alarmLevel}, #{item.keywords}, #{item.logicType}, #{item.logLevel}, #{item.description},#{item.isOpen},#{item.isAlarm}
+		from dual
+		</foreach>
+	
+  </insert>
+  <select id="getResourceBo" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogResourceBo" resultType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogResourceBo">
+		select
+			STRATEGY_TYPE as strategyType,
+			STRATEGY_ID as strategyId,
+			RESOURCE_ID as resourceId,
+			IS_MONITOR as isMonitor,
+			IP as resourceIp
+		from stm_syslog_resource
+		where IP = #{resourceIp} and STRATEGY_TYPE = #{strategyType}
+	</select>
+	
+	 
+  <!-- mysql -->
+	 
+  <select id="saveSyslogHistroy" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogBo" databaseId="mysql">
+		insert into stm_syslog_syslog_history(RESOURCE_ID,ALERT_TIME,MSG,LEVEL,KEYWORDS)
+		values(#{resourceId},#{alertTime},#{msg},#{level},#{keyWords})
+	</select>
+	
+	 
+  <!-- oracle -->
+	 
+  <select id="saveSyslogHistroy" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogBo" databaseId="oracle">
+		insert into stm_syslog_syslog_history(RESOURCE_ID,ALERT_TIME,MSG,"LEVEL",KEYWORDS)
+		values(#{resourceId},#{alertTime},#{msg},#{level},#{keyWords})
+	</select>
+	
+	 
+  <!-- mysql -->
+	 
+  <select id="saveSyslogHistroy" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogBo" databaseId="dm">
+		insert into stm_syslog_syslog_history(RESOURCE_ID,ALERT_TIME,MSG,"LEVEL",KEYWORDS)
+		values(#{resourceId},#{alertTime},#{msg},#{level},#{keyWords})
+	</select>
+  <select id="countSyslogHistory" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogBo" resultType="int" databaseId="mysql">
+		select count(*) from stm_syslog_syslog_history
+		where RESOURCE_ID = #{resourceId}
+		 
+    <if test="alertTime != null and alertTime != ''">
+			AND ALERT_TIME LIKE CONCAT(DATE_FORMAT(#{alertTime}, '%Y-%m-%d'),'%')
+		</if>
+	
+  </select>
+	
+	 
+  <!-- oracle -->
+	 
+  <select id="countSyslogHistory" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogBo" resultType="int" databaseId="oracle">
+		select count(*) from stm_syslog_syslog_history
+		where RESOURCE_ID = #{resourceId}
+		 
+    <if test="alertTime != null and alertTime != ''">
+			AND to_char(ALERT_TIME, 'yyyy-MM-dd') = to_char(#{alertTime},'yyyy-MM-dd')
+		</if>
+	
+  </select>
+	
+	 
+  <select id="countSyslogHistory" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogBo" resultType="int" databaseId="dm">
+		select count(*) from stm_syslog_syslog_history
+		where RESOURCE_ID = #{resourceId}
+		 
+    <if test="alertTime != null and alertTime != ''">
+			AND to_char(ALERT_TIME, 'yyyy-MM-dd') = to_char(#{alertTime},'yyyy-MM-dd')
+		</if>
+	
+  </select>
+ 	<update id="updateResourceSta" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogResourceBo"  
+	 databaseId="oracle">
+		
+		update stm_syslog_resource_sta
+				set LAST_DATE = sysdate,
+				CUR_DATE_COUNT = (select count(*) from stm_syslog_syslog_history
+								  where RESOURCE_ID = #{resourceId}
+								  AND to_char(ALERT_TIME, 'yyyy-MM-dd') = to_char(#{lastDate},'yyyy-MM-dd')),
+				ALL_COUNT = (select count(*) from stm_syslog_syslog_history where RESOURCE_ID = #{resourceId})
+		where RESOURCE_ID = #{resourceId} and STRATEGY_TYPE = #{strategyType}
+	</update>
+	<update id="updateResourceSta" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogResourceBo"
+	  databaseId="mysql">
+		update stm_syslog_resource_sta
+				set LAST_DATE = sysdate(),
+				CUR_DATE_COUNT = (select count(*) from stm_syslog_syslog_history
+								  where RESOURCE_ID = #{resourceId}
+								  AND ALERT_TIME LIKE CONCAT(DATE_FORMAT(#{lastDate}, '%Y-%m-%d'),'%')),
+				ALL_COUNT = (select count(*) from stm_syslog_syslog_history where RESOURCE_ID = #{resourceId})
+		where RESOURCE_ID = #{resourceId} and STRATEGY_TYPE = #{strategyType}
+	</update>
+	 
+  <update id="updateRuleLevel" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SysLogRuleBo">
+		update stm_syslog_strategy_rule
+		SET	ALARM_LEVEL = #{alarmLevel}
+		where ID = #{id}
+	</update>
+	
+	 
+  <delete id="batchResByResourceId">
+		DELETE resource,
+		 sta,
+		 syslogHistory,
+		 trapHistory
+		FROM
+			stm_syslog_resource res
+		LEFT JOIN stm_syslog_resource_sta sta ON res.RESOURCE_ID = sta.RESOURCE_ID
+		LEFT JOIN stm_syslog_syslog_history syslogHistory ON res.RESOURCE_ID = syslogHistory.RESOURCE_ID
+		LEFT JOIN stm_syslog_snmptrap_history trapHistory ON res.RESOURCE_ID = trapHistory.RESOURCE_ID
+		WHERE
+			res.RESOURCE_ID in
+		 
+    <foreach item="ids" index="index" collection="array" open="(" separator="," close=")">  
+ 			#{ids}
+		</foreach> 
+	
+  </delete>
+</mapper>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.topo.dao.HLJDao">
+	<select id="getById" resultType="com.mainsteam.stm.topo.bo.HLJNode" parameterType="long">
+		select * from stm_topo_hlj_node where id=#{id}
+	</select>
+	<update id="updateInstanceIds" parameterType="com.mainsteam.stm.topo.bo.HLJNode">
+		update stm_topo_hlj_node set instanceIds=#{instanceIds},nextMapId=#{nextMapId},mapId=#{mapId},area=#{area} where id=#{id}
+	</update>
+	<insert id="addNode" parameterType="com.mainsteam.stm.topo.bo.HLJNode">
+		insert into stm_topo_hlj_node (id,nodeId,mapId,nextMapId,instanceIds,area) values(#{id},#{nodeId},#{mapId},#{nextMapId},#{instanceIds},#{area})
+	</insert>
+	<select id="getNodesByMapId" resultType="com.mainsteam.stm.topo.bo.HLJNode" parameterType="map">
+		select ${projection} from stm_topo_hlj_node where mapId=#{mapId}
+	</select>
+	<select id="getNodesByNextMapId" resultType="com.mainsteam.stm.topo.bo.HLJNode" parameterType="map">
+		select instanceIds,nextMapId from stm_topo_hlj_node where nextMapId=#{mapId}
+	</select>
+	<delete id="delNullRelation" parameterType="map">
+		delete from stm_topo_hlj_node where mapId=#{mapId} and nextMapId=#{nextMapId} and nodeId is null
+	</delete>
+	<select id="existRelation" parameterType="map" resultType="int">
+		select count(id) from stm_topo_hlj_node where mapId=#{mapId} and nextMapId=#{nextMapId} and nodeId is not null
+	</select>
+	<select id="existNullRelation" parameterType="map" resultType="int">
+		select count(id) from stm_topo_hlj_node where mapId=#{mapId} and nextMapId=#{nextMapId} and nodeId is null
+	</select>
+</mapper>

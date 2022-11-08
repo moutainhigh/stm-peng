@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.profilelib.dao.ProfileAutoRediscoverDao">
+
+	<sql id="profile_table"> STM_PROFILELIB_AUTO_REDISCOVER 	</sql>
+	<sql id="profile_instance_table"> STM_PROFILELIB_AUTO_REDISC_INS </sql>
+	<sql id="columnsAlias">
+		ID id,
+		PROFILE_NAME profileName,
+		PROFILE_DESC profileDesc,
+		IS_USE isUse,
+		DOMAIN_ID domainId,
+		CREATE_USER createUser,
+		CREATE_TIME
+		createTime,
+		UPDATE_USER updateUser,
+		UPDATE_TIME updateTime,
+		EXECUT_REPEAT executRepeat,
+		IS_REMOVE_HISTORY isRemoveHistory
+	</sql>
+	<sql id="columns">
+		ID,
+		PROFILE_NAME,
+		PROFILE_DESC,
+		IS_USE,
+		DOMAIN_ID,
+		CREATE_USER,
+		CREATE_TIME,
+		UPDATE_USER,
+		UPDATE_TIME,
+		EXECUT_REPEAT,
+		IS_REMOVE_HISTORY
+	</sql>
+
+	<insert id="addProfileAutoRediscover"
+		parameterType="com.mainsteam.stm.profilelib.obj.ProfilelibAutoRediscover">
+		INSERT INTO
+		<include refid="profile_table" />
+		(
+		<include refid="columns"></include>
+		) VALUES
+		(#{id},#{profileName},#{profileDesc},#{isUse},#{domainId},#{createUser},#{createTime},#{updateUser},#{updateTime},#{executRepeat},#{isRemoveHistory})
+	</insert>
+
+	<insert id="addProfileAutoRediscoverInstance"
+		parameterType="com.mainsteam.stm.profilelib.obj.ProfilelibAutoRediscoverInstance">
+		INSERT INTO
+		<include refid="profile_instance_table" />
+		(ID,PROFILE_ID,INSTANCE_ID,EXECUTE_TIME,NEXT_EXECUTE_TIME) VALUES (#{id},#{profileId},#{instanceId},#{executeTime},#{nextExecuteTime})
+	</insert>
+
+	<delete id="deleteProfileAutoRediscover" parameterType="long">
+		DELETE FROM
+		<include refid="profile_table" />
+		WHERE id=#{profileId}
+	</delete>
+
+	<delete id="deleteProfileAutoRediscoverInstanceByProfileId"
+		parameterType="long">
+		DELETE FROM
+		<include refid="profile_instance_table" />
+		WHERE PROFILE_ID=#{profileId}
+	</delete>
+
+	<delete id="deleteProfileAutoRediscoverInstanceByInstanceId"
+		parameterType="long">
+		DELETE FROM
+		<include refid="profile_instance_table" />
+		WHERE INSTANCE_ID=#{instanceId}
+	</delete>
+
+	<select id="getProfileAutoRediscover" parameterType="long"
+		resultType="com.mainsteam.stm.profilelib.obj.ProfilelibAutoRediscover">
+		SELECT
+		<include refid="columnsAlias" />
+		FROM
+		<include refid="profile_table" />
+		WHERE ID=#{profileId}
+	</select>
+
+	<select id="getAllProfileAutoRediscover"
+		resultType="com.mainsteam.stm.profilelib.obj.ProfilelibAutoRediscover">
+		SELECT
+		<include refid="columnsAlias" />
+		FROM
+		<include refid="profile_table" />
+	</select>
+
+	<select id="getUsedProfileAutoRediscover"
+		resultType="com.mainsteam.stm.profilelib.obj.ProfilelibAutoRediscover">
+		SELECT
+		<include refid="columnsAlias" />
+		FROM
+		<include refid="profile_table" />
+		WHERE IS_USE =1
+	</select>
+	<update id="updateProfileAutoRediscover"
+		parameterType="com.mainsteam.stm.profilelib.obj.ProfilelibAutoRediscover">
+		UPDATE
+		<include refid="profile_table" />
+		SET
+		PROFILE_NAME=#{profileName},
+		PROFILE_DESC=#{profileDesc},
+		IS_USE=#{isUse},
+		DOMAIN_ID=#{domainId},
+		CREATE_USER=#{createUser},
+		CREATE_TIME=#{createTime},
+		UPDATE_USER=#{updateUser},
+		UPDATE_TIME=#{updateTime},
+		EXECUT_REPEAT=#{executRepeat},
+		IS_REMOVE_HISTORY=#{isRemoveHistory}
+		WHERE ID=#{id}
+	</update>
+
+	<select id="getAutoRediscoverProfileInstanceByProfileId"
+		parameterType="long"
+		resultType="com.mainsteam.stm.profilelib.obj.ProfilelibAutoRediscoverInstance">
+		SELECT
+		ID id,
+		PROFILE_ID profileId,
+		INSTANCE_ID instanceId,
+		EXECUTE_TIME executeTime,
+		NEXT_EXECUTE_TIME nextExecuteTime
+		FROM
+		<include refid="profile_instance_table" />
+		WHERE PROFILE_ID = #{profileId}
+	</select>
+
+	<update id="updateProfileInstanceExecuteTime"
+		parameterType="com.mainsteam.stm.profilelib.obj.ProfilelibAutoRediscoverInstance">
+		UPDATE
+		<include refid="profile_instance_table" />
+		SET
+		EXECUTE_TIME=#{executeTime},
+		NEXT_EXECUTE_TIME=#{nextExecuteTime}
+		WHERE ID=#{id}
+	</update>
+	<select id="getProfileInstanceCount" resultType="int">
+	    SELECT COUNT(1) FROM (SELECT INSTANCE_ID FROM <include refid="profile_instance_table" /> GROUP BY INSTANCE_ID) t
+	</select>
+	
+	<select id="getProfilelibAutoRediscoverInstanceByInstanceId" parameterType="long" resultType="com.mainsteam.stm.profilelib.obj.ProfilelibAutoRediscoverInstance">
+	    SELECT
+		ID id,
+		PROFILE_ID profileId,
+		INSTANCE_ID instanceId,
+		EXECUTE_TIME executeTime,
+		NEXT_EXECUTE_TIME nextExecuteTime
+		FROM
+		<include refid="profile_instance_table" />
+		WHERE INSTANCE_ID = #{instanceId}
+	    
+	</select>
+</mapper>

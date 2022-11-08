@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                    http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+                    http://www.springframework.org/schema/context
+                    http://www.springframework.org/schema/context/spring-context-3.2.xsd
+                    ">
+	<bean id="OCRPCServer"
+		class="com.mainsteam.stm.rpc.server.OCRPCServerImpl" destroy-method="close" init-method="init">
+		<property name="nodeService" ref="localNodeService">
+		</property>
+		<property name="logicServer" ref="logicServer">
+		</property>		
+	</bean>
+	<bean id="jmxBeanBeanPostProcessors"
+		class="com.mainsteam.stm.rpc.server.JmxBeanBeanPostProcessors">
+	</bean>	
+	<bean id="jmxBeanLoader"
+		class="com.mainsteam.stm.rpc.server.JmxBeanLoader">
+		<property name="jmxBeanBeanPostProcessors" ref="jmxBeanBeanPostProcessors">
+		</property>
+		<property name="server" ref="OCRPCServer">
+		</property>
+		<property name="physicalServer" ref="physicalServer">
+		</property>		
+	</bean>
+</beans>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.mainsteam.stm.portal.config.dao.IConfigScriptDirectoryDao">
+
+	<select id="getAll" resultType="com.mainsteam.stm.portal.config.bo.ConfigScriptDirectoryBo">
+		SELECT ID,DIR_LEVEL AS DIRLEVEL,NAME,PARENTID FROM STM_CONFIG_SCRIPT_DIRECTORY
+	</select>
+	
+	<select id="getById" parameterType="Long" resultType="com.mainsteam.stm.portal.config.bo.ConfigScriptDirectoryBo">
+		SELECT ID,DIR_LEVEL AS DIRLEVEL,NAME,PARENTID FROM STM_CONFIG_SCRIPT_DIRECTORY
+		WHERE ID=#{id}
+	</select>
+	
+	<select id="getByParentId" parameterType="Long" resultType="com.mainsteam.stm.portal.config.bo.ConfigScriptDirectoryBo">
+		SELECT ID,DIR_LEVEL AS DIRLEVEL,NAME,PARENTID FROM STM_CONFIG_SCRIPT_DIRECTORY
+		WHERE PARENTID=#{id}
+	</select>
+	
+	<select id="getByName" parameterType="String" resultType="com.mainsteam.stm.portal.config.bo.ConfigScriptDirectoryBo">
+		SELECT ID,DIR_LEVEL AS DIRLEVEL,NAME,PARENTID FROM STM_CONFIG_SCRIPT_DIRECTORY
+		WHERE NAME=#{name}
+	</select>
+	
+	<insert id="insert" parameterType="com.mainsteam.stm.portal.config.bo.ConfigScriptDirectoryBo" >
+		INSERT INTO STM_CONFIG_SCRIPT_DIRECTORY (ID,DIR_LEVEL,NAME,PARENTID) VALUES( #{id},#{dirLevel},#{name},#{parentId} )
+	</insert>
+	
+	<update id="update" parameterType="com.mainsteam.stm.portal.config.bo.ConfigScriptDirectoryBo">
+		UPDATE STM_CONFIG_SCRIPT_DIRECTORY
+		<set>
+			<if test="dirLevel > 0"> DIR_LEVEL = #{dirLevel}, </if>
+			<if test="name != null"> NAME = #{name}, </if>
+			<if test="parentId > 0"> PARENTID = #{parentId} </if>
+		</set>
+		WHERE ID=#{id}
+	</update>
+	
+	<delete id="del" parameterType="Long">
+		DELETE FROM STM_CONFIG_SCRIPT_DIRECTORY WHERE ID=#{id}
+	</delete>
+	
+</mapper>

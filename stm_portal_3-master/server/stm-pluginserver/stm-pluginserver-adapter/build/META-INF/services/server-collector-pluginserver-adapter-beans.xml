@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                    http://www.springframework.org/schema/context
+                    http://www.springframework.org/schema/context/spring-context-2.5.xsd
+                    ">
+	<bean id="pluginRequestManager"
+		class="com.mainsteam.stm.pluginserver.adapter.manager.impl.PluginRequestManagerImpl">
+	</bean>
+	<bean id="requestReponseSynch"
+		class="com.mainsteam.stm.pluginserver.adapter.manager.impl.RequestReponseSynchImpl" init-method="start">
+	</bean>	
+	<bean id="pluginResponseClient"
+		class="com.mainsteam.stm.pluginserver.adapter.PluginResponseClientImpl">
+		<property name="responseReceiver" ref="pluginResponseReceiver"/>
+		<property name="container" ref="pluginContainer"/>
+	</bean>
+	<bean id="pluginResponseReceiver"
+		class="com.mainsteam.stm.pluginserver.adapter.PluginResponseReceiverImpl">
+		<property name="processBeanManager" ref="processBeanManager"/>
+		<property name="requestManager" ref="pluginRequestManager"/>
+		<!-- blew defined by oc-transfer -->
+		<property name="metricDataTransferSender" ref="metricDataTransferSender"/>	
+		<property name="reponseSynch" ref="requestReponseSynch"/>
+		<property name="metricDataManager" ref="metricDataManager"/>
+	</bean>
+	<bean id="pluginRequestReceiver"
+		class="com.mainsteam.stm.pluginserver.adapter.PluginRequestReceiverImpl">
+		<property name="container" ref="pluginContainer"/>
+	</bean>
+	<!-- 提供给组件外部使用的接口，用来发送pluginRequest请求 -->
+	<bean id="pluginRequestClient"
+		class="com.mainsteam.stm.pluginserver.adapter.PluginRequestClientImpl" init-method="start">
+		<property name="receiver" ref="pluginRequestReceiver"/>
+		<property name="pluginRequestManager" ref="pluginRequestManager"/>
+		<property name="reponseSynch" ref="requestReponseSynch"/>
+		<property name="executor" ref="metricExecutor"/>
+	</bean>
+	<!-- 给外部提供采集回来数据使用 -->
+	<bean id="metricDataManager"
+		class="com.mainsteam.stm.pluginserver.adapter.interceptor.MetricDataManagerImpl">
+	</bean>
+	<bean id="receiverMetricRegisterLoad"
+		class="com.mainsteam.stm.pluginserver.adapter.interceptor.ReceiverMetricRegisterLoad">
+		<property name="metricDataManager" ref="metricDataManager"/>
+	</bean>
+</beans>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.knowledge.zip.dao.sqlite.IKnowledgeZipSqliteDao">
+	<select id="getAllCloudyKnowledge" resultType="com.mainsteam.stm.knowledge.zip.bo.CloudyKnowledge">
+	select CLOUDY_ID as cloudyId,
+		KNOWLEDGE_TYPE_CODE AS knowledgeTypeCode,
+		TITLE,
+		SOURCE_CONTENT as sourceContent,
+		RESOLVE_CONTENT as resolveContent,
+		RESOLVE_ATTACHMENT_CONTENT_1 as resolveAttachmentContent1,
+		RESOLVE_ATTACHMENT_CONTENT_2 as resolveAttachmentContent2,
+		RESOLVE_ATTACHMENT_CONTENT_3 as resolveAttachmentContent3,
+		RESOLVE_ATTACHMENT_CONTENT_4 as resolveAttachmentContent4,
+		RESOLVE_ATTACHMENT_CONTENT_5 as resolveAttachmentContent5,
+		RESOLVE_ATTACHMENT_NAME_1 as resolveAttachmentName1,
+		RESOLVE_ATTACHMENT_NAME_2 as resolveAttachmentName2,
+		RESOLVE_ATTACHMENT_NAME_3 as resolveAttachmentName3,
+		RESOLVE_ATTACHMENT_NAME_4 as resolveAttachmentName4,
+		RESOLVE_ATTACHMENT_NAME_5 as resolveAttachmentName5
+	 from CLOUDY_KNOWLEDGE
+	 </select>
+	 
+	 <delete id="deleteByTableName" parameterType="string">
+	 	delete from ${tableName}
+	 </delete>
+	 
+	 <insert id="saveKnowledges">
+	 	insert into CLOUDY_KNOWLEDGE(CLOUDY_ID,KNOWLEDGE_TYPE_CODE,TITLE,SOURCE_CONTENT, RESOLVE_CONTENT,
+		 	RESOLVE_ATTACHMENT_CONTENT_1, RESOLVE_ATTACHMENT_NAME_1,
+		 	RESOLVE_ATTACHMENT_CONTENT_2, RESOLVE_ATTACHMENT_NAME_2,
+		 	RESOLVE_ATTACHMENT_CONTENT_3, RESOLVE_ATTACHMENT_NAME_3,
+		 	RESOLVE_ATTACHMENT_CONTENT_4, RESOLVE_ATTACHMENT_NAME_4,
+		 	RESOLVE_ATTACHMENT_CONTENT_5, RESOLVE_ATTACHMENT_NAME_5)
+	 	values
+	 	(#{cloudyId}, #{knowledgeTypeCode}, #{title}, #{sourceContent}, #{resolveContent},
+			#{resolveAttachmentContent1,jdbcType=BINARY}, #{resolveAttachmentName1},
+			#{resolveAttachmentContent2,jdbcType=BINARY}, #{resolveAttachmentName2},
+			#{resolveAttachmentContent3,jdbcType=BINARY}, #{resolveAttachmentName3},
+			#{resolveAttachmentContent4,jdbcType=BINARY}, #{resolveAttachmentName4},
+			#{resolveAttachmentContent5,jdbcType=BINARY}, #{resolveAttachmentName5})
+	 	
+	 </insert>
+	 
+	 <!-- 下面为测试用 -->
+	 <insert id="save" parameterType="com.mainsteam.stm.knowledge.zip.bo.CloudyKnowledge">
+	 	insert into CLOUDY_KNOWLEDGE(CLOUDY_ID,KNOWLEDGE_TYPE_CODE,TITLE,SOURCE_CONTENT, RESOLVE_CONTENT,
+	 	RESOLVE_ATTACHMENT_CONTENT_1, RESOLVE_ATTACHMENT_NAME_1)
+	 	values(#{cloudyId}, #{knowledgeTypeCode}, #{title}, #{sourceContent}, #{resolveContent}, #{resolveAttachmentContent1,jdbcType=BINARY}
+	 	, #{resolveAttachmentName1})
+	 </insert>
+</mapper>

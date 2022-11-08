@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.topo.dao.IMacLatestDao">
+   
+   
+   
+   
+   
+  <resultMap type="com.mainsteam.stm.topo.bo.MacLatestBo" id="macLatestMap">
+     
+     
+     
+     
+     
+    <id column="id" property="id"/>
+     
+     
+     
+     
+     
+    <result column="mac" property="mac"/>
+     
+     
+     
+     
+     
+    <result column="up_device_ip" property="upDeviceIp"/>
+     
+     
+     
+     
+     
+    <result column="up_device_interface" property="upDeviceInterface"/>
+     
+     
+     
+     
+     
+    <result column="up_device_name" property="upDeviceName"/>
+     
+     
+     
+     
+     
+    <result column="host_name" property="hostName"/>
+     
+     
+     
+     
+     
+    <result column="update_time" property="updateTime"/>
+     
+     
+     
+     
+     
+    <result column="ip" property="ip"/>
+  
+  
+  
+  
+  
+  </resultMap>
+   
+   
+   
+   
+   
+  <update id="updateByMac" parameterType="java.util.Map">
+	   UPDATE STM_TOPO_LATEST_MAC
+	   SET host_name = #{hostName}
+	   WHERE mac = #{mac} and host_name != #{hostName}
+	</update>
+   
+   
+   
+   
+   
+  <select id="getAll" resultMap="macLatestMap">
+		SELECT * FROM STM_TOPO_LATEST_MAC
+	</select>
+   
+   
+   
+   
+   
+  <delete id="delAll">
+		delete from STM_TOPO_LATEST_MAC
+	</delete>
+   
+   
+   
+   
+   
+  <delete id="delByIds">
+		delete from STM_TOPO_LATEST_MAC
+		where id in
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach collection="ids" item="item" index="index" open="(" separator="," close=")">  
+         #{item}  
+      	</foreach>  
+	
+	
+  
+  
+  
+  
+  
+  </delete>
+   
+   
+   
+   
+   
+  <insert id="insert" parameterType="com.mainsteam.stm.topo.bo.MacLatestBo">
+		insert into STM_TOPO_LATEST_MAC (id,mac,ip,up_device_name,up_device_ip,up_device_interface,update_time,host_name)
+		values (#{id},#{mac},#{ip},#{upDeviceName},#{upDeviceIp},#{upDeviceInterface},#{updateTime},#{hostName})
+	</insert>
+   
+   
+   
+   
+   
+  <select id="selectAll" resultMap="macLatestMap">
+		SELECT * FROM STM_TOPO_LATEST_MAC
+	</select>
+   
+   
+   
+   
+   
+  <select id="selectByIds" resultMap="macLatestMap">
+       SELECT * FROM STM_TOPO_LATEST_MAC
+       WHERE id IN 
+       
+		 
+     
+     
+     
+     
+     
+    <foreach collection="ids" item="item" index="index" open="(" separator="," close=")">  
+         #{item}  
+      </foreach>  
+    
+	
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="pageSelect" resultMap="macLatestMap" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="mysql">
+		SELECT * FROM STM_TOPO_LATEST_MAC
+		 
+		 
+     
+     
+     
+     
+     
+    <if test="condition != null and condition.searchType !=null and condition.searchVal != null and condition.searchVal != ''">
+			 
+			 
+       
+       
+       
+       
+       
+      <trim prefix="where" prefixOverrides="and |or ">
+				 
+				 
+         
+         
+         
+         
+         
+        <!-- 1:IP地址, 2:Mac地址,3:上联设备名称,4:上联设备IP,5:上联设备接口-->
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.searchType == 1">IP</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.searchType == 2">MAC</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.searchType == 3">up_device_ip</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.searchType == 4">up_device_name</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.searchType == 5">up_device_interface</if>
+		        LIKE CONCAT('%', #{condition.searchVal}, '%') 
+			
+			
+      
+      
+      
+      
+      
+      </trim>
+		
+		
+    
+    
+    
+    
+    
+    </if>
+	
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="pageSelect" resultMap="macLatestMap" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oracle">
+		SELECT * FROM STM_TOPO_LATEST_MAC
+		 
+		 
+     
+     
+     
+     
+     
+    <if test="condition != null and condition.searchType !=null and condition.searchVal != null and condition.searchVal != ''">
+			 
+			 
+       
+       
+       
+       
+       
+      <trim prefix="where" prefixOverrides="and |or ">
+				 
+				 
+         
+         
+         
+         
+         
+        <!-- 1:IP地址, 2:Mac地址,3:上联设备名称,4:上联设备IP,5:上联设备接口-->
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.searchType == 1">IP</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.searchType == 2">MAC</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.searchType == 3">up_device_ip</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.searchType == 4">up_device_name</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.searchType == 5">up_device_interface</if>
+		        LIKE '%'||#{condition.searchVal}||'%' 
+			
+			
+      
+      
+      
+      
+      
+      </trim>
+		
+		
+    
+    
+    
+    
+    
+    </if>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="pageSelect" resultMap="macLatestMap" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="dm">
+		SELECT * FROM STM_TOPO_LATEST_MAC
+		 
+		 
+     
+     
+     
+     
+     
+    <if test="condition != null and condition.searchType !=null and condition.searchVal != null and condition.searchVal != ''">
+			 
+			 
+       
+       
+       
+       
+       
+      <trim prefix="where" prefixOverrides="and |or ">
+				 
+				 
+         
+         
+         
+         
+         
+        <!-- 1:IP地址, 2:Mac地址,3:上联设备名称,4:上联设备IP,5:上联设备接口-->
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.searchType == 1">IP</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.searchType == 2">MAC</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.searchType == 3">up_device_ip</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.searchType == 4">up_device_name</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.searchType == 5">up_device_interface</if>
+		        LIKE '%'||#{condition.searchVal}||'%' 
+			
+			
+      
+      
+      
+      
+      
+      </trim>
+		
+		
+    
+    
+    
+    
+    
+    </if>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+  <select id="pageSelect" resultMap="macLatestMap" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oscar">
+		SELECT * FROM STM_TOPO_LATEST_MAC
+		 
+		 
+     
+     
+     
+     
+     
+    <if test="condition != null and condition.searchType !=null and condition.searchVal != null and condition.searchVal != ''">
+			 
+			 
+       
+       
+       
+       
+       
+      <trim prefix="where" prefixOverrides="and |or ">
+				 
+				 
+         
+         
+         
+         
+         
+        <!-- 1:IP地址, 2:Mac地址,3:上联设备名称,4:上联设备IP,5:上联设备接口-->
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.searchType == 1">IP</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.searchType == 2">MAC</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.searchType == 3">up_device_ip</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.searchType == 4">up_device_name</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.searchType == 5">up_device_interface</if>
+		        LIKE '%'||#{condition.searchVal}||'%' 
+			
+			
+      
+      
+      
+      
+      
+      </trim>
+		
+		
+    
+    
+    
+    
+    
+    </if>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:context="http://www.springframework.org/schema/context" 
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                    http://www.springframework.org/schema/context
+                    http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+	<bean id="profilefaultService" class="com.mainsteam.stm.profile.fault.service.impl.ProfilefaultServiceImpl">
+		<property name="sequence" ref="profilelibFaultSeq"/>
+		<property name="profileFaultDao" ref="profileFaultDao" />
+		<property name="profilefaultInstanceService" ref="profilefaultInstanceService"/>
+		<property name="profilefaultMetricService" ref="profilefaultMetricService"/>
+		<property name="client" ref="OCRPClient"/>
+		<property name="localNodeService" ref="localNodeService"/>
+		<property name="instanceService" ref="resourceInstanceService"/>
+		<property name="scriptManager" ref="scriptManageService"/>
+		<property name="fileClient" ref="fileClient"/>
+		<property name="capacityService" ref="capacityService"></property>
+	</bean>
+	
+	<bean id="profilefaultInstanceService" class="com.mainsteam.stm.profile.fault.service.impl.ProfileFaultInstanceServiceImpl">
+		<property name="profileInstanceDao" ref="profileInstanceDao"/>
+	</bean>
+	
+	<bean id="profilefaultMetricService" class="com.mainsteam.stm.profile.fault.service.impl.ProfileFaultMetricServiceImpl">
+		<property name="profileMetricDao" ref="profileMetridDao"/>
+	</bean>
+	
+	<!-- Dao配置 -->
+	<bean id="profileFaultDao" class="com.mainsteam.stm.profile.fault.dao.impl.ProfileFaultDaoImpl">
+		<property name="session" ref="sqlSession" />
+	</bean>
+	<bean id="profileInstanceDao" class="com.mainsteam.stm.profile.fault.dao.impl.ProfileFaultInstanceDaoImpl">
+		<property name="session" ref="sqlSession" />
+		<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+	</bean>
+	<bean id="profileMetridDao" class="com.mainsteam.stm.profile.fault.dao.impl.ProfileFaultMetricDaoImpl">
+		<property name="session" ref="sqlSession" />
+		<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+	</bean>
+	
+	
+	<bean name="profilelibFaultSeq" factory-bean="platformSeqFactory" 
+		factory-method="getSeq">
+		<constructor-arg value="STM_PROFILELIB_FAULT_SEQ" />
+	</bean>
+</beans>

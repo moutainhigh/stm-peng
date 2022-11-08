@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	
+	<devicetypeinfo devicetype="MW_TONGLINKQ" ismulticoltype="true" majortype="middleware" minortype="TongLINKQ" manufacturer="tonglink" devicetype_zh="TongLINK/Q">
+		
+		<devicetypes>
+		</devicetypes>
+		
+		<!-- 该设备类型定义的命令，用于合并命令执行 -->
+		<commands>
+			<command coltype="CLI" comid="chk_tlqstat" command="/tmp/tonglink.sh ${InstallPath}"/>
+			<command coltype="CLI" comid="chk_common" command="/tmp/os.sh"/>
+			<command coltype="CLI" comid="chk_physicalrate" command="/tmp/appinfo.sh tlq"/>
+		</commands>
+		
+		<!-- 描述该类设备的所有指标采集,一行对应一个指标 -->
+		<resources>
+			<!-- TongLINK/Q状态 -->
+			<resource kpiid="M2Availability" coltype="CLI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_tlqstat" select="status=(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M2Availability" field="value" fieldtype="" willalert="y"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.contains(&quot;不可用&quot;)" alertdesc5="服务器不可用"
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- TongLINK/Q CPU利用率 -->
+			<resource kpiid="M2CPURate" coltype="CLI" value="" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="chk_physicalrate" select="&lt;get_appcpurate&gt;([\s\S]*)&lt;/get_appcpurate&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_d_M2CPURate" field="value" fieldtype="" willalert="y"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>=60"
+					alertdesc3="CPU利用率超过${trigervalue1}%，当前值为${value}%" alertexp4="${value}>=80" alertdesc4="CPU利用率超过${trigervalue1}%，当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/> 
+			</resource>
+			
+			<!-- TongLINK/Q 内存利用率 -->
+			<resource kpiid="M2MEMRate" coltype="CLI" value="" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="chk_physicalrate" select="&lt;get_appmemrate&gt;([\s\S]*)&lt;/get_appmemrate&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_d_M2MEMRate" field="value" fieldtype="" willalert="y"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>=80"
+					alertdesc3="内存利用率超过${trigervalue1}%，当前值为${value}%" alertexp4="${value}>=90" alertdesc4="内存利用率超过${trigervalue1}%，当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- 版本 -->
+			<resource kpiid="M2Version" coltype="CLI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_tlqstat" select="TLQVer=(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M2Version" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 监听端口 -->
+			<resource kpiid="M2ProxyListenerPort" coltype="CLI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_tlqstat" select="SelfPort=(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M2ProxyListenerPort" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 主机名称 -->
+			<resource kpiid="M2HostName" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;hostname&gt;(\w+)&lt;/hostname&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M2HostName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 操作系统 -->
+			<resource kpiid="M2OperationSystem" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;os&gt;(.*)&lt;/os&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M2OperationSystem" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 操作系统版本 -->
+			<resource kpiid="M2OSVersion" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;osversion&gt;([\s\S]*)&lt;/osversion&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M2OSVersion" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 主机说明 -->
+			<resource kpiid="M2SysInfo" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;systeminfo&gt;([\s\S]*)&lt;/systeminfo&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M2SysInfo" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 本地节点名称 -->
+			<resource kpiid="M2LocalNodeName" coltype="CLI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_tlqstat" select="MyName=\[(\S+)\]" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M2LocalNodeName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 本地节点别名 -->
+			<resource kpiid="M2LocalNodeAlias" coltype="CLI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_tlqstat" select="Alias=\[(\S*)\]" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M2LocalNodeAlias" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 上级节点数 -->
+			<resource kpiid="M2HigherNodeCount" coltype="CLI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_tlqstat" select="UpNodeNum=(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M2HigherNodeCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 下级节点数 -->
+			<resource kpiid="M2LowerNodeCount" coltype="CLI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_tlqstat" select="DnNodeNum=(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M2LowerNodeCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!--                      接收队列                 -->
+			<!-- 接收队列名称 -->
+			<resource kpiid="M2RecQueueName" coltype="CLI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_tlqstat" select="recqueue\s+\d+:\s+\[(.*)\]\s+\d+\s+\d+\s+\[.*\]\s+[-\d]+\s+\d+\s+[.\d]+" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M2RecQueueName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 队列当前深度 -->
+			<resource kpiid="M2RecCurDepth" coltype="CLI" value="" valuetype="Integer" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_tlqstat" select="recqueue\s+\d+:\s+\[$key\]\s+\d+\s+\d+\s+\[.*\]\s+[-\d]+\s+(\d+)\s+[.\d]+" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M2RecCurDepth" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 接收队列平均利用率 -->
+			<resource kpiid="M2RecUtilRatio" coltype="CLI" value="$d1*100" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_tlqstat" select="recqueue\s+\d+:\s+\[$key\]\s+\d+\s+\d+\s+\[.*\]\s+[-\d]+\s+\d+\s+([.\d]+)" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M2RecUtilRatio" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>=60"
+					alertdesc3="发送队列平均利用率利用率超过${trigervalue1}%，当前值为${value}%" alertexp4="${value}>=90" alertdesc4="发送队列平均利用率利用率超过${trigervalue1}%，当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="15" storefactor="1"/>
+			</resource>
+			
+			<!-- 消息记录数限制 -->
+			<resource kpiid="M2RecDepthLimit" coltype="CLI" value="" valuetype="Integer" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_tlqstat" select="recqueue\s+\d+:\s+\[$key\]\s+(\d+)\s+\d+\s+\[.*\]\s+[-\d]+\s+\d+\s+[.\d]+" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M2RecDepthLimit" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 对应程序编号 -->
+			<resource kpiid="M2RecProgramNumber" coltype="CLI" value="" valuetype="Integer" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_tlqstat" select="recqueue\s+\d+:\s+\[$key\]\s+\d+\s+\d+\s+\[.*\]\s+([-\d]+)\s+\d+\s+[.\d]+" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M2RecProgramNumber" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 存储模式 -->
+			<resource kpiid="M2RecStorageMode" coltype="CLI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_tlqstat" select="recqueue\s+\d+:\s+\[$key\]\s+\d+\s+\d+\s+\[(.*)\]\s+[-\d]+\s+\d+\s+[.\d]+" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M2RecStorageMode" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 消息可用空间限制 -->
+			<resource kpiid="M2RecDataLimit" coltype="CLI" value="" valuetype="Integer" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_tlqstat" select="recqueue\s+\d+:\s+\[$key\]\s+\d+\s+(\d+)\s+\[.*\]\s+[-\d]+\s+\d+\s+[.\d]+" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M2RecDataLimit" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!--            发送队列           -->
+			<!-- 接收队列名称 -->
+			<resource kpiid="M2SndQueueName" coltype="CLI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_tlqstat" select="sendqueue\s+\d+:\s+\[(.*)\]\s+\[.*\]\s+\[.*\]\s+\[.*\]\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M2SndQueueName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 发送队列平均利用率 -->
+			<resource kpiid="M2SndUtilRatio" coltype="CLI" value="$d1*100" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_tlqstat" select="sendqueue\s+\d+:\s+\[$key\]\s+\[.*\]\s+\[.*\]\s+\[.*\]\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M2SndUtilRatio" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>=60"
+					alertdesc3="发送队列平均利用率利用率超过${trigervalue1}%，当前值为${value}%" alertexp4="${value}>=90" alertdesc4="发送队列平均利用率利用率超过${trigervalue1}%，当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="15" storefactor="1"/>
+			</resource>
+			
+			<!-- 目的节点名称 -->
+			<resource kpiid="M2SndDestNodeName" coltype="CLI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_tlqstat" select="sendqueue\s+\d+:\s+\[$key\]\s+\[(.*)\]\s+\[.*\]\s+\[.*\]\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M2SndDestNodeName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 接收队列名称 -->
+			<resource kpiid="M2SndRecQueueName" coltype="CLI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_tlqstat" select="sendqueue\s+\d+:\s+\[$key\]\s+\[.*\]\s+\[(.*)\]\s+\[.*\]\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M2SndRecQueueName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 消息记录数限制 -->
+			<resource kpiid="M2SndDepthLimit" coltype="CLI" value="" valuetype="Integer" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_tlqstat" select="sendqueue\s+\d+:\s+\[$key\]\s+\[.*\]\s+\[.*\]\s+\[.*\]\s+\d+\s+(\d+)\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M2SndDepthLimit" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 存储模式 -->
+			<resource kpiid="M2SndStorageMode" coltype="CLI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_tlqstat" select="sendqueue\s+\d+:\s+\[$key\]\s+\[.*\]\s+\[.*\]\s+\[(.*)\]\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M2SndStorageMode" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 队列当前深度 -->
+			<resource kpiid="M2SndCurDepth" coltype="CLI" value="" valuetype="Integer" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_tlqstat" select="sendqueue\s+\d+:\s+\[$key\]\s+\[.*\]\s+\[.*\]\s+\[.*\]\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+(\d+)\s+\d+" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M2SndCurDepth" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 消息可用空间限制 -->
+			<resource kpiid="M2SndDataLimit" coltype="CLI" value="" valuetype="Integer" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_tlqstat" select="sendqueue\s+\d+:\s+\[$key\]\s+\[.*\]\s+\[.*\]\s+\[.*\]\s+\d+\s+\d+\s+(\d+)\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M2SndDataLimit" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+		</resources>
+	</devicetypeinfo>
+</root>

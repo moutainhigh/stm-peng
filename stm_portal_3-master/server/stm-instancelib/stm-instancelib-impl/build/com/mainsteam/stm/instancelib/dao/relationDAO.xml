@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.instancelib.dao.RelationDAO">
+	
+	<select id="getRelationPOsByInstanceId" resultType="com.mainsteam.stm.instancelib.dao.pojo.RelationPO">
+		select INSTANCEID,FROMINSTANCEID,TOINSTANCEID,FROMINSTANCETYPE,TOINSTANCETYPE,RELATIONTYPE
+		from STM_INSTANCELIB_RELATION
+		where INSTANCEID=#{instanceId}
+	</select>
+	
+	<select id="getRelationPOsByInstanceType" resultType="com.mainsteam.stm.instancelib.dao.pojo.RelationPO">
+		select INSTANCEID,FROMINSTANCEID,TOINSTANCEID,FROMINSTANCETYPE,TOINSTANCETYPE,RELATIONTYPE
+		from STM_INSTANCELIB_RELATION
+		where fromInstanceType=#{type} or toInstanceType=#{type}
+	</select>
+	
+	
+	<insert id="insertRelationPO"  parameterType="com.mainsteam.stm.instancelib.dao.pojo.RelationPO">
+	    insert into STM_INSTANCELIB_RELATION
+	    (INSTANCEID,FROMINSTANCEID,TOINSTANCEID,FROMINSTANCETYPE,TOINSTANCETYPE,RELATIONTYPE) 
+	    VALUES (#{instanceId}, #{fromInstanceId}, #{toInstanceId}, #{fromInstanceType}, #{toInstanceType},#{relationType})
+	</insert>
+	
+	<update id="updateRelationPO" parameterType="com.mainsteam.stm.instancelib.dao.pojo.RelationPO">
+		update STM_INSTANCELIB_RELATION
+		set FROMINSTANCEID=#{fromInstanceId} , TOINSTANCEID=#{toInstanceId}, FROMINSTANCETYPE=#{fromInstanceType}, TOINSTANCETYPE=#{toInstanceType}, RELATIONTYPE=#{relationType}
+		where INSTANCEID=#{instanceId}
+	</update>
+	
+	<delete id="removeRelationPOByInstanceId" >
+		delete from STM_INSTANCELIB_RELATION  where INSTANCEID=#{instanceId}
+	</delete>
+	<delete id="removeRelationPOByInstanceIdAndType" >
+		delete from STM_INSTANCELIB_RELATION
+		where (fromInstanceid=#{instanceId} and fromInstanceType=#{type}) 
+		   or (toInstanceId=#{instanceId} and toInstanceType=#{type})
+	</delete>
+	
+</mapper>

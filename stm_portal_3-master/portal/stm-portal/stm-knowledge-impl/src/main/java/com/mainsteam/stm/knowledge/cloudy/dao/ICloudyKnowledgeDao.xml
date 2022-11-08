@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.knowledge.cloudy.dao.ICloudyKnowledgeDao">
+   
+   
+   
+   
+   
+  <select id="pageSelect" resultType="com.mainsteam.stm.knowledge.cloudy.bo.CKnowledgeStaBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		SELECT k.KNOWLEDGE_TYPE_CODE "typeCode",COUNT(1) "count" from STM_KNG k WHERE k.ISCLOUDY = 1 GROUP BY k.KNOWLEDGE_TYPE_CODE
+	</select>
+   
+   
+   
+   
+   
+  <select id="countCloudyKnowledgeTotal" resultType="int">
+		SELECT COUNT(1) from STM_KNG k WHERE k.ISCLOUDY = 1
+	</select>
+   
+   
+   
+   
+   
+  <select id="cloudyKnowledgeUpdateTime" resultType="java.util.Date" databaseId="mysql">
+		select CREATED_TIME from STM_KNG where ISCLOUDY = 1 ORDER BY CREATED_TIME DESC LIMIT 0,1
+	</select>
+   
+   
+   
+   
+   
+  <select id="cloudyKnowledgeUpdateTime" resultType="java.util.Date" databaseId="oracle">
+		select * from (select CREATED_TIME from STM_KNG where ISCLOUDY = 1 ORDER BY CREATED_TIME DESC ) where rownum =1
+	</select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="cloudyKnowledgeUpdateTime" resultType="java.util.Date" databaseId="dm">
+		select * from (select CREATED_TIME from STM_KNG where ISCLOUDY = 1 ORDER BY CREATED_TIME DESC ) where rownum =1
+	</select>
+  <select id="cloudyKnowledgeUpdateTime" resultType="java.util.Date" databaseId="oscar">
+		select * from (select CREATED_TIME from STM_KNG where ISCLOUDY = 1 ORDER BY CREATED_TIME DESC ) where rownum =1
+	</select>
+</mapper>

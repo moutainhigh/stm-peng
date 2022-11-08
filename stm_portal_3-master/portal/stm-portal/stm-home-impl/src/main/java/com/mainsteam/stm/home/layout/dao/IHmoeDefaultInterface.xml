@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mainsteam.stm.home.layout.dao.IHomeDefaultInterfaceDao" >
+
+	 <resultMap id="HomeDefaultInterfaceBoMap" type="com.mainsteam.stm.home.layout.bo.HomeDefaultInterfaceBo" >
+        <id column="ID" property="id" jdbcType="BIGINT" />
+        <result column="USER_ID" property="userId" jdbcType="BIGINT" />
+        <result column="RESOURCE_ID" property="resourceId" jdbcType="BIGINT" />
+        <result column="DEFAULT_INTERFACE_ID" property="defaultInterfaceId" jdbcType="BIGINT" />
+	</resultMap>
+	
+	<!-- 通过用户ID和资源ID查询 -->
+	<select id="getByUserIdAndResourceId" parameterType="com.mainsteam.stm.home.layout.bo.HomeDefaultInterfaceBo" resultMap="HomeDefaultInterfaceBoMap">
+		SELECT
+			h.ID,
+			h.RESOURCE_ID,
+			h.USER_ID,
+			h.DEFAULT_INTERFACE_ID
+		FROM
+			STM_HOME_DEFAULT_INTERFACE h
+		WHERE
+			h.USER_ID = #{userId,jdbcType=BIGINT}
+		AND h.RESOURCE_ID = #{resourceId,jdbcType=BIGINT}
+	</select>
+	
+	<!-- 根据用户ID和资源ID修改默认接口 -->
+	<update id="updateByUserIdAndResourceId" parameterType="com.mainsteam.stm.home.layout.bo.HomeDefaultInterfaceBo">
+		UPDATE STM_HOME_DEFAULT_INTERFACE h
+		SET h.DEFAULT_INTERFACE_ID = #{defaultInterfaceId}
+		WHERE
+			h.USER_ID = #{userId,jdbcType=BIGINT}
+		AND h.RESOURCE_ID = #{resourceId,jdbcType=BIGINT}
+	</update>
+	
+	<!-- 添加网络接口默认接口 -->
+	<insert id="insert" parameterType="com.mainsteam.stm.home.layout.bo.HomeDefaultInterfaceBo">
+		INSERT INTO STM_HOME_DEFAULT_INTERFACE (
+			ID,
+			USER_ID,
+			RESOURCE_ID,
+			DEFAULT_INTERFACE_ID
+		)
+		VALUES
+			(
+			#{id,jdbcType=BIGINT}, 
+			#{userId,jdbcType=BIGINT}, 
+			#{resourceId,jdbcType=BIGINT}, 
+			#{defaultInterfaceId,jdbcType=BIGINT}
+			)
+	</insert>
+	
+	<!-- 根据用户ID和资源ID删除 -->
+	<delete id="delete" parameterType="com.mainsteam.stm.home.layout.bo.HomeDefaultInterfaceBo">
+		DELETE
+		FROM
+			stm_home_default_interface
+		WHERE
+			user_id = #{userId,jdbcType=BIGINT}
+		AND resource_id = #{resourceId,jdbcType=BIGINT}
+	</delete>
+</mapper>

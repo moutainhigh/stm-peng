@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- 编辑使用 XMLSpy v2006 U (http://www.altova.com) 由 any (any) -->
+<!-- 编辑使用 XMLSpy v2006 U (http://www.altova.com) 由 any (any) -->
+<!--W3C Schema 由 XMLSpy v2006 U 创建 (http://www.altova.com)-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+	<xs:element name="DefaultValue" type="xs:string"/>
+	<xs:element name="HelpInfo" type="xs:string"/>
+	<xs:element name="HideGroup" type="xs:string"/>
+	<xs:element name="MaxActiveSession" type="xs:integer"/>
+	<xs:element name="MaxidleSession" type="xs:integer"/>
+	<xs:element name="Name" type="xs:string"/>
+	<xs:element name="errorInfo" type="xs:string"/>
+	<xs:element name="ObjectCacheTimeout" type="xs:integer"/>
+	<xs:element name="Plugin">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="MaxActiveSession"/>
+				<xs:element ref="MaxidleSession"/>
+				<xs:element ref="SessionTTL"/>
+				<xs:element ref="ObjectCacheTimeout"/>
+				<xs:element ref="PluginInitParameters"/>
+			</xs:sequence>
+			<xs:attribute name="version" type="xs:string" use="required"/>
+			<xs:attribute name="id" use="required">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[A-Z][a-zA-Z]*"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="name" type="xs:string" use="required"/>
+			<xs:attribute name="class" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="PluginInitParameters">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="parameter" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+		<xs:unique name="parameterIdUnique">
+			<xs:selector xpath=".//parameter"/>
+			<xs:field xpath="@id"/>
+		</xs:unique>
+	</xs:element>
+	<xs:element name="SessionTTL" type="xs:integer"/>
+	<xs:element name="ShowGroup" type="xs:string"/>
+	<xs:element name="SupportValue">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Name"/>
+				<xs:element ref="Value"/>
+				<xs:element ref="ShowGroup" minOccurs="0"/>
+				<xs:element ref="HideGroup" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SupportValues">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="SupportValue" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Value" type="xs:string"/>
+	<xs:element name="parameter">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="DefaultValue" minOccurs="0"/>
+				<xs:element ref="SupportValues" minOccurs="0"/>
+				<xs:element ref="HelpInfo" maxOccurs="unbounded"/>
+				<xs:element ref="errorInfo" minOccurs="0"/>
+			</xs:sequence>
+			<xs:attribute name="id" use="required">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[a-zA-Z][a-zA-Z]*"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="boxStyle" type="xs:string" use="required"/>
+			<xs:attribute name="name" type="xs:string" use="required"/>
+			<xs:attribute name="displayOrder" type="xs:integer" use="required"/>
+			<xs:attribute name="isEdit" type="xs:boolean" use="required"/>
+			<xs:attribute name="isDisplay" type="xs:boolean" use="required"/>
+			<xs:attribute name="isSessionKey" type="xs:boolean"/>
+			<xs:attribute name="valueValidate" type="xs:string"/>
+			<xs:attribute name="mustInput" type="xs:boolean"/>
+			<xs:attribute name="group" type="xs:string"/>
+			<xs:attribute name="isPassword" type="xs:boolean"/>
+			<xs:attribute name="type" type="xs:string"/>
+			<xs:attribute name="unit">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="s"/>
+						<xs:enumeration value="ms"/>
+						<xs:enumeration value="m"/>
+						<!-- 秒 -->
+						<!-- 毫秒 -->
+						<!-- 分 -->
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

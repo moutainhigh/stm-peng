@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.portal.resource.dao.IAccountDao">
+	<select id="get" resultType="com.mainsteam.stm.portal.resource.po.AccountPo" parameterType="long">
+		select ACCOUNT_ID,
+		       DOMAIN_ID,
+		       USERNAME,
+		       PASSWORD,
+		       COMMENTS,
+		       STATUS,
+		       ENTRY_ID,
+		       ENTRY_DATETIME,
+		       DELETE_DATETIME,
+			   (SELECT COUNT(b.ACCOUNT_ID)
+			      FROM STM_RESOURCE_ACCO_INST_REL b
+			     WHERE a.ACCOUNT_ID = b.ACCOUNT_ID
+			       and b.STATUS = '1') AS resourses
+		  from STM_RESOURCE_ACCOUNT a
+		 where ACCOUNT_ID = #{account_id}
+	</select>
+	<select id="getAccountCountByDomainId" resultType="java.lang.Integer" parameterType="long">
+		select count(1) from STM_RESOURCE_ACCOUNT where DOMAIN_ID = #{domainId} and STATUS = '1'
+	</select>
+	<select id="getList" resultType="com.mainsteam.stm.portal.resource.po.AccountPo">
+		select A.ACCOUNT_ID AS account_id,
+		       B.ID AS domain_id,
+		       B.NAME AS domainname,
+		       A.USERNAME AS username,
+		       A.PASSWORD AS password,
+		       A.COMMENTS AS comments,
+		       A.STATUS AS status,
+		       A.ENTRY_ID AS entry_id,
+		       A.ENTRY_DATETIME AS entry_datetime,
+		       A.DELETE_DATETIME AS delete_datetime,
+			   (SELECT COUNT(C.ACCOUNT_ID)
+			      FROM STM_RESOURCE_ACCO_INST_REL C
+			     WHERE A.ACCOUNT_ID = C.ACCOUNT_ID
+			       and C.STATUS = '1') AS resourses
+		  from STM_RESOURCE_ACCOUNT A, STM_SYS_DOMAIN B
+		 where A.domain_id = B.id
+		   and A.status = '1'
+		   and B.id in
+		    <foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+		       #{item}
+		    </foreach>
+		 order by a.ENTRY_DATETIME desc
+	</select>
+	
+	<insert id="insert" parameterType="com.mainsteam.stm.portal.resource.po.AccountPo">
+	    insert into STM_RESOURCE_ACCOUNT(
+	       ACCOUNT_ID,
+	       DOMAIN_ID,
+	       USERNAME,
+	       PASSWORD,
+	       COMMENTS,
+	       STATUS,
+	       ENTRY_ID,
+	       ENTRY_DATETIME,
+	       DELETE_DATETIME
+	    ) values (
+	       #{account_id},
+	       #{domain_id},
+	       #{username}, 
+	       #{password}, 
+	       #{comments},
+	       #{status},
+	       #{entry_id},
+	       #{entry_datetime},
+	       #{delete_datetime}
+	       )
+	</insert>
+	
+	<delete id="del" parameterType="long">
+		delete from STM_RESOURCE_ACCOUNT
+		      where ACCOUNT_ID = #{account_id}
+	</delete>
+	
+	<update id="update" parameterType="com.mainsteam.stm.portal.resource.po.AccountPo">
+		update STM_RESOURCE_ACCOUNT
+		<set>
+			<if test="username != null"> DOMAIN_ID = #{domain_id}, </if>
+			<if test="username != null"> USERNAME = #{username}, </if>
+			<if test="password != null"> PASSWORD = #{password} ,</if>
+			<if test="comments != null"> COMMENTS = #{comments}, </if>
+			<if test="status != null"> STATUS = #{status}, </if>
+			<if test="entry_id != null"> ENTRY_ID = #{entry_id}, </if>
+			<if test="entry_datetime != null"> ENTRY_DATETIME = #{entry_datetime}, </if>
+			<if test="delete_datetime != null"> DELETE_DATETIME = #{delete_datetime}, </if>
+		</set>
+		 where ACCOUNT_ID = #{account_id}
+	</update>
+	
+</mapper>

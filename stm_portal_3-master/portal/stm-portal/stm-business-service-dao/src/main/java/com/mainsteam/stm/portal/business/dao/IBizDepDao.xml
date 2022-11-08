@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.portal.business.dao.IBizDepDao">
+	<select id="getList" resultType="com.mainsteam.stm.portal.business.bo.BizDepBo" parameterType="java.lang.Integer">
+		SELECT ID, NAME, FILEID, TYPE,ENTRY_ID AS ENTRYID,ENTRY_DATETIME AS ENTRYDATETIME
+		FROM STM_BIZ_DEP WHERE TYPE = #{type}
+	</select>
+	<select id="get" resultType="com.mainsteam.stm.portal.business.bo.BizDepBo" parameterType="long">
+		SELECT ID, NAME, FILEID, TYPE,ENTRY_ID AS ENTRYID,ENTRY_DATETIME AS ENTRYDATETIME
+		FROM STM_BIZ_DEP WHERE ID = #{id}
+	</select>
+	<select id="getListByIds" resultType="com.mainsteam.stm.portal.business.bo.BizDepBo" parameterType="java.util.List">
+		SELECT ID, NAME, FILEID, TYPE,ENTRY_ID AS ENTRYID,ENTRY_DATETIME AS ENTRYDATETIME
+		FROM STM_BIZ_DEP WHERE 1=1
+		<if test="list!=null and list.size()>0">
+			AND ID IN 
+			<foreach item="id" index="index" collection="list" open="(" separator="," close=")">  
+  				#{id}
+	 		</foreach> 
+		</if>
+		<if test="list==null or list.size()==0">
+			AND ID IS NULL 
+		</if>
+	</select>
+
+	<insert id="insert" parameterType="com.mainsteam.stm.portal.business.bo.BizDepBo">
+		INSERT INTO STM_BIZ_DEP( ID, NAME, FILEID,TYPE,ENTRY_ID,ENTRY_DATETIME) VALUES
+		( #{id}, #{name}, #{fileId}, #{type},#{entryId},#{entryDateTime})
+	</insert>
+
+	<delete id="del" parameterType="long">
+		DELETE FROM STM_BIZ_DEP WHERE ID = #{id}
+	</delete>
+	
+	<select id="checkGroupNameIsExsit" resultType="Integer" parameterType="map">
+		SELECT COUNT(*) FROM STM_BIZ_DEP  WHERE NAME = #{name} AND TYPE = #{type}
+		<if test="oldName!='' and oldName!=null ">
+			AND NAME != #{oldName}
+		</if>
+	</select>
+	
+	<update id="update" parameterType="com.mainsteam.stm.portal.business.bo.BizDepBo">
+		UPDATE STM_BIZ_DEP
+		<set>
+			<if test="name != null"> NAME = #{name}, </if>
+			<if test="fileId != null"> FILEID = #{fileId}, </if>
+		</set>
+		where ID = #{id}
+	</update>
+</mapper>

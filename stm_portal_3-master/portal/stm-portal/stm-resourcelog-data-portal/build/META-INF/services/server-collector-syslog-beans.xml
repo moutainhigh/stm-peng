@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                    http://www.springframework.org/schema/context
+                    http://www.springframework.org/schema/context/spring-context-2.5.xsd
+                    ">
+	<bean id="syslogDataHandler" class="com.mainsteam.stm.resourcelog.data.SyslogDataHandler">
+		<property name="metricDataTransferSender" ref="metricDataTransferSender"></property>
+		<property name="port" value="${syslog.port:514}"></property>
+	</bean>
+	<bean id="trapReceiveThread" class="com.mainsteam.stm.resourcelog.trap.TrapReceiveThread" init-method="start">
+		<property name="metricDataTransferSender" ref="metricDataTransferSender"></property>
+		<property name="port" value="${snmptrap.port:162}"></property>
+		<property name="listen" value="${trap.listen:off}"></property>
+	</bean>
+</beans>

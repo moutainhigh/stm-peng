@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.state.dao.MetricStateDAO">
+	<insert id="addMetricState" parameterType="com.mainsteam.stm.state.obj.MetricStateData" >
+	    INSERT INTO STM_METRIC_STATE(INSTANCE_ID,METRIC_ID,STATE,COLLECT_TIME,UPDATE_TIME)
+	    VALUES (#{instanceID},#{metricID},#{state}, #{collectTime}, #{updateTime})
+	</insert>
+
+	<insert id="updateMetricStateForMysql" parameterType="com.mainsteam.stm.state.obj.MetricStateData">
+		REPLACE INTO STM_METRIC_STATE(INSTANCE_ID,METRIC_ID,STATE,COLLECT_TIME,UPDATE_TIME)
+		VALUES (#{instanceID},#{metricID},#{state}, #{collectTime},now())
+	</insert>
+	<insert id="updateMetricStateForOracle" parameterType="com.mainsteam.stm.state.obj.MetricStateData">
+		MERGE INTO STM_METRIC_STATE TB
+		USING (SELECT #{instanceID} as INSTANCE_ID, #{metricID} as METRIC_ID,#{state} as STATE,#{collectTime} as COLLECT_TIME FROM DUAL) TB2
+		ON (TB.INSTANCE_ID=TB2.INSTANCE_ID AND TB.METRIC_ID=TB2.METRIC_ID  )
+		WHEN MATCHED THEN
+		UPDATE SET TB.STATE=#{state,jdbcType=VARCHAR},
+		TB.UPDATE_TIME=SYSDATE,
+		TB.COLLECT_TIME=#{collectTime,jdbcType=TIMESTAMP}
+		WHERE TB.INSTANCE_ID=#{instanceID} and TB.METRIC_ID=#{metricID}
+		WHEN NOT MATCHED THEN
+		INSERT (TB.INSTANCE_ID,TB.METRIC_ID,TB.STATE,TB.COLLECT_TIME,TB.UPDATE_TIME)
+		VALUES (TB2.INSTANCE_ID,TB2.METRIC_ID,TB2.STATE,TB2.COLLECT_TIME,SYSDATE)
+	</insert>
+
+	<delete id="deleteMetricState" parameterType="com.mainsteam.stm.state.obj.MetricStateData" >
+	    DELETE FROM STM_METRIC_STATE WHERE INSTANCE_ID= #{instanceID} AND METRIC_ID=#{metricID}
+	</delete>
+	
+	<insert id="addMetricHistoryState" parameterType="com.mainsteam.stm.state.obj.MetricStateData">
+	    INSERT INTO STM_METRIC_AVA_STATE_HIS(METRIC_ID,INSTANCE_ID,state,COLLECT_TIME)
+	    VALUES (#{metricID},#{instanceID},#{state}, #{collectTime})
+	</insert>
+
+	<insert id="addInstanceState" parameterType="com.mainsteam.stm.state.obj.InstanceStateData">
+	    INSERT into STM_INSTANCE_STATE(INSTANCE_ID,STATE,COLLECT_TIME,CAUSE_METRIC,CAUSE_INSTANCE,UPDATE_TIME,COLLECT_STATE,ALARM_STATE)
+	    VALUES (#{instanceID},#{resourceState}, #{collectTime},#{causeBymetricID},#{causeByInstance},#{updateTime},#{collectStateEnum},#{alarmState})
+	</insert>
+
+	<insert id="updateInstanceStateForMysql" parameterType="com.mainsteam.stm.state.obj.InstanceStateData">
+		replace into STM_INSTANCE_STATE(INSTANCE_ID,STATE,COLLECT_TIME,CAUSE_METRIC,CAUSE_INSTANCE,UPDATE_TIME,COLLECT_STATE,ALARM_STATE)
+	    VALUES (#{instanceID},#{resourceState}, #{collectTime},#{causeBymetricID},#{causeByInstance},#{updateTime},#{collectStateEnum},#{alarmState})
+	</insert>
+
+	<insert id="updateInstanceStateForMysqlBatch" parameterType="java.util.List">
+		replace into STM_INSTANCE_STATE(INSTANCE_ID,STATE,COLLECT_TIME,CAUSE_METRIC,CAUSE_INSTANCE,UPDATE_TIME,COLLECT_STATE,ALARM_STATE)
+		VALUES
+		<foreach collection="list" item="inst" index="index" separator=",">
+		(
+			#{inst.instanceID},
+			#{inst.resourceState},
+			#{inst.collectTime},
+			#{inst.causeBymetricID},
+			#{inst.causeByInstance},
+			now(),
+			#{inst.collectStateEnum},
+			#{inst.alarmState}
+		)
+
+		</foreach>
+	</insert>
+
+	<insert id="updateInstanceStateForOracle" parameterType="com.mainsteam.stm.state.obj.InstanceStateData">
+		MERGE INTO STM_INSTANCE_STATE TB
+	    USING (SELECT #{instanceID} as INSTANCE_ID,#{state} as STATE,#{alarmState} as ALARM_STATE, #{causeBymetricID} as CAUSE_METRIC,#{causeByInstance} as CAUSE_INSTANCE,
+	    	#{collectTime} as COLLECT_TIME, #{collectStateEnum} as COLLECT_STATE FROM DUAL) TB2
+	    ON (TB.INSTANCE_ID=TB2.INSTANCE_ID)
+	    WHEN MATCHED THEN
+	    	UPDATE SET
+	    	TB.STATE=#{state,jdbcType=VARCHAR},
+	    	TB.ALARM_STATE=#{alarmState},
+	    	TB.COLLECT_STATE=#{collectStateEnum,jdbcType=VARCHAR},
+	    	TB.COLLECT_TIME=#{collectTime,jdbcType=TIMESTAMP},
+	    	TB.CAUSE_METRIC=#{causeBymetricID},
+	    	TB.CAUSE_INSTANCE=#{causeByInstance},
+	    	TB.UPDATE_TIME=SYSDATE
+	    	WHERE TB.INSTANCE_ID=#{instanceID}
+	    WHEN NOT MATCHED THEN
+	    	INSERT (INSTANCE_ID,STATE,ALARM_STATE,COLLECT_TIME,CAUSE_METRIC,CAUSE_INSTANCE,UPDATE_TIME,COLLECT_STATE)
+	    	VALUES (TB2.INSTANCE_ID,TB2.STATE,TB2.ALARM_STATE,TB2.COLLECT_TIME,TB2.CAUSE_METRIC,TB2.CAUSE_INSTANCE,SYSDATE,TB2.COLLECT_STATE)
+	</insert>
+
+	<delete id="deleteInstanceState" parameterType="Long">
+	    DELETE FROM STM_INSTANCE_STATE WHERE INSTANCE_ID= #{instanceID}
+	</delete>
+
+	<insert id="addInstanceStateHistory" parameterType="com.mainsteam.stm.state.obj.InstanceStateData">
+	    INSERT INTO STM_INSTANCE_STATE_HIS(INSTANCE_ID,STATE,COLLECT_TIME,CAUSE_METRIC,CAUSE_INSTANCE,COLLECT_STATE,ALARM_STATE)
+	    VALUES (#{instanceID},#{resourceState}, #{collectTime},#{causeBymetricID},#{causeByInstance},#{collectStateEnum},#{alarmState})
+
+
+	</insert>
+
+	<insert id="addInstanceStateHistoryBatch" parameterType="java.util.List" databaseId="mysql">
+		INSERT INTO STM_INSTANCE_STATE_HIS(INSTANCE_ID,STATE,COLLECT_TIME,CAUSE_METRIC,CAUSE_INSTANCE,COLLECT_STATE,ALARM_STATE)
+		VALUES
+		<foreach collection="list" item="inst" index="index" separator=",">
+			(
+			#{inst.instanceID},
+			#{inst.resourceState},
+			#{inst.collectTime},
+			#{inst.causeBymetricID},
+			#{inst.causeByInstance},
+			#{inst.collectStateEnum},
+			#{inst.alarmState}
+			)
+		</foreach>
+	</insert>
+
+	<insert id="addInstanceStateHistoryBatch" parameterType="java.util.List" databaseId="oracle">
+		INSERT INTO STM_INSTANCE_STATE_HIS(INSTANCE_ID,STATE,COLLECT_TIME,CAUSE_METRIC,CAUSE_INSTANCE,COLLECT_STATE,ALARM_STATE)
+		SELECT TEMP.*
+		FROM
+		(
+		<foreach collection="list" item="inst" index="index" separator="UNION ALL">
+			SELECT
+				#{inst.instanceID} instanceId,
+				#{inst.resourceState} resourceState,
+				#{inst.collectTime} collectTime,
+				#{inst.causeBymetricID} causeByMetricId,
+				#{inst.causeByInstance} causeByInstance,
+				#{inst.collectStateEnum} collectState,
+				#{inst.alarmState} alarmState
+			 FROM dual
+		</foreach>
+		) TEMP
+	</insert>
+
+	<insert id="addInstanceStateHistoryBatch" parameterType="java.util.List" databaseId="oscar">
+		INSERT INTO STM_INSTANCE_STATE_HIS(INSTANCE_ID,STATE,COLLECT_TIME,CAUSE_METRIC,CAUSE_INSTANCE,COLLECT_STATE,ALARM_STATE)
+		SELECT TEMP.*
+		FROM
+		(
+		<foreach collection="list" item="inst" index="index" separator="UNION ALL">
+			SELECT
+			#{inst.instanceID} instanceId,
+			#{inst.resourceState} resourceState,
+			#{inst.collectTime} collectTime,
+			#{inst.causeBymetricID} causeByMetricId,
+			#{inst.causeByInstance} causeByInstance,
+			#{inst.collectStateEnum} collectState,
+			#{inst.alarmState} alarmState
+			FROM dual
+		</foreach>
+		) TEMP
+	</insert>
+
+	<insert id="addInstanceStateHistoryBatch" parameterType="java.util.List" databaseId="dm">
+		INSERT INTO STM_INSTANCE_STATE_HIS(INSTANCE_ID,STATE,COLLECT_TIME,CAUSE_METRIC,CAUSE_INSTANCE,COLLECT_STATE,ALARM_STATE)
+		SELECT TEMP.*
+		FROM
+		(
+		<foreach collection="list" item="inst" index="index" separator="UNION ALL">
+			SELECT
+			#{inst.instanceID} instanceId,
+			#{inst.resourceState} resourceState,
+			#{inst.collectTime} collectTime,
+			#{inst.causeBymetricID} causeByMetricId,
+			#{inst.causeByInstance} causeByInstance,
+			#{inst.collectStateEnum} collectState,
+			#{inst.alarmState} alarmState
+			FROM dual
+		</foreach>
+		) TEMP
+	</insert>
+
+	<sql id="instanceStateAlias">
+		INSTANCE_ID as instanceID,
+		STATE as resourceState,
+		ALARM_STATE AS alarmState,
+		(CASE WHEN state='CRITICAL' THEN 'CRITICAL' WHEN ALARM_STATE='CRITICAL' THEN 'NORMAL_CRITICAL' ELSE ALARM_STATE END ) state,
+		COLLECT_TIME as collectTime,
+		CAUSE_METRIC as causeBymetricID,
+		CAUSE_INSTANCE as causeByInstance,
+		COLLECT_STATE as collectStateEnum
+	</sql>
+
+	<sql id="preInstanceStateAlias">
+		INSTANCE_ID as instanceID,
+		STATE as state,
+		ALARM_STATE AS alarmState,
+		COLLECT_TIME as collectTime,
+		CAUSE_METRIC as causeBymetricID,
+		CAUSE_INSTANCE as causeByInstance,
+		COLLECT_STATE as collectStateEnum
+	</sql>
+
+	<select id="getInstanceState" parameterType="Long" resultType="com.mainsteam.stm.state.obj.InstanceStateData">
+		SELECT  
+		<include refid="instanceStateAlias"></include> from stm_instance_state where INSTANCE_ID=#{instanceID}
+	</select>
+	<select id="findAllInstanceState" parameterType="Long" resultType="com.mainsteam.stm.state.obj.InstanceStateData">
+		SELECT  
+		<include refid="instanceStateAlias"></include> FROM STM_INSTANCE_STATE
+	
+	</select>
+	<select id="findInstanceStates" parameterType="Long" resultType="com.mainsteam.stm.state.obj.InstanceStateData">
+		SELECT  
+		<include refid="instanceStateAlias"></include> FROM STM_INSTANCE_STATE
+		WHERE INSTANCE_ID IN 
+		 
+		<foreach collection="list" item="id" separator="," index="index" open="(" close=")">
+			#{id}
+			<if test="index%998&gt;996">) OR INSTANCE_ID IN ('-1'</if>
+		</foreach>
+	
+	</select>
+	<select id="findMetricState" parameterType="map" resultType="com.mainsteam.stm.state.obj.MetricStateData">
+		SELECT 
+			INSTANCE_ID as instanceID,METRIC_ID as metricID,STATE as state,COLLECT_TIME as collectTime
+		FROM STM_METRIC_STATE
+		WHERE INSTANCE_ID IN 
+		<foreach collection="instanceIDes" item="id" separator="," index="index" open="(" close=")">
+			#{id}
+			<if test="index%998&gt;996">) OR INSTANCE_ID IN ('-1'</if>
+		</foreach>
+		 
+		<if test="metricIDes!=null">
+		 	AND METRIC_ID IN (
+			<foreach collection="metricIDes" item="id" separator=",">#{id}</foreach>)
+		</if>
+	</select>
+
+	<select id="findPerfMetricState" parameterType="map" resultType="com.mainsteam.stm.state.obj.MetricStateData">
+		SELECT
+		INSTANCE_ID as instanceID,METRIC_ID as metricID,STATE as state,COLLECT_TIME as collectTime
+		FROM STM_METRIC_STATE
+		WHERE INSTANCE_ID IN
+		<foreach collection="instanceIDes" item="id" separator="," index="index" open="(" close=")">
+			#{id}
+			<if test="index%998&gt;996">) OR INSTANCE_ID IN ('-1'</if>
+		</foreach>
+		<if test="ignores!=null and ignores.size() !=0">
+			AND STATE NOT IN (
+			<foreach collection="ignores" item="metric_state" separator=",">#{metric_state}</foreach>
+			)
+		</if>
+	</select>
+
+	<select id="getMetricState" parameterType="map" resultType="com.mainsteam.stm.state.obj.MetricStateData">
+		SELECT 
+			INSTANCE_ID as instanceID,METRIC_ID as metricID,STATE as state,COLLECT_TIME as collectTime
+		FROM STM_METRIC_STATE
+		WHERE INSTANCE_ID=#{instanceID} and METRIC_ID=#{metricID}
+	</select>
+	<select id="getPreInstanceState" parameterType="map" resultType="com.mainsteam.stm.state.obj.InstanceStateData" databaseId="mysql">
+			SELECT   
+		<include refid="preInstanceStateAlias"></include> FROM STM_INSTANCE_STATE_HIS
+			WHERE INSTANCE_ID=#{instanceID} 
+				AND COLLECT_TIME &lt; #{startTime}
+				ORDER BY COLLECT_TIME DESC limit 0,1
+	
+	</select>
+	<select id="getPreInstanceState" parameterType="map" resultType="com.mainsteam.stm.state.obj.InstanceStateData" databaseId="oracle">
+			SELECT A.* FROM (
+				SELECT   
+		<include refid="preInstanceStateAlias"></include> FROM STM_INSTANCE_STATE_HIS
+				WHERE INSTANCE_ID=#{instanceID} 
+					AND COLLECT_TIME &lt; #{startTime}
+					ORDER BY COLLECT_TIME DESC 
+			)A WHERE ROWNUM &lt;= 1
+	
+	</select>
+	<select id="getPreInstanceState" parameterType="map" resultType="com.mainsteam.stm.state.obj.InstanceStateData" databaseId="oscar">
+			SELECT A.* FROM (
+				SELECT   
+		<include refid="preInstanceStateAlias"></include> FROM STM_INSTANCE_STATE_HIS
+				WHERE INSTANCE_ID=#{instanceID} 
+					AND COLLECT_TIME &lt; #{startTime}
+					ORDER BY COLLECT_TIME DESC 
+			)A WHERE ROWNUM &lt;= 1
+
+	</select>
+	<select id="findInstanceStateHistory" parameterType="map" resultType="com.mainsteam.stm.state.obj.InstanceStateData">
+		SELECT * FROM (
+				SELECT INSTANCE_ID as instanceID,state, COLLECT_TIME as collectTime 
+				FROM STM_INSTANCE_STATE_HIS
+				WHERE INSTANCE_ID in (
+		<foreach collection="instanceIDes" item="id" separator=",">#{id}</foreach>)
+					AND COLLECT_TIME &gt; #{startTime} AND COLLECT_TIME &lt; #{endTime}
+			UNION ALL	
+				SELECT INSTANCEID AS instanceID,state,change_time AS collectTime
+				FROM STM_PROFILELIB_LIFE_HISTORY
+				WHERE  INSTANCEID in (
+		<foreach collection="instanceIDes" item="id" separator=",">#{id}</foreach>)
+					AND change_time &gt; #{startTime} AND change_time &lt; #{endTime}
+			) ST ORDER BY collectTime ASC
+	
+	</select>
+
+	<select id="findLatestInstanceState" parameterType="java.lang.Long" databaseId="mysql" resultType="com.mainsteam.stm.state.obj.InstanceStateData">
+		SELECT <include refid="instanceStateAlias"></include>
+		FROM STM_INSTANCE_STATE_HIS
+		WHERE INSTANCE_ID=#{instanceID} ORDER BY COLLECT_TIME DESC LIMIT 1,1;
+	</select>
+
+	<select id="findLatestInstanceState" parameterType="java.lang.Long" databaseId="oracle" resultType="com.mainsteam.stm.state.obj.InstanceStateData">
+		SELECT * FROM (
+			SELECT
+				ROWNUM as recno,
+				<include refid="instanceStateAlias"></include>
+			FROM
+				(SELECT *
+					FROM
+						STM_INSTANCE_STATE_HIS
+					WHERE INSTANCE_ID=#{instanceID}
+					ORDER BY COLLECT_TIME DESC)
+			WHERE ROWNUM &lt;=3
+		) WHERE recno=2;
+	</select>
+	<select id="findLatestInstanceState" parameterType="java.lang.Long" databaseId="oscar" resultType="com.mainsteam.stm.state.obj.InstanceStateData">
+		SELECT * FROM (
+		SELECT
+		ROWNUM as recno,
+		<include refid="instanceStateAlias"></include>
+		FROM
+		(SELECT *
+		FROM
+		STM_INSTANCE_STATE_HIS
+		WHERE INSTANCE_ID=#{instanceID}
+		ORDER BY COLLECT_TIME DESC)
+		WHERE ROWNUM &lt;=3
+		) WHERE recno=2;
+	</select>
+
+	<update id="updateByInstances" parameterType="map">
+		UPDATE STM_METRIC_STATE SET STATE='NORMAL', COLLECT_TIME=#{collectTime} WHERE INSTANCE_ID IN
+		<foreach collection="instanceIds" item="id" separator="," index="index" open="(" close=")">
+			#{id}
+			<if test="index%998&gt;996">) OR INSTANCE_ID IN ('-1'</if>
+		</foreach>
+	</update>
+
+</mapper>

@@ -1,0 +1,677 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.portal.netflow.dao.ipgroup.netflow.IIpGroupProtoDao">
+	
+	<select id="getTotalIpGroupProtoNetflows" resultType="com.mainsteam.stm.portal.netflow.bo.Whole" parameterType="com.mainsteam.stm.portal.netflow.bo.NetflowParamBo">
+
+		SELECT 
+		    SUM(IFNULL(flowTotal, 0)) AS wholeFlows,
+		    SUM(IFNULL(flowTotal, 0)) AS wholePackets,
+		    SUM(IFNULL(flowTotal, 0)) AS wholeConnects
+		  FROM
+		    CONF_PROTOCOL ag 
+		    LEFT JOIN 
+		      (SELECT 
+		        proto,
+		        flowIn + flowOut AS flowTotal,
+		        in_packages + out_packages AS packetTotal,
+		        connectNumberIn + connectNumberOut AS connectTotal
+		      FROM
+		        (SELECT 
+		          t1.proto,
+		          IFNULL(in_flows, 0) AS flowIn,
+		          IFNULL(out_flows, 0) AS flowOut,
+		          IFNULL(in_packages, 0) AS in_packages,
+		          IFNULL(out_packages, 0) AS out_packages,
+		          IFNULL(connectNumberIn, 0) AS connectNumberIn,
+		          IFNULL(connectNumberOut, 0) AS connectNumberOut
+		        FROM
+		          (
+		            (SELECT 
+		              proto,
+		              SUM(out_flows) AS out_flows,
+		              SUM(out_packages) AS out_packages,
+		              SUM(connectNumberOut) AS connectNumberOut
+		            FROM
+		              (SELECT 
+		                proto,
+		                SUM(f.octets_total) AS out_flows,
+		               	sum(f.packet_total) as out_packages,
+						SUM(f.FLOW_TOTAL) AS connectNumberOut
+		              FROM
+		               CONF_IP_GROUP g 
+		                LEFT JOIN CONF_IP_GROUP_AID a 
+		                  ON g.id = a.conf_ip_group_id 
+		                LEFT JOIN ANA_IF_IN_NET_APP_TOS_${tableSuffix} f 
+		                  <![CDATA[ ON f.src_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		              WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		                AND f.src_ip_grp = ${ipGroupId} 
+		                AND f.acq_time <![CDATA[ > ]]> ${stime} 
+		                AND f.acq_time <![CDATA[ <= ]]> ${etime} 
+		              GROUP BY proto 
+		              UNION
+		              SELECT 
+		                f.proto,
+		                SUM(f.octets_total) AS out_flows,
+		                sum(f.packet_total) as out_packages,
+						SUM(f.FLOW_TOTAL) AS connectNumberOut
+		              FROM
+		               CONF_IP_GROUP g 
+		                LEFT JOIN CONF_IP_GROUP_AID a 
+		                  ON g.id = a.conf_ip_group_id 
+		                LEFT JOIN ANA_IF_OUT_NET_APP_TOS_${tableSuffix} f 
+		                  <![CDATA[ ON f.src_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		              WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		                AND f.src_ip_grp = ${ipGroupId} 
+		                AND f.acq_time <![CDATA[ > ]]> ${stime} 
+		                AND f.acq_time <![CDATA[ <= ]]> ${etime} 
+		              GROUP BY proto) t11 
+		            GROUP BY proto) t1 
+		            LEFT JOIN 
+		              (SELECT 
+		                proto,
+		                SUM(in_flows) AS in_flows,
+		                SUM(in_packages) AS in_packages,
+		                SUM(connectNumberIn) AS connectNumberIn
+		              FROM
+		                (SELECT 
+		                  proto,
+		                  SUM(f.octets_total) AS in_flows,
+		                  sum(f.packet_total) as in_packages,
+						  SUM(f.FLOW_TOTAL) AS connectNumberIn
+		                FROM
+		                 CONF_IP_GROUP g 
+		                  LEFT JOIN CONF_IP_GROUP_AID a 
+		                    ON g.id = a.conf_ip_group_id 
+		                  LEFT JOIN ANA_IF_IN_NET_APP_TOS_${tableSuffix} f 
+		                    <![CDATA[ ON f.dst_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		                WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		                  AND f.dst_ip_grp = ${ipGroupId} 
+		                  AND f.acq_time <![CDATA[ > ]]> ${stime} 
+		                  AND f.acq_time <![CDATA[ <= ]]> ${etime} 
+		                GROUP BY proto 
+		                UNION
+		                SELECT 
+		                  proto,
+		                  SUM(f.octets_total) AS in_flows,
+		                  sum(f.packet_total) as in_packages,
+						  SUM(f.FLOW_TOTAL) AS connectNumberIn
+		                FROM
+		                 CONF_IP_GROUP g 
+		                  LEFT JOIN CONF_IP_GROUP_AID a 
+		                    ON g.id = a.conf_ip_group_id 
+		                  LEFT JOIN ANA_IF_OUT_NET_APP_TOS_${tableSuffix} f 
+		                    <![CDATA[ ON f.dst_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		                WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		                  AND f.dst_ip_grp = ${ipGroupId} 
+		                  AND f.acq_time <![CDATA[ > ]]> ${stime} 
+		                  AND f.acq_time <![CDATA[ <= ]]> ${etime} 
+		                GROUP BY proto) t12 
+		              GROUP BY proto) t2 
+		              ON t1.proto = t2.proto
+		          ) 
+		          UNION
+		          SELECT 
+		            t2.proto,
+		            IFNULL(in_flows, 0) AS flowIn,
+		            IFNULL(out_flows, 0) AS flowOut,
+		            IFNULL(in_packages, 0) AS in_packages,
+		            IFNULL(out_packages, 0) AS out_packages,
+		            IFNULL(connectNumberIn, 0) AS connectNumberIn,
+		            IFNULL(connectNumberOut, 0) AS connectNumberOut
+		          FROM
+		            (
+		              (SELECT 
+		                proto,
+		                SUM(out_flows) AS out_flows,
+		                SUM(out_packages) AS out_packages,
+		                SUM(connectNumberOut) AS connectNumberOut
+		              FROM
+		                (SELECT 
+		                  proto,
+		                  SUM(f.octets_total) AS out_flows,
+		                  sum(f.packet_total) as out_packages,
+						  SUM(f.FLOW_TOTAL) AS connectNumberOut
+		                FROM
+		                 CONF_IP_GROUP g 
+		                  LEFT JOIN CONF_IP_GROUP_AID a 
+		                    ON g.id = a.conf_ip_group_id 
+		                  LEFT JOIN ANA_IF_IN_NET_APP_TOS_${tableSuffix} f 
+		                    <![CDATA[ ON f.src_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		                WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		                  AND f.src_ip_grp = ${ipGroupId} 
+		                  AND f.acq_time <![CDATA[ > ]]> ${stime} 
+		                  AND f.acq_time <![CDATA[ <= ]]> ${etime} 
+		                GROUP BY proto 
+		                UNION
+		                SELECT 
+		                  proto,
+		                  SUM(f.octets_total) AS out_flows,
+		                  sum(f.packet_total) as out_packages,
+						  SUM(f.FLOW_TOTAL) AS connectNumberOut
+		                FROM
+		                 CONF_IP_GROUP g 
+		                  LEFT JOIN CONF_IP_GROUP_AID a 
+		                    ON g.id = a.conf_ip_group_id 
+		                  LEFT JOIN ANA_IF_OUT_NET_APP_TOS_${tableSuffix} f 
+		                    <![CDATA[ ON f.src_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		                WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		                  AND f.src_ip_grp = ${ipGroupId} 
+		                  AND f.acq_time <![CDATA[ > ]]> ${stime} 
+		                  AND f.acq_time <![CDATA[ <= ]]> ${etime} 
+		                GROUP BY proto) t11 
+		              GROUP BY t11.proto) t1 
+		              RIGHT JOIN 
+		                (SELECT 
+		                  proto,
+		                  SUM(in_flows) AS in_flows,
+		                  SUM(in_packages) AS in_packages,
+		                  SUM(connectNumberIn) AS connectNumberIn
+		                FROM
+		                  (SELECT 
+		                    proto,
+		                    SUM(f.octets_total) AS in_flows,
+		                    sum(f.packet_total) as in_packages,
+							SUM(f.FLOW_TOTAL) AS connectNumberIn
+		                  FROM
+		                   CONF_IP_GROUP g 
+		                    LEFT JOIN CONF_IP_GROUP_AID a 
+		                      ON g.id = a.conf_ip_group_id 
+		                    LEFT JOIN ANA_IF_IN_NET_APP_TOS_${tableSuffix} f 
+		                      <![CDATA[ ON f.dst_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		                  WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		                    AND f.dst_ip_grp = ${ipGroupId} 
+		                    AND f.acq_time <![CDATA[ > ]]> ${stime} 
+		                    AND f.acq_time <![CDATA[ <= ]]> ${etime} 
+		                  GROUP BY proto 
+		                  UNION
+		                  SELECT 
+		                    f.proto,
+		                    SUM(f.octets_total) AS in_flows,
+		                    sum(f.packet_total) as in_packages,
+							SUM(f.FLOW_TOTAL) AS connectNumberIn
+		                  FROM
+		                   CONF_IP_GROUP g 
+		                    LEFT JOIN CONF_IP_GROUP_AID a 
+		                      ON g.id = a.conf_ip_group_id 
+		                    LEFT JOIN ANA_IF_OUT_NET_APP_TOS_${tableSuffix} f 
+		                      <![CDATA[ ON f.dst_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		                  WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		                    AND f.dst_ip_grp = ${ipGroupId} 
+		                    AND f.acq_time <![CDATA[ > ]]> ${stime} 
+		                    AND f.acq_time <![CDATA[ <= ]]> ${etime} 
+		                  GROUP BY proto) t21 
+		                GROUP BY proto) t2 
+		                ON t1.proto = t2.proto
+		            )) t 
+		        GROUP BY t.proto) ot 
+		        ON ot.proto = ag.`ID` 	
+		        
+	</select>
+	
+	<select id="ipGroupProtoPageSelect" resultType="com.mainsteam.stm.portal.netflow.bo.NetflowBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		
+		SELECT 
+		  * 
+		FROM
+		  (SELECT 
+		    ag.`NAME`,
+		    ag.`ID` AS protoId,
+		    IFNULL(flowIn, 0) AS flowIn,
+		    IFNULL(flowOut, 0) AS flowOut,
+		    IFNULL(flowTotal, 0) AS flowTotal,
+		    IFNULL(packetIn, 0) AS packetIn,
+		    IFNULL(packetOut, 0) AS packetOut,
+		    IFNULL(packetTotal, 0) AS packetTotal,
+		    IFNULL(speedIn, 0) AS speedIn,
+		    IFNULL(speedOut, 0) AS speedOut,
+		    IFNULL(speedTotal, 0) AS speedTotal,
+		    IFNULL(flowPctge, 0) AS flowPctge,
+		    IFNULL(packetPctge, 0) AS packetPctge,
+		    IFNULL(connectPctge, 0) AS connectPctge,
+		    IFNULL(packetInSpeed, 0) AS packetInSpeed,IFNULL(packetOutSpeed, 0) AS packetOutSpeed,IFNULL(packetTotalSpeed, 0) AS packetTotalSpeed,
+		    IFNULL(connectNumberIn, 0) AS connectNumberIn,IFNULL(connectNumberOut, 0) AS connectNumberOut,IFNULL(connectNumberTotal, 0) AS connectNumberTotal,
+		    IFNULL(connectNumberInSpeed, 0) AS connectNumberInSpeed,IFNULL(connectNumberOutSpeed, 0) AS connectNumberOutSpeed,IFNULL(connectNumberTotalSpeed, 0) AS connectNumberTotalSpeed
+		  FROM
+		    CONF_PROTOCOL ag 
+		    LEFT JOIN 
+		      (SELECT 
+		        proto,
+		        flowIn,
+		        packetIn,
+		        flowOut,
+		        packetOut,
+		        flowIn + flowOut AS flowTotal,
+		        packetIn + packetOut AS packetTotal,
+		        flowIn / ${condition.timeInterval} AS speedIn,
+		        flowOut / ${condition.timeInterval} AS speedOut,
+		        (flowIn + flowOut) / ${condition.timeInterval} AS speedTotal,
+		        (flowIn + flowOut) / ${condition.wholeFlows} AS flowPctge,
+		        (packetIn + packetOut) / ${condition.wholePackets} AS packetPctge,
+		        (connectNumberIn + connectNumberOut) / ${condition.wholeConnects} AS connectPctge,
+		        packetIn / ${condition.timeInterval} packetInSpeed,packetOut / ${condition.timeInterval} packetOutSpeed,(packetIn+packetOut) / ${condition.timeInterval} packetTotalSpeed,
+		        connectNumberIn,connectNumberOut,connectNumberIn+connectNumberOut connectNumberTotal,
+		        connectNumberIn / ${condition.timeInterval} connectNumberInSpeed,connectNumberOut / ${condition.timeInterval} connectNumberOutSpeed,connectNumberIn+connectNumberOut / ${condition.timeInterval} connectNumberTotalSpeed
+		      FROM
+		        (SELECT 
+		          t1.proto,
+		          IFNULL(in_flows, 0) AS flowIn,
+		          IFNULL(in_packages, 0) AS packetIn,
+		          IFNULL(out_flows, 0) AS flowOut,
+		          IFNULL(out_packages, 0) AS packetOut,
+		          IFNULL(connectNumberIn, 0) AS connectNumberIn,
+		          IFNULL(connectNumberOut, 0) AS connectNumberOut 
+		        FROM
+		          (
+		            (SELECT 
+		              proto,
+		              SUM(out_flows) AS out_flows,
+		              SUM(out_packages) AS out_packages,
+		              SUM(connectNumberOut) AS connectNumberOut
+		            FROM
+		              (SELECT 
+		                proto,
+		                SUM(f.octets_total) AS out_flows,
+		                SUM(f.packet_total) AS out_packages,
+		                SUM(f.FLOW_TOTAL) AS connectNumberOut
+		              FROM
+		               CONF_IP_GROUP g 
+		                LEFT JOIN CONF_IP_GROUP_AID a 
+		                  ON g.id = a.conf_ip_group_id 
+		                LEFT JOIN ANA_IF_IN_NET_APP_TOS_${condition.tableSuffix} f 
+		                  <![CDATA[ ON f.src_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		              WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		                AND f.src_ip_grp = ${condition.ipGroupId} 
+		                AND f.acq_time <![CDATA[ > ]]> ${condition.stime} 
+		                AND f.acq_time <![CDATA[ <= ]]> ${condition.etime} 
+		              GROUP BY proto 
+		              UNION
+		              SELECT 
+		                f.proto,
+		                SUM(f.octets_total) AS out_flows,
+		                SUM(f.packet_total) AS out_packages,
+		                SUM(f.FLOW_TOTAL) AS connectNumberOut
+		              FROM
+		               CONF_IP_GROUP g 
+		                LEFT JOIN CONF_IP_GROUP_AID a 
+		                  ON g.id = a.conf_ip_group_id 
+		                LEFT JOIN ANA_IF_OUT_NET_APP_TOS_${condition.tableSuffix} f 
+		                  <![CDATA[ ON f.src_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		              WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		                AND f.src_ip_grp = ${condition.ipGroupId} 
+		                AND f.acq_time <![CDATA[ > ]]> ${condition.stime} 
+		                AND f.acq_time <![CDATA[ <= ]]> ${condition.etime} 
+		              GROUP BY proto) t11 
+		            GROUP BY proto) t1 
+		            LEFT JOIN 
+		              (SELECT 
+		                proto,
+		                SUM(in_flows) AS in_flows,
+		                SUM(in_packages) AS in_packages,
+		                SUM(connectNumberIn) AS connectNumberIn
+		              FROM
+		                (SELECT 
+		                  proto,
+		                  SUM(f.octets_total) AS in_flows,
+		                  SUM(f.packet_total) AS in_packages,
+		                  SUM(f.FLOW_TOTAL) AS connectNumberIn
+		                FROM
+		                 CONF_IP_GROUP g 
+		                  LEFT JOIN CONF_IP_GROUP_AID a 
+		                    ON g.id = a.conf_ip_group_id 
+		                  LEFT JOIN ANA_IF_IN_NET_APP_TOS_${condition.tableSuffix} f 
+		                    <![CDATA[ ON f.dst_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		                WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		                  AND f.dst_ip_grp = ${condition.ipGroupId} 
+		                  AND f.acq_time <![CDATA[ > ]]> ${condition.stime} 
+		                  AND f.acq_time <![CDATA[ <= ]]> ${condition.etime} 
+		                GROUP BY proto 
+		                UNION
+		                SELECT 
+		                  proto,
+		                  SUM(f.octets_total) AS in_flows,
+		                  SUM(f.packet_total) AS in_packages,
+		                  SUM(f.FLOW_TOTAL) AS connectNumberIn
+		                FROM
+		                 CONF_IP_GROUP g 
+		                  LEFT JOIN CONF_IP_GROUP_AID a 
+		                    ON g.id = a.conf_ip_group_id 
+		                  LEFT JOIN ANA_IF_OUT_NET_APP_TOS_${condition.tableSuffix} f 
+		                    <![CDATA[ ON f.dst_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		                WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		                  AND f.dst_ip_grp = ${condition.ipGroupId} 
+		                  AND f.acq_time <![CDATA[ > ]]> ${condition.stime} 
+		                  AND f.acq_time <![CDATA[ <= ]]> ${condition.etime} 
+		                GROUP BY proto) t12 
+		              GROUP BY proto) t2 
+		              ON t1.proto = t2.proto
+		          ) 
+		          UNION
+		          SELECT 
+		            t2.proto,
+		            IFNULL(in_flows, 0) AS flowIn,
+		            IFNULL(in_packages, 0) AS packetIn,
+		            IFNULL(out_flows, 0) AS flowOut,
+		            IFNULL(out_packages, 0) AS packetOut,
+		            IFNULL(connectNumberIn, 0) AS connectNumberIn,
+		            IFNULL(connectNumberOut, 0) AS connectNumberOut
+		          FROM
+		            (
+		              (SELECT 
+		                proto,
+		                SUM(out_flows) AS out_flows,
+		                SUM(out_packages) AS out_packages,
+		                SUM(connectNumberOut) AS connectNumberOut
+		              FROM
+		                (SELECT 
+		                  proto,
+		                  SUM(f.octets_total) AS out_flows,
+		                  SUM(f.packet_total) AS out_packages,
+		                  SUM(f.FLOW_TOTAL) AS connectNumberOut
+		                FROM
+		                 CONF_IP_GROUP g 
+		                  LEFT JOIN CONF_IP_GROUP_AID a 
+		                    ON g.id = a.conf_ip_group_id 
+		                  LEFT JOIN ANA_IF_IN_NET_APP_TOS_${condition.tableSuffix} f 
+		                    <![CDATA[ ON f.src_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		                WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		                  AND f.src_ip_grp = ${condition.ipGroupId} 
+		                  AND f.acq_time <![CDATA[ > ]]> ${condition.stime} 
+		                  AND f.acq_time <![CDATA[ <= ]]> ${condition.etime} 
+		                GROUP BY proto 
+		                UNION
+		                SELECT 
+		                  proto,
+		                  SUM(f.octets_total) AS out_flows,
+		                  SUM(f.packet_total) AS out_packages,
+		                  SUM(f.FLOW_TOTAL) AS connectNumberOut
+		                FROM
+		                 CONF_IP_GROUP g 
+		                  LEFT JOIN CONF_IP_GROUP_AID a 
+		                    ON g.id = a.conf_ip_group_id 
+		                  LEFT JOIN ANA_IF_OUT_NET_APP_TOS_${condition.tableSuffix} f 
+		                    <![CDATA[ ON f.src_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		                WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		                  AND f.src_ip_grp = ${condition.ipGroupId} 
+		                  AND f.acq_time <![CDATA[ > ]]> ${condition.stime} 
+		                  AND f.acq_time <![CDATA[ <= ]]> ${condition.etime} 
+		                GROUP BY proto) t11 
+		              GROUP BY t11.proto) t1 
+		              RIGHT JOIN 
+		                (SELECT 
+		                  proto,
+		                  SUM(in_flows) AS in_flows,
+		                  SUM(in_packages) AS in_packages,
+		                  SUM(connectNumberIn) AS connectNumberIn
+		                FROM
+		                  (SELECT 
+		                    proto,
+		                    SUM(f.octets_total) AS in_flows,
+		                    SUM(f.packet_total) AS in_packages,
+		                    SUM(f.FLOW_TOTAL) AS connectNumberIn
+		                  FROM
+		                   CONF_IP_GROUP g 
+		                    LEFT JOIN CONF_IP_GROUP_AID a 
+		                      ON g.id = a.conf_ip_group_id 
+		                    LEFT JOIN ANA_IF_IN_NET_APP_TOS_${condition.tableSuffix} f 
+		                      <![CDATA[ ON f.dst_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		                  WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		                    AND f.dst_ip_grp = ${condition.ipGroupId} 
+		                    AND f.acq_time <![CDATA[ > ]]> ${condition.stime} 
+		                    AND f.acq_time <![CDATA[ <= ]]> ${condition.etime} 
+		                  GROUP BY proto 
+		                  UNION
+		                  SELECT 
+		                    f.proto,
+		                    SUM(f.octets_total) AS in_flows,
+		                    SUM(f.packet_total) AS in_packages,
+		                    SUM(f.FLOW_TOTAL) AS connectNumberIn
+		                  FROM
+		                   CONF_IP_GROUP g 
+		                    LEFT JOIN CONF_IP_GROUP_AID a 
+		                      ON g.id = a.conf_ip_group_id 
+		                    LEFT JOIN ANA_IF_OUT_NET_APP_TOS_${condition.tableSuffix} f 
+		                      <![CDATA[ ON f.dst_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		                  WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		                    AND f.dst_ip_grp = ${condition.ipGroupId} 
+		                    AND f.acq_time <![CDATA[ > ]]> ${condition.stime} 
+		                    AND f.acq_time <![CDATA[ <= ]]> ${condition.etime} 
+		                  GROUP BY proto) t21 
+		                GROUP BY proto) t2 
+		                ON t1.proto = t2.proto
+		            )) t 
+		        GROUP BY t.proto) ot 
+		        ON ot.proto = ag.`ID` 
+		      GROUP BY ag.`ID`) tall 
+			<if test="condition!=null">
+				order by 
+				<if test="condition.sort != null">tall.${condition.sort}</if>
+				<if test="condition.order != null"> ${condition.order} </if>
+			</if>
+
+	</select>
+	
+	<select id="getIpGroupProtoChartData" parameterType="com.mainsteam.stm.portal.netflow.bo.NetflowParamBo" resultType="com.mainsteam.stm.portal.netflow.bo.NetflowBo">
+
+		SELECT 
+		  IFNULL(flowIn, 0) AS flowIn,
+		  IFNULL(flowOut, 0) AS flowOut,
+		  IFNULL(flowTotal, 0) AS flowTotal,
+		  IFNULL(packetIn, 0) AS packetIn,
+		  IFNULL(packetOut, 0) AS packetOut,
+		  IFNULL(packetTotal, 0) AS packetTotal,
+		  IFNULL(speedIn, 0) AS speedIn,
+		  IFNULL(speedOut, 0) AS speedOut,
+		  IFNULL(speedTotal, 0) AS speedTotal,
+		  IFNULL(flowPctge, 0) AS flowPctge,
+		  IFNULL(packetPctge, 0) AS packetPctge,
+		  IFNULL(connectPctge, 0) AS connectPctge,
+		  IFNULL(packetInSpeed, 0) AS packetInSpeed,IFNULL(packetOutSpeed, 0) AS packetOutSpeed,IFNULL(packetTotalSpeed, 0) AS packetTotalSpeed,
+		  IFNULL(connectNumberIn, 0) AS connectNumberIn,IFNULL(connectNumberOut, 0) AS connectNumberOut,IFNULL(connectNumberTotal, 0) AS connectNumberTotal,
+		  IFNULL(connectNumberInSpeed, 0) AS connectNumberInSpeed,IFNULL(connectNumberOutSpeed, 0) AS connectNumberOutSpeed,IFNULL(connectNumberTotalSpeed, 0) AS connectNumberTotalSpeed
+		FROM
+		    (SELECT 
+		      acq_time,
+		      flowIn,
+		      packetIn,
+		      flowOut,
+		      packetOut,
+		      flowIn + flowOut AS flowTotal,
+		      packetIn + packetOut AS packetTotal,
+		      flowIn / ${timeInterval} AS speedIn,
+		      flowOut / ${timeInterval} AS speedOut,
+		      (flowIn + flowOut) / ${timeInterval} AS speedTotal,
+		      (flowIn + flowOut) / ${wholeFlows} AS flowPctge,
+		      (packetIn + packetOut) / ${wholeFlows} AS packetPctge,
+		      (connectNumberIn + connectNumberOut) / ${wholeFlows} AS connectPctge,
+		      packetIn / ${timeInterval} packetInSpeed,packetOut / ${timeInterval} packetOutSpeed,(packetIn+packetOut) / ${timeInterval} packetTotalSpeed,
+		      connectNumberIn,connectNumberOut,connectNumberIn+connectNumberOut connectNumberTotal,
+		      connectNumberIn / ${timeInterval} connectNumberInSpeed,connectNumberOut / ${timeInterval} connectNumberOutSpeed,(connectNumberIn+connectNumberOut) / ${timeInterval} connectNumberTotalSpeed
+		    FROM
+		      (SELECT 
+		        t1.acq_time,
+		        IFNULL(in_flows, 0) AS flowIn,
+		        IFNULL(in_packages, 0) AS packetIn,
+		        IFNULL(out_flows, 0) AS flowOut,
+		        IFNULL(out_packages, 0) AS packetOut,
+		        IFNULL(connectNumberIn, 0) AS connectNumberIn,
+		        IFNULL(connectNumberOut, 0) AS connectNumberOut 
+		      FROM
+		        (
+		          (SELECT 
+		            acq_time,
+		            SUM(out_flows) AS out_flows,
+		            SUM(out_packages) AS out_packages,
+		            SUM(connectNumberOut) AS connectNumberOut
+		          FROM
+		            (SELECT 
+		              acq_time,
+		              SUM(f.octets_total) AS out_flows,
+		              SUM(f.packet_total) AS out_packages,
+		              SUM(f.FLOW_TOTAL) AS connectNumberOut
+		            FROM
+		             CONF_IP_GROUP g 
+		              LEFT JOIN CONF_IP_GROUP_AID a 
+		                ON g.id = a.conf_ip_group_id 
+		              LEFT JOIN ANA_IF_IN_NET_APP_TOS_${tableSuffix} f 
+		                <![CDATA[ ON f.src_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		            WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		              AND f.src_ip_grp = ${ipGroupId} 
+		              AND f.acq_time in (${timeParam}) AND proto=${protoId} 
+		            GROUP BY acq_time 
+		            UNION
+		            SELECT 
+		              f.acq_time,
+		              SUM(f.octets_total) AS out_flows,
+		              SUM(f.packet_total) AS out_packages,
+		              SUM(f.FLOW_TOTAL) AS connectNumberOut
+		            FROM
+		             CONF_IP_GROUP g 
+		              LEFT JOIN CONF_IP_GROUP_AID a 
+		                ON g.id = a.conf_ip_group_id 
+		              LEFT JOIN ANA_IF_OUT_NET_APP_TOS_${tableSuffix} f 
+		                <![CDATA[ ON f.src_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		            WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		              AND f.src_ip_grp = ${ipGroupId} 
+		              AND f.acq_time in (${timeParam}) AND proto=${protoId} 
+		            GROUP BY acq_time) t11 
+		          GROUP BY acq_time) t1 
+		          LEFT JOIN 
+		            (SELECT 
+		              acq_time,
+		              SUM(in_flows) AS in_flows,
+		              SUM(in_packages) AS in_packages,
+		              SUM(connectNumberIn) AS connectNumberIn
+		            FROM
+		              (SELECT 
+		                acq_time,
+		                SUM(f.octets_total) AS in_flows,
+		                SUM(f.packet_total) AS in_packages,
+		                SUM(f.FLOW_TOTAL) AS connectNumberIn
+		              FROM
+		               CONF_IP_GROUP g 
+		                LEFT JOIN CONF_IP_GROUP_AID a 
+		                  ON g.id = a.conf_ip_group_id 
+		                LEFT JOIN ANA_IF_IN_NET_APP_TOS_${tableSuffix} f 
+		                  <![CDATA[ ON f.dst_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		              WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		                AND f.dst_ip_grp = ${ipGroupId} 
+		                AND f.acq_time in (${timeParam}) AND proto=${protoId} 
+		              GROUP BY acq_time 
+		              UNION
+		              SELECT 
+		                acq_time,
+		                SUM(f.octets_total) AS in_flows,
+		                SUM(f.packet_total) AS in_packages,
+		                SUM(f.FLOW_TOTAL) AS connectNumberIn
+		              FROM
+		               CONF_IP_GROUP g 
+		                LEFT JOIN CONF_IP_GROUP_AID a 
+		                  ON g.id = a.conf_ip_group_id 
+		                LEFT JOIN ANA_IF_OUT_NET_APP_TOS_${tableSuffix} f 
+		                  <![CDATA[ ON f.dst_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		              WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		                AND f.dst_ip_grp = ${ipGroupId} 
+		                AND f.acq_time in (${timeParam}) AND proto=${protoId} 
+		              GROUP BY acq_time) t12 
+		            GROUP BY acq_time) t2 
+		            ON t1.acq_time = t2.acq_time
+		        ) 
+		        UNION
+		        SELECT 
+		          t2.acq_time,
+		          IFNULL(in_flows, 0) AS flowIn,
+		          IFNULL(in_packages, 0) AS packetIn,
+		          IFNULL(out_flows, 0) AS flowOut,
+		          IFNULL(out_packages, 0) AS packetOut,
+		          IFNULL(connectNumberIn, 0) AS connectNumberIn,
+		          IFNULL(connectNumberOut, 0) AS connectNumberOut 
+		        FROM
+		          (
+		            (SELECT 
+		              acq_time,
+		              SUM(out_flows) AS out_flows,
+		              SUM(out_packages) AS out_packages,
+		              SUM(connectNumberOut) AS connectNumberOut
+		            FROM
+		              (SELECT 
+		                acq_time,
+		                SUM(f.octets_total) AS out_flows,
+		                SUM(f.packet_total) AS out_packages,
+		                SUM(f.FLOW_TOTAL) AS connectNumberOut
+		              FROM
+		               CONF_IP_GROUP g 
+		                LEFT JOIN CONF_IP_GROUP_AID a 
+		                  ON g.id = a.conf_ip_group_id 
+		                LEFT JOIN ANA_IF_IN_NET_APP_TOS_${tableSuffix} f 
+		                  <![CDATA[ ON f.src_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		              WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		                AND f.src_ip_grp = ${ipGroupId} 
+		                AND f.acq_time in (${timeParam}) AND proto=${protoId} 
+		              GROUP BY acq_time 
+		              UNION
+		              SELECT 
+		                acq_time,
+		                SUM(f.octets_total) AS out_flows,
+		                SUM(f.packet_total) AS out_packages,
+		                SUM(f.FLOW_TOTAL) AS connectNumberOut
+		              FROM
+		               CONF_IP_GROUP g 
+		                LEFT JOIN CONF_IP_GROUP_AID a 
+		                  ON g.id = a.conf_ip_group_id 
+		                LEFT JOIN ANA_IF_OUT_NET_APP_TOS_${tableSuffix} f 
+		                  <![CDATA[ ON f.src_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		              WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		                AND f.src_ip_grp = ${ipGroupId} 
+		                AND f.acq_time in (${timeParam}) AND proto=${protoId} 
+		              GROUP BY acq_time) t11 
+		            GROUP BY t11.acq_time) t1 
+		            RIGHT JOIN 
+		              (SELECT 
+		                acq_time,
+		                SUM(in_flows) AS in_flows,
+		                SUM(in_packages) AS in_packages,
+		                SUM(connectNumberIn) AS connectNumberIn
+		              FROM
+		                (SELECT 
+		                  acq_time,
+		                  SUM(f.octets_total) AS in_flows,
+		                  SUM(f.packet_total) AS in_packages,
+		                  SUM(f.FLOW_TOTAL) AS connectNumberIn
+		                FROM
+		                 CONF_IP_GROUP g 
+		                  LEFT JOIN CONF_IP_GROUP_AID a 
+		                    ON g.id = a.conf_ip_group_id 
+		                  LEFT JOIN ANA_IF_IN_NET_APP_TOS_${tableSuffix} f 
+		                    <![CDATA[ ON f.dst_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		                WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		                  AND f.dst_ip_grp = ${ipGroupId} 
+		                  AND f.acq_time in (${timeParam}) AND proto=${protoId} 
+		                GROUP BY acq_time 
+		                UNION
+		                SELECT 
+		                  f.acq_time,
+		                  SUM(f.octets_total) AS in_flows,
+		                  SUM(f.packet_total) AS in_packages,
+		                  SUM(f.FLOW_TOTAL) AS connectNumberIn
+		                FROM
+		                 CONF_IP_GROUP g 
+		                  LEFT JOIN CONF_IP_GROUP_AID a 
+		                    ON g.id = a.conf_ip_group_id 
+		                  LEFT JOIN ANA_IF_OUT_NET_APP_TOS_${tableSuffix} f 
+		                    <![CDATA[ ON f.dst_ip_grp & 1 << (g.id - 1) != 0 ]]> 
+		                WHERE <![CDATA[ f.acq_time >= UNIX_TIMESTAMP(a.create_date) ]]> 
+		                  AND f.dst_ip_grp = ${ipGroupId} 
+		                  AND f.acq_time in (${timeParam}) AND proto=${protoId} 
+		                GROUP BY acq_time) t21 
+		              GROUP BY acq_time) t2 
+		              ON t1.acq_time = t2.acq_time
+		          )) t 
+		      GROUP BY t.acq_time) ot 
+	
+	</select>
+	
+</mapper>

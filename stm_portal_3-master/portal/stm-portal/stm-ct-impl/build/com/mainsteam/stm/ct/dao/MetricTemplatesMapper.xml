@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.ct.dao.MetricTemplatesMapper">
+
+    <sql id="whereIfSql">
+        <if test="condition.profilelib_id != null and condition.profilelib_id != ''">
+            AND profilelib_id = #{condition.profilelib_id}
+        </if>
+        <if test="condition.enable != null and condition.enable != ''">
+            AND status = #{condition.enable}
+        </if>
+        <if test="condition.compare_type != null and condition.compare_type != ''">
+            AND compar_type like CONCAT('%',#{condition.compare_type},'%')
+        </if>
+        <!--<if test="condition.isDefault != null and condition.isDefault != ''">-->
+            <!--AND is_default like '%{condition.isDefault}%'-->
+        <!--</if>-->
+        <!--<if test="condition.profileName != null and condition.profileName != ''">-->
+            <!--AND profile_name like '%{condition.profileName}%'-->
+        <!--</if>-->
+    </sql>
+
+    <select id="getMetricTemplates" resultType="com.mainsteam.stm.ct.bo.MsMetricTemplates">
+        SELECT
+            *
+        FROM
+            ms_metric_templates
+        WHERE
+            1 = 1
+            <include refid="whereIfSql"/>
+        ORDER BY
+            id ASC
+    </select>
+    <insert id="insert" parameterType="com.mainsteam.stm.ct.bo.MsMetricTemplates">
+        INSERT INTO `ms_metric_templates` ( `metric_name`, `enable`, `attention_value`, `alarm_value`, `profilelib_id`, `compare_type`, `alarm_message`,`c_name`)
+         VALUES (#{metric_name}, #{enable}, #{attention_value}, #{alarm_value}, #{profilelib_id},#{compare_type},#{alarm_message},#{c_name});
+
+    </insert>
+    <update id="update" parameterType="com.mainsteam.stm.ct.bo.MsMetricTemplates">
+    	UPDATE `ms_metric_templates` SET 
+    	`metric_name`=#{metric_name}, 
+    	`enable`=#{enable}, 
+    	`attention_value`=#{attention_value}, 
+    	`alarm_value`=#{alarm_value}, 
+    	`profilelib_id`=#{profilelib_id}, 
+    	`compare_type`=#{compare_type}, 
+    	`alarm_message`=#{alarm_message} 
+    	WHERE (`id`=#{id});
+    </update>
+    <delete id="deleteTemplatesByProfilelibId" parameterType="java.lang.Integer">
+        delete from ms_metric_templates where profilelib_id = #{profilelib_id};
+    </delete>
+</mapper>

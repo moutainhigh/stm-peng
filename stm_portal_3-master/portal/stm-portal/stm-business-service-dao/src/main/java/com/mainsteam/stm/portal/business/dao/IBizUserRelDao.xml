@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.portal.business.dao.IBizUserRelDao">
+   
+   
+   
+   
+   
+  <select id="getUserlistByBizId" resultType="com.mainsteam.stm.portal.business.bo.BizUserRelBo" parameterType="map" databaseId="mysql">
+		SELECT A.ID AS USER_ID,#{biz_id} AS BIZ_ID,A.ACCOUNT,A.NAME,'1' AS View
+		FROM stm_sys_user A
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <if test="domain_id!= null and domain_id!=''">
+			INNER JOIN (SELECT DISTINCT USER_ID FROM stm_sys_user_domain_role_rel WHERE DOMAIN_ID IN (#{domain_id})) U
+			ON A.ID = U.USER_ID
+		</if>
+		WHERE NOT EXISTS (SELECT USER_ID FROM stm_biz_user_rel B WHERE A.ID = B.USER_ID AND BIZ_ID = #{biz_id}) 
+		AND A.USER_TYPE NOT IN (3,4)
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <if test="account!=null and account!=''"> AND A.NAME LIKE CONCAT('%',#{account},'%') </if>
+		UNION ALL
+		SELECT A.USER_ID,A.BIZ_ID,B.ACCOUNT,B.NAME,'0' AS View 
+		FROM stm_biz_user_rel A,stm_sys_user B
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <if test="domain_id!= null and domain_id!=''">
+			INNER JOIN (SELECT DISTINCT USER_ID FROM stm_sys_user_domain_role_rel WHERE DOMAIN_ID IN (#{domain_id})) U
+			ON B.ID = U.USER_ID
+		</if>
+		WHERE A.USER_ID = B.ID AND A.BIZ_ID = #{biz_id} AND B.USER_TYPE NOT IN (3,4)
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <if test="account!=null and account!=''"> AND B.NAME LIKE CONCAT('%',#{account},'%')</if>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="getUserlistByBizId" resultType="com.mainsteam.stm.portal.business.bo.BizUserRelBo" parameterType="map" databaseId="oracle">
+		SELECT A.ID AS USER_ID,#{biz_id} AS BIZ_ID,A.ACCOUNT,A.NAME,'1' AS          <![CDATA["View"]]>
+		FROM stm_sys_user A
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <if test="domain_id!= null and domain_id!=''">
+			INNER JOIN (SELECT DISTINCT USER_ID FROM stm_sys_user_domain_role_rel WHERE DOMAIN_ID IN (#{domain_id})) U
+			ON A.ID = U.USER_ID
+		</if>
+		WHERE NOT EXISTS (SELECT USER_ID FROM stm_biz_user_rel B WHERE A.ID = B.USER_ID AND BIZ_ID = #{biz_id}) 
+		AND A.USER_TYPE NOT IN (3,4)
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <if test="account!=null and account!=''"> AND A.NAME LIKE CONCAT('%',CONCAT(#{account},'%')) </if>
+		UNION ALL
+		SELECT A.USER_ID,A.BIZ_ID,B.ACCOUNT,B.NAME,'0' AS          <![CDATA["View"]]> 
+		FROM stm_biz_user_rel A,stm_sys_user B
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <if test="domain_id!= null and domain_id!=''">
+			INNER JOIN (SELECT DISTINCT USER_ID FROM stm_sys_user_domain_role_rel WHERE DOMAIN_ID IN (#{domain_id})) U
+			ON B.ID = U.USER_ID
+		</if>
+		WHERE A.USER_ID = B.ID AND A.BIZ_ID = #{biz_id} AND B.USER_TYPE NOT IN (3,4)
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <if test="account!=null and account!=''"> AND B.NAME LIKE CONCAT('%',CONCAT(#{account},'%'))</if>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  </select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="getUserlistByBizId" resultType="com.mainsteam.stm.portal.business.bo.BizUserRelBo" parameterType="map" databaseId="dm">
+		SELECT A.ID AS USER_ID,#{biz_id} AS BIZ_ID,A.ACCOUNT,A.NAME,'1' AS          <![CDATA["View"]]>
+		FROM stm_sys_user A
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <if test="domain_id!= null and domain_id!=''">
+			INNER JOIN (SELECT DISTINCT USER_ID FROM stm_sys_user_domain_role_rel WHERE DOMAIN_ID IN (#{domain_id})) U
+			ON A.ID = U.USER_ID
+		</if>
+		WHERE NOT EXISTS (SELECT USER_ID FROM stm_biz_user_rel B WHERE A.ID = B.USER_ID AND BIZ_ID = #{biz_id}) 
+		AND A.USER_TYPE NOT IN (3,4)
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <if test="account!=null and account!=''"> AND A.NAME LIKE CONCAT('%',CONCAT(#{account},'%')) </if>
+		UNION ALL
+		SELECT A.USER_ID,A.BIZ_ID,B.ACCOUNT,B.NAME,'0' AS          <![CDATA["View"]]> 
+		FROM stm_biz_user_rel A,stm_sys_user B
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <if test="domain_id!= null and domain_id!=''">
+			INNER JOIN (SELECT DISTINCT USER_ID FROM stm_sys_user_domain_role_rel WHERE DOMAIN_ID IN (#{domain_id})) U
+			ON B.ID = U.USER_ID
+		</if>
+		WHERE A.USER_ID = B.ID AND A.BIZ_ID = #{biz_id} AND B.USER_TYPE NOT IN (3,4)
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <if test="account!=null and account!=''"> AND B.NAME LIKE CONCAT('%',CONCAT(#{account},'%'))</if>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  </select>
+  <select id="getUserlistByBizId" resultType="com.mainsteam.stm.portal.business.bo.BizUserRelBo" parameterType="map" databaseId="oscar">
+		SELECT A.ID AS USER_ID,#{biz_id} AS BIZ_ID,A.ACCOUNT,A.NAME,'1' AS          <![CDATA["View"]]>
+		FROM stm_sys_user A
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <if test="domain_id!= null and domain_id!=''">
+			INNER JOIN (SELECT DISTINCT USER_ID FROM stm_sys_user_domain_role_rel WHERE DOMAIN_ID IN (#{domain_id})) U
+			ON A.ID = U.USER_ID
+		</if>
+		WHERE NOT EXISTS (SELECT USER_ID FROM stm_biz_user_rel B WHERE A.ID = B.USER_ID AND BIZ_ID = #{biz_id}) 
+		AND A.USER_TYPE NOT IN (3,4)
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <if test="account!=null and account!=''"> AND A.NAME LIKE CONCAT('%',CONCAT(#{account},'%')) </if>
+		UNION ALL
+		SELECT A.USER_ID,A.BIZ_ID,B.ACCOUNT,B.NAME,'0' AS          <![CDATA["View"]]> 
+		FROM stm_biz_user_rel A,stm_sys_user B
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <if test="domain_id!= null and domain_id!=''">
+			INNER JOIN (SELECT DISTINCT USER_ID FROM stm_sys_user_domain_role_rel WHERE DOMAIN_ID IN (#{domain_id})) U
+			ON B.ID = U.USER_ID
+		</if>
+		WHERE A.USER_ID = B.ID AND A.BIZ_ID = #{biz_id} AND B.USER_TYPE NOT IN (3,4)
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <if test="account!=null and account!=''"> AND B.NAME LIKE CONCAT('%',CONCAT(#{account},'%'))</if>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="getBizlistByUserId" resultType="com.mainsteam.stm.portal.business.bo.BizMainBo" parameterType="long">
+		SELECT B.ID, 
+			B.NAME, 
+			B.REMARK,
+			B.MANAGER_ID AS managerId,
+			B.CREATE_ID AS createId,
+			B.CREATE_TIME AS createTime,
+			B.UPDATE_TIME AS updateTime,
+			B.FILE_ID as fileId,
+			B.DOMAIN_ID AS domainId 
+			FROM stm_biz_main B
+			WHERE NOT EXISTS (
+			SELECT BIZ_ID FROM stm_biz_user_rel A WHERE A.BIZ_ID = B.ID AND A.USER_ID = #{user_id}
+		)
+	</select>
+   
+   
+   
+   
+   
+  <select id="checkUserView" resultType="com.mainsteam.stm.portal.business.bo.BizUserRelBo" parameterType="map">
+		SELECT USER_ID,BIZ_ID FROM stm_biz_user_rel
+		WHERE USER_ID = #{user_id} AND BIZ_ID = #{biz_id}
+	</select>
+   
+   
+   
+   
+   
+  <delete id="deleteByBizId" parameterType="java.util.Map">
+		DELETE FROM stm_biz_user_rel WHERE BIZ_ID IN 
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <foreach collection="biz_ids" open="(" close=")" separator="," item="biz_id">
+			#{biz_id}
+		</foreach>
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <if test="user_ids!=null and user_ids.size!=0">
+			AND USER_ID IN 
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+      <foreach collection="user_ids" item="user_id" index="index" open="(" close=")" separator=",">
+				#{user_id}
+			</foreach>
+		
+		
+    
+    
+    
+    
+    
+    
+    
+    </if>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  </delete>
+   
+   
+   
+   
+   
+  <select id="getCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM stm_biz_user_rel WHERE BIZ_ID = #{biz_id}
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+    <if test="user_ids!=null and user_ids.size!=0">
+			AND USER_ID IN 
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+      <foreach collection="user_ids" item="user_id" index="index" open="(" close=")" separator=",">
+				#{user_id}
+			</foreach>
+		
+		
+    
+    
+    
+    
+    
+    
+    
+    </if>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <insert id="insertSet" parameterType="java.util.Map" databaseId="mysql">
+		INSERT INTO stm_biz_user_rel(BIZ_ID,USER_ID) VALUES (#{biz_id},#{user_id})
+	</insert>
+   
+   
+   
+   
+   
+  <insert id="insertSet" parameterType="java.util.Map" databaseId="oracle">
+		INSERT INTO stm_biz_user_rel(ID,BIZ_ID,USER_ID) VALUES (STM_BIZ_USER_REL_SEQ.nextval,#{biz_id},#{user_id})
+	</insert>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <insert id="insertSet" parameterType="java.util.Map" databaseId="dm">
+		INSERT INTO stm_biz_user_rel(ID,BIZ_ID,USER_ID) VALUES (STM_BIZ_USER_REL_SEQ.nextval,#{biz_id},#{user_id})
+	</insert>
+  <insert id="insertSet" parameterType="java.util.Map" databaseId="oscar">
+		INSERT INTO stm_biz_user_rel(ID,BIZ_ID,USER_ID) VALUES (STM_BIZ_USER_REL_SEQ.nextval,#{biz_id},#{user_id})
+	</insert>
+</mapper>

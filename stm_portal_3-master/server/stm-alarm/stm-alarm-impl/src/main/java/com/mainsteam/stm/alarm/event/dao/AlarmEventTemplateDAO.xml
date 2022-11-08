@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.alarm.event.dao.AlarmEventTemplateDAO">
+
+	<sql id="columns">
+		unique_key as uniqueKey,
+		content as jsonContent
+	</sql>
+
+	<insert id="addAlarmEventTemplate" parameterType="com.mainsteam.stm.alarm.po.AlarmEventTemplatePO">
+		INSERT INTO stm_alarm_event_template(content, unique_key)
+		VALUES
+		(#{jsonContent},#{uniqueKey})
+	</insert>
+
+	<insert id="addAlarmEventTemplateForMysql"  parameterType="com.mainsteam.stm.alarm.po.AlarmEventTemplatePO" >
+		INSERT INTO stm_alarm_event_template(content, unique_key)
+		VALUES
+		(#{jsonContent},#{uniqueKey})
+		ON DUPLICATE KEY
+		UPDATE content=#{jsonContent}
+	</insert>
+
+	<insert id="addAlarmEventTemplateForOracle" parameterType="com.mainsteam.stm.alarm.po.AlarmEventTemplatePO" >
+		MERGE INTO stm_alarm_event_template event using
+		(select#{jsonContent} as content, #{uniqueKey} as unique_key from dual) tmp
+		ON (event.unique_key=tmp.unique_key)
+		WHEN MATCHED THEN
+		UPDATE SET event.content=#{jsonContent}
+		WHEN NOT MATCHED THEN
+		INSERT (event.content,event.unique_key)
+		VALUES
+		(tmp.content,tmp.unique_key)
+	</insert>
+
+	<delete id="deleteTemplate" parameterType="com.mainsteam.stm.alarm.po.AlarmEventTemplatePO">
+		DELETE FROM stm_alarm_event_template
+		<where>
+			<if test="uniqueKey !=null">
+				unique_key=#{uniqueKey}
+			</if>
+		</where>
+	</delete>
+
+	<select id="selectTemplate" parameterType="com.mainsteam.stm.alarm.po.AlarmEventTemplatePO" resultType="com.mainsteam.stm.alarm.po.AlarmEventTemplatePO">
+		SELECT <include refid="columns"></include>
+		FROM stm_alarm_event_template
+		<where>
+			<if test="uniqueKey !=null">
+				unique_key=#{uniqueKey}
+			</if>
+		</where>
+	</select>
+
+</mapper>

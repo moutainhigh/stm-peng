@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root> <import src="public_tomcat.xml" />
+	<!-- 
+	devicetype:			设备类型名称
+	ismulticoltype:		是否允许采集方式多选
+	majortype:			主要分类（可以理解为设备类型）
+	minortype:			次要分类
+	manufacturer:		厂商
+	devicetype_zh:		设备类型中文描述
+	 -->
+	<devicetypeinfo devicetype="Tomcat7" ismulticoltype="true" majortype="middleware" minortype="Tomcat" manufacturer="Apache" devicetype_zh="Tomcat7x">
+		
+		<!-- 用于定位设备为该类设备的多个sysoid标识，如果snmp采集为sysoid，如果其他方式自行定义 -->
+		<devicetypes>
+			
+		</devicetypes>
+		
+		<!-- 该设备类型定义的命令，用于合并命令执行 -->
+		<commands>
+			<!-- coltype:采集方式，comid：命令ID，command：命令 -->
+		
+			<!--Tomcat CPU利用率-->
+			<command coltype="WMI" comid="tomcat_cpurate" command="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Process where Name like 'tomcat7%'"/>
+			<!--物理内存总大小 KByte-->
+			<command coltype="WMI" comid="physical_total_memory" command="root\cimv2::SELECT TotalVisibleMEMorySize FROM Win32_OperatingSystem" />
+			<!--Tomcat内存使用内存 Byte-->
+			<command coltype="WMI" comid="tomcat_used_memory" command="root\cimv2::select WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name like 'tomcat7%'"/>
+			<!--主机名称-->
+			<command coltype="WMI" comid="hostname" command="root\cimv2::SELECT Name FROM Win32_ComputerSystem" />
+			<!--主机操作系统-->
+			<command coltype="WMI" comid="osname" command="root\cimv2::SELECT Caption from Win32_OperatingSystem" />
+		
+			<!--command coltype="INNER_PROC" comid="getJVMMemoryPool" command="com.qwserv.itm.pal.appmdl.tomcat.TomcatCollectorUtil.getJVMMemoryPool"/-->  <!--JVM-->
+			<!--command coltype="INNER_PROC" comid="getJVMType" command="com.qwserv.itm.pal.appmdl.tomcat.TomcatCollectorUtil.getJVMType"/-->  <!--JVM-->
+			<!--command coltype="INNER_PROC" comid="getJVMInitial" command="com.qwserv.itm.pal.appmdl.tomcat.TomcatCollectorUtil.getJVMInitial"/-->  <!--JVM-->
+			<!--command coltype="INNER_PROC" comid="getJVMTotal" command="com.qwserv.itm.pal.appmdl.tomcat.TomcatCollectorUtil.getJVMTotal"/-->  <!--JVM-->
+			<!--command coltype="INNER_PROC" comid="getJVMUsed" command="com.qwserv.itm.pal.appmdl.tomcat.TomcatCollectorUtil.getJVMUsed"/-->  <!--JVM-->
+			<!--command coltype="INNER_PROC" comid="getJVMMaximum" command="com.qwserv.itm.pal.appmdl.tomcat.TomcatCollectorUtil.getJVMMaximum"/-->  <!--JVM-->
+
+			<command coltype="CLI" comid="chk_common" command="/tmp/os.sh"/>
+			<command coltype="CLI" comid="chk_physicalrate" command="/tmp/appinfo.sh javaw"/>
+		</commands>
+		
+		<!-- 描述该类设备的所有指标采集,一行对应一个指标 -->
+		<!-- kpiid的命名规范：长度不超过20，命名规范，前两位为模块标识，分别以以下字符打头， N（网络）、H（主机）、D（数据库）、M（中间件）、A（应用）；第二位为数字，由模块内部进行标识定义-->
+		<resources>
+			
+			<!-- Tomcat CPU利用率 -->
+			<resource kpiid="M9cpuRate" coltype="WMI" value="" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="tomcat_cpurate" select="" merge="sum" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M9cpuRate" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+		
+		<!--物理内存总大小 KByte-->
+			<resource kpiid="M9phyTotalMemory" coltype="WMI" value="" valuetype="Float" unit="KByte">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="physical_total_memory" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M9phyTotalMemory" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+
+			<!--Tomcat内存使用内存 Byte-->
+			<resource kpiid="M9tomcatUsedMemory" coltype="WMI" value="" valuetype="Float" unit="Byte">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="tomcat_used_memory" select="" merge="sum" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M9tomcatUsedMemory" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+
+			<!--Tomcat内存使用率-->
+			<resource kpiid="M9tomcatMemoryRate" coltype="WMI" value="100*$d1/$d2/1024" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="tomcat_used_memory" select="" merge="sum" deal=""/>
+					<collect exeorder="20" comid="physical_total_memory" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M9tomcatMemoryRate" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+
+			<!-- 系统可管理内存-->
+			<resource kpiid="M9phyTotalMemory" coltype="CLI" value="$d1/1024" valuetype="Float" unit="GB">
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;memsize&gt;(\w+)&lt;/memsize&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M9phyTotalMemory" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+
+			<!--Tomcat 内存利用率 -->
+			<resource kpiid="M9tomcatMemoryRate" coltype="CLI" value="" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="chk_physicalrate" select="&lt;get_appmemrate&gt;([\s\S]*)&lt;/get_appmemrate&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_d_M9tomcatMemoryRate" field="value" fieldtype="" willalert="y"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>=80"
+					alertdesc3="内存利用率超过${trigervalue1}%，当前值为${value}%" alertexp4="${value}>=90" alertdesc4="内存利用率超过${trigervalue1}%，当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- Tomcat CPU利用率 -->
+			<resource kpiid="M9cpuRate" coltype="CLI" value="" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_physicalrate" select="&lt;get_appcpurate&gt;([\s\S]*)&lt;/get_appcpurate&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M9cpuRate" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!--主机名称-->
+			<resource kpiid="M9hostName" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="hostname" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M9hostName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+
+			<!--主机操作系统
+			<resource kpiid="M9osName" coltype="WMI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="osname" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_M9osName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>-->
+		
+			<!-- JVM subResouce -->
+			<!--resource kpiid="M9JVMMemoryPool" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="getJVMMemoryPool" select="($key)" merge="" deal=""/>				
+				</collects>
+				
+				<kpipolicy table="res_d_M9JVMMemoryPool" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="0"/>
+					
+			</resource-->
+		
+			<!-- Memory Pool -->
+			<!--resource kpiid="M9JVMType" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="getJVMType" select="$key=(.+)" merge="" deal=""/>				
+				</collects>
+				<kpipolicy table="res_d_M9JVMType" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="0"/>
+					
+			</resource-->
+
+			<!-- Memory Pool -->
+			<!--resource kpiid="M9JVMInitial" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="getJVMInitial" select="$key=(.+)" merge="" deal=""/>				
+				</collects>
+				<kpipolicy table="res_d_M9JVMInitial" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="0"/>
+					
+			</resource-->
+
+			<!--resource kpiid="M9JVMTotal" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="getJVMTotal" select="$key=(.+)" merge="" deal=""/>				
+				</collects>
+				<kpipolicy table="res_d_M9JVMTotal" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="0"/>
+					
+			</resource-->
+
+			<!--resource kpiid="M9JVMUsed" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="getJVMUsed" select="$key=(.+)" merge="" deal=""/>				
+				</collects>
+				<kpipolicy table="res_d_M9JVMUsed" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="0"/>
+					
+			</resource-->
+
+			<!--resource kpiid="M9JVMMaximum" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="getJVMMaximum" select="$key=(.+)" merge="" deal=""/>				
+				</collects>
+				<kpipolicy table="res_d_M9JVMMaximum" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="0"/>
+					
+			</resource-->
+
+		</resources>
+	</devicetypeinfo>
+</root>

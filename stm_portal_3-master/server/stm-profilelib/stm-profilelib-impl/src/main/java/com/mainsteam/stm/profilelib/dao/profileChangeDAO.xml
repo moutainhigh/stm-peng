@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.profilelib.dao.ProfileChangeDAO">
+	 
+	 <select id="getChangeByPO" 
+		resultType="com.mainsteam.stm.profilelib.po.ProfileChangePO"
+		parameterType="com.mainsteam.stm.profilelib.po.ProfileChangePO">
+		SELECT
+		profile_change_id AS profileChangeId,
+		operate_mode AS operateMode,
+		source AS source,
+		change_time AS changeTime,
+		operate_state AS operateState,
+		profile_id AS profileId,
+		timeline_id AS timelineId
+		FROM
+		STM_PROFILELIB_CHANGE
+		<trim prefix="where" prefixOverrides="and">
+			<if test="operateMode != null"> and operate_mode =#{operateMode} </if>
+			<if test="source > 0"> and source = #{source} </if>
+			<if test="operateState != null"> and operate_state= #{operateState} </if>
+			<if test="profileId > 0"> and profile_id= #{profileId} </if>
+			<if test="timelineId > 0"> and timeline_id= #{timelineId} </if>
+		</trim>
+		order by profile_change_id ASC
+	</select>
+		<select id="getProfileChange" 
+		resultType="com.mainsteam.stm.profilelib.po.ProfileChangePO"
+		parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		SELECT
+		profile_change_id AS profileChangeId,
+		operate_mode AS operateMode,
+		source AS source,
+		change_time AS changeTime,
+		operate_state AS operateState,
+		profile_id AS profileId,
+		timeline_id AS timelineId
+		FROM
+		STM_PROFILELIB_CHANGE where operate_state= 0
+	</select>
+	 <insert id="insertProfileChange" 
+		parameterType="com.mainsteam.stm.profilelib.po.ProfileChangePO">
+		insert into STM_PROFILELIB_CHANGE
+		(profile_change_id,operate_mode, source, change_time, operate_state,profile_id,timeline_id) 
+		values (#{profileChangeId}, #{operateMode}, #{source}, #{changeTime}, #{operateState}, #{profileId} , #{timelineId}) </insert>
+	
+	<update id="updateProfileChange" 
+		parameterType="com.mainsteam.stm.profilelib.po.ProfileChangePO">
+		update  STM_PROFILELIB_CHANGE
+		<set>
+			<if test="changeTime != null"> change_time =#{changeTime},</if>
+			<if test="operateState != null"> operate_state = #{operateState},</if>
+		</set>	
+	    where profile_change_id = #{profileChangeId}
+	    </update>
+	  <!--  <update id="updateProfileChangeByPO" 
+		parameterType="com.mainsteam.stm.profilelib.po.ProfileChangePO">
+		update  STM_PROFILELIB_CHANGE
+		<set>
+			<if test="changeTime != null"> change_time =#{changeTime},</if>
+			<if test="operateState != null"> operate_state = #{operateState},</if>
+		</set>	
+	    where operate_mode = #{operateMode} and source = #{source} and profile_id = #{profileId}
+	    </update> -->
+	     <delete id="deleteProfileChangeById" 
+		parameterType="long"> 
+		delete from  STM_PROFILELIB_CHANGE where profile_change_id = #{profileChangeId}
+	    </delete>
+</mapper>

@@ -1,0 +1,116 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript" src="lib/jquery-ui-1.8.4.custom/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="lib/raphael.js"></script>
+<script type="text/javascript" src="lib/raphael-fn.js"></script>
+<script type="text/javascript" src="demo.js"></script>
+<script type="text/javascript">
+	$(function() {
+		var ttgl = [{text:"172.16.2.12",x:450,y:50,src:"img/top/router.png"},
+					{text:"172.16.2.23",x:650,y:50,src:"img/top/switch.png"},
+					{text:"192.168.1.17",x:650,y:150,src:"img/top/switch_unable.png"},
+					{text:"192.168.1.1",x:650,y:250,src:"img/top/switch.png"},
+					{text:"172.168.1.47",x:600,y:350,src:"img/top/10_switch3.png"},
+					{text:"172.168.1.38",x:700,y:350,src:"img/top/10_switch3.png"},	
+					{text:"192.166.1.11",x:10+250,y:500,src:"img/top/switch.png"},					
+					{text:"172.16.0.23",x:90+250,y:500,src:"img/top/switch.png"},
+					{text:"172.16.0.11",x:170+250,y:500,src:"img/top/switch_danger.png"},
+					{text:"172.16.0.35",x:250+250,y:500,src:"img/top/switch.png"},
+					{text:"192.168.2.11",x:330+250,y:500,src:"img/top/switch_waring.png"},
+					{text:"192.168.1.121",x:410+250,y:500,src:"img/top/switch.png"},
+					{text:"192.168.1.33",x:490+250,y:500,src:"img/top/switch.png"},
+					{text:"192.168.1.66",x:570+250,y:500,src:"img/top/switch_waring.png"},
+					{text:"192.168.2.35",x:650+250,y:500,src:"img/top/switch.png"},
+					{text:"192.168.2.11",x:730+250,y:500,src:"img/top/switch.png"}]
+		var ttgl2 = [{text:"192.168.1.66",x:40,y:150,src:"img/top/10_switch3.png"},
+					{text:"192.168.1.78",x:180,y:30,src:"img/top/switch.png"},
+					{text:"192.168.1.88",x:180,y:110,src:"img/top/switch.png"},
+					{text:"192.168.1.54",x:180,y:190,src:"img/top/switch.png"},
+					{text:"192.168.1.45",x:180,y:270,src:"img/top/switch.png"},
+					{text:"192.168.1.77",x:320,y:190,src:"img/top/10_appserver.png"},
+					{text:"192.168.1.24",x:320,y:270,src:"img/top/10_appserver.png"}]
+		var containerJSON = {containers:[{
+			texts:[{text:"192.168.2.12",rx:22.5,ry:65,type:"text_ip"}],
+			imgs:[{src:"img/top/router.png",type:"img_bg",rx:0,ry:0,w:55,h:55}]}]}
+		var imgs = ["img/top/router.png","img/top/switch.png","img/top/switch_waring.png","img/top/switch_unable.png","img/top/switch_danger.png"]
+		var canvas = $("#myflow").canvas({a:10});
+		var compay = canvas.container(500,370,20,20).addImg(canvas.raphael.image("ys_img/internet.png",0,0,20,20),0,0).ready();					
+		var X = 110;
+		var Y = 110;
+		var xn = 0;
+		var r = 350
+		var fz = canvas.container(1100,0,200,200).addImg(canvas.raphael.image("ys_img/fz.png",0,0,200,200),0,0).ready();
+		fz.handler.click(function(){
+			var lines = canvas.lines;
+			for(var i in lines){
+				lines[i].attr({stroke: "#"+parseInt(Math.random()*10)+""+parseInt(Math.random()*10)+""+parseInt(Math.random()*10)});
+			}
+		})
+		var temp = new Array();
+		var temp2 = new Array();
+		fz.handler.dblclick(function(){
+			canvas.raphael.clear();
+			var sbgl = canvas.container(800,120,450,350).ready(0,0,450,30,true)
+			.addRect(canvas.raphael.rect(0,0,100,30,5).attr({fill:"green",stroke:"green","fill-opacity": 0.5}),350,0)
+			.addText(canvas.raphael.text(0, 0,"设备管理").attr({"font-size": 18,fill:"white"}),400,15);
+			for(var i in ttgl){
+				var obj = containerJSON.containers[0];
+				obj.texts[0].text = ttgl[i].text;
+				obj.imgs[0].src = ttgl[i].src;
+				temp.push(canvas.childcontainer(ttgl[i].x,ttgl[i].y,55,70).set(containerJSON.containers[0]))
+			}
+			for(var i in ttgl2){
+				var obj = containerJSON.containers[0];
+				obj.texts[0].text = ttgl2[i].text;
+				obj.imgs[0].src = ttgl2[i].src;
+				var c = canvas.childcontainer(ttgl2[i].x,ttgl2[i].y,55,70).set(containerJSON.containers[0]);
+				temp2.push(c);
+				sbgl.addContainer(c,ttgl2[i].x,ttgl2[i].y)
+			}
+			canvas.onLine(temp[0],temp[1]).attr({"stroke-width": 1})
+			canvas.onLine(temp[1],temp[2]).attr({"stroke-width": 1})
+			canvas.onLine(temp[2],temp[3]).attr({"stroke-width": 1})
+			canvas.onLine(temp[3],temp[4]).attr({"stroke-width": 1})
+			canvas.onLine(temp[3],temp[5]).attr({"stroke-width": 1})
+			canvas.onLine(temp[4],temp[5]).attr({"stroke-width": 1})
+			for(var i=6;i<16;i++){
+				canvas.onLine(temp[4],temp[i]).attr({"stroke-width": 1,stroke: "yellow"})
+				canvas.onLine(temp[5],temp[i]).attr({"stroke-width": 1,stroke: "yellow"})
+			}
+			canvas.onLine(temp[5],temp2[0]).attr({"stroke-width": 1,stroke: "red"})
+			for(var i=1;i<5;i++){
+				canvas.onLine(temp2[0],temp2[i]).attr({"stroke-width": 1})
+			}
+			canvas.onLine(temp2[3],temp2[5]).attr({"stroke-width": 1})
+			canvas.onLine(temp2[4],temp2[6]).attr({"stroke-width": 1})
+		})
+		var array = new Array();
+		array.push(fz);
+		for(var i=0;i<30;i++){
+			containerJSON.containers[0].texts[0].text = "192.168.2."+parseInt(Math.random()*256);
+			containerJSON.containers[0].imgs[0].src = imgs[parseInt(Math.random()*5)]
+			array.push(canvas.childcontainer(Math.sin(i)*r+500,Math.cos(i)*r+350,55,70).set(containerJSON.containers[0]));
+		}
+/**		
+		for(var i= 0;i<5;i++){
+			var con = containerJSON.containers[0];
+			con.imgs[0].src = imgs[i];
+			xn++;
+			var arr = new Array();
+			for(var j=0;j<xn;j++){
+				arr.push(canvas.childcontainer(Math.sin(j)*200+300,Math.cos(j)*200+300,55,70).set(con));
+			}
+			array[i] = arr;
+		}*/
+		for(var i in array){
+			canvas.onLine(compay,array[i]).attr({"stroke-width": 1})
+		}
+	});
+</script>
+</head>
+<body style="background:black;">
+<div id="myflow"></div>
+</body>
+</html>

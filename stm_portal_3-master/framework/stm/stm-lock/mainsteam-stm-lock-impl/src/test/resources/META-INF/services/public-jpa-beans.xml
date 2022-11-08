@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd">
+
+    <!-- 加载配置文件 -->
+    <context:property-placeholder location="classpath*:properties/*.properties" />
+    <!-- 支持注解事物（注解事物优先） -->
+    <tx:annotation-driven/>
+    
+    <!-- 数据源 -->
+	<bean id="defaultDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"  destroy-method="close">  
+	    <property name="driverClass" value="${jdbc.driverClassName}"></property>  
+	    <property name="jdbcUrl" value="${jdbc.url}"></property>  
+	    <property name="user" value="${jdbc.username}"></property>  
+	    <property name="password" value="${jdbc.password}"></property>  
+	    <property name="initialPoolSize" value="${jdbc.initialPoolSize}"></property>  
+	    <property name="maxIdleTime" value="${jdbc.maxIdleTime}"></property>  
+	    <property name="maxPoolSize" value="${jdbc.maxPoolSize}"></property>  
+	    <property name="minPoolSize" value="${jdbc.minPoolSize}"></property>  
+	    
+	    <property name="acquireRetryDelay" value="1000"></property>  
+	    <property name="acquireRetryAttempts" value="60"></property>  
+	    <property name="breakAfterAcquireFailure" value="false"></property>  
+	</bean>
+
+	<!-- dataSourceproxy 配置代理管理事务 -->
+    <bean id="transactionDataSourceProxy" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
+        <property name="targetDataSource" ref="defaultDataSource" />
+    </bean>
+    
+<!--     <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate"> -->
+<!--         <property name="dataSource" ref="transactionDataSourceProxy"/> -->
+<!-- 	</bean> -->
+	
+	<!-- 事务管理配置 -->
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="transactionDataSourceProxy" />
+    </bean>	
+    
+	<!-- 配置事务特性 ，配置add、delete和update开始的方法，事务传播特性为required -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+		<!-- 增加对非运行时异常的事物回滚 -->
+			<tx:method name="save*" propagation="REQUIRED"/>
+			<tx:method name="add*" propagation="REQUIRED" />
+			<tx:method name="create*" propagation="REQUIRED" />
+			<tx:method name="insert*" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+			<tx:method name="merge*" propagation="REQUIRED" />
+			<tx:method name="del*" propagation="REQUIRED" />
+			<tx:method name="remove*" propagation="REQUIRED" />
+			<tx:method name="put*" propagation="REQUIRED" />
+			<tx:method name="use*" propagation="REQUIRED" />
+			<tx:method name="init*" propagation="REQUIRED" />
+			<tx:method name="getSeq" propagation="REQUIRED" />
+			<tx:method name="listen" propagation="REQUIRED" />
+			<tx:method name="batch*" propagation="REQUIRED"/>
+			<tx:method name="init*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="get*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="count*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="find*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="query*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="select*" propagation="SUPPORTS" read-only="true" />			
+			
+		</tx:attributes>
+	</tx:advice>
+	
+	<aop:config>
+		<aop:pointcut id="allManagerMethod"
+			expression="execution (* com.mainsteam.stm..*.service..*.*(..))" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="allManagerMethod" />
+	</aop:config>
+	
+	
+	
+    
+    <!-- 流量分析 数据源  begin
+    <bean id="portal_netflow_datasource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="url" value="${jdbc.portal.netflow.url}" />
+        <property name="username" value="${jdbc.portal.netflow.username}" />
+        <property name="password" value="${jdbc.portal.netflow.password}" />
+
+        <property name="initialSize" value="${jdbc.portal.netflow.initialSize}" />
+        <property name="minIdle" value="${jdbc.portal.netflow.minIdle}" />
+        <property name="maxActive" value="${jdbc.portal.netflow.maxActive}" />
+
+        <property name="maxWait" value="${jdbc.portal.netflow.maxWait}" />
+
+        <property name="timeBetweenEvictionRunsMillis" value="${jdbc.portal.netflow.timeBetweenEvictionRunsMillis}" />
+
+        <property name="minEvictableIdleTimeMillis" value="${jdbc.portal.netflow.minEvictableIdleTimeMillis}" />
+
+        <property name="validationQuery" value="SELECT 'x'" />
+        <property name="testWhileIdle" value="true" />
+        <property name="testOnBorrow" value="false" />
+        <property name="testOnReturn" value="false" />
+
+        <property name="poolPreparedStatements" value="true" />
+        <property name="maxPoolPreparedStatementPerConnectionSize" value="100" />
+        <property name="filters" value="stat" />
+    </bean> -->
+
+	<!-- dataSourceproxy 
+    <bean id="portal_netflow_transactionDataSourceProxy" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
+        <property name="targetDataSource" ref="portal_netflow_datasource" />
+    </bean>
+    
+    <bean id="portal_netflow_jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="portal_netflow_transactionDataSourceProxy"/>
+	</bean>-->
+	
+	<!-- 事务管理配置
+    <bean id="portal_netflow_transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="portal_netflow_transactionDataSourceProxy" />
+    </bean>	 -->
+    
+	<!-- 配置事务特性 ，配置add、delete和update开始的方法，事务传播特性为required 
+	<tx:advice id="portal_netflow_txAdvice" transaction-manager="portal_netflow_transactionManager">
+		<tx:attributes>
+			<tx:method name="save*" propagation="REQUIRED"/>
+			<tx:method name="add*" propagation="REQUIRED" />
+			<tx:method name="create*" propagation="REQUIRED" />
+			<tx:method name="insert*" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+			<tx:method name="merge*" propagation="REQUIRED" />
+			<tx:method name="del*" propagation="REQUIRED" />
+			<tx:method name="remove*" propagation="REQUIRED" />
+			<tx:method name="put*" propagation="REQUIRED" />
+			<tx:method name="use*" propagation="REQUIRED" />
+			<tx:method name="init*" propagation="REQUIRED" />
+			<tx:method name="getSeq" propagation="REQUIRED" />
+			<tx:method name="batch*"/>
+			<tx:method name="count*" propagation="REQUIRED" read-only="true" />
+			<tx:method name="find*" propagation="REQUIRED" read-only="true" />
+			<tx:method name="list*" propagation="REQUIRED" read-only="true" />
+		</tx:attributes>
+	</tx:advice>
+	
+	<aop:config>
+		<aop:pointcut id="portal_netflow_allManagerMethod"
+			expression="execution (* com.mainsteam.stm..*.service..*.*(..))" />
+		<aop:advisor advice-ref="portal_netflow_txAdvice" pointcut-ref="portal_netflow_allManagerMethod" />
+	</aop:config>-->
+	
+	<!-- sqlite数据源配置 end -->
+</beans>

@@ -1,0 +1,2609 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+*详情中使用的type：
+*	text-文本 multiprocess-指标块 mulitgauge（gauge）-多个仪表盘  mulitgraph-多个线图 multiMeter-（solidgauge）多个仪表盘 alarm-告警块
+*	mulitpie-（pie）多饼图 tabPanel-tab块（用来显示拼接仪表盘和线图，例如存储，硬件，虚拟存储等。。） solidgauge-单个仪表盘  
+*	bar-柱状图（接口流量top5）  type/childType='other' -暂定块，显示无数据 ，fan-风扇、battery-电池、cpu-CPU camera-摄像头 microphone-麦克风 display-视频
+* content : 显示内容
+* valType : 取值方式(property-属性、infometric-信息指标、prefmetric-性能指标、instancestate-资源实例状态、)
+* property : name、showname、ip、resourcename、profile、domain、discoverIp、discoverPort...
+*name : 取值名称
+*特殊子资源类型 : Partition-分区
+*特殊指标 :
+*	 throughput-吞吐量、cpuRate-cpu利用率、memRate-内存利用率、appCpuRate-应用cpu利用率、appMemRate-应用内存利用率
+*    Version-版本、sysUpTime-运行时间、osVersion-操作系统版本、fileSysName-分区名称、fileSysUsedSize-分区已使用
+*    fileSysFreeSize-分区可使用、fileSysRate-分区利用率  DiskUsagePercentages-磁盘使用百分比 NetworkUsed-网络使用情况
+*	KBytesTransSpeed-传输字节速率
+* div category='default' 为默认选择不能删除 -->
+
+<container name='general'>
+	<div category='default'>
+			<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='IP地址' width='10.5%'></td>
+				<td type='text' valType='property' name='ip' companType="ip" width='10.5%'></td>				
+				<td type='text' content='资源类型' width='10.5%'></td>
+				<td type='text' valType='property' name='resourcename' companType="resourcename" width='10.5%'></td>	
+				<td type='text' content='当前可用性' width='10.5%'></td>
+				<td type='text' valType='availability' name='availability'  companType="availability" width='8.5%'></td>
+				<td type='text' content='运行时长' width='10.5%'></td>
+				<td type='text' valType='infometric' name='sysUpTime' companType="sysUpTime" width='10.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+		
+			<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+					type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+		</table>
+		<table>
+			<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率' type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+				
+		</table>
+			<table>
+				<tr height='40%'>
+				<td ischild='true' childtype='Partition'
+					metrics='fileSysName,fileSysUsedSize,fileSysFreeSize,fileSysRate'
+					type='multiMeter' title='分区利用率' width='33%' height='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%" height='60%'></td>
+			</tr>
+		</table>
+	</div>
+		<div category='RedisServer'>
+			<table>
+			<tr height='60%'>
+					<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight"  height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='资源类型' width='10.5%'></td>
+				<td type='text' valType='property' name='resourcename' companType="resourcename" width='10.5%'></td>				
+				<td type='text' content='版本' width='8.5%'></td>
+				<td type='text' valType='infometric' name='Version'  companType="Version" width='8.5%'></td>
+				<td type='text' content='服务IP地址' width='10.5%'></td>
+				<td type='text' valType='property' name='discoverIp' companType="discoverIp" width='10.5%'></td>
+				<td type='text' content='服务端口' width='8.5%'></td>
+				<td type='text' valType='property' name='discoverPort' companType="discoverPort" width='8.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+		
+			<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+					type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+		</table>
+		<table>
+			<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率' type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+				
+		</table>
+			<table>
+				<tr height='40%'>
+			<td name='appCpuRate' title='Redis占用性能' valType='prefmetric' type='mulitpie' width='50%' height='40%'></td>
+			<td name='appMemRate' title='Redis占用性能' valType='prefmetric' type='mulitpie' width='50%' height='40%'></td>
+				
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%" height='60%'></td>
+			</tr>
+		</table>
+	</div>
+	<div category='Host'>
+		<table>
+			<tr height='60%'>
+				<td type='text'  valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='IP地址' width='10.5%'></td>
+				<td type='text' valType='property' name='ip' companType="ip" width='10.5%'></td>				
+				<td type='text' content='资源类型' width='10.5%'></td>
+				<td type='text' valType='property' name='resourcename' companType="resourcename" width='10.5%'></td>	
+				<td type='text' content='当前可用性' width='10.5%'></td>
+				<td type='text' valType='availability' name='availability'  companType="availability" width='8.5%'></td>
+				<td type='text' content='运行时长' width='10.5%'></td>
+				<td type='text' valType='infometric' name='sysUpTime' companType="sysUpTime" width='10.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+			
+			<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+					type='multiprocess' metriclist='' title='关注指标' height='40%'></td>
+			</tr>
+		</table>
+		<table>
+				<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			<tr height='40%'>
+				<td ischild='true' childtype='Partition'
+					metrics='fileSysName,fileSysUsedSize,fileSysFreeSize,fileSysRate'
+					type='multiMeter' title='分区利用率' width='33%' height='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%" height='60%'></td>
+			</tr>
+		</table>
+		
+	</div>
+	<div category='Database'>
+		<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='资源类型' width='10.5%'></td>
+				<td type='text' valType='property' name='resourcename' companType="resourcename" width='10.5%'></td>
+				<td type='text' content='版本' width='8.5%'></td>
+				<td type='text' valType='infometric' name='Version'  companType="Version" width='8.5%'></td>
+				<td type='text' content='服务IP地址' width='10.5%'></td>
+				<td type='text' valType='property' name='discoverIp' companType="discoverIp" width='10.5%'></td>
+				<td type='text' content='服务端口' width='8.5%'></td>
+				<td type='text' valType='property' name='discoverPort' companType="discoverPort" width='8.5%'></td>
+				<td type='text' content='运行时长' width='10.5%'></td>
+				<td type='text' valType='infometric' name='sysUpTime' companType="sysUpTime" width='10.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+		
+			<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+					type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+		</table>
+		<table>
+						<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			<tr height='40%'>
+			<td name='appCpuRate' title='数据库占用性能' valType='prefmetric' type='mulitpie' width='50%' height='40%'></td>
+			<td name='appMemRate' title='数据库占用性能' valType='prefmetric' type='mulitpie' width='50%' height='40%'></td>
+				
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%" height='60%'></td>
+			</tr>
+		</table>
+	</div>
+	<div category='NetworkDevice'>
+	<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='资源类型' width='10.5%'></td>
+				<td type='text' valType='property' name='resourcename' companType="resourcename" width='10.5%'></td>
+				<td type='text' content='IP地址' width='10.5%'></td>
+				<td type='text' valType='property' name='ip' companType="ip" width='10.5%'></td>
+				<td type='text' content='当前可用性' width='10%'></td>
+				<td type='text' valType='availability' name='availability'  companType="availability" width='15%'></td>
+				<td type='text' content='运行时长' width='10.5%'></td>
+				<td type='text' valType='infometric' name='sysUpTime' companType="sysUpTime" width='10.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+			<tr height='40%'>
+				<td ischild='true' childtype='TopPanel'
+					metrics=''
+					type='bar' title='接口流量TOP5' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+			<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			<tr height='40%'>
+				<td name='throughput' valType='prefmetric' type='graph'  title='吞吐量' width='100%' height='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+	</div>
+	<div category='SnmpOthers'>
+			<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='资源类型' width='10.5%'></td>
+				<td type='text' valType='property' name='resourcename' companType="resourcename" width='10.5%'></td>				
+				<td type='text' content='IP地址' width='10.5%'></td>
+				<td type='text' valType='property' name='ip' companType="ip" width='10.5%'></td>
+				<td type='text' content='当前可用性' width='10%'></td>
+				<td type='text' valType='availability' name='availability'  companType="availability" width='15%'></td>				
+				<td type='text' content='运行时长' width='10.5%'></td>
+				<td type='text' valType='infometric' name='sysUpTime' companType="sysUpTime" width='10.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='10.5%'></td>
+			</tr>
+			<tr height='40%'>
+				<td ischild='true' childtype='TopPanel'
+					metrics=''
+					type='bar' title='接口流量TOP5' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+			<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			<tr height='40%'>
+				<td name='throughput' valType='prefmetric' type='graph'  title='吞吐量' width='100%' height='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+	</div>
+	<div category='Directory'>
+
+			<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='资源类型' width='10.5%'></td>
+				<td type='text' valType='property' name='resourcename' companType="resourcename" width='10.5%'></td>
+				<td type='text' content='版本' width='8.5%'></td>
+				<td type='text' valType='infometric' name='Version' companType="Version" width='8.5%'></td>
+				<td type='text' content='服务IP地址' width='10.5%'></td>
+				<td type='text' valType='property' name='discoverIp' companType="discoverIp" width='10.5%'></td>
+				<td type='text' content='服务端口' width='12.5%'></td>
+				<td type='text' valType='property' name='discoverPort' companType="discoverPort" width='10.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+			<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+					type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+						<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			<tr height='40%'>
+			<td name='appCpuRate' title='Directory占用性能' valType='prefmetric' type='mulitpie' width='50%' height='40%'></td>
+			<td name='appMemRate' title='Directory占用性能' valType='prefmetric' type='mulitpie' width='50%' height='40%'></td>
+				
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>	
+	</div>
+	<div category='WebServer'>
+			<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='资源类型' width='10.5%'></td>
+				<td type='text' valType='property' name='resourcename' companType="resourcename" width='10.5%'></td>
+				<td type='text' content='版本' width='8.5%'></td>
+				<td type='text' valType='infometric' name='Version' companType="Version" width='8.5%'></td>
+				<td type='text' content='服务IP地址' width='10.5%'></td>
+				<td type='text' valType='property' name='discoverIp' companType="discoverIp" width='10.5%'></td>
+				<td type='text' content='服务端口' width='12.5%'></td>
+				<td type='text' valType='property' name='discoverPort' companType="discoverPort" width='10.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+			<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+					type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+						<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			<tr height='40%'>
+			<td name='appCpuRate' title='Apache占用性能' valType='prefmetric' type='mulitpie' width='50%' height='40%'></td>
+			<td name='appMemRate' title='Apache占用性能' valType='prefmetric' type='mulitpie' width='50%' height='40%'></td>
+				
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+	</div>
+	<div category='IIS'>
+			<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='资源类型' width='10.5%'></td>
+				<td type='text' valType='property' name='resourcename' companType="resourcename" width='10.5%'></td>
+				<td type='text' content='版本' width='8.5%'></td>
+				<td type='text' valType='infometric' name='Version' companType="Version" width='8.5%'></td>
+				<td type='text' content='服务IP地址' width='10.5%'></td>
+				<td type='text' valType='property' name='discoverIp' companType="discoverIp" width='10.5%'></td>
+				<td type='text' content='服务端口' width='12.5%'></td>
+				<td type='text' valType='property' name='discoverPort' companType="discoverPort" width='10.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+			<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+					type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+						<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			<tr height='40%'>
+			<td name='appCpuRate'  title='IIS占用性能' valType='prefmetric' type='mulitpie' width='50%' height='40%'></td>
+			<td name='appMemRate' title='IIS占用性能' valType='prefmetric' type='mulitpie' width='50%' height='40%'></td>
+				
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+	</div>
+	<div category='MailServer'>
+			<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='资源类型' width='10.5%'></td>
+				<td type='text' valType='property' name='resourcename' companType="resourcename" width='10.5%'></td>
+				<td type='text' content='版本' width='8.5%'></td>
+				<td type='text' valType='infometric' name='Version' companType="Version" width='8.5%'></td>
+				<td type='text' content='服务IP地址' width='10.5%'></td>
+				<td type='text' valType='property' name='discoverIp' companType="discoverIp" width='10.5%'></td>
+				<td type='text' content='服务端口' width='12.5%'></td>
+				<td type='text' valType='property' name='discoverPort' companType="discoverPort" width='10.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+			<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+					type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+							<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			<tr height='40%'>
+			<td name='appCpuRate' title='MailServer占用性能' valType='prefmetric' type='mulitpie' width='50%' height='40%'></td>
+			<td name='appMemRate' title='MailServer占用性能' valType='prefmetric' type='mulitpie' width='50%' height='40%'></td>
+				
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+	</div>
+	<div category='Middleware'>
+		<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='资源类型' width='10.5%'></td>
+				<td type='text' valType='property' name='resourcename' companType="resourcename" width='10.5%'></td>
+				<td type='text' content='版本' width='8.5%'></td>
+				<td type='text' valType='infometric' name='Version' companType="Version" width='8.5%'></td>
+				<td type='text' content='服务IP地址' width='10.5%'></td>
+				<td type='text' valType='property' name='discoverIp' companType="discoverIp" width='10.5%'></td>
+				<td type='text' content='服务端口' width='12.5%'></td>
+				<td type='text' valType='property' name='discoverPort' companType="discoverPort" width='10.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+			<tr height='40%'>
+				<td ischild='true' childtype='Middleware'
+					metrics=''
+					type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+					<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			<tr height='40%'>
+			<td name='appCpuRate' title='J2EEAppServer占用性能' valType='prefmetric' type='mulitpie' width='50%' height='40%'></td>
+			<td name='appMemRate' title='J2EEAppServer占用性能' valType='prefmetric' type='mulitpie' width='50%' height='40%'></td>
+				
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+	</div>
+	<div category='CICS'>
+			<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='IP地址' width='10.5%'></td>
+				<td type='text' valType='property' name='discoverIp' companType="discoverIp" width='10.5%'></td>
+				<td type='text' content='资源类型' width='10.5%'></td>
+				<td type='text' valType='property' name='resourcename' companType="resourcename" width='10.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+				<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+					type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+					<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			<tr height='40%'>
+			<td name='appCpuRate'  title='CICS占用性能' valType='prefmetric' type='mulitpie' width='50%' height='40%'></td>
+			<td name='appMemRate' title='CICS占用性能' valType='prefmetric' type='mulitpie' width='50%' height='40%'></td>
+				
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+	</div>
+	<div category='J2EEAppServer'>
+				<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='资源类型' width='10.5%'></td>
+				<td type='text' valType='property' name='resourcename' companType="resourcename" width='10.5%'></td>
+				<td type='text' content='版本' width='8.5%'></td>
+				<td type='text' valType='infometric' name='Version' companType="Version" width='8.5%'></td>
+				<td type='text' content='服务IP地址' width='10.5%'></td>
+				<td type='text' valType='property' name='discoverIp' companType="discoverIp" width='10.5%'></td>
+				<td type='text' content='服务端口' width='12.5%'></td>
+				<td type='text' valType='property' name='discoverPort' companType="discoverPort" width='10.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='10.5%'></td>
+			</tr>
+			<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+					type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+					<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			<tr height='40%'>
+			<td name='appCpuRate' title='J2EEAppServer占用性能' valType='prefmetric' type='mulitpie' width='50%' height='40%'></td>
+			<td name='appMemRate' title='J2EEAppServer占用性能' valType='prefmetric' type='mulitpie' width='50%' height='40%'></td>
+				
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+		
+		
+	</div>
+	<div category='StandardService'>
+		<table>
+			<tr height='60%'>
+					<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='资源类型' width='10.5%'></td>
+				<td type='text' valType='property' name='resourcename' companType="resourcename" width='10.5%'></td>
+				<td type='text' content='版本' width='8.5%'></td>
+				<td type='text' valType='infometric' name='Version' companType="Version" width='8.5%'></td>
+				<td type='text' content='服务IP地址' width='12.5%'></td>
+				<td type='text' valType='property' name='discoverIp' companType="discoverIp" width='12.5%'></td>
+				<td type='text' content='服务端口' width='12.5%'></td>
+				<td type='text' valType='property' name='discoverPort' companType="discoverPort" width='12.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+			
+			<tr height='40%'>
+				<td ischild='true' childtype='StandardService'
+					metrics=''
+					type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+					<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			<tr height='40%'>
+			<td name='appCpuRate' title='StandardService占用性能' valType='prefmetric' type='mulitpie' width='50%' height='40%'></td>
+			<td name='appMemRate' title='StandardService占用性能' valType='prefmetric' type='mulitpie' width='50%' height='40%'></td>
+				
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+	</div>
+	<div category='LotusDomino'>
+		<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='资源类型' width='10.5%'></td>
+				<td type='text' valType='property' name='resourcename' companType="resourcename" width='10.5%'></td>
+				<td type='text' content='版本' width='8.5%'></td>
+				<td type='text' valType='infometric' name='Version' companType="Version" width='8.5%'></td>
+				<td type='text' content='服务IP地址' width='10.5%'></td>
+				<td type='text' valType='property' name='discoverIp' companType="discoverIp" width='10.5%'></td>
+				<td type='text' content='服务端口' width='12.5%'></td>
+				<td type='text' valType='property' name='discoverPort' companType="discoverPort" width='10.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='10.5%'></td>
+			</tr>
+			<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+					type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+						<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			<tr height='40%'>
+			<td name='appCpuRate'  title='LotusDomino占用性能' valType='prefmetric' type='mulitpie' width='50%' height='40%'></td>
+			<td name='appMemRate' title='LotusDomino占用性能' valType='prefmetric' type='mulitpie' width='50%' height='40%'></td>
+				
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+		
+	</div>
+	<div category='Link'>
+			<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='资源类型' width='10.5%'></td>
+				<td type='text' valType='property' name='resourcename' companType="resourcename" width='10.5%'></td>
+				<td type='text' content='版本' width='8.5%'></td>
+				<td type='text' valType='infometric' name='Version'  companType="Version" width='8.5%'></td>
+				<td type='text' content='服务IP地址' width='12.5%'></td>
+				<td type='text' valType='property' name='discoverIp' companType="discoverIp" width='12.5%'></td>
+				<td type='text' content='服务端口' width='12.5%'></td>
+				<td type='text' valType='property' name='discoverPort' companType="discoverPort" width='12.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+			<tr height='40%'>
+						<td name='others' title=''  type='others'   width='100%' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+				<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			<tr height='60%'>
+					<td name='others' valType='prefmetric' metric='cpuRate'  type='others'  title='' width='100%' height='60%'></td>
+			</tr>
+			<tr height='40%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%" height='40%'></td>
+			</tr>
+		</table>
+	</div>
+	<div category='Storage'>
+			<table>
+			<tr height='40%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='217px'  width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='资源类型' width='10.5%'></td>
+				<td type='text' valType='property' name='resourcename' companType="resourcename" width='10.5%'></td>
+				<td type='text' content='版本' width='8.5%'></td>
+				<td type='text' valType='infometric' name='Version'  companType="Version" width='8.5%'></td>
+				<td type='text' content='服务IP地址' width='12.5%'></td>
+				<td type='text' valType='property' name='discoverIp' companType="discoverIp" width='12.5%'></td>
+				<td type='text' content='服务端口' width='12.5%'></td>
+				<td type='text' valType='property' name='discoverPort' companType="discoverPort" width='12.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+			<tr height='33%'>
+						<td name='others' valType='prefmetric' metric='cpuRate'  type='others'  title='' width='100%' height='33%'></td>
+			</tr>
+			<tr height='27%'>
+						<td name='others' valType='prefmetric' metric='cpuRate'  type='others'  title='' width='100%' height='27%'></td>
+			</tr>
+		</table>
+		<table>
+				<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			<tr height='40%'>
+					<td name='others' valType='prefmetric' metric='cpuRate'  type='others'  title='' width='100%' height='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%" height='60%'></td>
+			</tr>
+		</table>
+		
+	</div>
+	<div category='Hardware'>
+		<table>
+			<tr height='50%' width='25%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight"  height='220px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='产品型号' width='8.5%'></td>
+				<td type='text' valType='infometric' name='ProductModel' companType="ProductModel" width='8.5%'></td>
+				<td type='text' content='服务IP地址' width='7.5%'></td>
+				<td type='text' valType='property' name='discoverIp' companType="discoverIp" width='12.5%'></td>
+				<td type='text' content='服务端口' width='12.5%'></td>
+				<td type='text' valType='property' name='discoverPort' companType="discoverPort" width='12.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+				<tr height='50%'  width='25%'>
+				<td ischild='true' childtype='Processor' metrics='processorName,processorStatus' type='cpu' title='处理器' height='50%'  width='25%'></td>
+
+			</tr>
+			<tr height='50%' width='25%'>
+					<td ischild='true' childtype='Fan' metrics='fanName,fanStatus' type='fan' title='风扇' height='50%'  width='25%'></td>
+			</tr>
+			<tr height='50%' width='25%'>
+			<td ischild='true' childtype='Power' metrics='powerName,powerStatus' type='battery' title='电源' height='50%'  width='25%'></td>
+			</tr>
+		</table>
+		<table>			
+			<tr height='50%' width='70%'>
+					<td name='AmbientTemps' colspan="4" title='机箱温度' metric='AmbientTemp' valType='prefmetric' childType='temp' type='tabPanel' width='200px' height='50%'></td>
+					<td name='AmbientTemp' colspan="4" valType='prefmetric' metric='AmbientTemp' childType='mulitgraph' type='tabPanel'  title='温度曲线图' width='500px' height='50%'></td>
+					<td name="alarmpanel" colspan="4"  title='告警' childType='alarm' type='tabPanel' width="408px"  height='50%'></td>
+					</tr>
+			
+		</table>	
+		
+	</div>
+	<div category='VirtualCluster'>
+		<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='总CPU资源' width='10.5%'></td>
+				<td type='text' valType='infometric' name='CPUNum' companType="CPUNum" width='10.5%'></td>
+				<td type='text' content='总内存' width='10.5%'></td>
+				<td type='text' valType='infometric' name='TotalMemSize' companType="TotalMemSize" width='10.5%'></td>
+				<td type='text' content='总存储' width='10.5%'></td>
+				<td type='text' valType='infometric' name='DatastoreSize' companType="DatastoreSize" width='10.5%'></td>
+				<td type='text' content='主机数' width='10.5%'></td>
+				<td type='text' valType='infometric' name='HostNum'  companType="HostNum" width='10.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+			
+			</tr>
+				<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+				type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+					<tr height='40%'>
+				<td name='CPUPercent' rowspan='3' valType='prefmetric' title='CPU百分比'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='MEMPercent' rowspan='3' title='内存百分比' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='CPUPercent'  type='mulitgraph'  title='CPU百分比' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='MEMPercent'  type='mulitgraph'  title='内存百分比' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			
+				<tr height='40%'>
+				<td resourceid='VMWareDatastore' metrics='Name,availability,DataStorageVolume,DataStorageFreeSpace' type='table' title='存储器' width='33%' height='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+		
+		
+	</div>
+	<div category='VirtualHost'>
+		<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='总CPU资源' width='10.5%'></td>
+				<td type='text' valType='infometric' name='CPUNum' companType="CPUNum" width='10.5%'></td>
+				<td type='text' content='总内存' width='10.5%'></td>
+				<td type='text' valType='infometric' name='TotalMemSize' companType="TotalMemSize" width='10.5%'></td>
+				<td type='text' content='总存储' width='10.5%'></td>
+				<td type='text' valType='infometric' name='DatastoreSize' companType="DatastoreSize" width='10.5%'></td>
+				<td type='text' content='网卡数' width='8.5%'></td>
+				<td type='text' valType='infometric' name='NumberOfNIC'  companType="NumberOfNIC" width='8.5%'></td>
+				<td type='text' content='VM个数' width='10.5%'></td>
+				<td type='text' valType='infometric' name='VMNum'  companType="VMNum" width='10.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='10.5%'></td>
+			</tr>
+				<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+				type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+						<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			
+				<tr height='40%'>
+				<td resourceid='VMWareDatastore' metrics='Name,availability,DataStorageVolume,DataStorageFreeSpace' type='table' title='存储器' width='33%' height='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+	</div>
+	<div category='VirtualStorage'>
+		<table>
+			<tr height='50%' >
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='220px' width='320px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='容量' width='10.5%'></td>
+				<td type='text' valType='infometric' name='DataStorageVolume' companType="DataStorageVolume" width='10.5%'></td>
+				<td type='text' content='可用空间' width='10.5%'></td>
+				<td type='text' valType='infometric' name='DataStorageFreeSpace' companType="DataStorageFreeSpace"  width='10.5%'></td>
+				<td type='text' content='连接主机数' width='7.5%'></td>
+				<td type='text' valType='infometric' name='HostNum' companType="HostNum" width='10.5%'></td>
+				<td type='text' content='VM个数' width='10.5%'></td>
+				<td type='text' valType='infometric' name='VMNum'  companType="VMNum" width='10.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+
+			</tr>
+				<tr height='50%'  width='40%'>
+					<td resourceid='VMWareVM' name='DiskAssignedSpace' title='空间使用情况' valType='statisticalData' type='pie'   height='50%'  width='40%'></td>
+			</tr>
+				<tr height='50%' width='40%'>
+				<td resourceid='VMWareVM' name='DiskAssignedSpace' title='虚拟机占用（TOP5)' valType='statisticalData' type='pie' TopN='5' height='50%'  width='40%'></td>
+			</tr>
+		</table>
+		<table>
+			<tr height='50%' width='70%'>
+				<td name='DiskUsagePercentages' colspan="3" title='磁盘使用百分比'  metric='DiskUsagePercentage' valType='prefmetric' childType='gauge' type='tabPanel' width='200px' height='50%'></td>
+					<td name='DiskUsagePercentage' colspan="3" valType='prefmetric' metric='DiskUsagePercentage'  type='tabPanel' childType='mulitgraph'  title='磁盘使用百分比曲线图' width='500px' height='50%'></td>
+					<td name="alarmpanel" colspan="3"  title='告警' childType='alarm' type='tabPanel' width="408px"  height='50%'></td>
+					</tr>
+		
+
+		</table>
+	</div>
+	<div category='VirtualVM'>
+	<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='内存大小' width='10.5%'></td>
+				<td type='text' valType='infometric' name='MEMVMSize' companType="MEMVMSize" width='10.5%'></td>
+				<td type='text' content='空间大小' width='10.5%'></td>
+				<td type='text' valType='infometric' name='DiskAssignedSpace' companType="DiskAssignedSpace" width='10.5%'></td>
+				<td type='text' content='CPU个数' width='10.5%'></td>
+				<td type='text' valType='infometric' name='cpuNum' companType="cpuNum" width='10.5%'></td>
+				<td type='text' content='IP地址' width='8.5%'></td>
+				<td type='text' valType='property' name='discoverIp' companType="discoverIp" width='8.5%'></td>				
+				<td type='text' content='操作系统' width='12.5%'></td>
+				<td type='text' valType='infometric' name='osVersion'  companType="osVersion" width='12.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"   width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='10.5%'></td>
+			</tr>
+				<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+				type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+						<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			
+				<tr height='40%'>
+					<td name='NetworkUsed' title='网络使用情况' valType='prefmetric' type='graph' width='100%' height='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+	</div>
+	<div category='JDBCModel'>
+	<table>
+			<tr height='60%' >
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight"  height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='资源类型' width='8.5%'></td>
+				<td type='text' valType='property' name='resourcename'  companType="resourcename" width='8.5%'></td>
+				<td type='text' content='服务IP地址' width='10.5%'></td>
+				<td type='text' valType='property' name='discoverIp' companType="discoverIp"  width='10.5%'></td>
+				<td type='text' content='服务端口' width='10.5%'></td>
+				<td type='text' valType='property' name='discoverPort' companType="discoverPort" width='10.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"   width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>		
+			</tr>
+				<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+				type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+		
+		</table>
+			<table>
+				<tr height='40%'>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric=''  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric=''  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				<td name='otherline' rowspan='3' valType='prefmetric' metric=''  type='mulitgraph'  title='' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			
+				<tr height='40%'>
+						<td name='others' title='' valType='prefmetric' type='others' width='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+	</div>
+	<div category='DiskArray'>	
+	<table>
+	<tr height='50%' width='35%'>
+			<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='220px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='SMI-Sprovider' width='10.5%'></td>
+				<td type='text' valType='property' name='discoverIp' companType="discoverIp" width='10.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='10.5%'></td>
+			</tr>
+				<tr height='40%'  width='35%'>
+					<td metrics='DiskAssignedSpace' type='pie' valType='statisticalData' title='空间信息' height='40%'></td>
+			</tr>
+				<tr height='40%' width='25%'>
+				<td  name='KBytesTransSpeed' title='传输字节速率' valType='prefmetric' type='graph' height='50%'  width='30%'></td>
+			</tr>
+		</table>
+			<table>
+			<tr height='50%' width='70%'>
+				<td ischild='true' colspan='3' childType='tabs'  type='tabPanel' childtype='storageDevice,accessDevice' title='组件信息' metrics='none' width='700px' height='50%'></td>
+					<td name="alarmpanel" colspan="3"  title='告警' childType='alarm' type='tabPanel' width="408px"  height='50%'></td>
+					</tr>
+		
+
+		</table>
+		
+		
+	</div>
+		
+			<div category='TatemotoVideo'>
+		<table>
+			<tr height='60%'>
+				<td type='text'  valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='IP地址' width='10.5%'></td>
+				<td type='text' valType='property' name='ip' companType="ip" width='10.5%'></td>				
+				<td type='text' content='资源类型' width='10.5%'></td>
+				<td type='text' valType='property' name='resourcename' companType="resourcename" width='10.5%'></td>	
+				<td type='text' content='当前可用性' width='10.5%'></td>
+				<td type='text' valType='availability' name='availability'  companType="availability" width='8.5%'></td>
+				<td type='text' content='运行时长' width='10.5%'></td>
+				<td type='text' valType='infometric' name='sysUpTime' companType="sysUpTime" width='10.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+			
+			<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+					type='multiprocess' metriclist='' title='关注指标' height='40%'></td>
+			</tr>
+		</table>
+		<table>
+				<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			<tr height='40%'>
+				<td ischild='true' childtype='Partition'
+					metrics='fileSysName,fileSysUsedSize,fileSysFreeSize,fileSysRate'
+					type='multiMeter' title='分区利用率' width='33%' height='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%" height='60%'></td>
+			</tr>
+		</table>
+		
+	</div>
+			<div category='Perabytes'>
+		<table>
+			<tr height='60%'>
+				<td type='text'  valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='IP地址' width='10.5%'></td>
+				<td type='text' valType='property' name='ip' companType="ip" width='10.5%'></td>				
+				<td type='text' content='资源类型' width='10.5%'></td>
+				<td type='text' valType='property' name='resourcename' companType="resourcename" width='10.5%'></td>	
+				<td type='text' content='当前可用性' width='10.5%'></td>
+				<td type='text' valType='availability' name='availability'  companType="availability" width='8.5%'></td>
+				<td type='text' content='运行时长' width='10.5%'></td>
+				<td type='text' valType='infometric' name='sysUpTime' companType="sysUpTime" width='10.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+			
+			<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+					type='multiprocess' metriclist='' title='关注指标' height='40%'></td>
+			</tr>
+		</table>
+		<table>
+				<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			<tr height='40%'>
+				<td ischild='true' childtype='Partition'
+					metrics='fileSysName,fileSysUsedSize,fileSysFreeSize,fileSysRate'
+					type='multiMeter' title='分区利用率' width='33%' height='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%" height='60%'></td>
+			</tr>
+		</table>
+		
+	</div>
+	<div category='XenHosts'>	
+			<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='地址' width='10.5%'></td>
+				<td type='text' valType='infometric' name='address' companType="address" width='10.5%'></td>
+				<td type='text' content='UUID' width='10.5%'></td>
+				<td type='text' valType='infometric' name='uuid' companType="uuid" width='10.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='10.5%'></td>
+			</tr>
+				<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+				type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+						<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			
+				<tr height='40%'>
+				<td name='throughput' title='吞吐量' valType='prefmetric' type='graph' width='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+		
+	</div>
+	<div category='XenVMs'>
+				<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='UUID' width='10.5%'></td>
+				<td type='text' valType='infometric' name='uuid' companType="uuid" width='10.5%'></td>
+				<td type='text' content='当前可用性' width='12.5%'></td>
+				<td type='text' valType='availability' name='availability' companType="availability" width='12.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='10.5%'></td>
+			</tr>
+				<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+				type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+						<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			
+				<tr height='40%'>
+				<td name='throughput' title='吞吐量' valType='prefmetric' type='graph' width='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+	</div>
+	<div category='XenSRs'>
+		<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='UUID' width='10.5%'></td>
+				<td type='text' valType='infometric' name='uuid' companType="uuid" width='10.5%'></td>
+				<td type='text' content='当前可用性' width='12.5%'></td>
+				<td type='text' valType='availability' name='availability' companType="availability" width='12.5%'></td>				
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+			</tr>
+				<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+				type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+			<tr height='40%'>
+				<td name='physicalRate' rowspan='3' valType='prefmetric' title='空间利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='others' rowspan='3' title='' valType='prefmetric' type='others' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='physicalRate'  type='mulitgraph'  title='空间利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric'  type='others'  title='' width='100%' height='30%'></td>
+				</tr>
+					
+
+		</table>
+			<table>
+			
+				<tr height='40%'>
+				<td name='others' title='' valType='prefmetric' type='others' width='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+	</div>
+	
+		<div category='KvmHosts'>	
+			<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='UUID' width='10.5%'></td>
+				<td type='text' valType='infometric' name='uuid' companType="uuid" width='10.5%'></td>
+				<td type='text' content='当前可用性' width='12.5%'></td>
+				<td type='text' valType='availability' name='availability' companType="availability" width='12.5%'></td>				
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='10.5%'></td>
+			</tr>
+				<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+				type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+					<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			
+				<tr height='40%'>
+			<td name='others' title='' valType='prefmetric' type='others' width='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+		
+	</div>
+	<div category='KvmVMs'>
+				<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='UUID' width='10.5%'></td>
+				<td type='text' valType='infometric' name='uuid' companType="uuid" width='10.5%'></td>
+				<td type='text' content='当前可用性' width='12.5%'></td>
+				<td type='text' valType='availability' name='availability' companType="availability" width='12.5%'></td>				
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='10.5%'></td>
+			</tr>
+				<tr height='40%'>
+				<td name='others' title='' valType='prefmetric' type='others' width='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+						<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			
+				<tr height='40%'>
+				<td name='throughput' title='吞吐量' valType='prefmetric' type='graph' width='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+	</div>
+	<div category='KvmDataStores'>
+		<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='UUID' width='10.5%'></td>
+				<td type='text' valType='infometric' name='uuid' companType="uuid" width='10.5%'></td>
+				<td type='text' content='当前可用性' width='12.5%'></td>
+				<td type='text' valType='availability' name='availability' companType="availability" width='12.5%'></td>				
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+			</tr>
+				<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+				type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+			<tr height='40%'>
+				<td name='physicalRate' rowspan='3' valType='prefmetric' title='空间利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='others' rowspan='3' title='' valType='prefmetric' type='others' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='physicalRate'  type='mulitgraph'  title='空间利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric'  type='others'  title='' width='100%' height='30%'></td>
+				</tr>
+		
+				
+		</table>
+			<table>
+			
+				<tr height='40%'>
+				<td name='others' title='' valType='prefmetric' type='others' width='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+	</div>
+	
+	<div category='FusionComputeClusters'>
+		<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='地址' width='10.5%'></td>
+				<td type='text' valType='infometric' name='address' companType="address" width='10.5%'></td>
+				<td type='text' content='UUID' width='10.5%'></td>
+				<td type='text' valType='infometric' name='uuid' companType="uuid" width='10.5%'></td>
+				<td type='text' content='当前可用性' width='12.5%'></td>
+				<td type='text' valType='availability' name='availability' companType="availability" width='12.5%'></td>					
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+			</tr>
+				<tr height='40%'>
+					<td metrics='' forType="cpu" type='pie' valType='statisticalData' title='CPU容量' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+					<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			
+				<tr height='40%'>
+		<td metrics='' forType="mem" type='pie' valType='statisticalData' title='内存容量' height='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+
+	</div>
+	<div category='FusionComputeHosts'>
+			<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='地址' width='10.5%'></td>
+				<td type='text' valType='infometric' name='address' companType="address" width='10.5%'></td>
+				<td type='text' content='UUID' width='10.5%'></td>
+				<td type='text' valType='infometric' name='uuid' companType="uuid" width='10.5%'></td>
+				<td type='text' content='当前可用性' width='12.5%'></td>
+				<td type='text' valType='availability' name='availability' companType="availability" width='12.5%'></td>					
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='10.5%'></td>
+			</tr>
+				<tr height='40%'>
+				<td name='others' childtype='' type='others' title='' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+					<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			
+				<tr height='40%'>
+				<td name='others' title='' valType='' type='others' width='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+	</div>
+	<div category='FusionComputeVMs'>
+		<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='UUID' width='10.5%'></td>
+				<td type='text' valType='infometric' name='uuid' companType="uuid" width='10.5%'></td>
+				<td type='text' content='当前可用性' width='12.5%'></td>
+				<td type='text' valType='availability' name='availability' companType="availability" width='12.5%'></td>					
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='10.5%'></td>
+			</tr>
+				<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+				type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+					<tr height='40%'>
+				<td name='physicalRate' rowspan='3' valType='prefmetric' title='空间利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='others' rowspan='3' title='' valType='prefmetric' type='others' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='physicalRate'  type='mulitgraph'  title='空间利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric'  type='others'  title='' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			
+				<tr height='40%'>
+				<td name='throughput' title='吞吐量' valType='prefmetric' type='graph' width='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+	</div>
+	<div category='FusionComputeDataStores'>
+				<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='UUID' width='10.5%'></td>
+				<td type='text' valType='infometric' name='uuid' companType="uuid" width='10.5%'></td>
+				<td type='text' content='当前可用性' width='12.5%'></td>
+				<td type='text' valType='availability' name='availability' companType="availability" width='12.5%'></td>					
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+			</tr>
+				<tr height='40%'>
+				<td name='others' childtype='' type='others' title='' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+					<tr height='40%'>
+				<td name='physicalRate' rowspan='3' valType='prefmetric' title='空间利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='others' rowspan='3' title='' valType='prefmetric' type='others' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='physicalRate'  type='mulitgraph'  title='空间利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric'  type='others'  title='' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			
+				<tr height='40%'>
+				<td name='others' childtype='' type='others' title='' height='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+	</div>
+	<div category='ConferenceEndPoint'>
+		<table>
+			<tr height='50%' width='25%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='220px' width='260px' ></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='资源类型' width='8.5%'></td>
+				<td type='text' valType='infometric' name='resourcename' companType="resourcename" width='8.5%'></td>
+				<td type='text' content='IP地址' width='7.5%'></td>
+				<td type='text' valType='property' name='ip' companType="ip" width='12.5%'></td>
+				<td type='text' content='当前可用性' width='7.5%'></td>
+				<td type='text' valType='property' name='availability' companType="availability" width='12.5%'></td>
+				<td type='text' content='运行时长' width='7.5%'></td>
+				<td type='text' valType='property' name='sysUpTime' companType="sysUpTime" width='12.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+
+			</tr>
+				<tr height='50%'  width='25%'>
+				<td ischild='true' childtype='Camera' metrics='CameraifStatus' type='camera' title='摄像头' height='50%'  width='25%'></td>
+
+			</tr>
+			<tr height='50%' width='25%'>
+					<td ischild='true' childtype='Microphone' metrics='MICifStatus' type='microphone' title='麦克风' height='50%'  width='25%'></td>
+			</tr>
+			<tr height='50%' width='25%'>
+			<td ischild='true' childtype='Display' metrics='DisplayifStatus' type='display' title='视频' height='50%'  width='25%'></td>
+			</tr>
+		</table>
+		<table>			
+			<tr height='50%' width='70%'>
+					<td name='SystemTemperatures' colspan="4" title='设备温度' metric='SystemTemperature' valType='prefmetric' childType='temp' type='tabPanel' width='200px' height='50%'></td>
+					<td name='SystemTemperature' colspan="4" valType='prefmetric' metric='SystemTemperature' childType='mulitgraph' type='tabPanel'  title='温度曲线图' width='500px' height='50%'></td>
+					<td name="alarmpanel" colspan="4"  title='告警' childType='alarm' type='tabPanel' width="408px"  height='50%'></td>
+					</tr>
+			
+		</table>	
+		
+	</div>
+	<div category='MediaConvergenceServer'>	
+			<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px' ></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='infometric' name='hostname' companType="hostname" width='12.5%'></td>
+				<td type='text' content='系统时间' width='12.5%'></td>
+				<td type='text' valType='infometric' name='date' companType="date" width='12.5%'></td>
+				<td type='text' content='时区' width='12.5%'></td>
+				<td type='text' valType='infometric' name='timezone' companType="timezone" width='12.5%'></td>
+				<td type='text' content='编码' width='12.5%'></td>
+				<td type='text' valType='infometric' name='locale'  companType="locale" width='12.5%'></td>
+				<td type='text' content='产品版本' width='12.5%'></td>
+				<td type='text' valType='infometric' name='productVersion'  companType="productVersion" width='12.5%'></td>
+				<td type='text' content='运行时长' width='10.5%'></td>
+				<td type='text' valType='infometric' name='sysUpTime' companType="sysUpTime" width='10.5%'></td>
+				<td type='text' content='许可证MAC' width='12.5%'></td>
+				<td type='text' valType='infometric' name='licenseMAC'   companType="licenseMAC" width='12.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>				
+			</tr>
+			
+			<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric'
+					metrics=''
+					type='multiprocess' metriclist='' title='关注指标' height='40%'></td>
+			</tr>
+		</table>
+		<table>
+				<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			<tr height='40%'>
+			<td ischild='true' childtype='Disk' metrics='diskName,diskUsage,diskFree,diskUsed' type='multiMeter' title='磁盘' width='33%' height='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%" height='60%'></td>
+			</tr>
+		</table>
+	</div>
+
+<div category='ContentServer'>
+	<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='IP地址' width='12.5%'></td>
+				<td type='text' valType='property' name='ip'  companType="ip"  width='12.5%'></td>
+				<td type='text' content='当前可用性' width='12.5%'></td>
+				<td type='text' valType='availability' name='availability' companType="availability"  width='12.5%'></td>
+				<td type='text' content='运行时长' width='12.5%'></td>
+				<td type='text' valType='infometric' name='sysUpTime' companType="sysUpTime"  width='12.5%'></td>				
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+				<tr height='40%'>
+				<td name='others' valType='prefmetric' metric=''  type='others'  title='' width='100%' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+					<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			<tr height='40%'>
+					<td ischild='true' childtype='Partition' metrics='fileSysName,fileSysUsedSize,fileSysFreeSize,fileSysRate' type='multiMeter' title='分区利用率' width='33%' height='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+	</div>
+		<div category='ConferenceConductor'>		
+		<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='IP地址' width='12.5%'></td>
+				<td type='text' valType='property' name='ip'  companType="ip"  width='12.5%'></td>
+				<td type='text' content='当前可用性' width='12.5%'></td>
+				<td type='text' valType='availability' name='availability' companType="availability"  width='12.5%'></td>
+				<td type='text' content='运行时长' width='12.5%'></td>
+				<td type='text' valType='infometric' name='sysUpTime' companType="sysUpTime"  width='12.5%'></td>				
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+				<tr height='40%'>
+				<td name='others' valType='prefmetric' metric=''  type='others'  title='' width='100%' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+					<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			<tr height='40%'>
+			<td ischild='true' childtype='Node' metrics='fileSysUsedSize' type='node' title='节点' width='33%'  height='40%'></td>
+
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+	
+	</div>
+	
+	<div category='ConferenceServer'>
+	<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='操作系统' width='12.5%'></td>
+				<td type='text' valType='infometric' name='osVersion'  companType="osVersion"  width='12.5%'></td>
+				<td type='text' content='IP地址' width='12.5%'></td>
+				<td type='text' valType='property' name='ip'  companType="ip"  width='12.5%'></td>
+				<td type='text' content='当前可用性' width='12.5%'></td>
+				<td type='text' valType='availability' name='availability' companType="availability"  width='12.5%'></td>
+				<td type='text' content='运行时长' width='12.5%'></td>
+				<td type='text' valType='infometric' name='sysUpTime' companType="sysUpTime"  width='12.5%'></td>				
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+				<tr height='40%'>
+				<td name='others' valType='prefmetric' metric=''  type='others'  title='' width='100%' height='40%'></td>
+			</tr>
+
+		</table>
+		<table>
+					<tr height='40%'>
+				<td name='CPUPercent' rowspan='3' valType='prefmetric' title='CPU百分比'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='MEMPercent' rowspan='3' title='内存百分比' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+				</tr>
+		</table>
+			<table>
+			<tr height='40%'>
+				<td ischild='true' childtype='VCSHost' metrics='' type='multiMeter' title='待定'  width='33%' height='40%'></td>
+			</tr>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+			</tr>
+		</table>
+	</div>
+	<div category='SignalDetection'>
+			<table>
+			<tr height='50%' width='25%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='220px' width='260px' ></td>
+				<td type='text' rowspan="2" valType='resourceImg' name='resourceImg' width='8%'></td>
+				<td type='text' content='信号名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='IP地址' width='12.5%'></td>
+				<td type='text' valType='property' name='ip' companType="ip" width='12.5%'></td>
+				<td type='text' content='检测槽位号' width='12.5%'></td>
+				<td type='text' valType='infometric' name='SignalId' companType="SignalId" width='12.5%'></td>		
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='值班员' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+				<tr height='50%'  width='25%'>
+				<td title='图像' metric="Video" metricType="infometric" type='commonOneMetricPanel' resourceStateUIClass="dst_ico dst_video_green||dst_ico dst_video_red" height='50%'  width='25%'></td>
+
+			</tr>
+			<tr height='50%' width='25%'>
+				<td title='左声道' metric="LeftChannel" metricType="infometric" type='commonOneMetricPanel' resourceStateUIClass="dst_ico track_green||dst_ico track_red"  height='50%'  width='25%'></td>
+			</tr>
+			<tr height='50%' width='25%'>
+			<td title='右声道' metric="RightChannel" metricType="infometric" type='commonOneMetricPanel' resourceStateUIClass="dst_ico track_green||dst_ico track_red"  height='50%'  width='25%'></td>
+			</tr>
+		</table>
+		<table>			
+			<tr height='50%' width='70%'>
+					<td name='AmbientTemps' colspan="4" title='' metric='AmbientTemp' valType='prefmetric' childType='other' type='tabPanel' width='200px' height='50%'></td>
+					<td name='AmbientTemp' colspan="4" valType='prefmetric' metric='AmbientTemp' childType='other' type='tabPanel'  title='' width='500px' height='50%'></td>
+					<td name="alarmpanel" colspan="4"  title='告警' childType='alarm' type='tabPanel' width="408px"  height='50%'></td>
+					</tr>
+			
+		</table>	
+	</div>
+	
+		<div category='CallController'>
+		<table>
+			<tr height='50%' width='25%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight"  height='220px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='资源类型' width='12.5%'></td>
+				<td type='text' valType='property' name='resourcename' companType="resourcename" width='12.5%'></td>
+				<td type='text' content='操作系统' width='12.5%'></td>
+				<td type='text' valType='infometric' name='osVersion' companType="osVersion"  width='12.5%'></td>
+				<td type='text' content='IP地址' width='12.5%'></td>
+				<td type='text' valType='property' name='ip' companType="ip" width='12.5%'></td>
+				<td type='text' content='运行时长' width='12.5%'></td>
+				<td type='text' valType='infometric' name='sysUpTime' companType="sysUpTime" width='12.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+			</tr>
+				<tr height='50%'  width='25%'>
+				<td  title='Traversal' metrics='TraversalCurrent,TraversalMax,TraversalTotal' metricsName='当前值,峰值,重启后累计值' type='metricTabs' height='50%'  width='25%'></td>
+			</tr>
+			<tr height='50%' width='25%'>
+				<td  title='Non-Traversal' metrics='NonTraversalCurrent,NonTraversalMax,NonTraversalTotal' metricsName='当前值,峰值,重启后累计值' type='metricTabs' height='50%'  width='25%'></td>
+			</tr>
+			<tr height='50%' width='25%'>
+				<td  title='Registrations' metrics='RegistrationsCurrent,RegistrationsMax,RegistrationsTotal' metricsName='当前值,峰值,重启后累计值' type='metricTabs' height='50%'  width='25%' ></td>
+			</tr>
+		</table>
+		<table>			
+			<tr height='50%' width='70%'>
+					<td name='AmbientTemps' colspan="4" title='机箱温度' metric='AmbientTemp' valType='prefmetric' childType='temp' type='tabPanel' width='200px' height='50%'></td>
+					<td name='AmbientTemp' colspan="4" valType='prefmetric' metric='AmbientTemp' childType='mulitgraph' type='tabPanel'  title='温度曲线图' width='500px' height='50%'></td>
+					<td name="alarmpanel" colspan="4"  title='告警' childType='alarm' type='tabPanel' width="408px"  height='50%'></td>
+					</tr>
+			
+		</table>	
+		
+	</div>
+	
+	
+	<div category='ConferenceBridge'>	
+	<table>
+	<tr height='50%' >
+			<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='220px' width='260px'></td>
+				<td type='text' content='资源名称' width='10.5%'></td>
+				<td type='text' valType='property' name='name' companType="name" width='10.5%'></td>
+				<td type='text' content='IP地址' width='8.5%'></td>
+				<td type='text' valType='property' name='ip' companType="ip" width='8.5%'></td>
+				<td type='text' content='资源类型' width='12.5%'></td>
+				<td type='text' valType='property' name='resourcename'  companType="resourcename" width='12.5%'></td>
+				<td type='text' content='当前可用性' width='12.5%'></td>
+				<td type='text' valType='availability' name='availability' companType="availability" width='12.5%'></td>
+				<td type='text' content='运行时长' width='12.5%'></td>
+				<td type='text' valType='infometric' name='upTime' companType="upTime"  width='12.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+				<tr height='40%'  width='40%'>
+				<td name='cpuLoad' title='CPU负载' valType='prefmetric' type='graph' height='40%' ></td>
+			</tr>
+				<tr height='60%' width='40%'>
+				<td  title='已激活功能' metrics='activatedFeatures' type='tableMetric' height='50%'  width='25%' ></td>
+			</tr>
+		</table>
+			<table>
+			<tr height='50%' width='70%'>
+				<td name="environment" colspan="4" title='环境指标' metrics='voltagesStatus,temperatureStatus,rtcBatteryStatus,fanStatus' childType='environmentPanel' type='tabPanel' width='700px' height='50%' ></td>
+					<td name="alarmpanel" colspan="4"  title='告警' childType='alarm' type='tabPanel' width="408px"  height='50%'></td>
+					</tr>
+		</table>		
+	</div>
+		<div category='WeatherFile'>
+		<table>
+			<tr height='50%' width='25%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='220px' width='260px'></td>
+				<td type='text' content='资源名称' width='10.5%'></td>
+				<td type='text' valType='property' name='name' companType="name" width='10.5%'></td>
+				<td type='text' content='IP地址' width='8.5%'></td>
+				<td type='text' valType='property' name='ip' companType="ip" width='8.5%'></td>
+				<td type='text' content='资源类型' width='12.5%'></td>
+				<td type='text' valType='property' name='resourcename'  companType="resourcename" width='12.5%'></td>
+				<td type='text' content='文件路径' width='12.5%'></td>
+				<td type='text' valType='infometric' name='path' companType="path" width='12.5%'></td>
+				<td type='text' content='所属域' width='8.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+				<td type='text' content='责任人' width='7.5%'></td>
+				<td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='12.5%'></td>
+			</tr>
+				<tr height='50%'  width='25%'>
+					<td title='文件生成状态' metricType="instancestate" type='solidgauge'  height='50%'  width='25%' ></td> <!--label / number -->
+
+			</tr>
+			<tr height='50%' width='25%'>
+				<td title='当前文件总数' metric="fileCount" metricType="prefmetric" type='solidgauge' soliType='label'  height='50%'  width='25%'></td>
+			</tr>
+			<tr height='50%' width='25%'>
+
+			<td title='当前文件总大小' metric="totalFileSize" metricType="prefmetric" type='solidgauge' soliType='label'  height='50%'  width='25%'></td>
+			</tr>
+		</table>
+		<table>			
+			<tr height='50%' width='70%'>
+					<td name='other' colspan="4" title='' metric='' valType='' childType='other' type='tabPanel' width='200px' height='50%'></td>
+					<td name='other' colspan="4" valType='' metric='' childType='other' type='tabPanel'  title='' width='500px' height='50%'></td>
+					<td name="alarmpanel" colspan="4"  title='告警' childType='alarm' type='tabPanel' width="408px"  height='50%'></td>
+					</tr>
+			
+		</table>	
+		
+	</div>
+	<div category='DTCenterECSs'>
+		<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='IP地址' width='10.5%'></td>
+				<td type='text' valType='property' name='ip' companType="ip" width='12.5%'></td>
+				<td type='text' content='当前可用性' width='10.5%'></td>
+				<td type='text' valType='availability' name='availability'  companType="availability" width='12.5%'></td>
+				<td type='text' content='所属域' width='10.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain" width='12.5%'></td>
+				<td type='text' content='Cpu内核数' width='10.5%'></td>
+				<td type='text' valType='infometric' name='cpuNum' companType="cpuNum" width='12.5%'></td>
+				<td type='text' content='内存容量' width='10.5%'></td>
+				<td type='text' valType='infometric' name='memSize' companType="memSize" width='12.5%'></td>
+				<td type='text' content='区域' width='10.5%'></td>
+				<td type='text' valType='infometric' name='regeion' companType="regeion"  width='12.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='12.5%'></td>
+			</tr>
+			<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric' metrics='cpuNum, memSize' type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+		</table>
+		<table>
+			<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+			</tr>
+		</table>
+		<table>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%" height='100%'></td>
+			</tr>
+		</table>
+	</div>
+
+	<div category='KyLinVms'>
+		<table>
+			<tr height='60%'>
+				<td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+				<td type='text' content='显示名称' width='10.5%'></td>
+				<td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+				<td type='text' content='IP地址' width='10.5%'></td>
+				<td type='text' valType='property' name='ip' companType="ip" width='12.5%'></td>
+				<td type='text' content='当前可用性' width='10.5%'></td>
+				<td type='text' valType='availability' name='availability'  companType="availability" width='12.5%'></td>
+				<td type='text' content='所属域' width='10.5%'></td>
+				<td type='text' valType='property' name='domain' companType="domain" width='12.5%'></td>
+				<td type='text' content='内存容量' width='10.5%'></td>
+				<td type='text' valType='infometric' name='memSize' companType="memSize" width='12.5%'></td>
+				<td type='text' content='项目名称' width='10.5%'></td>
+				<td type='text' valType='property' name='project' companType="project"  width='12.5%'></td>
+				<td type='text' content='当前策略' width='10.5%'></td>
+				<td type='text' valType='property' name='profile' companType="profile" width='12.5%'></td>
+			</tr>
+			<tr height='40%'>
+				<td ischild='true' childtype='InformationMetric' metrics='' type='multiprocess' title='关注指标' height='40%'></td>
+			</tr>
+		</table>
+		<table>
+			<tr height='40%'>
+				<td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+				<td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+				<td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+				<td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+			</tr>
+		</table>
+		<table>
+			<tr height='60%'>
+				<td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%" height='60%'></td>
+			</tr>
+		</table>
+	</div>
+	
+	<div category='SurveillanceCamera'>
+		<table>
+			<tr>
+				<td type='text' content='摄像头名称' width='10%'></td>
+				<td type='text' valType='infometric' name='name' width='12.5%'></td>
+				<td type='text' content='摄像头IP' width='10.5%'></td>
+				<td type='text' valType='infometric' name='devIP' width='10.5%'></td>
+				<td type='text' content='设备ID' width='8%'></td>
+				<td type='text' valType='infometric' name='channelID' width='18%'></td>
+				<td type='text' content='所属组织' width='10%'></td>
+				<td type='text' valType='infometric' name='groupName' width='20%'></td>
+			</tr>
+			<tr>
+				<td type='text' content='连通状态' width='10%'></td>
+				<td type='text' valType='availability' name='availability' width='12.5%'></td>
+				<td type='text' content='类型' width='10.5%'></td>
+				<td type='text' valType='property' name='cameraType' width='10.5%'></td>
+				<td type='text' content='厂商' width='8%'></td>
+				<td type='text' valType='infometric' name='keep' width='18%'></td>
+				<td type='text' content='责任人' width='10%'></td>
+				<td type='text' valType='property' name='liablePerson' width='20%'></td>
+			</tr>
+		</table>
+		<table>
+			<tr>
+				<td name='videoPlay' valType='' type='video' width='50%'></td>
+				<td name='camerPicture' valType='' type='picture' width='50%'></td>
+			</tr>
+		</table>
+		<table>
+			<tr>
+				<td name='cameraResult' type='text' colspan="5" content='诊断结果' width='100%'></td>
+			</tr>
+			<tr>
+				<td name='colourCast' title='画面偏色' valType='prefmetric' type='cameraprogress' width='20%'></td>
+				<td name='legibility' title='清晰度' valType='prefmetric' type='cameraprogress' width='20%'></td>
+				<td name='brightness' title='亮度' valType='prefmetric' type='cameraprogress' width='20%'></td>
+				<td name='streakDisturb' title='条纹干扰' valType='prefmetric' type='cameraprogress' width='20%'></td>
+				<td name='snowflakeDisturb' title='雪花干扰' valType='prefmetric' type='cameraprogress' width='20%'></td>
+			</tr>
+			<tr>
+				<td name='sightChange' title='场景变换' valType='prefmetric' type='cameraprogress' width='20%'></td>
+				<td name='screenFrozen' title='画面冻结' valType='prefmetric' type='cameraprogress' width='20%'></td>
+				<td name='PTZSpeed' title='PTZ速度' valType='prefmetric' type='cameraprogress' width='20%'></td>
+				<td name='PTZDegree' title='PTZ角度' valType='prefmetric' type='cameraprogress' width='20%'></td>
+				<td name='keepOut' title='人为遮挡' valType='prefmetric' type='cameraprogress' width='20%'></td>
+			</tr>
+		</table>
+	</div>
+	<!-- VmWare5.5版本资源详情 -->
+	<div category='VirtualCluster5.5'>
+        <table>
+            <tr height='60%'>
+                <td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+                <td type='text' content='显示名称' width='10.5%'></td>
+                <td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+                <td type='text' content='总CPU资源' width='10.5%'></td>
+                <td type='text' valType='infometric' name='CPUNum' companType="CPUNum" width='10.5%'></td>
+                <td type='text' content='总内存' width='10.5%'></td>
+                <td type='text' valType='infometric' name='TotalMemSize' companType="TotalMemSize" width='10.5%'></td>
+                <td type='text' content='总存储' width='10.5%'></td>
+                <td type='text' valType='infometric' name='DatastoreSize' companType="DatastoreSize" width='10.5%'></td>
+                <td type='text' content='主机数' width='10.5%'></td>
+                <td type='text' valType='infometric' name='HostNum'  companType="HostNum" width='10.5%'></td>
+                <td type='text' content='所属域' width='8.5%'></td>
+                <td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+                <td type='text' content='当前策略' width='10.5%'></td>
+                <td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+            </tr>
+                <tr height='40%'>
+                <td ischild='true' childtype='InformationMetric' metrics='' type='multiprocess' title='关注指标' height='40%'></td>
+            </tr>
+        </table>
+        <table>
+            <tr height='40%'>
+                <td name='CPUPercent' rowspan='3' valType='prefmetric' title='CPU百分比'  type='mulitgauge' width='100%' height='40%' ></td>
+                <td name='MEMPercent' rowspan='3' title='内存百分比' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+                <td name='cpuline' rowspan='3' valType='prefmetric' metric='CPUPercent'  type='mulitgraph'  title='CPU百分比' width='100%' height='30%'></td>
+                <td name='memline' rowspan='3' valType='prefmetric' metric='MEMPercent'  type='mulitgraph'  title='内存百分比' width='100%' height='30%'></td>
+            </tr>
+        </table>
+        <table>
+            <tr height='40%'>
+               <td resourceid='VMWareDatastore' metrics='Name,availability,DataStorageVolume,DataStorageFreeSpace' type='table' title='存储器' width='33%' height='40%'></td>
+            </tr>
+            <tr height='60%'>
+                <td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+            </tr>
+        </table>
+    </div>
+    <div category='VirtualHost5.5'>
+        <table>
+            <tr height='60%'>
+                <td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+                <td type='text' content='显示名称' width='10.5%'></td>
+                <td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+                <td type='text' content='总CPU资源' width='10.5%'></td>
+                <td type='text' valType='infometric' name='CPUNum' companType="CPUNum" width='10.5%'></td>
+                <td type='text' content='总内存' width='10.5%'></td>
+                <td type='text' valType='infometric' name='TotalMemSize' companType="TotalMemSize" width='10.5%'></td>
+                <td type='text' content='总存储' width='10.5%'></td>
+                <td type='text' valType='infometric' name='DatastoreSize' companType="DatastoreSize" width='10.5%'></td>
+                <td type='text' content='网卡数' width='8.5%'></td>
+                <td type='text' valType='infometric' name='NumberOfNIC'  companType="NumberOfNIC" width='8.5%'></td>
+                <td type='text' content='VM个数' width='10.5%'></td>
+                <td type='text' valType='infometric' name='VMNum'  companType="VMNum" width='10.5%'></td>
+                <td type='text' content='所属域' width='8.5%'></td>
+                <td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+                <td type='text' content='当前策略' width='10.5%'></td>
+                <td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+                <td type='text' content='责任人' width='7.5%'></td>
+                <td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='10.5%'></td>
+            </tr>
+                <tr height='40%'>
+                <td ischild='true' childtype='InformationMetric' metrics='' type='multiprocess' title='关注指标' height='40%'></td>
+            </tr>
+        </table>
+        <table>
+            <tr height='40%'>
+                <td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+                <td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+                <td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+                <td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+            </tr>
+        </table>
+        <table>
+            <tr height='40%'>
+                <td resourceid='VMWareDatastore' metrics='Name,availability,DataStorageVolume,DataStorageFreeSpace' type='table' title='存储器' width='33%' height='40%'></td>
+            </tr>
+            <tr height='60%'>
+                <td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+            </tr>
+        </table>
+    </div>
+    <div category='VirtualStorage5.5'>
+        <table>
+            <tr height='50%' >
+                <td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='220px' width='320px'></td>
+                <td type='text' content='显示名称' width='10.5%'></td>
+                <td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+                <td type='text' content='容量' width='10.5%'></td>
+                <td type='text' valType='infometric' name='DataStorageVolume' companType="DataStorageVolume" width='10.5%'></td>
+                <td type='text' content='可用空间' width='10.5%'></td>
+                <td type='text' valType='infometric' name='DataStorageFreeSpace' companType="DataStorageFreeSpace"  width='10.5%'></td>
+                <td type='text' content='连接主机数' width='7.5%'></td>
+                <td type='text' valType='infometric' name='HostNum' companType="HostNum" width='10.5%'></td>
+                <td type='text' content='VM个数' width='10.5%'></td>
+                <td type='text' valType='infometric' name='VMNum'  companType="VMNum" width='10.5%'></td>
+                <td type='text' content='所属域' width='8.5%'></td>
+                <td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+                <td type='text' content='当前策略' width='10.5%'></td>
+                <td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+            </tr>
+            <tr height='50%'  width='40%'>
+                <td resourceid='VMWareVM' name='DiskAssignedSpace' title='空间使用情况' valType='statisticalData' type='pie'   height='50%'  width='40%'></td>
+            </tr>
+                <tr height='50%' width='40%'>
+                <td resourceid='VMWareVM' name='DiskAssignedSpace' title='虚拟机占用（TOP5)' valType='statisticalData' type='pie' TopN='5' height='50%'  width='40%'></td>
+            </tr>
+        </table>
+        <table>
+            <tr height='50%' width='70%'>
+                <td name='DiskUsagePercentages' colspan="3" title='磁盘使用百分比'  metric='DiskUsagePercentage' valType='prefmetric' childType='gauge' type='tabPanel' width='200px' height='50%'></td>
+                <td name='DiskUsagePercentage' colspan="3" valType='prefmetric' metric='DiskUsagePercentage'  type='tabPanel' childType='mulitgraph'  title='磁盘使用百分比曲线图' width='500px' height='50%'></td>
+                <td name="alarmpanel" colspan="3"  title='告警' childType='alarm' type='tabPanel' width="408px"  height='50%'></td>
+            </tr>
+        </table>
+    </div>
+    <div category='VirtualVM5.5'>
+        <table>
+            <tr height='60%'>
+                <td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+                <td type='text' content='显示名称' width='10.5%'></td>
+                <td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+                <td type='text' content='内存大小' width='10.5%'></td>
+                <td type='text' valType='infometric' name='MEMVMSize' companType="MEMVMSize" width='10.5%'></td>
+                <td type='text' content='空间大小' width='10.5%'></td>
+                <td type='text' valType='infometric' name='DiskAssignedSpace' companType="DiskAssignedSpace" width='10.5%'></td>
+                <td type='text' content='CPU个数' width='10.5%'></td>
+                <td type='text' valType='infometric' name='cpuNum' companType="cpuNum" width='10.5%'></td>
+                <td type='text' content='IP地址' width='8.5%'></td>
+                <td type='text' valType='property' name='discoverIp' companType="discoverIp" width='8.5%'></td>             
+                <td type='text' content='操作系统' width='12.5%'></td>
+                <td type='text' valType='infometric' name='osVersion'  companType="osVersion" width='12.5%'></td>
+                <td type='text' content='所属域' width='8.5%'></td>
+                <td type='text' valType='property' name='domain' companType="domain"   width='8.5%'></td>
+                <td type='text' content='当前策略' width='10.5%'></td>
+                <td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+                <td type='text' content='责任人' width='7.5%'></td>
+                <td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='10.5%'></td>
+            </tr>
+                <tr height='40%'>
+                <td ischild='true' childtype='InformationMetric' metrics='' type='multiprocess' title='关注指标' height='40%'></td>
+            </tr>
+        </table>
+        <table>
+            <tr height='40%'>
+                <td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+                <td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+                <td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+                <td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+            </tr>
+        </table>
+        <table>
+            <tr height='40%'>
+                    <td name='NetworkUsed' title='网络使用情况' valType='prefmetric' type='graph' width='100%' height='40%'></td>
+            </tr>
+            <tr height='60%'>
+                <td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+            </tr>
+        </table>
+    </div>
+    <!-- VmWare6版本资源详情 -->
+    <div category='VirtualCluster6'>
+        <table>
+            <tr height='60%'>
+                <td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+                <td type='text' content='显示名称' width='10.5%'></td>
+                <td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+                <td type='text' content='总CPU资源' width='10.5%'></td>
+                <td type='text' valType='infometric' name='CPUNum' companType="CPUNum" width='10.5%'></td>
+                <td type='text' content='总内存' width='10.5%'></td>
+                <td type='text' valType='infometric' name='TotalMemSize' companType="TotalMemSize" width='10.5%'></td>
+                <td type='text' content='总存储' width='10.5%'></td>
+                <td type='text' valType='infometric' name='DatastoreSize' companType="DatastoreSize" width='10.5%'></td>
+                <td type='text' content='主机数' width='10.5%'></td>
+                <td type='text' valType='infometric' name='HostNum'  companType="HostNum" width='10.5%'></td>
+                <td type='text' content='所属域' width='8.5%'></td>
+                <td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+                <td type='text' content='当前策略' width='10.5%'></td>
+                <td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+            </tr>
+                <tr height='40%'>
+                <td ischild='true' childtype='InformationMetric' metrics='' type='multiprocess' title='关注指标' height='40%'></td>
+            </tr>
+        </table>
+        <table>
+            <tr height='40%'>
+                <td name='CPUPercent' rowspan='3' valType='prefmetric' title='CPU百分比'  type='mulitgauge' width='100%' height='40%' ></td>
+                <td name='MEMPercent' rowspan='3' title='内存百分比' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+                <td name='cpuline' rowspan='3' valType='prefmetric' metric='CPUPercent'  type='mulitgraph'  title='CPU百分比' width='100%' height='30%'></td>
+                <td name='memline' rowspan='3' valType='prefmetric' metric='MEMPercent'  type='mulitgraph'  title='内存百分比' width='100%' height='30%'></td>
+            </tr>
+        </table>
+        <table>
+            <tr height='40%'>
+               <td resourceid='VMWareDatastore' metrics='Name,availability,DataStorageVolume,DataStorageFreeSpace' type='table' title='存储器' width='33%' height='40%'></td>
+            </tr>
+            <tr height='60%'>
+                <td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+            </tr>
+        </table>
+    </div>
+    <div category='VirtualHost6'>
+        <table>
+            <tr height='60%'>
+                <td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+                <td type='text' content='显示名称' width='10.5%'></td>
+                <td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+                <td type='text' content='总CPU资源' width='10.5%'></td>
+                <td type='text' valType='infometric' name='CPUNum' companType="CPUNum" width='10.5%'></td>
+                <td type='text' content='总内存' width='10.5%'></td>
+                <td type='text' valType='infometric' name='TotalMemSize' companType="TotalMemSize" width='10.5%'></td>
+                <td type='text' content='总存储' width='10.5%'></td>
+                <td type='text' valType='infometric' name='DatastoreSize' companType="DatastoreSize" width='10.5%'></td>
+                <td type='text' content='网卡数' width='8.5%'></td>
+                <td type='text' valType='infometric' name='NumberOfNIC'  companType="NumberOfNIC" width='8.5%'></td>
+                <td type='text' content='VM个数' width='10.5%'></td>
+                <td type='text' valType='infometric' name='VMNum'  companType="VMNum" width='10.5%'></td>
+                <td type='text' content='所属域' width='8.5%'></td>
+                <td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+                <td type='text' content='当前策略' width='10.5%'></td>
+                <td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+                <td type='text' content='责任人' width='7.5%'></td>
+                <td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='10.5%'></td>
+            </tr>
+                <tr height='40%'>
+                <td ischild='true' childtype='InformationMetric' metrics='' type='multiprocess' title='关注指标' height='40%'></td>
+            </tr>
+        </table>
+        <table>
+            <tr height='40%'>
+                <td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+                <td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+                <td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+                <td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+            </tr>
+        </table>
+        <table>
+            <tr height='40%'>
+                <td resourceid='VMWareDatastore' metrics='Name,availability,DataStorageVolume,DataStorageFreeSpace' type='table' title='存储器' width='33%' height='40%'></td>
+            </tr>
+            <tr height='60%'>
+                <td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+            </tr>
+        </table>
+    </div>
+    <div category='VirtualStorage6'>
+        <table>
+            <tr height='50%' >
+                <td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='220px' width='320px'></td>
+                <td type='text' content='显示名称' width='10.5%'></td>
+                <td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+                <td type='text' content='容量' width='10.5%'></td>
+                <td type='text' valType='infometric' name='DataStorageVolume' companType="DataStorageVolume" width='10.5%'></td>
+                <td type='text' content='可用空间' width='10.5%'></td>
+                <td type='text' valType='infometric' name='DataStorageFreeSpace' companType="DataStorageFreeSpace"  width='10.5%'></td>
+                <td type='text' content='连接主机数' width='7.5%'></td>
+                <td type='text' valType='infometric' name='HostNum' companType="HostNum" width='10.5%'></td>
+                <td type='text' content='VM个数' width='10.5%'></td>
+                <td type='text' valType='infometric' name='VMNum'  companType="VMNum" width='10.5%'></td>
+                <td type='text' content='所属域' width='8.5%'></td>
+                <td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+                <td type='text' content='当前策略' width='10.5%'></td>
+                <td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+            </tr>
+            <tr height='50%'  width='40%'>
+                <td resourceid='VMWareVM' name='DiskAssignedSpace' title='空间使用情况' valType='statisticalData' type='pie'   height='50%'  width='40%'></td>
+            </tr>
+                <tr height='50%' width='40%'>
+                <td resourceid='VMWareVM' name='DiskAssignedSpace' title='虚拟机占用（TOP5)' valType='statisticalData' type='pie' TopN='5' height='50%'  width='40%'></td>
+            </tr>
+        </table>
+        <table>
+            <tr height='50%' width='70%'>
+                <td name='DiskUsagePercentages' colspan="3" title='磁盘使用百分比'  metric='DiskUsagePercentage' valType='prefmetric' childType='gauge' type='tabPanel' width='200px' height='50%'></td>
+                <td name='DiskUsagePercentage' colspan="3" valType='prefmetric' metric='DiskUsagePercentage'  type='tabPanel' childType='mulitgraph'  title='磁盘使用百分比曲线图' width='500px' height='50%'></td>
+                <td name="alarmpanel" colspan="3"  title='告警' childType='alarm' type='tabPanel' width="408px"  height='50%'></td>
+            </tr>
+        </table>
+    </div>
+    <div category='VirtualVM6'>
+        <table>
+            <tr height='60%'>
+                <td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+                <td type='text' content='显示名称' width='10.5%'></td>
+                <td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+                <td type='text' content='内存大小' width='10.5%'></td>
+                <td type='text' valType='infometric' name='MEMVMSize' companType="MEMVMSize" width='10.5%'></td>
+                <td type='text' content='空间大小' width='10.5%'></td>
+                <td type='text' valType='infometric' name='DiskAssignedSpace' companType="DiskAssignedSpace" width='10.5%'></td>
+                <td type='text' content='CPU个数' width='10.5%'></td>
+                <td type='text' valType='infometric' name='cpuNum' companType="cpuNum" width='10.5%'></td>
+                <td type='text' content='IP地址' width='8.5%'></td>
+                <td type='text' valType='property' name='discoverIp' companType="discoverIp" width='8.5%'></td>             
+                <td type='text' content='操作系统' width='12.5%'></td>
+                <td type='text' valType='infometric' name='osVersion'  companType="osVersion" width='12.5%'></td>
+                <td type='text' content='所属域' width='8.5%'></td>
+                <td type='text' valType='property' name='domain' companType="domain"   width='8.5%'></td>
+                <td type='text' content='当前策略' width='10.5%'></td>
+                <td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+                <td type='text' content='责任人' width='7.5%'></td>
+                <td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='10.5%'></td>
+            </tr>
+                <tr height='40%'>
+                <td ischild='true' childtype='InformationMetric' metrics='' type='multiprocess' title='关注指标' height='40%'></td>
+            </tr>
+        </table>
+        <table>
+            <tr height='40%'>
+                <td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+                <td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+                <td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+                <td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+            </tr>
+        </table>
+        <table>
+            <tr height='40%'>
+                    <td name='NetworkUsed' title='网络使用情况' valType='prefmetric' type='graph' width='100%' height='40%'></td>
+            </tr>
+            <tr height='60%'>
+                <td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+            </tr>
+        </table>
+    </div>
+    <!-- VmWare5.5版本资源详情 -->
+    <div category='VirtualCluster6.5'>
+        <table>
+            <tr height='60%'>
+                <td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+                <td type='text' content='显示名称' width='10.5%'></td>
+                <td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+                <td type='text' content='总CPU资源' width='10.5%'></td>
+                <td type='text' valType='infometric' name='CPUNum' companType="CPUNum" width='10.5%'></td>
+                <td type='text' content='总内存' width='10.5%'></td>
+                <td type='text' valType='infometric' name='TotalMemSize' companType="TotalMemSize" width='10.5%'></td>
+                <td type='text' content='总存储' width='10.5%'></td>
+                <td type='text' valType='infometric' name='DatastoreSize' companType="DatastoreSize" width='10.5%'></td>
+                <td type='text' content='主机数' width='10.5%'></td>
+                <td type='text' valType='infometric' name='HostNum'  companType="HostNum" width='10.5%'></td>
+                <td type='text' content='所属域' width='8.5%'></td>
+                <td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+                <td type='text' content='当前策略' width='10.5%'></td>
+                <td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+            </tr>
+                <tr height='40%'>
+                <td ischild='true' childtype='InformationMetric' metrics='' type='multiprocess' title='关注指标' height='40%'></td>
+            </tr>
+        </table>
+        <table>
+            <tr height='40%'>
+                <td name='CPUPercent' rowspan='3' valType='prefmetric' title='CPU百分比'  type='mulitgauge' width='100%' height='40%' ></td>
+                <td name='MEMPercent' rowspan='3' title='内存百分比' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+                <td name='cpuline' rowspan='3' valType='prefmetric' metric='CPUPercent'  type='mulitgraph'  title='CPU百分比' width='100%' height='30%'></td>
+                <td name='memline' rowspan='3' valType='prefmetric' metric='MEMPercent'  type='mulitgraph'  title='内存百分比' width='100%' height='30%'></td>
+            </tr>
+        </table>
+        <table>
+            <tr height='40%'>
+               <td resourceid='VMWareDatastore' metrics='Name,availability,DataStorageVolume,DataStorageFreeSpace' type='table' title='存储器' width='33%' height='40%'></td>
+            </tr>
+            <tr height='60%'>
+                <td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+            </tr>
+        </table>
+    </div>
+    <div category='VirtualHost6.5'>
+        <table>
+            <tr height='60%'>
+                <td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+                <td type='text' content='显示名称' width='10.5%'></td>
+                <td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+                <td type='text' content='总CPU资源' width='10.5%'></td>
+                <td type='text' valType='infometric' name='CPUNum' companType="CPUNum" width='10.5%'></td>
+                <td type='text' content='总内存' width='10.5%'></td>
+                <td type='text' valType='infometric' name='TotalMemSize' companType="TotalMemSize" width='10.5%'></td>
+                <td type='text' content='总存储' width='10.5%'></td>
+                <td type='text' valType='infometric' name='DatastoreSize' companType="DatastoreSize" width='10.5%'></td>
+                <td type='text' content='网卡数' width='8.5%'></td>
+                <td type='text' valType='infometric' name='NumberOfNIC'  companType="NumberOfNIC" width='8.5%'></td>
+                <td type='text' content='VM个数' width='10.5%'></td>
+                <td type='text' valType='infometric' name='VMNum'  companType="VMNum" width='10.5%'></td>
+                <td type='text' content='所属域' width='8.5%'></td>
+                <td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+                <td type='text' content='当前策略' width='10.5%'></td>
+                <td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+                <td type='text' content='责任人' width='7.5%'></td>
+                <td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='10.5%'></td>
+            </tr>
+                <tr height='40%'>
+                <td ischild='true' childtype='InformationMetric' metrics='' type='multiprocess' title='关注指标' height='40%'></td>
+            </tr>
+        </table>
+        <table>
+            <tr height='40%'>
+                <td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+                <td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+                <td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+                <td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+            </tr>
+        </table>
+        <table>
+            <tr height='40%'>
+                <td resourceid='VMWareDatastore' metrics='Name,availability,DataStorageVolume,DataStorageFreeSpace' type='table' title='存储器' width='33%' height='40%'></td>
+            </tr>
+            <tr height='60%'>
+                <td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+            </tr>
+        </table>
+    </div>
+    <div category='VirtualStorage6.5'>
+        <table>
+            <tr height='50%' >
+                <td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='220px' width='320px'></td>
+                <td type='text' content='显示名称' width='10.5%'></td>
+                <td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+                <td type='text' content='容量' width='10.5%'></td>
+                <td type='text' valType='infometric' name='DataStorageVolume' companType="DataStorageVolume" width='10.5%'></td>
+                <td type='text' content='可用空间' width='10.5%'></td>
+                <td type='text' valType='infometric' name='DataStorageFreeSpace' companType="DataStorageFreeSpace"  width='10.5%'></td>
+                <td type='text' content='连接主机数' width='7.5%'></td>
+                <td type='text' valType='infometric' name='HostNum' companType="HostNum" width='10.5%'></td>
+                <td type='text' content='VM个数' width='10.5%'></td>
+                <td type='text' valType='infometric' name='VMNum'  companType="VMNum" width='10.5%'></td>
+                <td type='text' content='所属域' width='8.5%'></td>
+                <td type='text' valType='property' name='domain' companType="domain"  width='8.5%'></td>
+                <td type='text' content='当前策略' width='10.5%'></td>
+                <td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+            </tr>
+            <tr height='50%'  width='40%'>
+                <td resourceid='VMWareVM' name='DiskAssignedSpace' title='空间使用情况' valType='statisticalData' type='pie'   height='50%'  width='40%'></td>
+            </tr>
+                <tr height='50%' width='40%'>
+                <td resourceid='VMWareVM' name='DiskAssignedSpace' title='虚拟机占用（TOP5)' valType='statisticalData' type='pie' TopN='5' height='50%'  width='40%'></td>
+            </tr>
+        </table>
+        <table>
+            <tr height='50%' width='70%'>
+                <td name='DiskUsagePercentages' colspan="3" title='磁盘使用百分比'  metric='DiskUsagePercentage' valType='prefmetric' childType='gauge' type='tabPanel' width='200px' height='50%'></td>
+                <td name='DiskUsagePercentage' colspan="3" valType='prefmetric' metric='DiskUsagePercentage'  type='tabPanel' childType='mulitgraph'  title='磁盘使用百分比曲线图' width='500px' height='50%'></td>
+                <td name="alarmpanel" colspan="3"  title='告警' childType='alarm' type='tabPanel' width="408px"  height='50%'></td>
+            </tr>
+        </table>
+    </div>
+    <div category='VirtualVM6.5'>
+        <table>
+            <tr height='60%'>
+                <td type='text' rowspan="2" valType='availability' name='statusLight' companType="statusLight" height='260px' width='260px'></td>
+                <td type='text' content='显示名称' width='10.5%'></td>
+                <td type='text' valType='property' name='showname' companType="showname" width='10.5%'></td>
+                <td type='text' content='内存大小' width='10.5%'></td>
+                <td type='text' valType='infometric' name='MEMVMSize' companType="MEMVMSize" width='10.5%'></td>
+                <td type='text' content='空间大小' width='10.5%'></td>
+                <td type='text' valType='infometric' name='DiskAssignedSpace' companType="DiskAssignedSpace" width='10.5%'></td>
+                <td type='text' content='CPU个数' width='10.5%'></td>
+                <td type='text' valType='infometric' name='cpuNum' companType="cpuNum" width='10.5%'></td>
+                <td type='text' content='IP地址' width='8.5%'></td>
+                <td type='text' valType='property' name='discoverIp' companType="discoverIp" width='8.5%'></td>             
+                <td type='text' content='操作系统' width='12.5%'></td>
+                <td type='text' valType='infometric' name='osVersion'  companType="osVersion" width='12.5%'></td>
+                <td type='text' content='所属域' width='8.5%'></td>
+                <td type='text' valType='property' name='domain' companType="domain"   width='8.5%'></td>
+                <td type='text' content='当前策略' width='10.5%'></td>
+                <td type='text' valType='property' name='profile' companType="profile" width='10.5%'></td>
+                <td type='text' content='责任人' width='7.5%'></td>
+                <td type='text' valType='property' name='liablePerson' companType="liablePerson"   width='10.5%'></td>
+            </tr>
+                <tr height='40%'>
+                <td ischild='true' childtype='InformationMetric' metrics='' type='multiprocess' title='关注指标' height='40%'></td>
+            </tr>
+        </table>
+        <table>
+            <tr height='40%'>
+                <td name='cpuRate' rowspan='3' valType='prefmetric' title='CPU利用率'  type='mulitgauge' width='100%' height='40%' ></td>
+                <td name='memRate' rowspan='3' title='内存利用率' valType='prefmetric' type='mulitgauge' width='100%' height='40%'></td>
+                <td name='cpuline' rowspan='3' valType='prefmetric' metric='cpuRate'  type='mulitgraph'  title='CPU利用率' width='100%' height='30%'></td>
+                <td name='memline' rowspan='3' valType='prefmetric' metric='memRate'  type='mulitgraph'  title='内存利用率' width='100%' height='30%'></td>
+            </tr>
+        </table>
+        <table>
+            <tr height='40%'>
+                    <td name='NetworkUsed' title='网络使用情况' valType='prefmetric' type='graph' width='100%' height='40%'></td>
+            </tr>
+            <tr height='60%'>
+                <td ischild='true' colspan="3" type='alarm' childtype='' title='告警' metrics='' width="100%"  height='60%'></td>
+            </tr>
+        </table>
+    </div>
+</container>

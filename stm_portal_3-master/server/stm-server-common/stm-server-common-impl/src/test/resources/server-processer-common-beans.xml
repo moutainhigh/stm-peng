@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+	
+	
+	
+	<bean id="metricDataDAO" class="com.mainsteam.stm.common.metric.dao.MetricDataDAOImpl" init-method="init">
+		<property name="session" ref="sqlSession" />
+		<property name="metricTableNameCache" ref="metricTableNameManager" />
+		<property name="metricDataBatchPersisterFactory" ref="metricDataBatchPersisterFactory" />
+	</bean>
+	<bean id="metricDataBatchPersisterFactory" class="com.mainsteam.stm.common.metric.MetricDataBatchPersisterFactory">
+		<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+		<property name="metricTableNameCache" ref="metricTableNameManager" />
+	</bean>	
+	<bean id="metricTableNameManager" class="com.mainsteam.stm.common.metric.MetricTableNameManager" init-method="start">
+		<property name="session" ref="sqlSession" />
+		<property name="dbUrl" value="${jdbc.url}"/>
+	</bean>	
+	
+	<bean id="metricAvailableDAO" class="com.mainsteam.stm.common.metric.dao.MetricAvailableDAOImpl" init-method="start">
+		<property name="metricDataBatchPersisterFactory" ref="metricDataBatchPersisterFactory" />
+	</bean>
+	
+	
+	<bean id="metricInfoDAO" class="com.mainsteam.stm.common.metric.dao.MetricInfoDAOImpl" init-method="start">
+		<property name="session" ref="sqlSession" />
+		<property name="metricDataBatchPersisterFactory" ref="metricDataBatchPersisterFactory" />
+	</bean>
+	
+	
+	
+	
+	<bean id="metricSummaryDAO" class="com.mainsteam.stm.common.metric.dao.MetricSummaryDAOImpl" init-method="init">
+		<property name="session" ref="sqlSession" />
+		<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+		<property name="dbUrl" value="${jdbc.url}"/>
+	</bean>
+	
+	
+	<bean id="metricStateDAO" class="com.mainsteam.stm.common.state.dao.MetricStateDAOImpl">
+		<property name="session" ref="sqlSession" />
+	</bean>
+	
+	
+	
+	<!--提供给dcs可用性指标的数据查询接口，icmp插件使用，用来初始化icmp里的ip及其初始值 -->
+	<bean id="metricAvailQueryDAO" class="com.mainsteam.stm.common.instance.dao.MetricAvailQueryDAOImpl">
+		<property name="session" ref="sqlSession" />
+	</bean>
+	
+	
+	<bean id="dataSyncDAO" class="com.mainsteam.stm.common.sync.dao.DataSyncDAOImpl">
+		<property name="session" ref="sqlSession"/>
+		<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+		<property name="sequence">
+			<bean id="dataSyncSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+				<constructor-arg value="STM_DATA_SYNC"/>
+			</bean>
+		</property>
+	</bean>
+</beans>

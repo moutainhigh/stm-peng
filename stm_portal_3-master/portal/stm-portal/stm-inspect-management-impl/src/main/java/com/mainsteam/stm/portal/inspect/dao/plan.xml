@@ -1,0 +1,1794 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.portal.inspect.dao.IInspectPlanDaoApi">
+	 
+  <!-- mysql -->
+	 <resultMap type="com.mainsteam.stm.portal.inspect.bo.InspectPlanClob" id="InspectPlanClob">
+	 <result property="id" column="id" />
+	 <result column="type" property="type" />
+	 <result column="timeStr" property="timeStr" javaType="string"/>
+	 </resultMap> 
+  <select id="inspectPlanByList" resultType="com.mainsteam.stm.portal.inspect.bo.InspectPlanBasicBo" parameterType="com.mainsteam.stm.portal.inspect.bo.InspectPlanBasicBo" databaseId="mysql">
+	SELECT DISTINCT(p.ID) id ,
+		p.TASK_NAME insepctPalnTaskName,p.DOMAIN
+		inspectPlanDomain,p.INSPECTOR inspectPlanInspector,p.CREATOR
+		inspectPlanCreator,DATE_FORMAT(p.LAST_EDIT_TIME,'%Y-%m-%d %H:%i')
+		inspectPlanLastEditTime,p.TYPE
+		inspectPlanType,
+		IF(p.LAST_EXEC_TIME='0000-00-00
+		00:00:00',NULL,DATE_FORMAT(p.LAST_EXEC_TIME,'%Y-%m-%d %H:%i'))
+		inspectPlanLastExecTime,p.DESCRIBLE
+		inspectPlanDescrible,p.STATUS
+		inspectPlanStatus 
+ FROM STM_INSPECT_PLAN p LEFT JOIN STM_INSPECT_GROUP_DOMAIN_REL b ON p.ID=b.INSPECT_ID
+ LEFT JOIN STM_SYS_USER u ON
+		p.CREATOR = u.ID LEFT JOIN STM_SYS_USER u1 ON p.INSPECTOR = u1.ID
+		where
+		1 = 1
+		 
+    <if test="condition.inspectPlanCreator != null">
+			and p.CREATOR = #{condition.inspectPlanCreator}
+		</if>
+		 
+    <if test="condition.insepctPalnTaskName != null and condition.insepctPalnTaskName != '' ">
+			and p.TASK_NAME like
+			concat('%',#{condition.insepctPalnTaskName},'%')
+		</if>
+		 
+    <if test="condition.inspectPlanTypes != null">
+			and
+			 
+      <foreach collection="condition.inspectPlanTypes" item="item" open="(" close=")" index="index">
+				 
+        <if test="index != 0 ">
+					or
+				</if>
+				p.TYPE = #{item}
+			
+      </foreach>
+		
+    </if>
+		 
+    <if test="condition.inspectPlanStatus != null">
+			and p.STATUS = #{condition.inspectPlanStatus}
+		</if>
+		 
+    <if test="condition.inspectPlanDomains != null">
+			and b.DOMAIN_ID IN 
+			 
+      <foreach collection="condition.inspectPlanDomains" item="item" open="(" close=")" index="index" separator=",">
+				#{item}
+			</foreach>
+			
+		
+    </if>
+		 
+    <if test="condition.inspectPlanInspector != null">
+			and p.INSPECTOR = #{condition.inspectPlanInspector}
+		</if>
+		 
+    <if test="condition.createUserName != null">
+			and u.NAME like
+			concat('%',#{condition.createUserName},'%')
+		</if>
+		 
+    <if test="condition.inspectorName != null">
+			and u1.NAME like
+			concat('%',#{condition.inspectorName},'%')
+		</if>
+		 
+    <if test="condition.authorityUserId != null and condition.authorityUserId != ''">
+			and (
+			p.CREATOR = #{condition.authorityUserId}
+			 
+      <if test="condition.authorityDomainIds != null">
+				or b.DOMAIN_ID in
+				 
+        <foreach collection="condition.authorityDomainIds" item="item" open="(" close=")" index="index">
+					#{item}
+				</foreach>
+			
+      </if>
+			)
+		
+    </if>
+		order by p.CREATOR = #{condition.orderUserId} desc,p.STATUS
+		desc,p.LAST_EDIT_TIME desc
+	
+  </select>
+	 
+  <!-- oracle -->
+	 
+  <select id="inspectPlanByList" resultType="com.mainsteam.stm.portal.inspect.bo.InspectPlanBasicBo" parameterType="com.mainsteam.stm.portal.inspect.bo.InspectPlanBasicBo" databaseId="oracle">
+		select p.ID id,p.TASK_NAME insepctPalnTaskName,p.DOMAIN
+		inspectPlanDomain,p.INSPECTOR inspectPlanInspector,p.CREATOR
+		inspectPlanCreator,to_char(p.LAST_EDIT_TIME,'yyyy-MM-dd HH24:mi')
+		inspectPlanLastEditTime,p.TYPE
+		inspectPlanType,
+		decode(p.LAST_EXEC_TIME,'0000-00-00 00:00:00',null,to_char(p.LAST_EXEC_TIME,'yyyy-MM-dd HH24:mi'))
+		inspectPlanLastExecTime,p.DESCRIBLE
+		inspectPlanDescrible,p.STATUS
+		inspectPlanStatus from
+		STM_INSPECT_PLAN p
+		left join STM_SYS_USER u on p.CREATOR = u.ID
+		left join STM_SYS_USER u1 on p.INSPECTOR = u1.ID
+		where 1 = 1 
+		 
+    <if test="condition.inspectPlanCreator != null">
+			and p.CREATOR = #{condition.inspectPlanCreator}
+		</if>
+		 
+    <if test="condition.insepctPalnTaskName != null and condition.insepctPalnTaskName != '' ">
+			and p.TASK_NAME like '%'||#{condition.insepctPalnTaskName}||'%'
+		</if>
+		 
+    <if test="condition.inspectPlanTypes != null">
+			and
+			 
+      <foreach collection="condition.inspectPlanTypes" item="item" open="(" close=")" index="index">
+				 
+        <if test="index != 0 ">
+					or
+				</if>
+				p.TYPE  like '%'||#{item}||'%'
+			
+      </foreach>
+		
+    </if>
+		 
+    <if test="condition.inspectPlanStatus != null">
+			and p.STATUS = #{condition.inspectPlanStatus}
+		</if>
+		 
+    <if test="condition.inspectPlanDomains != null">
+		    and EXISTS(SELECT 1 
+		               FROM STM_INSPECT_GROUP_DOMAIN_REL b
+		               WHERE p.ID = b.INSPECT_ID
+		                     and b.DOMAIN_ID IN
+					   
+      <foreach collection="condition.inspectPlanDomains" item="item" open="(" close=")" index="index" separator=",">
+						     #{item}
+					  </foreach>
+		    )
+		
+    </if>
+		 
+    <if test="condition.inspectPlanInspector != null">
+			and p.INSPECTOR = #{condition.inspectPlanInspector}
+		</if>
+		 
+    <if test="condition.createUserName != null">
+			and u.NAME like '%'||#{condition.createUserName}||'%'
+		</if>
+		 
+    <if test="condition.inspectorName != null">
+			and u1.NAME like '%'||#{condition.inspectorName}||'%'
+		</if>
+		 
+    <if test="condition.authorityUserId != null and condition.authorityUserId != ''">
+			and (
+			p.CREATOR = #{condition.authorityUserId}
+			 
+      <if test="condition.authorityDomainIds != null">
+			    or EXISTS(SELECT 1 
+	                      FROM STM_INSPECT_GROUP_DOMAIN_REL b
+	                      WHERE p.ID = b.INSPECT_ID
+	                            and b.DOMAIN_ID in 
+	                       
+        <foreach collection="condition.authorityDomainIds" item="item" open="(" close=")" index="index">
+					          #{item}
+				          </foreach>
+	            ) 
+			
+      </if>
+		   )
+		
+    </if>
+		order by DECODE(p.CREATOR,#{condition.orderUserId},null,p.CREATOR) nulls first,p.STATUS desc,p.LAST_EDIT_TIME desc
+	
+  </select>
+	 
+  <!-- oscar -->
+	 
+  <select id="inspectPlanByList" resultType="com.mainsteam.stm.portal.inspect.bo.InspectPlanBasicBo" parameterType="com.mainsteam.stm.portal.inspect.bo.InspectPlanBasicBo" databaseId="dm">
+		select p.ID id,p.TASK_NAME insepctPalnTaskName,p."DOMAIN"
+		inspectPlanDomain,p.INSPECTOR inspectPlanInspector,p.CREATOR
+		inspectPlanCreator,p.LAST_EDIT_TIME
+		inspectPlanLastEditTime,p.TYPE
+		inspectPlanType,
+		p.LAST_EXEC_TIME
+		inspectPlanLastExecTime,p.DESCRIBLE
+		inspectPlanDescrible,p.STATUS 
+		inspectPlanStatus from
+		STM_INSPECT_PLAN p
+		left join STM_SYS_USER u on p.CREATOR = u.ID
+		left join STM_SYS_USER u1 on p.INSPECTOR = u1.ID
+		where 1 = 1 
+		 
+    <if test="condition.inspectPlanCreator != null">
+			and p.CREATOR = #{condition.inspectPlanCreator}
+		</if>
+		 
+    <if test="condition.insepctPalnTaskName != null and condition.insepctPalnTaskName != '' ">
+			and p.TASK_NAME like '%'||#{condition.insepctPalnTaskName}||'%'
+		</if>
+		 
+    <if test="condition.inspectPlanTypes != null">
+			and
+			 
+      <foreach collection="condition.inspectPlanTypes" item="item" open="(" close=")" index="index">
+				 
+        <if test="index != 0 ">
+					or
+				</if>
+				p.TYPE  like '%'||#{item}||'%'
+			
+      </foreach>
+		
+    </if>
+		 
+    <if test="condition.inspectPlanStatus != null">
+			and p.STATUS = #{condition.inspectPlanStatus}
+		</if>
+		 
+    <if test="condition.inspectPlanDomains != null">
+		    and EXISTS(SELECT 1 
+		               FROM STM_INSPECT_GROUP_DOMAIN_REL b
+		               WHERE p.ID = b.INSPECT_ID
+		                     and b.DOMAIN_ID IN
+					   
+      <foreach collection="condition.inspectPlanDomains" item="item" open="(" close=")" index="index" separator=",">
+						     #{item}
+					  </foreach>
+		    )
+		
+    </if>
+		 
+    <if test="condition.inspectPlanInspector != null">
+			and p.INSPECTOR = #{condition.inspectPlanInspector}
+		</if>
+		 
+    <if test="condition.createUserName != null">
+			and u.NAME like '%'||#{condition.createUserName}||'%'
+		</if>
+		 
+    <if test="condition.inspectorName != null">
+			and u1.NAME like '%'||#{condition.inspectorName}||'%'
+		</if>
+		 
+    <if test="condition.authorityUserId != null and condition.authorityUserId != ''">
+			and (
+			p.CREATOR = #{condition.authorityUserId}
+			 
+      <if test="condition.authorityDomainIds != null">
+			    or EXISTS(SELECT 1 
+	                      FROM STM_INSPECT_GROUP_DOMAIN_REL b
+	                      WHERE p.ID = b.INSPECT_ID
+	                            and b.DOMAIN_ID in 
+	                       
+        <foreach collection="condition.authorityDomainIds" item="item" open="(" close=")" index="index">
+					          #{item}
+				          </foreach>
+	            ) 
+			
+      </if>
+		   )
+		
+    </if>
+		order by DECODE(p.CREATOR,#{condition.orderUserId},null,p.CREATOR) nulls first,p.STATUS desc,p.LAST_EDIT_TIME desc
+	
+  </select>
+  <select id="inspectPlanByList" resultType="com.mainsteam.stm.portal.inspect.bo.InspectPlanBasicBo" parameterType="com.mainsteam.stm.portal.inspect.bo.InspectPlanBasicBo" databaseId="oscar">
+		select p.ID id,p.TASK_NAME insepctPalnTaskName,p.DOMAIN
+		inspectPlanDomain,p.INSPECTOR inspectPlanInspector,p.CREATOR
+		inspectPlanCreator,to_char(p.LAST_EDIT_TIME,'yyyy-MM-dd HH24:mi')
+		inspectPlanLastEditTime,p.TYPE
+		inspectPlanType,
+		to_char(p.LAST_EXEC_TIME,'yyyy-MM-dd HH24:mi')
+		inspectPlanLastExecTime,p.DESCRIBLE
+		inspectPlanDescrible,p.STATUS
+		inspectPlanStatus from
+		STM_INSPECT_PLAN p
+		left join STM_SYS_USER u on p.CREATOR = u.ID
+		left join STM_SYS_USER u1 on p.INSPECTOR = u1.ID
+		where  1 = 1
+		 
+    <if test="condition.inspectPlanCreator != null">
+			and p.CREATOR = #{condition.inspectPlanCreator}
+		</if>
+		 
+    <if test="condition.insepctPalnTaskName != null and condition.insepctPalnTaskName != '' ">
+			and p.TASK_NAME like '%'||#{condition.insepctPalnTaskName}||'%'
+		</if>
+		 
+    <if test="condition.inspectPlanTypes != null">
+			and
+			 
+      <foreach collection="condition.inspectPlanTypes" item="item" open="(" close=")" index="index">
+				 
+        <if test="index != 0 ">
+					or
+				</if>
+				p.TYPE  like '%'||#{item}||'%'
+			
+      </foreach>
+		
+    </if>
+		 
+    <if test="condition.inspectPlanStatus != null">
+			and p.STATUS = #{condition.inspectPlanStatus}
+		</if>
+		 
+    <if test="condition.inspectPlanDomains != null">
+			and EXISTS(SELECT 1 
+	                   FROM STM_INSPECT_GROUP_DOMAIN_REL b
+	                   WHERE p.ID = b.INSPECT_ID
+	                         and b.DOMAIN_ID IN 
+					    
+      <foreach collection="condition.inspectPlanDomains" item="item" open="(" close=")" index="index" separator=",">
+							 #{item}
+					   </foreach>
+			)
+		
+    </if>
+		 
+    <if test="condition.inspectPlanInspector != null">
+			and p.INSPECTOR = #{condition.inspectPlanInspector}
+		</if>
+		 
+    <if test="condition.createUserName != null">
+			and u.NAME like '%'||#{condition.createUserName}||'%'
+		</if>
+		 
+    <if test="condition.inspectorName != null">
+			and u1.NAME like '%'||#{condition.inspectorName}||'%'
+		</if>
+		 
+    <if test="condition.authorityUserId != null and condition.authorityUserId != ''">
+			and (
+			p.CREATOR = #{condition.authorityUserId}
+			 
+      <if test="condition.authorityDomainIds != null">
+				or EXISTS(SELECT 1 
+	                      FROM STM_INSPECT_GROUP_DOMAIN_REL b
+	                      WHERE p.ID = b.INSPECT_ID
+	                            and b.DOMAIN_ID in
+						   
+        <foreach collection="condition.authorityDomainIds" item="item" open="(" close=")" index="index">
+							    #{item}
+						  </foreach>
+				)
+			
+      </if>
+			)
+		
+    </if>
+		order by DECODE(p.CREATOR,#{condition.orderUserId},null,p.CREATOR) nulls first,p.STATUS desc,p.LAST_EDIT_TIME desc
+	
+  </select>
+	
+	 
+  <insert id="inspect_plan_saveBasic">
+		insert INTO
+		STM_INSPECT_PLAN(ID,TASK_NAME,TYPE,TYPE_TIME,DOMAIN,INSPECTOR,DESCRIBLE,REPORT_EDITABLE,CREATOR,STATUS)
+		values(#{id},#{name},#{type},#{format},#{domain},#{inspector},#{description},#{reportChange},#{creator},0)
+	</insert>
+	<!-- dm -->
+	<insert id="inspect_plan_saveBasic" databaseId="dm">
+		insert INTO
+		STM_INSPECT_PLAN(ID,TASK_NAME,TYPE,TYPE_TIME,"DOMAIN",INSPECTOR,DESCRIBLE,REPORT_EDITABLE,CREATOR,STATUS)
+		values(#{id},#{name},#{type},#{format},#{domain},#{inspector},#{description},#{reportChange},#{creator},0)
+	</insert>
+
+	 
+  <update id="inspect_plan_updateState">
+		update STM_INSPECT_PLAN set STATUS = #{state} where
+		ID
+		= #{id}
+	</update>
+
+	 
+  <update id="inspect_plan_updateBasic">
+		update STM_INSPECT_PLAN set TASK_NAME = #{name},
+		TYPE =
+		#{type},
+		TYPE_TIME = #{format},
+		DOMAIN = #{domain},
+		INSPECTOR =
+		#{inspector},
+		DESCRIBLE = #{description},
+		REPORT_EDITABLE =
+		#{reportChange},
+		REPORT_NAME = #{name} 
+		where
+		ID = #{id}
+	</update>
+	<!-- dm -->
+	<update id="inspect_plan_updateBasic" databaseId="dm">
+		update STM_INSPECT_PLAN set TASK_NAME = #{name},
+		TYPE =
+		#{type},
+		TYPE_TIME = #{format},
+		"DOMAIN" = #{domain},
+		INSPECTOR =
+		#{inspector},
+		DESCRIBLE = #{description},
+		REPORT_EDITABLE =
+		#{reportChange},
+		REPORT_NAME = #{name} 
+		where
+		ID = #{id}
+	</update>
+ 
+  <!-- 	<update id="inspect_plan_updateBasic" databaseId="oracle">
+		update STM_INSPECT_PLAN set TASK_NAME = #{name,jdbcType=VARCHAR},
+		TYPE =
+		#{type,jdbcType=NUMERIC},
+		TYPE_TIME = #{format,jdbcType=CLOB},
+		DOMAIN = #{domain,jdbcType=NUMERIC},
+		INSPECTOR =
+		#{inspector,jdbcType=NUMERIC},
+		DESCRIBLE = #{description,jdbcType=CLOB},
+		REPORT_EDITABLE =
+		#{reportChange,jdbcType=NUMERIC}
+		where
+		ID = #{id,jdbcType=NUMERIC}
+	</update> -->
+
+	 
+  <update id="inspect_plan_updateRoutine">
+		update STM_INSPECT_PLAN set
+		REPORT_PRODUCE_TIME_SHOW =
+		#{reportProduceTimeShow},
+		REPORT_MODIFY_TIME_SHOW =
+		#{reportModifyTimeShow},
+		REPORT_MODIFIOR_SHOW = #{reportModifiorShow},
+		RESOURCE_SHOW = #{resourceShow},
+		BUSINESS_SHOW = #{businessShow},
+		RESOURCE_NAME = #{resourceName},
+		RESOURCE_TYPE = #{resourceType},
+		BUSINESS_NAME = #{businessName}
+		where
+		ID = #{id}
+	</update>
+	
+	 
+  <!-- mysql批量插入 -->
+	 
+  <insert id="inspect_plan_addSelfItems" parameterType="java.util.List" databaseId="mysql">
+		insert
+		STM_INSPECT_PLAN_SELF_ITEM(ID,INSPECT_PLAN_ID,SELF_ITEM_NAME,SELF_ITME_TYPE,ITEM_CONTENT)
+		values
+		 
+    <foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id},#{item.inspectPlanId},#{item.inspectPlanSelfItemName},#{item.inspectPlanSelfItemType},#{item.inspectPlanItemContent})
+		</foreach>
+	
+  </insert>
+	
+	 
+  <!-- oracle批量插入 -->
+	 
+  <insert id="inspect_plan_addSelfItems" parameterType="java.util.List" databaseId="oracle">
+		insert INTO
+		STM_INSPECT_PLAN_SELF_ITEM(ID,INSPECT_PLAN_ID,SELF_ITEM_NAME,SELF_ITME_TYPE,ITEM_CONTENT)
+		 
+    <foreach close=")" collection="list" item="item" index="index" open="(" separator="union">
+			select 
+			#{item.id},#{item.inspectPlanId},#{item.inspectPlanSelfItemName},#{item.inspectPlanSelfItemType},#{item.inspectPlanItemContent}
+			from dual
+		</foreach>
+	
+  </insert>
+	 
+  <!-- oscar批量插入 -->
+	 
+  <insert id="inspect_plan_addSelfItems" parameterType="java.util.List" databaseId="dm">
+		insert INTO
+		STM_INSPECT_PLAN_SELF_ITEM(ID,INSPECT_PLAN_ID,SELF_ITEM_NAME,SELF_ITME_TYPE,ITEM_CONTENT)
+		 
+    <foreach close=")" collection="list" item="item" index="index" open="(" separator="union">
+			select 
+			#{item.id},#{item.inspectPlanId},#{item.inspectPlanSelfItemName},#{item.inspectPlanSelfItemType},#{item.inspectPlanItemContent}
+			from dual
+		</foreach>
+	
+  </insert>
+  <insert id="inspect_plan_addSelfItems" parameterType="java.util.List" databaseId="oscar">
+		insert INTO
+		STM_INSPECT_PLAN_SELF_ITEM(ID,INSPECT_PLAN_ID,SELF_ITEM_NAME,SELF_ITME_TYPE,ITEM_CONTENT)
+		 
+    <foreach close=")" collection="list" item="item" index="index" open="(" separator="union">
+			select 
+			#{item.id},#{item.inspectPlanId},#{item.inspectPlanSelfItemName},#{item.inspectPlanSelfItemType},#{item.inspectPlanItemContent}
+			from dual
+		</foreach>
+	
+  </insert>
+	
+	 
+  <delete id="inspect_plan_delSelfItems">
+		delete from STM_INSPECT_PLAN_SELF_ITEM where
+		INSPECT_PLAN_ID in
+		 
+    <foreach collection="planIds" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	
+  </delete>
+	 
+  <!-- mysql -->
+	 
+  <insert id="inspect_plan_addInspectionItems" parameterType="java.util.List" databaseId="mysql">
+		insert
+		STM_INSPECT_PLAN_CONTENT(ID,INSPECT_PLAN_ID,CHILD_ITME,ITME_DESCRIBLE,SORT)
+		values
+		 
+    <foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id},#{item.inspectPlanId},#{item.inspectPlanItemName},#{item.inspectPlanItemDescrible},#{item.sort})
+		</foreach>
+	
+  </insert>
+	 
+  <!-- oracle -->
+	 
+  <insert id="inspect_plan_addInspectionItems" parameterType="java.util.List" databaseId="oracle">
+		insert INTO
+		STM_INSPECT_PLAN_CONTENT(ID,INSPECT_PLAN_ID,CHILD_ITME,ITME_DESCRIBLE,SORT)
+		 
+    <foreach collection="list" item="item" index="index" open="(" separator="union" close=")">
+			select
+			#{item.id},#{item.inspectPlanId},#{item.inspectPlanItemName},#{item.inspectPlanItemDescrible},#{item.sort}
+			from dual
+		</foreach>
+	
+  </insert>
+	 
+  <!-- oscar -->
+	 
+  <insert id="inspect_plan_addInspectionItems" parameterType="java.util.List" databaseId="dm">
+		insert INTO
+		STM_INSPECT_PLAN_CONTENT(ID,INSPECT_PLAN_ID,CHILD_ITME,ITME_DESCRIBLE,SORT)
+		 
+    <foreach collection="list" item="item" index="index" open="(" separator="union" close=")">
+			select
+			#{item.id},#{item.inspectPlanId},#{item.inspectPlanItemName},#{item.inspectPlanItemDescrible},#{item.sort}
+			from dual
+		</foreach>
+	
+  </insert>
+  <insert id="inspect_plan_addInspectionItems" parameterType="java.util.List" databaseId="oscar">
+		insert INTO
+		STM_INSPECT_PLAN_CONTENT(ID,INSPECT_PLAN_ID,CHILD_ITME,ITME_DESCRIBLE,SORT)
+		 
+    <foreach collection="list" item="item" index="index" open="(" separator="union" close=")">
+			select
+			#{item.id},#{item.inspectPlanId},#{item.inspectPlanItemName},#{item.inspectPlanItemDescrible},#{item.sort}
+			from dual
+		</foreach>
+	
+  </insert>
+	 
+  <update id="inspect_plan_updateInspectionItem" parameterType="com.mainsteam.stm.portal.inspect.bo.InspectPlanContentBo">
+		update STM_INSPECT_PLAN_CONTENT set CHILD_ITME =
+		#{inspectPlanItemName},ITME_DESCRIBLE = #{inspectPlanItemDescrible},
+		SORT = #{sort}
+		where ID = #{id}
+	</update>
+
+   <delete id="inspect_plan_delInspectionItem" databaseId="mysql">
+delete from STM_INSPECT_PLAN_CONTENT where  ID =#{id} or PARENT_ID =#{id}
+	 
+    <!-- 	delete from STM_INSPECT_PLAN_CONTENT where ID in
+		<foreach collection="ids" index="index" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+		or PARENT_ID in
+		<foreach collection="ids" index="index" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach> -->
+	
+  </delete>
+	
+	 
+  <delete id="inspect_plan_delInspectionItem" databaseId="oracle">
+	delete from STM_INSPECT_PLAN_CONTENT where  ID =#{id} or PARENT_ID =#{id}
+ 
+    <!-- 		delete from STM_INSPECT_PLAN_CONTENT where
+		<foreach collection="ids" index="index" item="item" open="(" separator="or" close=")">
+		ID in	#{item}
+		</foreach>
+		or 
+		<foreach collection="ids" index="index" item="item" open="(" separator="or" close=")">
+		PARENT_ID in	#{item}
+		</foreach> -->
+	
+  </delete>
+	 
+  <delete id="inspect_plan_delInspectionItem" databaseId="dm">
+	delete from STM_INSPECT_PLAN_CONTENT where  ID =#{id} or PARENT_ID =#{id}
+ 
+    <!-- 		delete from STM_INSPECT_PLAN_CONTENT where
+		<foreach collection="ids" index="index" item="item" open="(" separator="or" close=")">
+		ID in	#{item}
+		</foreach>
+		or 
+		<foreach collection="ids" index="index" item="item" open="(" separator="or" close=")">
+		PARENT_ID in	#{item}
+		</foreach> -->
+	
+  </delete>
+  <delete id="inspect_plan_delInspectionItem" databaseId="oscar">
+	delete from STM_INSPECT_PLAN_CONTENT where  ID =#{id} or PARENT_ID =#{id}
+		 
+    <!-- <foreach collection="ids" index="index" item="item" open="(" separator="or" close=")">
+		ID in	#{item}
+		</foreach>
+		or 
+		<foreach collection="ids" index="index" item="item" open="(" separator="or" close=")">
+		PARENT_ID in	#{item}
+		</foreach> -->
+	
+  </delete>
+	
+	
+	
+	 
+  <delete id="inspect_plan_delInspectionItemParent">
+		delete from STM_INSPECT_PLAN_CONTENT where PARENT_ID in
+	 
+    <foreach collection="ids" index="index" item="item" open="(" separator="or" close=")">
+		 	
+			#{item}
+		</foreach>
+	
+  </delete>
+	
+
+	 
+  <select id="inspect_plan_queryInspectionItemByThreeId" parameterType="java.util.List" resultType="java.lang.Long">
+		select c3.ID from STM_INSPECT_PLAN_CONTENT c1 left join
+		STM_INSPECT_PLAN_CONTENT c2 on c1.ID = c2.PARENT_ID left join
+		STM_INSPECT_PLAN_CONTENT c3 on c2.ID = c3.PARENT_ID where C3.ID is not
+		null and c1.ID in
+		 
+    <foreach collection="ids" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	
+  </select>
+
+	 
+  <select id="inspect_plan_loadInspectionItems" resultType="com.mainsteam.stm.portal.inspect.bo.InspectPlanContentBo">
+		select ID id,CHILD_ITME inspectPlanItemName,ITME_DESCRIBLE
+		inspectPlanItemDescrible from STM_INSPECT_PLAN_CONTENT where
+		INSPECT_PLAN_ID = #{id}
+		and PARENT_ID
+		is null order by SORT
+	</select>
+	 
+  <!-- mysql -->
+	 
+  <select id="inspect_plan_getRoutine" parameterType="java.util.HashMap" databaseId="mysql" resultType="java.util.HashMap">
+		select p.ID pid,p.REPORT_NAME reportName,p.INSPECTOR
+		inspector,
+		if(p.REPORT_PRODUCE_TIME_SHOW =
+		true,'on','')
+		reportProduceTimeShow,if(p.REPORT_MODIFY_TIME_SHOW =
+		true,'on','')
+		reportModifyTimeShow,if(p.REPORT_MODIFIOR_SHOW =
+		true,'on','')
+		inspectPlanReportModifiorShow,
+		if(p.RESOURCE_SHOW =
+		true,'on','') inspectReportResourceNameShow,
+		if(p.BUSINESS_SHOW =
+		true,'on','') inspectReportBusinessNameShow,
+		p.RESOURCE_NAME
+		inspectReportResourceName,
+		P.RESOURCE_TYPE inspectReportResourceType,
+		p.BUSINESS_NAME inspectReportBusinessName,
+		p.LAST_EDIT_TIME reportModifyTime,
+		if(p.LAST_EXEC_TIME =
+		'0000-00-00 00:00:00','',p.LAST_EXEC_TIME) reportProduceTime,
+		c.ID cid,
+		c.SELF_ITEM_NAME
+		inspectReportSelfItemName,c.SELF_ITME_TYPE
+		inspectReportSelfItemType,
+		c.ITEM_CONTENT inspectReportItemContent
+		from
+		STM_INSPECT_PLAN p left join
+		STM_INSPECT_PLAN_SELF_ITEM c on p.ID =
+		c.INSPECT_PLAN_ID
+		where p.ID =
+		#{id} order by cid
+	</select>
+	 
+  <!-- oracle -->
+	 
+  <select id="inspect_plan_getRoutine" parameterType="java.util.HashMap" databaseId="oracle" resultType="java.util.HashMap">
+		select p.ID pid,p.REPORT_NAME reportName,p.INSPECTOR
+		inspector,
+		decode(p.REPORT_PRODUCE_TIME_SHOW,1,'on','') reportProduceTimeShow,
+		decode(p.REPORT_MODIFY_TIME_SHOW,1,'on','') reportModifyTimeShow,
+		decode(p.REPORT_MODIFIOR_SHOW,1,'on','') inspectPlanReportModifiorShow,
+		decode(p.RESOURCE_SHOW,1,'on','') inspectReportResourceNameShow,
+		decode(p.BUSINESS_SHOW,1,'on','') inspectReportBusinessNameShow,
+		p.RESOURCE_NAME inspectReportResourceName,
+		P.RESOURCE_TYPE inspectReportResourceType,
+		p.BUSINESS_NAME inspectReportBusinessName,
+		p.LAST_EDIT_TIME reportModifyTime,
+		decode(p.LAST_EXEC_TIME,'0000-00-00 00:00:00','',p.LAST_EXEC_TIME) reportProduceTime,
+		c.ID cid,
+		c.SELF_ITEM_NAME inspectReportSelfItemName,
+		c.SELF_ITME_TYPE inspectReportSelfItemType,
+		c.ITEM_CONTENT inspectReportItemContent
+		from
+		STM_INSPECT_PLAN p left join
+		STM_INSPECT_PLAN_SELF_ITEM c on p.ID =
+		c.INSPECT_PLAN_ID
+		where p.ID =
+		#{id} order by cid
+	</select>
+	 
+  <!-- oscar -->
+	 
+  <select id="inspect_plan_getRoutine" parameterType="java.util.HashMap" databaseId="dm" resultType="java.util.HashMap">
+		select p.ID pid,p.REPORT_NAME reportName,p.INSPECTOR
+		inspector,
+		decode(p.REPORT_PRODUCE_TIME_SHOW,1,'on','') reportProduceTimeShow,
+		decode(p.REPORT_MODIFY_TIME_SHOW,1,'on','') reportModifyTimeShow,
+		decode(p.REPORT_MODIFIOR_SHOW,1,'on','') inspectPlanReportModifiorShow,
+		decode(p.RESOURCE_SHOW,1,'on','') inspectReportResourceNameShow,
+		decode(p.BUSINESS_SHOW,1,'on','') inspectReportBusinessNameShow,
+		p.RESOURCE_NAME inspectReportResourceName,
+		P.RESOURCE_TYPE inspectReportResourceType,
+		p.BUSINESS_NAME inspectReportBusinessName,
+		p.LAST_EDIT_TIME reportModifyTime,
+		p.LAST_EXEC_TIME reportProduceTime,
+		c.ID cid,
+		c.SELF_ITEM_NAME inspectReportSelfItemName,
+		c.SELF_ITME_TYPE inspectReportSelfItemType,
+		c.ITEM_CONTENT inspectReportItemContent
+		from
+		STM_INSPECT_PLAN p left join
+		STM_INSPECT_PLAN_SELF_ITEM c on p.ID =
+		c.INSPECT_PLAN_ID
+		where p.ID =
+		#{id} order by cid
+	</select>
+  <select id="inspect_plan_getRoutine" parameterType="java.util.HashMap" databaseId="oscar" resultType="java.util.HashMap">
+		select p.ID pid,p.REPORT_NAME reportName,p.INSPECTOR
+		inspector,
+		decode(p.REPORT_PRODUCE_TIME_SHOW,1,'on','') reportProduceTimeShow,
+		decode(p.REPORT_MODIFY_TIME_SHOW,1,'on','') reportModifyTimeShow,
+		decode(p.REPORT_MODIFIOR_SHOW,1,'on','') inspectPlanReportModifiorShow,
+		decode(p.RESOURCE_SHOW,1,'on','') inspectReportResourceNameShow,
+		decode(p.BUSINESS_SHOW,1,'on','') inspectReportBusinessNameShow,
+		p.RESOURCE_NAME inspectReportResourceName,
+		P.RESOURCE_TYPE inspectReportResourceType,
+		p.BUSINESS_NAME inspectReportBusinessName,
+		p.LAST_EDIT_TIME reportModifyTime,
+	 	decode(p.LAST_EXEC_TIME,'0000-00-00 00:00:00','',p.LAST_EXEC_TIME) reportProduceTime,
+		c.ID cid,
+		c.SELF_ITEM_NAME inspectReportSelfItemName,
+		c.SELF_ITME_TYPE inspectReportSelfItemType,
+		c.ITEM_CONTENT inspectReportItemContent
+		from
+		STM_INSPECT_PLAN p left join
+		STM_INSPECT_PLAN_SELF_ITEM c on p.ID =
+		c.INSPECT_PLAN_ID
+		where p.ID =
+		#{id} order by cid
+	</select>
+	 
+  <select id="loadBasic" parameterType="HashMap" resultType="com.mainsteam.stm.portal.inspect.bo.BasicInfoBo">
+
+		select
+		ID as id,
+		TASK_NAME as insepctPalnTaskName,
+		TYPE as
+		inspectPlanType,
+		DOMAIN as inspectPlanDomain,
+		INSPECTOR as
+		inspectPlanInspector,
+		REPORT_EDITABLE as inspectRlanReportEditable,
+		TYPE_TIME as inspectPlanTypeTime,
+		DESCRIBLE as inspectPlanDescrible
+		from
+		STM_INSPECT_PLAN b
+		where b.ID=#{id}
+
+	</select>
+<!-- dm -->
+	<select id="loadBasic" parameterType="HashMap" resultType="com.mainsteam.stm.portal.inspect.bo.BasicInfoBo" databaseId="dm">
+
+		select
+		ID as id,
+		TASK_NAME as insepctPalnTaskName,
+		TYPE as
+		inspectPlanType,
+		"DOMAIN" as inspectPlanDomain,
+		INSPECTOR as
+		inspectPlanInspector,
+		REPORT_EDITABLE as inspectRlanReportEditable,
+		TYPE_TIME as inspectPlanTypeTime,
+		DESCRIBLE as inspectPlanDescrible
+		from
+		STM_INSPECT_PLAN b
+		where b.ID=#{id}
+
+	</select>
+	 
+  <!-- mysql -->
+	 
+  <insert id="inspect_plan_saveConclusions" parameterType="java.util.List" databaseId="mysql">
+		insert
+		STM_INSPECT_PLAN_RESULT_SETTING(ID,INSPECT_PLAN_ID,SUMMERISE_NAME,SUMERISE_DESCRIBLE)
+		values
+		 
+    <foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id},#{item.inspectPlanId},#{item.inspectPlanSummeriseName},#{item.inspectPlanSumeriseDescrible})
+		</foreach>
+	
+  </insert>
+	
+	 
+  <!-- oracle -->
+	 
+  <insert id="inspect_plan_saveConclusions" parameterType="java.util.List" databaseId="oracle">
+		insert INTO
+		STM_INSPECT_PLAN_RESULT_SETTING(ID,INSPECT_PLAN_ID,SUMMERISE_NAME,SUMERISE_DESCRIBLE)
+		 
+    <foreach collection="list" item="item" index="index" open="(" separator="union" close=")">
+			select
+			#{item.id},#{item.inspectPlanId},#{item.inspectPlanSummeriseName},#{item.inspectPlanSumeriseDescrible}
+			from dual
+		</foreach>
+	
+  </insert>
+	 
+  <!-- oscar -->
+	 
+  <insert id="inspect_plan_saveConclusions" parameterType="java.util.List" databaseId="dm">
+		insert INTO
+		STM_INSPECT_PLAN_RESULT_SETTING(ID,INSPECT_PLAN_ID,SUMMERISE_NAME,SUMERISE_DESCRIBLE)
+		 
+    <foreach collection="list" item="item" index="index" open="(" separator="union" close=")">
+			select
+			#{item.id},#{item.inspectPlanId},#{item.inspectPlanSummeriseName},#{item.inspectPlanSumeriseDescrible}
+			from dual
+		</foreach>
+	
+  </insert>
+  <insert id="inspect_plan_saveConclusions" parameterType="java.util.List" databaseId="oscar">
+		insert INTO
+		STM_INSPECT_PLAN_RESULT_SETTING(ID,INSPECT_PLAN_ID,SUMMERISE_NAME,SUMERISE_DESCRIBLE)
+		 
+    <foreach collection="list" item="item" index="index" open="(" separator="union" close=")">
+			select
+			#{item.id},#{item.inspectPlanId},#{item.inspectPlanSummeriseName},#{item.inspectPlanSumeriseDescrible}
+			from dual
+		</foreach>
+	
+  </insert>
+	 
+  <delete id="inspect_plan_delConclusionsByBasicId">
+		delete from STM_INSPECT_PLAN_RESULT_SETTING where
+		INSPECT_PLAN_ID in
+		 
+    <foreach collection="planIds" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	
+  </delete>
+
+
+
+	 
+  <select id="inspect_plan_getConclusionsByBasicId" resultType="com.mainsteam.stm.portal.inspect.bo.InspectPlanResultSettingBo">
+		select ID id,INSPECT_PLAN_ID
+		inspectPlanId,SUMMERISE_NAME
+		inspectPlanSummeriseName,SUMERISE_DESCRIBLE
+		inspectPlanSumeriseDescrible from STM_INSPECT_PLAN_RESULT_SETTING where
+		INSPECT_PLAN_ID = #{basicId}
+	</select>
+
+	 
+  <select id="inspect_plan_loadItem" resultType="com.mainsteam.stm.portal.inspect.bo.InspectPlanContentBo">
+		select ID id,INSPECT_PLAN_ID inspectPlanId,
+		PARENT_ID
+		inspectPlanParentId,
+		CHILD_ITME inspectPlanItemName,
+		ITME_DESCRIBLE
+		inspectPlanItemDescrible,
+		ITME_VALUE inspectPlanItemValue,
+		ITME_REFERENCE_PREFIX inspectPlanItemReferencePrefix,
+		ITME_REFERENCE_SUBFIX inspectPlanItemReferenceSubfix,
+		ITME_UNIT
+		inspectPlanItemUnit,
+		ITME_CONDITION_DESCRIBLE
+		itemConditionDescrible,
+		SORT sort,EDIT
+		edit,INDICATOR_AS_ITEM indicatorAsItem,
+		RESOURCE_ID
+		resourceId,INDEX_MODEL_ID indexModelId,MODEL_ID modelId,
+		TYPE type
+		from
+		STM_INSPECT_PLAN_CONTENT
+		where PARENT_ID =
+		#{catalogId} order by SORT
+	</select>
+
+	 
+  <select id="inspect_plan_loadItem_hierarchy_two" resultType="java.util.HashMap">
+		select c1.ID id,
+		c1.INSPECT_PLAN_ID inspectPlanId,
+		c1.PARENT_ID inspectPlanParentId,
+		c1.CHILD_ITME inspectPlanItemName,
+		c1.ITME_DESCRIBLE inspectPlanItemDescrible,
+		c1.ITME_VALUE
+		inspectPlanItemValue,
+		c1.ITME_REFERENCE_PREFIX
+		inspectPlanItemReferencePrefix,
+		c1.ITME_REFERENCE_SUBFIX
+		inspectPlanItemReferenceSubfix,
+		c1.ITME_UNIT
+		inspectPlanItemUnit,
+		c1.ITME_CONDITION_DESCRIBLE
+		itemConditionDescrible,
+		c1.SORT
+		sort,c1.EDIT
+		edit,c1.INDICATOR_AS_ITEM indicatorAsItem,
+		c1.RESOURCE_ID
+		resourceId,c1.INDEX_MODEL_ID indexModelId,c1.MODEL_ID modelId,
+		c1.TYPE TYPE,
+		c2.ID
+		id2,c2.INSPECT_PLAN_ID inspectPlanId2,
+		c2.PARENT_ID
+		inspectPlanParentId2,
+		c2.CHILD_ITME inspectPlanItemName2,
+		c2.ITME_DESCRIBLE
+		inspectPlanItemDescrible2,
+		c2.ITME_VALUE
+		inspectPlanItemValue2,
+		c2.ITME_REFERENCE_PREFIX
+		itemReferencePrefix2,
+		c2.ITME_REFERENCE_SUBFIX
+		itemReferenceSubfix2,
+		c2.ITME_UNIT
+		inspectPlanItemUnit2,
+		c2.ITME_CONDITION_DESCRIBLE
+		itemConditionDescrible2,
+		c2.SORT
+		sort2,c2.EDIT
+		edit2,c2.INDICATOR_AS_ITEM indicatorAsItem2,
+		c2.RESOURCE_ID
+		resourceId2,c2.INDEX_MODEL_ID indexModelId2,c2.MODEL_ID
+		modelId2
+		from
+		STM_INSPECT_PLAN_CONTENT c1 left join
+		STM_INSPECT_PLAN_CONTENT c2 on c1.id = c2.PARENT_ID
+		where c1.PARENT_ID =
+		#{catalogId} order by c1.SORT,c2.SORT
+	</select>
+	
+	 
+  <!-- mysql -->
+	 
+  <insert id="inspect_plan_addItems" parameterType="com.mainsteam.stm.portal.inspect.bo.InspectPlanContentBo" databaseId="mysql">
+		insert
+		STM_INSPECT_PLAN_CONTENT(ID,PARENT_ID,CHILD_ITME,ITME_DESCRIBLE,ITME_VALUE,ITME_REFERENCE_PREFIX,ITME_REFERENCE_SUBFIX,ITME_UNIT,ITME_CONDITION_DESCRIBLE,SORT,EDIT,INDICATOR_AS_ITEM,RESOURCE_ID,INDEX_MODEL_ID,MODEL_ID,INSPECT_PLAN_ID,TYPE)
+		values
+		(#{id},#{inspectPlanParentId},#{inspectPlanItemName},#{inspectPlanItemDescrible},#{inspectPlanItemValue},#{inspectPlanItemReferencePrefix},#{inspectPlanItemReferenceSubfix},#{inspectPlanItemUnit},#{itemConditionDescrible},#{sort},#{edit},#{indicatorAsItem},#{resourceId},#{indexModelId},#{modelId},#{inspectPlanId},#{type})
+		 
+    <!-- <foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.id},#{item.inspectPlanParentId},#{item.inspectPlanItemName},#{item.inspectPlanItemDescrible},#{item.inspectPlanItemValue},#{item.inspectPlanItemReferencePrefix},#{item.inspectPlanItemReferenceSubfix},#{item.inspectPlanItemUnit},#{item.itemConditionDescrible},#{item.sort},#{item.edit},#{item.indicatorAsItem},#{item.resourceId},#{item.indexModelId},#{item.modelId},#{item.inspectPlanId},#{item.type})
+		</foreach> -->
+	
+  </insert>
+	
+	 
+  <!-- oracle -->
+	 
+  <insert id="inspect_plan_addItems" parameterType="com.mainsteam.stm.portal.inspect.bo.InspectPlanContentBo" databaseId="oracle">
+		insert INTO
+		STM_INSPECT_PLAN_CONTENT(ID,PARENT_ID,CHILD_ITME,ITME_DESCRIBLE,ITME_VALUE,ITME_REFERENCE_PREFIX,ITME_REFERENCE_SUBFIX,ITME_UNIT,ITME_CONDITION_DESCRIBLE,SORT,EDIT,INDICATOR_AS_ITEM,RESOURCE_ID,INDEX_MODEL_ID,MODEL_ID,INSPECT_PLAN_ID,TYPE)
+		values(
+			#{id,jdbcType=NUMERIC},
+			#{inspectPlanParentId,jdbcType=NUMERIC},
+			#{inspectPlanItemName,jdbcType=VARCHAR},
+			#{inspectPlanItemDescrible,jdbcType=VARCHAR},
+			#{inspectPlanItemValue,jdbcType=CLOB},
+			#{inspectPlanItemReferencePrefix,jdbcType=CLOB},
+			#{inspectPlanItemReferenceSubfix,jdbcType=CLOB},
+			#{inspectPlanItemUnit,jdbcType=VARCHAR},
+			#{itemConditionDescrible,jdbcType=CLOB},
+			#{sort,jdbcType=NUMERIC},
+			 
+    <if test="edit == true">
+				1,
+			</if>
+			 
+    <if test="edit == false">
+				0,
+			</if>
+			 
+    <if test="indicatorAsItem == true">
+				1,
+			</if>
+			 
+    <if test="indicatorAsItem == false">
+				0,
+			</if>
+			#{resourceId,jdbcType=NUMERIC},
+			#{indexModelId,jdbcType=VARCHAR},
+			#{modelId,jdbcType=VARCHAR},
+			#{inspectPlanId,jdbcType=NUMERIC},
+			#{type,jdbcType=NUMERIC}
+		)
+	
+  </insert>
+	 
+  <!-- oscar -->
+		 
+  <insert id="inspect_plan_addItems" parameterType="com.mainsteam.stm.portal.inspect.bo.InspectPlanContentBo" databaseId="dm">
+		insert INTO
+		STM_INSPECT_PLAN_CONTENT(ID,PARENT_ID,CHILD_ITME,ITME_DESCRIBLE,ITME_VALUE,ITME_REFERENCE_PREFIX,ITME_REFERENCE_SUBFIX,ITME_UNIT,ITME_CONDITION_DESCRIBLE,SORT,EDIT,INDICATOR_AS_ITEM,RESOURCE_ID,INDEX_MODEL_ID,MODEL_ID,INSPECT_PLAN_ID,TYPE)
+		values(
+			#{id,jdbcType=NUMERIC},
+			#{inspectPlanParentId,jdbcType=NUMERIC},
+			#{inspectPlanItemName,jdbcType=VARCHAR},
+			#{inspectPlanItemDescrible,jdbcType=VARCHAR},
+			#{inspectPlanItemValue,jdbcType=CLOB},
+			#{inspectPlanItemReferencePrefix,jdbcType=CLOB},
+			#{inspectPlanItemReferenceSubfix,jdbcType=CLOB},
+			#{inspectPlanItemUnit,jdbcType=VARCHAR},
+			#{itemConditionDescrible,jdbcType=CLOB},
+			#{sort,jdbcType=NUMERIC},
+			 
+    <if test="edit == true">
+				1,
+			</if>
+			 
+    <if test="edit == false">
+				0,
+			</if>
+			 
+    <if test="indicatorAsItem == true">
+				1,
+			</if>
+			 
+    <if test="indicatorAsItem == false">
+				0,
+			</if>
+			#{resourceId,jdbcType=NUMERIC},
+			#{indexModelId,jdbcType=VARCHAR},
+			#{modelId,jdbcType=VARCHAR},
+			#{inspectPlanId,jdbcType=NUMERIC},
+			#{type,jdbcType=NUMERIC}
+		)
+	
+  </insert>
+  <insert id="inspect_plan_addItems" parameterType="com.mainsteam.stm.portal.inspect.bo.InspectPlanContentBo" databaseId="oscar">
+			insert INTO
+		STM_INSPECT_PLAN_CONTENT(ID,PARENT_ID,CHILD_ITME,ITME_DESCRIBLE,ITME_VALUE,ITME_REFERENCE_PREFIX,ITME_REFERENCE_SUBFIX,ITME_UNIT,ITME_CONDITION_DESCRIBLE,SORT,EDIT,INDICATOR_AS_ITEM,RESOURCE_ID,INDEX_MODEL_ID,MODEL_ID,INSPECT_PLAN_ID,TYPE)
+	values(
+			#{id},
+			#{inspectPlanParentId},
+			#{inspectPlanItemName},
+			#{inspectPlanItemDescrible},
+			#{inspectPlanItemValue},
+			#{inspectPlanItemReferencePrefix},
+			#{inspectPlanItemReferenceSubfix},
+			#{inspectPlanItemUnit},
+			#{itemConditionDescrible},
+			#{sort},
+			 
+    <if test="edit == true">
+				1,
+			</if>
+			 
+    <if test="edit == false">
+				0,
+			</if>
+			 
+    <if test="indicatorAsItem == true">
+				1,
+			</if>
+			 
+    <if test="indicatorAsItem == false">
+				0,
+			</if>
+			#{resourceId},
+			#{indexModelId},
+			#{modelId},
+			#{inspectPlanId},
+			#{type}
+		)
+		
+	
+  </insert>
+	 
+  <!-- 	<insert id="inspect_plan_addItems" parameterType="java.util.List" databaseId="oscar">
+			insert INTO
+		STM_INSPECT_PLAN_CONTENT(ID,PARENT_ID,CHILD_ITME,ITME_DESCRIBLE,ITME_VALUE,ITME_REFERENCE_PREFIX,ITME_REFERENCE_SUBFIX,ITME_UNIT,ITME_CONDITION_DESCRIBLE,SORT,EDIT,INDICATOR_AS_ITEM,RESOURCE_ID,INDEX_MODEL_ID,MODEL_ID,INSPECT_PLAN_ID,TYPE)
+		<foreach collection="list" item="item" index="index" open="(" separator="union all" close=")">
+		select
+			#{item.id,jdbcType=NUMERIC},
+			#{item.inspectPlanParentId,jdbcType=NUMERIC},
+			#{item.inspectPlanItemName,jdbcType=VARCHAR},
+			#{item.inspectPlanItemDescrible,jdbcType=VARCHAR},
+			#{item.inspectPlanItemValue,jdbcType=CLOB},
+			#{item.inspectPlanItemReferencePrefix,jdbcType=CLOB},
+			#{item.inspectPlanItemReferenceSubfix,jdbcType=CLOB},
+			#{item.inspectPlanItemUnit,jdbcType=VARCHAR},
+			#{item.itemConditionDescrible,jdbcType=CLOB},
+			#{item.sort,jdbcType=NUMERIC},
+			<if test="item.edit == true">
+				1,
+			</if>
+			<if test="item.edit == false">
+				0,
+			</if>
+			<if test="item.indicatorAsItem == true">
+				1,
+			</if>
+			<if test="item.indicatorAsItem == false">
+				0,
+			</if>
+			#{item.resourceId,jdbcType=NUMERIC},
+			#{item.indexModelId,jdbcType=VARCHAR},
+			#{item.modelId,jdbcType=VARCHAR},
+			#{item.inspectPlanId,jdbcType=NUMERIC},
+			#{item.type,jdbcType=NUMERIC}
+		from dual
+		</foreach>
+		
+	</insert> -->
+	 
+  <insert id="inspect_plan_addItemsoscar" parameterType="com.mainsteam.stm.portal.inspect.bo.InspectPlanContentBo" databaseId="oscar">
+			insert INTO
+		STM_INSPECT_PLAN_CONTENT(ID,PARENT_ID,CHILD_ITME,ITME_DESCRIBLE,ITME_VALUE,ITME_REFERENCE_PREFIX,ITME_REFERENCE_SUBFIX,ITME_UNIT,ITME_CONDITION_DESCRIBLE,SORT,EDIT,INDICATOR_AS_ITEM,RESOURCE_ID,INDEX_MODEL_ID,MODEL_ID,INSPECT_PLAN_ID,TYPE)
+		values
+			(#{id},#{inspectPlanParentId},#{inspectPlanItemName},#{inspectPlanItemDescrible},#{inspectPlanItemValue},#{inspectPlanItemReferencePrefix},#{inspectPlanItemReferenceSubfix},#{inspectPlanItemUnit},#{itemConditionDescrible},#{sort},#{edit},#{indicatorAsItem},#{resourceId},#{indexModelId},#{modelId},#{inspectPlanId},#{type})
+		
+	</insert>
+	 
+  <update id="inspect_plan_updateItem" parameterType="com.mainsteam.stm.portal.inspect.bo.InspectPlanContentBo">
+		update STM_INSPECT_PLAN_CONTENT set CHILD_ITME =
+		#{inspectPlanItemName},ITME_DESCRIBLE =
+		#{inspectPlanItemDescrible},SORT = #{sort}
+		where ID = #{id}
+	</update>
+
+	 
+  <update id="inspect_plan_updateItemBasic">
+		update STM_INSPECT_PLAN_CONTENT set
+		ITME_VALUE =
+		#{value},
+		ITME_REFERENCE_PREFIX =
+		#{prefix},
+		ITME_REFERENCE_SUBFIX =
+		#{subfix},
+		ITME_UNIT =
+		#{unit},
+		ITME_CONDITION_DESCRIBLE =
+		#{describle}
+		where ID = #{id}
+	</update>
+
+	 
+  <select id="inspect_plan_loadJobInfo" parameterType="java.util.HashMap" resultMap="InspectPlanClob">
+		select ID id,TYPE type,TYPE_TIME timeStr from
+		STM_INSPECT_PLAN where ID
+		= #{id}
+  </select>
+
+	 
+  <update id="inspect_plan_updateExecTime" parameterType="java.util.HashMap">
+		update
+		STM_INSPECT_PLAN set LAST_EXEC_TIME = #{date} where ID = #{id}
+	</update>
+
+	 
+  <select id="inspect_plan_getPlan" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select
+		ID id,TASK_NAME,REPORT_NAME,TYPE,DESCRIBLE,DOMAIN,INSPECTOR,REPORT_PRODUCE_TIME_SHOW,REPORT_MODIFY_TIME_SHOW,REPORT_MODIFIOR_SHOW,REPORT_EDITABLE,RESOURCE_SHOW,BUSINESS_SHOW,RESOURCE_NAME,BUSINESS_NAME,STATUS,CREATOR,TYPE_TIME
+		from STM_INSPECT_PLAN where ID = #{id}
+	</select>
+	
+	<select id="inspect_plan_getPlan" parameterType="java.util.HashMap" resultType="java.util.HashMap" databaseId="dm">
+		select
+		ID id,TASK_NAME,REPORT_NAME,TYPE,DESCRIBLE,"DOMAIN",INSPECTOR,REPORT_PRODUCE_TIME_SHOW,REPORT_MODIFY_TIME_SHOW,REPORT_MODIFIOR_SHOW,REPORT_EDITABLE,RESOURCE_SHOW,BUSINESS_SHOW,RESOURCE_NAME,BUSINESS_NAME,STATUS,CREATOR,TYPE_TIME
+		from STM_INSPECT_PLAN where ID = #{id}
+	</select>
+	 
+  <select id="inspect_plan_getSelfItem" parameterType="java.util.HashMap" resultType="com.mainsteam.stm.portal.inspect.bo.InspectPlanSelfItemBo">
+		select ID id,INSPECT_PLAN_ID inspectPlanId,SELF_ITEM_NAME
+		inspectPlanSelfItemName,SELF_ITME_TYPE
+		inspectPlanSelfItemType,ITEM_CONTENT
+		inspectPlanItemContent
+		from
+		STM_INSPECT_PLAN_SELF_ITEM where
+		INSPECT_PLAN_ID = #{planId}
+	</select>
+
+	 
+  <select id="inspect_plan_getState" resultType="java.lang.Boolean">
+		select STATUS from
+		STM_INSPECT_PLAN where ID = #{id}
+	</select>
+
+	 
+  <delete id="inspect_plan_delPlan">
+		delete from STM_INSPECT_PLAN where ID in
+		 
+    <foreach collection="planIds" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	
+  </delete>
+	 
+  <!-- mysql -->
+	 
+  <select id="inspect_plan_comtentByDel" resultType="java.lang.Long" databaseId="mysql">
+		select ID from STM_INSPECT_PLAN_CONTENT c inner join
+		(select c1.ID
+		id1,c2.ID id2,c3.ID id3 from STM_INSPECT_PLAN_CONTENT c1
+		left join
+		STM_INSPECT_PLAN_CONTENT c2 on c1.ID = c2.PARENT_ID left join
+		STM_INSPECT_PLAN_CONTENT c3 on c2.ID = c3.PARENT_ID where
+		 
+    <if test="planIds != null">
+			c1.INSPECT_PLAN_ID in
+			 
+      <foreach collection="planIds" index="index" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		
+    </if>
+		 
+    <if test="itemIds != null">
+			c1.ID in
+			 
+      <foreach collection="itemIds" index="index" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		
+    </if>
+		) a on
+		c.ID = a.id1 or c.ID = a.id2 or c.ID = a.id3 where c.ID is not
+		null
+	
+  </select>
+	 
+  <!-- oracle -->
+	 
+  <select id="inspect_plan_comtentByDel" resultType="java.lang.Long" databaseId="oracle">
+		select c.ID from STM_INSPECT_PLAN_CONTENT c inner join
+		(select c1.ID
+		id1,c2.ID id2,c3.ID id3 from STM_INSPECT_PLAN_CONTENT c1
+		left join
+		STM_INSPECT_PLAN_CONTENT c2 on c1.ID = c2.PARENT_ID left join
+		STM_INSPECT_PLAN_CONTENT c3 on c2.ID = c3.PARENT_ID where
+		 
+    <if test="planIds != null">
+			c1.INSPECT_PLAN_ID in
+			 
+      <foreach collection="planIds" index="index" item="item" open="(" separator="union all" close=")">
+				select #{item} from dual
+			</foreach>
+		
+    </if>
+		 
+    <if test="itemIds != null">
+			c1.ID in
+			 
+      <foreach collection="itemIds" index="index" item="item" open="(" separator="union all" close=")">
+				select #{item} from dual
+			</foreach>
+		
+    </if>
+		) a on
+		c.ID = a.id1 or c.ID = a.id2 or c.ID = a.id3 where c.ID is not
+		null
+	
+  </select>
+	 
+  <!-- oscar -->
+	 
+  <select id="inspect_plan_comtentByDel" resultType="java.lang.Long" databaseId="dm">
+		select c.ID from STM_INSPECT_PLAN_CONTENT c inner join
+		(select c1.ID
+		id1,c2.ID id2,c3.ID id3 from STM_INSPECT_PLAN_CONTENT c1
+		left join
+		STM_INSPECT_PLAN_CONTENT c2 on c1.ID = c2.PARENT_ID left join
+		STM_INSPECT_PLAN_CONTENT c3 on c2.ID = c3.PARENT_ID where
+		 
+    <if test="planIds != null">
+			c1.INSPECT_PLAN_ID in
+			 
+      <foreach collection="planIds" index="index" item="item" open="(" separator="union all" close=")">
+				select #{item} from dual
+			</foreach>
+		
+    </if>
+		 
+    <if test="itemIds != null">
+			c1.ID in
+			 
+      <foreach collection="itemIds" index="index" item="item" open="(" separator="union all" close=")">
+				select #{item} from dual
+			</foreach>
+		
+    </if>
+		) a on
+		c.ID = a.id1 or c.ID = a.id2 or c.ID = a.id3 where c.ID is not
+		null
+	
+  </select>
+  <select id="inspect_plan_comtentByDel" resultType="java.lang.Long" databaseId="oscar">
+		select c.ID from STM_INSPECT_PLAN_CONTENT c inner join
+		(select c1.ID
+		id1,c2.ID id2,c3.ID id3 from STM_INSPECT_PLAN_CONTENT c1
+		left join
+		STM_INSPECT_PLAN_CONTENT c2 on c1.ID = c2.PARENT_ID left join
+		STM_INSPECT_PLAN_CONTENT c3 on c2.ID = c3.PARENT_ID where
+		 
+    <if test="planIds != null">
+			c1.INSPECT_PLAN_ID in
+			 
+      <foreach collection="planIds" index="index" item="item" open="(" separator="union all" close=")">
+				select #{item} from dual
+			</foreach>
+		
+    </if>
+		 
+    <if test="itemIds != null">
+			c1.ID in
+			 
+      <foreach collection="itemIds" index="index" item="item" open="(" separator="union all" close=")">
+				select #{item} from dual
+			</foreach>
+		
+    </if>
+		) a on
+		c.ID = a.id1 or c.ID = a.id2 or c.ID = a.id3 where c.ID is not
+		null
+	
+  </select>
+	 
+  <!-- mysql -->
+	 
+  <select id="inspect_plan_getTwoItems" resultType="java.lang.Long" databaseId="mysql">
+		select ID from STM_INSPECT_PLAN_CONTENT c inner join
+		(select c1.ID
+		id1,c2.ID id2 from STM_INSPECT_PLAN_CONTENT c1
+		left join
+		STM_INSPECT_PLAN_CONTENT c2 on c1.ID = c2.PARENT_ID where c1.PARENT_ID
+		in
+		 
+    <if test="parentIds != null">
+			 
+      <foreach collection="parentIds" index="index" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		
+    </if>
+		) a on
+		c.ID = a.id1 or c.ID = a.id2 where c.ID is not
+		null
+	
+  </select>
+	 
+  <!-- oracle -->
+	 
+  <select id="inspect_plan_getTwoItems" resultType="java.lang.Long" databaseId="oracle">
+		select c.ID from STM_INSPECT_PLAN_CONTENT c inner join
+		(select c1.ID
+		id1,c2.ID id2 from STM_INSPECT_PLAN_CONTENT c1
+		left join
+		STM_INSPECT_PLAN_CONTENT c2 on c1.ID = c2.PARENT_ID where c1.PARENT_ID
+		in
+		 
+    <if test="parentIds != null">
+			 
+      <foreach collection="parentIds" index="index" item="item" open="(" separator="union all" close=")">
+				select #{item} from dual
+			</foreach>
+		
+    </if>
+		) a on
+		c.ID = a.id1 or c.ID = a.id2 where c.ID is not
+		null
+	
+  </select>
+	 
+  <!-- oscar -->
+	 
+  <select id="inspect_plan_getTwoItems" resultType="java.lang.Long" databaseId="dm">
+		select c.ID from STM_INSPECT_PLAN_CONTENT c inner join
+		(select c1.ID
+		id1,c2.ID id2 from STM_INSPECT_PLAN_CONTENT c1
+		left join
+		STM_INSPECT_PLAN_CONTENT c2 on c1.ID = c2.PARENT_ID where c1.PARENT_ID
+		in
+		 
+    <if test="parentIds != null">
+			 
+      <foreach collection="parentIds" index="index" item="item" open="(" separator="union all" close=")">
+				select #{item} from dual
+			</foreach>
+		
+    </if>
+		) a on
+		c.ID = a.id1 or c.ID = a.id2 where c.ID is not
+		null
+	
+  </select>
+  <select id="inspect_plan_getTwoItems" resultType="java.lang.Long" databaseId="oscar">
+		select c.ID from STM_INSPECT_PLAN_CONTENT c inner join
+		(select c1.ID
+		id1,c2.ID id2 from STM_INSPECT_PLAN_CONTENT c1
+		left join
+		STM_INSPECT_PLAN_CONTENT c2 on c1.ID = c2.PARENT_ID where c1.PARENT_ID
+		in
+		 
+    <if test="parentIds != null">
+			 
+      <foreach collection="parentIds" index="index" item="item" open="(" separator="union all" close=")">
+				select #{item} from dual
+			</foreach>
+		
+    </if>
+		) a on
+		c.ID = a.id1 or c.ID = a.id2 where c.ID is not
+		null
+	
+  </select>
+	 
+  <!-- mysql -->
+	 
+  <insert id="inspect_plan_copyPlan" databaseId="mysql">
+		insert INTO
+		STM_INSPECT_PLAN(TASK_NAME,TYPE,DESCRIBLE,DOMAIN,INSPECTOR,REPORT_PRODUCE_TIME_SHOW,REPORT_MODIFY_TIME_SHOW,REPORT_MODIFIOR_SHOW,REPORT_EDITABLE,RESOURCE_SHOW,BUSINESS_SHOW,RESOURCE_NAME,BUSINESS_NAME,CREATOR,TYPE_TIME,REPORT_NAME,STATUS,ID)
+		select
+		concat(TASK_NAME,'(副本)'),TYPE,DESCRIBLE,DOMAIN,INSPECTOR,REPORT_PRODUCE_TIME_SHOW,REPORT_MODIFY_TIME_SHOW,REPORT_MODIFIOR_SHOW,REPORT_EDITABLE,RESOURCE_SHOW,BUSINESS_SHOW,RESOURCE_NAME,BUSINESS_NAME,#{userId},TYPE_TIME,concat(REPORT_NAME,'(副本)'),false,#{newId}
+		from STM_INSPECT_PLAN where ID = #{planId}
+	</insert>
+	 
+  <!-- oracle -->
+	 
+  <insert id="inspect_plan_copyPlan" databaseId="oracle">
+		insert INTO
+		STM_INSPECT_PLAN(TASK_NAME,TYPE,DESCRIBLE,DOMAIN,INSPECTOR,REPORT_PRODUCE_TIME_SHOW,REPORT_MODIFY_TIME_SHOW,REPORT_MODIFIOR_SHOW,REPORT_EDITABLE,RESOURCE_SHOW,BUSINESS_SHOW,RESOURCE_NAME,BUSINESS_NAME,CREATOR,TYPE_TIME,REPORT_NAME,STATUS,ID)
+		select
+		concat(TASK_NAME,'(副本)'),TYPE,DESCRIBLE,DOMAIN,INSPECTOR,REPORT_PRODUCE_TIME_SHOW,REPORT_MODIFY_TIME_SHOW,REPORT_MODIFIOR_SHOW,REPORT_EDITABLE,RESOURCE_SHOW,BUSINESS_SHOW,RESOURCE_NAME,BUSINESS_NAME,#{userId},TYPE_TIME,concat(REPORT_NAME,'(副本)'),0,#{newId}
+		from STM_INSPECT_PLAN where ID = #{planId}
+	</insert>
+	 
+  <!-- oscar -->
+	 
+  <insert id="inspect_plan_copyPlan" databaseId="dm">
+		insert INTO
+		STM_INSPECT_PLAN(TASK_NAME,TYPE,DESCRIBLE,"DOMAIN",INSPECTOR,REPORT_PRODUCE_TIME_SHOW,REPORT_MODIFY_TIME_SHOW,REPORT_MODIFIOR_SHOW,REPORT_EDITABLE,RESOURCE_SHOW,BUSINESS_SHOW,RESOURCE_NAME,BUSINESS_NAME,CREATOR,TYPE_TIME,REPORT_NAME,STATUS,ID)
+		select
+		concat(TASK_NAME,'(副本)'),TYPE,DESCRIBLE,"DOMAIN",INSPECTOR,REPORT_PRODUCE_TIME_SHOW,REPORT_MODIFY_TIME_SHOW,REPORT_MODIFIOR_SHOW,REPORT_EDITABLE,RESOURCE_SHOW,BUSINESS_SHOW,RESOURCE_NAME,BUSINESS_NAME,#{userId},TYPE_TIME,concat(REPORT_NAME,'(副本)'),0,#{newId}
+		from STM_INSPECT_PLAN where ID = #{planId}
+	</insert>
+  <insert id="inspect_plan_copyPlan" databaseId="oscar">
+		insert INTO
+		STM_INSPECT_PLAN(TASK_NAME,TYPE,DESCRIBLE,DOMAIN,INSPECTOR,REPORT_PRODUCE_TIME_SHOW,REPORT_MODIFY_TIME_SHOW,REPORT_MODIFIOR_SHOW,REPORT_EDITABLE,RESOURCE_SHOW,BUSINESS_SHOW,RESOURCE_NAME,BUSINESS_NAME,CREATOR,TYPE_TIME,REPORT_NAME,STATUS,ID)
+		select
+		concat(TASK_NAME,'(副本)'),TYPE,DESCRIBLE,DOMAIN,INSPECTOR,REPORT_PRODUCE_TIME_SHOW,REPORT_MODIFY_TIME_SHOW,REPORT_MODIFIOR_SHOW,REPORT_EDITABLE,RESOURCE_SHOW,BUSINESS_SHOW,RESOURCE_NAME,BUSINESS_NAME,#{userId},TYPE_TIME,concat(REPORT_NAME,'(副本)'),0,#{newId}
+		from STM_INSPECT_PLAN where ID = #{planId}
+	</insert>
+	 
+  <update id="inspect_plan_updateReportName">
+		update STM_INSPECT_PLAN set REPORT_NAME = #{name}
+		where ID = #{planId}
+	</update>
+	 
+  <select id="inspect_plan_selectReportByName" resultType="java.lang.Long">
+		select count(*) from STM_INSPECT_PLAN where REPORT_NAME = #{name}
+	</select>
+	 
+  <!-- mysql -->
+	 
+  <update id="inspect_plan_updateEditDate" databaseId="mysql">
+		update STM_INSPECT_PLAN set LAST_EDIT_TIME = now()
+		where id = #{id}
+	</update>
+	 
+  <!-- oracle -->
+	 
+  <update id="inspect_plan_updateEditDate" databaseId="oracle">
+		update STM_INSPECT_PLAN set LAST_EDIT_TIME = SYSDATE
+		where id = #{id}
+	</update>
+	 
+  <!-- oscar -->
+	 
+  <update id="inspect_plan_updateEditDate" databaseId="dm">
+		update STM_INSPECT_PLAN set LAST_EDIT_TIME = SYSDATE
+		where id = #{id}
+	</update>
+  <update id="inspect_plan_updateEditDate" databaseId="oscar">
+		update STM_INSPECT_PLAN set LAST_EDIT_TIME = SYSDATE
+		where id = #{id}
+	</update>
+	 
+  <select id="inspect_plan_getContentByResourceId" resultType="java.lang.Long" parameterType="java.util.HashMap">
+		select id from STM_INSPECT_PLAN_CONTENT where resource_id
+		is not null
+		and inspect_plan_id = #{id} union select id from
+		STM_INSPECT_PLAN_CONTENT where resource_id is not null and parent_id
+		in(select id from STM_INSPECT_PLAN_CONTENT where inspect_plan_id =
+		#{id})
+		union select id from
+		STM_INSPECT_PLAN_CONTENT where resource_id is
+		not null and parent_id
+		in(select id from
+		STM_INSPECT_PLAN_CONTENT where
+		parent_id
+		in(select id from STM_INSPECT_PLAN_CONTENT where
+		inspect_plan_id = #{id}))
+	</select>
+
+	 
+  <delete id="inspect_plan_delContent">
+		delete from STM_INSPECT_PLAN_CONTENT where id in
+		 
+    <foreach collection="ids" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	
+  </delete>
+
+ 
+  <!-- mysql -->
+	 
+  <select id="inspectDomainGroupList" resultType="com.mainsteam.stm.portal.inspect.bo.InspectPlanBasicBo" parameterType="com.mainsteam.stm.portal.inspect.bo.InspectPlanBasicBo" databaseId="mysql">
+		SELECT DISTINCT(p.ID) id ,
+		p.TASK_NAME insepctPalnTaskName,p.DOMAIN
+		inspectPlanDomain,p.INSPECTOR inspectPlanInspector,p.CREATOR
+		inspectPlanCreator,DATE_FORMAT(p.LAST_EDIT_TIME,'%Y-%m-%d %H:%i')
+		inspectPlanLastEditTime,p.TYPE
+		inspectPlanType,
+		IF(p.LAST_EXEC_TIME='0000-00-00
+		00:00:00',NULL,DATE_FORMAT(p.LAST_EXEC_TIME,'%Y-%m-%d %H:%i'))
+		inspectPlanLastExecTime,p.DESCRIBLE
+		inspectPlanDescrible,p.STATUS
+		inspectPlanStatus 
+ FROM STM_INSPECT_PLAN p LEFT JOIN STM_INSPECT_GROUP_DOMAIN_REL b ON p.ID=b.INSPECT_ID
+ LEFT JOIN STM_SYS_USER u ON
+		p.CREATOR = u.ID LEFT JOIN STM_SYS_USER u1 ON p.INSPECTOR = u1.ID
+		where
+		1 = 1
+		 
+    <if test="condition.inspectPlanCreator != null">
+			and p.CREATOR = #{condition.inspectPlanCreator}
+		</if>
+		 
+    <if test="condition.insepctPalnTaskName != null and condition.insepctPalnTaskName != '' ">
+			and p.TASK_NAME like
+			concat('%',#{condition.insepctPalnTaskName},'%')
+		</if>
+		 
+    <if test="condition.inspectPlanTypes != null">
+			and
+			 
+      <foreach collection="condition.inspectPlanTypes" item="item" open="(" close=")" index="index">
+				 
+        <if test="index != 0 ">
+					or
+				</if>
+				p.TYPE = #{item}
+			
+      </foreach>
+		
+    </if>
+		 
+    <if test="condition.inspectPlanStatus != null">
+			and p.STATUS = #{condition.inspectPlanStatus}
+		</if>
+		 
+    <if test="condition.inspectPlanDomains != null">
+			and
+			 
+      <foreach collection="condition.inspectPlanDomains" item="item" open="(" close=")" index="index">
+				 
+        <if test="index != 0 ">
+					or
+				</if>
+				b.DOMAIN_ID = #{item}
+			
+      </foreach>
+		
+    </if>
+		 
+    <if test="condition.inspectPlanInspector != null">
+			and p.INSPECTOR = #{condition.inspectPlanInspector}
+		</if>
+		 
+    <if test="condition.createUserName != null">
+			and u.NAME like
+			concat('%',#{condition.createUserName},'%')
+		</if>
+		 
+    <if test="condition.inspectorName != null">
+			and u1.NAME like
+			concat('%',#{condition.inspectorName},'%')
+		</if>
+		 
+    <if test="condition.authorityUserId != null and condition.authorityUserId != ''">
+			and (
+			p.CREATOR = #{condition.authorityUserId}
+			 
+      <if test="condition.authorityDomainIds != null">
+				or p.DOMAIN in
+				 
+        <foreach collection="condition.authorityDomainIds" item="item" open="(" close=")" index="index">
+					#{item}
+				</foreach>
+			
+      </if>
+			)
+		
+    </if>
+		order by p.CREATOR = #{condition.orderUserId} desc,p.STATUS
+		desc,p.LAST_EDIT_TIME desc
+	
+  </select>
+	<!-- dm -->
+	<select id="inspectDomainGroupList" resultType="com.mainsteam.stm.portal.inspect.bo.InspectPlanBasicBo" parameterType="com.mainsteam.stm.portal.inspect.bo.InspectPlanBasicBo" databaseId="dm">
+	SELECT 
+	p.ID id,
+	p.TASK_NAME insepctPalnTaskName,
+	p."DOMAIN" inspectPlanDomain,
+	p.INSPECTOR inspectPlanInspector,
+	p.CREATOR inspectPlanCreator,
+	p.LAST_EDIT_TIME inspectPlanLastEditTime,
+	p.TYPE inspectPlanType,
+	<!-- CASE p.LAST_EXEC_TIME
+	WHEN '0000-00-00 00:00:00' THEN
+	NULL
+		ELSE
+	to_date(
+		p.LAST_EXEC_TIME,
+		'%Y-%m-%d %H:%i'
+	) END -->
+ 	p.LAST_EXEC_TIME inspectPlanLastExecTime,
+ 	p.DESCRIBLE inspectPlanDescrible,
+ 	p. STATUS inspectPlanStatus
+	FROM
+	STM_INSPECT_PLAN p
+	LEFT JOIN STM_INSPECT_GROUP_DOMAIN_REL b ON p.ID = b.INSPECT_ID
+	LEFT JOIN STM_SYS_USER u ON p.CREATOR = u.ID
+	LEFT JOIN STM_SYS_USER u1 ON p.INSPECTOR = u1.ID
+	WHERE
+	1 = 1
+		 
+    <if test="condition.inspectPlanCreator != null">
+			and p.CREATOR = #{condition.inspectPlanCreator}
+		</if>
+		 
+    <if test="condition.insepctPalnTaskName != null and condition.insepctPalnTaskName != '' ">
+			and p.TASK_NAME like
+			concat('%',#{condition.insepctPalnTaskName},'%')
+		</if>
+		 
+    <if test="condition.inspectPlanTypes != null">
+			and
+			 
+      <foreach collection="condition.inspectPlanTypes" item="item" open="(" close=")" index="index">
+				 
+        <if test="index != 0 ">
+					or
+				</if>
+				p.TYPE = #{item}
+			
+      </foreach>
+		
+    </if>
+		 
+    <if test="condition.inspectPlanStatus != null">
+			and p.STATUS = #{condition.inspectPlanStatus}
+		</if>
+		 
+    <if test="condition.inspectPlanDomains != null">
+			and
+			 
+      <foreach collection="condition.inspectPlanDomains" item="item" open="(" close=")" index="index">
+				 
+        <if test="index != 0 ">
+					or
+				</if>
+				b.DOMAIN_ID = #{item}
+			
+      </foreach>
+		
+    </if>
+		 
+    <if test="condition.inspectPlanInspector != null">
+			and p.INSPECTOR = #{condition.inspectPlanInspector}
+		</if>
+		 
+    <if test="condition.createUserName != null">
+			and u.NAME like
+			concat('%',#{condition.createUserName},'%')
+		</if>
+		 
+    <if test="condition.inspectorName != null">
+			and u1.NAME like
+			concat('%',#{condition.inspectorName},'%')
+		</if>
+		 
+    <if test="condition.authorityUserId != null and condition.authorityUserId != ''">
+			and (
+			p.CREATOR = #{condition.authorityUserId}
+			 
+      <if test="condition.authorityDomainIds != null">
+				or p.DOMAIN in
+				 
+        <foreach collection="condition.authorityDomainIds" item="item" open="(" close=")" index="index">
+					#{item}
+				</foreach>
+			
+      </if>
+			)
+		
+    </if>
+		order by p.CREATOR = #{condition.orderUserId} desc,p.STATUS
+		desc,p.LAST_EDIT_TIME desc
+	
+  </select>
+	 
+  <select id="inspect_planDomain_loadAll" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select INSPECT_ID inspectid,DOMAIN_ID domainid from
+		STM_INSPECT_GROUP_DOMAIN_REL where INSPECT_ID
+		= #{id}
+	</select>
+	 
+  <select id="inspect_planDomain_loadById" parameterType="java.util.HashMap" resultType="com.mainsteam.stm.portal.inspect.bo.InspectPlanBasicBo">
+		select INSPECT_ID inspectid,DOMAIN_ID domainid from
+		STM_INSPECT_GROUP_DOMAIN_REL where INSPECT_ID
+		= #{inspectid} and DOMAIN_ID=#{domainid}
+	</select>
+		 
+  <insert id="inspect_planDomain_save" parameterType="com.mainsteam.stm.portal.inspect.bo.InspectPlanBasicBo">
+		insert INTO
+		STM_INSPECT_GROUP_DOMAIN_REL(ID,INSPECT_ID,DOMAIN_ID)
+		values(#{id},#{inspectid},#{domainid})
+	</insert>
+	
+		 
+  <!-- <insert id="inspect_planDomain_save" databaseId="oracle" parameterType="com.mainsteam.stm.portal.inspect.bo.InspectPlanBasicBo">
+		insert INTO
+		STM_INSPECT_GROUP_DOMAIN_REL(INSPECT_ID,DOMAIN_ID)
+		values(#{inspectid},#{domainid})
+	</insert> -->
+	
+	 
+  <delete id="inspect_planDomain_del">
+		DELETE FROM STM_INSPECT_GROUP_DOMAIN_REL WHERE INSPECT_ID =#{id}  AND DOMAIN_ID not in
+		 
+    <foreach collection="ids" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	
+  </delete>
+	 
+  <delete id="inspect_planDomain_delAll">
+		DELETE FROM STM_INSPECT_GROUP_DOMAIN_REL WHERE INSPECT_ID in
+		 
+    <foreach collection="planIds" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach> 
+	
+  </delete>
+</mapper>

@@ -1,0 +1,576 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">
+    <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0"/>
+    <PluginClassAliasList>
+        <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+        <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+        <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+        <PluginClassAlias id="columnPasteProcessor" class="com.mainsteam.stm.plugin.common.ColumnPasteProcessor"/>
+        <PluginClassAlias id="RegularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+        <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+        <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+        <PluginClassAlias id="tableConverter" class="com.mainsteam.stm.plugin.common.TableResultSetConverter"/>
+        <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+        <PluginClassAlias id="ChangeRateProcessor" class="com.mainsteam.stm.plugin.common.ChangeRateProcessor"/>
+        <PluginClassAlias id="processConverter" class="com.mainsteam.stm.plugin.common.ProcessResultSetConverter"/>
+        <PluginClassAlias id="FormatProcessor" class="com.mainsteam.stm.plugin.common.FormatProcessor"/>
+        <PluginClassAlias id="memRateProcessor" class="com.mainsteam.stm.plugin.common.MemRateProcessor"/>
+    </PluginClassAliasList>
+    <MetricPlugin metricid="icmpDelayTime" collectType="" pluginid="IcmpPlugin">
+        <PluginResultMetaInfo columns="ip,isAlive,ResponseTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ResponseTime"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="CPU"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfOS_Processor  where name = '_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT SUM(CPU) AS cpuRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    
+    <MetricPlugin metricid="cpuRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="Linux" value="top -b -n 3 -d 2 | grep -i &quot;cpu(s)&quot; | tail -n+3 | awk -F , '{if($4~/id/){printf (&quot;%0.2f&quot;,100-substr($4,1,length($4)-3));}}'"/>
+            <Parameter type="" key="FreeBSD" value="vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+            <Parameter type="" key="UnixWare" value="sar -u 1 2| awk 'BEGIN{idle=0;idloff=0;}{if($0~/idle/){for(i=1;i&lt;=NF;i++){if($i~/idle/)idloff=i;}}else if(NF&gt;1){idle=$idloff;}}END{syscpuload=100.00-idle;printf &quot;%.2f&quot;, syscpuload}'"/>
+            <Parameter type="" key="SunOS" value="vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+            <Parameter type="" key="AIX" value="vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+            <Parameter type="" key="SCO_SV" value="sar -u 1 2| awk 'BEGIN{idle=0;idloff=0;}{if($0~/idle/){for(i=1;i&lt;=NF;i++){if($i~/idle/)idloff=i;}}else if(NF&gt;1){idle=$idloff;}}END{syscpuload=100.00-idle;printf &quot;%.2f&quot;, syscpuload}'"/>
+            <Parameter type="" key="HP-UX" value="vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="Linux" value="top -b -n 3 -d 2 | grep -i &quot;cpu(s)&quot; | tail -n+3 | awk -F , '{if($4~/id/){printf (&quot;%0.2f&quot;,100-substr($4,1,length($4)-3));}}'"/>
+            <Parameter type="" key="FreeBSD" value="vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+            <Parameter type="" key="UnixWare" value="sar -u 1 2| awk 'BEGIN{idle=0;idloff=0;}{if($0~/idle/){for(i=1;i&lt;=NF;i++){if($i~/idle/)idloff=i;}}else if(NF&gt;1){idle=$idloff;}}END{syscpuload=100.00-idle;printf &quot;%.2f&quot;, syscpuload}'"/>
+            <Parameter type="" key="SunOS" value="vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+            <Parameter type="" key="AIX" value="vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+            <Parameter type="" key="SCO_SV" value="sar -u 1 2| awk 'BEGIN{idle=0;idloff=0;}{if($0~/idle/){for(i=1;i&lt;=NF;i++){if($i~/idle/)idloff=i;}}else if(NF&gt;1){idle=$idloff;}}END{syscpuload=100.00-idle;printf &quot;%.2f&quot;, syscpuload}'"/>
+            <Parameter type="" key="HP-UX" value="vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    
+    
+    <MetricPlugin metricid="memRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="Memory,totalMemSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select FreePhysicalMemory,TotalVisibleMEMorySize from Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (totalMemSize - Memory)/totalMemSize*100 AS memRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    
+    
+    <MetricPlugin metricid="availability" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\MicrosoftIISV2::select Started from IIsWebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="" value="TRUE,1;0"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="availableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    
+    
+    <MetricPlugin metricid="appCpuRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Process where Name like '%w3wp%' or Name like '%inetinfo%'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="Version" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="MajorVersion,MinorVersion"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\MicrosoftIISV2::select MajorIIsVersionNumber,MinorIIsVersionNumber from IIsWebInfo"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (MajorVersion)+'.'+(MinorVersion) as Version"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalMemSize" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="totalMemSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select TotalPhysicalMemory from Win32_ComputerSystem"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="hostName" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select name from Win32_ComputerSystem"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="appMemRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="memrate,memcap"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name like '%w3wp%' or Name like '%inetinfo%'"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select TotalPhysicalMemory from Win32_ComputerSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(memrate)*100/memcap) as appMemRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="BytesReceivedPersec" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="bytesReceivedPersec"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select BytesReceivedPersec from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(bytesReceivedPersec)) as BytesReceivedPersec"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="TotalBytesTrans" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="totalBytesTransfered"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select TotalBytesTransfered from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(totalBytesTransfered)) as TotalBytesTrans"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="BytesSentPersec" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="bytesSentPersec"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select BytesSentPersec from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(bytesSentPersec)) as BytesSentPersec"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="CurrConnections" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="currentConnections"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select CurrentConnections from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(currentConnections)) as CurrConnections"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="CurrAnonUsers" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="currentAnonyUsers"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select CurrentAnonyUsers  from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(currentAnonyUsers)) as CurrAnonUsers"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="GetRequestRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select GetRequestsPersec from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="MaxConnections" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="maximumConnections"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select MaximumConnections from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(maximumConnections)) as MaxConnections"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="TotalNotFoundErrors" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="totalNotFoundErrors"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select TotalNotFoundErrors from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(totalNotFoundErrors)) as TotalNotFoundErrors"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="CurrNonAnonUsers" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="currentNonAnonyUsers"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select CurrentNonAnonyUsers from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(currentNonAnonyUsers)) as CurrNonAnonUsers"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="MaxAnonUsers" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="maximumAnonyUsers"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select MaximumAnonyUsers from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(maximumAnonyUsers)) as MaxAnonUsers"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="MaxNonAnonUsers" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="maximumNonAnonyUsers"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select MaximumNonAnonyUsers from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(maximumNonAnonyUsers)) as MaxNonAnonUsers"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="TotalAnonUsers" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="totalAnonyUsers"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select TotalAnonyUsers from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(totalAnonyUsers)) as TotalAnonUsers"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="TotalNonAnonUsers" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="totalNonAnonyUsers"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select TotalNonAnonyUsers from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(totalNonAnonyUsers)) as TotalNonAnonUsers"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="FilesPersec" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="filesPersec"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select FilesPersec from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(filesPersec)) as FilesPersec"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="FilesReceivedPersec" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="filesReceivedPersec"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select FilesReceivedPersec from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(filesReceivedPersec)) as FilesReceivedPersec"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="FilesSentPersec" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="filesSentPersec"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select FilesSentPersec from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(filesSentPersec)) as FilesSentPersec"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="TotalBytesReceived" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="totalBytesReceived"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select TotalBytesReceived from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(totalBytesReceived)) as TotalBytesReceived"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="BytesTotalPersec" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="bytesTotalPersec"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select BytesTotalPersec from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(bytesTotalPersec)) as BytesTotalPersec"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="TotalFilesReceived" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="totalFilesReceived"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select TotalFilesReceived from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(totalFilesReceived)) as TotalFilesReceived"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="TotalFilesSent" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="totalFilesSent"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select TotalFilesSent from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(totalFilesSent)) as TotalFilesSent"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="TotalFilesTrans" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="totalFilesTransferred"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select TotalFilesTransferred from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(totalFilesTransferred)) as TotalFilesTrans"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="TotalGetRequests" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="totalGetRequests"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select totalGetRequests from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(totalGetRequests)) as TotalGetRequests"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="TotalPostRequests" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="totalPostRequests"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select TotalPostRequests from Win32_PerfFormattedData_W3SVC_WebService"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(totalPostRequests)) as TotalPostRequests"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="IisName" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="IisName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select name from Win32_PerfFormattedData_W3SVC_WebService WHERE NAME !='_Total'"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="IisName"/>
+            <Parameter type="" key="ValueColumnTitle" value="IisName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="IisServiceuptime" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="IisName,iisServiceuptime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select name,serviceuptime from Win32_PerfFormattedData_W3SVC_WebService WHERE NAME !='_Total'"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="IisName"/>
+            <Parameter type="" key="ValueColumnTitle" value="iisServiceuptime"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="IisName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="IISTotalGetRequests" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="IisName,IISTotalGetRequests"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select name,totalGetRequests from Win32_PerfFormattedData_W3SVC_WebService WHERE NAME !='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key="IISTotalGetRequests"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="IisName"/>
+            <Parameter type="" key="ValueColumnTitle" value="IISTotalGetRequests"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="IisName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="IISTotalPostRequests" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="IisName,IISTotalPostRequests"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select name,TotalPostRequests from Win32_PerfFormattedData_W3SVC_WebService WHERE NAME !='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key="IISTotalPostRequests"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="IisName"/>
+            <Parameter type="" key="ValueColumnTitle" value="IISTotalPostRequests"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="IisName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="IISTotaFileReceive" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="IisName,IISTotalFilesReceived"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select name,TotalFilesReceived from Win32_PerfFormattedData_W3SVC_WebService WHERE NAME !='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key="IISTotalFilesReceived"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="IisName"/>
+            <Parameter type="" key="ValueColumnTitle" value="IISTotalFilesReceived"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="IisName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="IISTotalFilesSent" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="IisName,IISTotalFilesSent"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select name,TotalFilesSent from Win32_PerfFormattedData_W3SVC_WebService WHERE NAME !='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key="IISTotalFilesSent"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="IisName"/>
+            <Parameter type="" key="ValueColumnTitle" value="IISTotalFilesSent"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="IisName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="IISMaxAnonyUsers" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="IISMaxAnonyUsers,IisName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select name,MaximumAnonyUsers from Win32_PerfFormattedData_W3SVC_WebService WHERE NAME !='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key="IISMaxAnonyUsers"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="IisName"/>
+            <Parameter type="" key="ValueColumnTitle" value="IISMaxAnonyUsers"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="IisName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="IISMaxNonAnonyUsers" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="IISMaxNonAnonyUsers,IisName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select name,MaximumNonAnonyUsers from Win32_PerfFormattedData_W3SVC_WebService WHERE NAME !='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key="IISMaxNonAnonyUsers"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="IisName"/>
+            <Parameter type="" key="ValueColumnTitle" value="IISMaxNonAnonyUsers"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="IisName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="OperatingSystem" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="OperatingSystem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::SELECT Caption from Win32_OperatingSystem"/>
+        </PluginParameter>
+    </MetricPlugin>
+</MetricPlugins>

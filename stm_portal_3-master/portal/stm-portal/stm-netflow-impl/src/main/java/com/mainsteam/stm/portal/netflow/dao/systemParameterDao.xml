@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.portal.netflow.dao.IDeviceGroupDao">
+
+	<select id="getServiePort"
+		resultType="com.mainsteam.stm.portal.netflow.bo.SystemParameterBo">
+		select id,CURR_VALUE port from
+		CONF_SYS_PARAMETER_VALUE
+		where PARAM_ID = 1
+		and SERVER_NAME='ALL' and
+		MODULE_NAME='ALL'
+	</select>
+
+	<update id="updateServicePort">
+		update CONF_SYS_PARAMETER_VALUE
+		<set>
+			LAST_VALUE=CURR_VALUE,
+			<if test="port!=null">CURR_VALUE=#{port},</if>
+			CHANGE_TIME=NOW()
+		</set>
+		where PARAM_ID = 1 and SERVER_NAME='ALL' and MODULE_NAME='ALL'
+	</update>
+</mapper>

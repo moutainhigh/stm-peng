@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                    http://www.springframework.org/schema/context
+                    http://www.springframework.org/schema/context/spring-context-2.5.xsd
+                    ">
+	<bean id="pluginContainer"
+		class="com.mainsteam.stm.pluginserver.PluginContainerImpl"
+		init-method="start">
+		<property name="executor" ref="pluginExecutor"/>
+		<property name="pluginProcesser" ref="pluginProcesser"/>
+		<property name="poolManager" ref="pluginSessionPoolManager"/>
+		<property name="contextManager" ref="pluginSessionContextManager"/>
+		<property name="coreCableManager" ref="runnerCoreCableManager"/>
+		<property name="capacityService" ref="capacityService"/>
+	</bean>
+	<bean id="pluginExecutor"
+		class="com.mainsteam.stm.pluginserver.executor.PluginExecutorImpl">
+		<property name="pluginSessionResultCacheByBatch" ref="pluginSessionResultCacheByBatch"/>
+	</bean>
+	<bean id="pluginSessionResultCacheByBatch"
+		class="com.mainsteam.stm.pluginserver.executor.cache.PluginSessionResultCacheByBatch" init-method="start">
+	</bean>
+	<bean id="pluginProcesser"
+		class="com.mainsteam.stm.pluginserver.processer.PluginProcesserImpl">
+		<property name="processBeanManager" ref="processBeanManager"/>
+	</bean>
+	<bean id="pluginSessionContextManager"
+		class="com.mainsteam.stm.pluginserver.context.PluginSessionContextManager">
+	</bean>
+	<bean id="multiRunnerCoreCableBalencer"
+		class="com.mainsteam.stm.pluginserver.cable.MultiRunnerCoreCableBalencer"
+		init-method="start">
+	</bean>
+	<bean id="runnerCoreCableManager"
+		class="com.mainsteam.stm.pluginserver.cable.RunnerCoreCableManager"
+		init-method="start">
+		<property name="balencer" ref="multiRunnerCoreCableBalencer">
+		</property>
+		<property name="poolManager" ref="pluginSessionPoolManager">
+		</property>
+		<property name="pluginSessionContextManager" ref="pluginSessionContextManager"/>
+		<property name="pluginSessionResultCacheByBatch" ref="pluginSessionResultCacheByBatch">
+		</property>
+	</bean>
+	<bean id="pluginSessionPoolManager"
+		class="com.mainsteam.stm.pluginserver.pool.GeneralPluginSessionPoolManager">
+		<property name="capacityService" ref="capacityService"/>
+		<property name="sessoinFactory" ref="pluginSessoinFactory"/>
+	</bean>
+	<bean id="pluginSessoinFactory" class="com.mainsteam.stm.pluginserver.pool.PluginSessoinFactory">
+		<property name="pluginClassLoader" ref="pluginClassLoader">
+		</property>
+	</bean>
+	<bean id="processBeanManager"
+		class="com.mainsteam.stm.pluginserver.process.manage.ProcessBeanManagerImpl">
+	</bean>
+	<bean id="pluginClassLoader" class="com.mainsteam.stm.pluginserver.plugin.loader.PluginClassLoader" init-method="start">
+	</bean>	
+</beans>

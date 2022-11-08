@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.portal.netflow.dao.inf.IIfTerminalDao">
+
+	<!-- 接口终端流量，包，连接数总数 -->
+	<select id="getIfTerminalTotals" resultType="com.mainsteam.stm.portal.netflow.bo.Whole" parameterType="com.mainsteam.stm.portal.netflow.bo.NetflowParamBo">
+		select 
+			ifnull(sum(ifnull(in_flows,0) +ifnull(out_flows,0)), 0) as wholeFlows,
+			ifnull(sum(ifnull(in_packages, 0)+ifnull(out_packages, 0)), 0) as wholePackets,
+			ifnull( sum(ifnull(in_connects, 0)+ifnull(out_connects, 0)), 0 ) as wholeConnects
+		from (
+		
+			select src_ip,in_flows,in_packages,out_flows,out_packages,in_connects,out_connects
+			from (
+				(
+					select src_ip, sum(out_flows) as out_flows,sum(out_packages) as out_packages,sum(out_connects) as out_connects from
+					(
+					select src_ip,sum(octets_total) as out_flows,sum(packet_total) as out_packages,sum(flow_total) as out_connects 
+					from ANA_IF_IN_NET_APP_TOS_${tableSuffix} 
+					where if_in_id in (${ifId}) and acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} group by src_ip
+					union all
+					select src_ip,sum(octets_total) as out_flows,sum(packet_total) as out_packages,sum(flow_total) as out_connects 
+					from ANA_IF_OUT_NET_APP_TOS_${tableSuffix} 
+					where if_out_id in (${ifId}) and acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} group by src_ip
+					) t
+					group by src_ip
+				) t1 left join 
+				(
+					select dst_ip, sum(in_flows) as in_flows,sum(in_packages) as in_packages,sum(in_connects) as in_connects from
+					(
+					select dst_ip,sum(octets_total) as in_flows,sum(packet_total) as in_packages,sum(flow_total) as in_connects 
+					from ANA_IF_IN_NET_APP_TOS_${tableSuffix} 
+					where if_in_id in (${ifId}) and acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} group by dst_ip
+					union all
+					select dst_ip,sum(octets_total) as in_flows,sum(packet_total) as in_packages,sum(flow_total) as in_connects 
+					from ANA_IF_OUT_NET_APP_TOS_${tableSuffix} 
+					where if_out_id in (${ifId}) and acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} group by dst_ip
+					) t
+					group by dst_ip
+				)t2  on t1.src_ip = t2.dst_ip
+			)
+			union 
+			select dst_ip,in_flows,in_packages,out_flows,out_packages,in_connects,out_connects 
+			from (
+				(
+					select src_ip, sum(out_flows) as out_flows,sum(out_packages) as out_packages,sum(out_connects) as out_connects from
+					(
+					select src_ip,sum(octets_total) as out_flows,sum(packet_total) as out_packages,sum(flow_total) as out_connects
+					from ANA_IF_IN_NET_APP_TOS_${tableSuffix} 
+					where if_in_id in (${ifId}) and acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} group by src_ip
+					union all
+					select src_ip,sum(octets_total) as out_flows,sum(packet_total) as out_packages,sum(flow_total) as out_connects
+					from ANA_IF_OUT_NET_APP_TOS_${tableSuffix} 
+					where if_out_id in (${ifId}) and acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} group by src_ip
+					) t
+					group by src_ip
+				) t1 right join 
+				(
+					select dst_ip, sum(in_flows) as in_flows,sum(in_packages) as in_packages,sum(in_connects) as in_connects from
+					(
+					select dst_ip,sum(octets_total) as in_flows,sum(packet_total) as in_packages,sum(flow_total) as in_connects 
+					from ANA_IF_IN_NET_APP_TOS_${tableSuffix} 
+					where if_in_id in (${ifId}) and acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} group by dst_ip
+					union all
+					select dst_ip,sum(octets_total) as in_flows,sum(packet_total) as in_packages,sum(flow_total) as in_connects
+					from ANA_IF_OUT_NET_APP_TOS_${tableSuffix} 
+					where if_out_id in (${ifId}) and acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} group by dst_ip
+					) t
+					group by dst_ip
+				)t2  on t1.src_ip = t2.dst_ip
+			)
+		) t3 
+	</select>	
+
+	<!-- 接口终端流量 -->
+	<select id="getTotalIfTerminalNetflows" resultType="Long" parameterType="com.mainsteam.stm.portal.netflow.bo.NetflowParamBo">
+		select 
+			ifnull(sum(ifnull(in_flows,0) +ifnull(out_flows,0)), 0) as wholeFlows
+		from (
+		
+			select src_ip,in_flows,in_packages,out_flows,out_packages
+			from (
+				(
+					select src_ip, sum(out_flows) as out_flows,sum(out_packages) as out_packages from
+					(
+					select src_ip,sum(octets_total) as out_flows,sum(packet_total) as out_packages 
+					from ANA_IF_IN_NET_APP_TOS_${tableSuffix} 
+					where if_in_id in (${ifId}) and acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} group by src_ip
+					union all
+					select src_ip,sum(octets_total) as out_flows,sum(packet_total) as out_packages 
+					from ANA_IF_OUT_NET_APP_TOS_${tableSuffix} 
+					where if_out_id in (${ifId}) and acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} group by src_ip
+					) t
+					group by src_ip
+				) t1 left join 
+		
+				(
+					select dst_ip, sum(in_flows) as in_flows,sum(in_packages) as in_packages from
+					(
+					select dst_ip,sum(octets_total) as in_flows,sum(packet_total) as in_packages 
+					from ANA_IF_IN_NET_APP_TOS_${tableSuffix} 
+					where if_in_id in (${ifId}) and acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} group by dst_ip
+					union all
+					select dst_ip,sum(octets_total) as in_flows,sum(packet_total) as in_packages 
+					from ANA_IF_OUT_NET_APP_TOS_${tableSuffix} 
+					where if_out_id in (${ifId}) and acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} group by dst_ip
+					) t
+					group by dst_ip
+				)t2  on t1.src_ip = t2.dst_ip
+			)
+			union 
+			select dst_ip,in_flows,in_packages,out_flows,out_packages
+			from (
+		
+				(
+					select src_ip, sum(out_flows) as out_flows,sum(out_packages) as out_packages from
+					(
+					select src_ip,sum(octets_total) as out_flows,sum(packet_total) as out_packages 
+					from ANA_IF_IN_NET_APP_TOS_${tableSuffix} 
+					where if_in_id in (${ifId}) and acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} group by src_ip
+					union all
+					select src_ip,sum(octets_total) as out_flows,sum(packet_total) as out_packages 
+					from ANA_IF_OUT_NET_APP_TOS_${tableSuffix} 
+					where if_out_id in (${ifId}) and acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} group by src_ip
+					) t
+					group by src_ip
+				) t1 right join 
+				(
+					select dst_ip, sum(in_flows) as in_flows,sum(in_packages) as in_packages from
+					(
+					select dst_ip,sum(octets_total) as in_flows,sum(packet_total) as in_packages 
+					from ANA_IF_IN_NET_APP_TOS_${tableSuffix} 
+					where if_in_id in (${ifId}) and acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} group by dst_ip
+					union all
+					select dst_ip,sum(octets_total) as in_flows,sum(packet_total) as in_packages 
+					from ANA_IF_OUT_NET_APP_TOS_${tableSuffix} 
+					where if_out_id in (${ifId}) and acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} group by dst_ip
+					) t
+					group by dst_ip
+				)t2  on t1.src_ip = t2.dst_ip
+			)
+		
+		) t3 
+	</select>
+
+	<select id="ifTerminalPageSelect" resultType="com.mainsteam.stm.portal.netflow.bo.NetflowBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		select * FROM
+		(
+			select 
+				src_ip as terminalIp,
+				
+				ifnull(in_flows,0) as flowIn,
+				ifnull(out_flows,0) as flowOut, 
+				ifnull(in_flows,0)+ifnull(out_flows,0) as flowTotal,
+				ifnull(in_flows,0)/${condition.timeInterval} as speedIn,
+				ifnull(out_flows,0)/${condition.timeInterval} as speedOut,
+				ifnull(in_flows,0)/${condition.timeInterval}+ifnull(out_flows,0)/${condition.timeInterval} as speedTotal,
+				
+				ifnull(in_packages,0) packetIn,
+				ifnull(out_packages,0) as packetOut,
+				ifnull(in_packages,0)+ifnull(out_packages,0) as packetTotal,
+				ifnull(in_packages, 0) / ${condition.timeInterval} as packetInSpeed,
+				ifnull(out_packages, 0) / ${condition.timeInterval} as packetOutSpeed,
+				ifnull(sum( ifnull(in_packages, 0)+ ifnull(out_packages, 0) ) / ${condition.timeInterval}, 0) as packetTotalSpeed,
+				
+				ifnull(in_connects, 0) as connectNumberIn,
+				ifnull(out_connects, 0) as connectNumberOut,
+				ifnull(sum( ifnull(in_connects, 0) + ifnull(out_connects, 0) ), 0) as connectNumberTotal,
+				ifnull(in_connects, 0) / ${condition.timeInterval} as connectNumberInSpeed,
+				ifnull(out_connects, 0) / ${condition.timeInterval} as connectNumberOutSpeed,
+				ifnull(sum(ifnull(in_connects, 0)+ifnull(out_connects, 0))/ ${condition.timeInterval}, 0) as connectNumberTotalSpeed,
+				
+				ifnull(sum((ifnull(in_flows,0)+ifnull(out_flows,0)))/${condition.wholeFlows}, 0) as flowPctge,
+				ifnull(sum((ifnull(in_packages,0)+ifnull(out_packages,0)))/${condition.wholePackets}, 0) as packetPctge,
+				ifnull(sum(ifnull(in_connects, 0)+ifnull(out_connects, 0))/${condition.wholeConnects}, 0) as connectPctge
+				
+			from (
+		
+				select src_ip,in_flows,in_packages,out_flows,out_packages,in_connects,out_connects 
+				from (
+					(
+						select src_ip, sum(out_flows) as out_flows,sum(out_packages) as out_packages,sum(out_connects) as out_connects from
+						(
+						select src_ip,sum(octets_total) as out_flows,sum(packet_total) as out_packages, sum(flow_total) as out_connects 
+						from ANA_IF_IN_NET_APP_TOS_${condition.tableSuffix} 
+						where if_in_id in (${condition.ifId}) and acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime} group by src_ip
+						union all
+						select src_ip,sum(octets_total) as out_flows,sum(packet_total) as out_packages,sum(flow_total) as out_connects 
+						from ANA_IF_OUT_NET_APP_TOS_${condition.tableSuffix} 
+						where if_out_id in (${condition.ifId}) and acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime} group by src_ip
+						) t
+						group by src_ip
+					) t1 left join 
+		
+					(
+						select dst_ip, sum(in_flows) as in_flows,sum(in_packages) as in_packages,sum(in_connects) as in_connects from
+						(
+						select dst_ip,sum(octets_total) as in_flows,sum(packet_total) as in_packages,sum(flow_total) as in_connects 
+						from ANA_IF_IN_NET_APP_TOS_${condition.tableSuffix} 
+						where if_in_id in (${condition.ifId}) and acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime} group by dst_ip
+						union all
+						select dst_ip,sum(octets_total) as in_flows,sum(packet_total) as in_packages,sum(flow_total) as in_connects 
+						from ANA_IF_OUT_NET_APP_TOS_${condition.tableSuffix} 
+						where if_out_id in (${condition.ifId}) and acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime} group by dst_ip
+						) t
+						group by dst_ip
+					)t2  on t1.src_ip = t2.dst_ip
+				)
+				union 
+				select dst_ip,in_flows,in_packages,out_flows,out_packages,in_connects,out_connects 
+				from (
+		
+					(
+						select src_ip, sum(out_flows) as out_flows,sum(out_packages) as out_packages,sum(out_connects) as out_connects from
+						(
+						select src_ip,sum(octets_total) as out_flows,sum(packet_total) as out_packages, sum(flow_total) as out_connects 
+						from ANA_IF_IN_NET_APP_TOS_${condition.tableSuffix} 
+						where if_in_id in (${condition.ifId}) and acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime} group by src_ip
+						union all
+						select src_ip,sum(octets_total) as out_flows,sum(packet_total) as out_packages,  sum(flow_total) as out_connects 
+						from ANA_IF_OUT_NET_APP_TOS_${condition.tableSuffix} 
+						where if_out_id in (${condition.ifId}) and acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime} group by src_ip
+						) t
+						group by src_ip
+					) t1 right join 
+					(
+						select dst_ip, sum(in_flows) as in_flows,sum(in_packages) as in_packages,sum(in_connects) as in_connects from
+						(
+						select dst_ip,sum(octets_total) as in_flows,sum(packet_total) as in_packages,sum(flow_total) as in_connects 
+						from ANA_IF_IN_NET_APP_TOS_${condition.tableSuffix} 
+						where if_in_id in (${condition.ifId}) and acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime} group by dst_ip
+						union all
+						select dst_ip,sum(octets_total) as in_flows,sum(packet_total) as in_packages,sum(flow_total) as in_connects 
+						from ANA_IF_OUT_NET_APP_TOS_${condition.tableSuffix} 
+						where if_out_id in (${condition.ifId}) and acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime} group by dst_ip
+						) t
+						group by dst_ip
+					)t2  on t1.src_ip = t2.dst_ip
+				)
+			) t3
+			group by t3.src_ip  
+		) t4
+		<if test="condition!=null">
+			order by
+	 		<if test="condition.sort != null">t4.${condition.sort}</if>
+			<if test="condition.order != null"> ${condition.order} </if>
+		</if>
+
+	</select>
+	
+	<select id="getIfTerminalChartData" parameterType="com.mainsteam.stm.portal.netflow.bo.NetflowParamBo" resultType="com.mainsteam.stm.portal.netflow.bo.NetflowBo">
+		select * from
+		(
+			select 
+				acq_time,
+
+				ifnull(in_flows,0) as flowIn,
+				ifnull(out_flows,0) as flowOut, 
+				ifnull(in_flows,0)+ifnull(out_flows,0) as flowTotal,
+				ifnull(in_flows,0)/${timeInterval} as speedIn,
+				ifnull(out_flows,0)/${timeInterval} as speedOut,
+			 	ifnull(sum(ifnull(in_flows,0)+ifnull(out_flows,0)) / ${timeInterval}, 0) as speedTotal,
+
+				ifnull(in_packages,0) packetIn,
+				ifnull(out_packages,0) as packetOut,
+				ifnull(in_packages,0)+ifnull(out_packages,0) as packetTotal,
+				ifnull(in_packages,0)/${timeInterval} as packetInSpeed,
+				ifnull(out_packages,0)/${timeInterval} as packetOutSpeed,
+				ifnull(sum(ifnull(in_packages,0)+ifnull(out_packages,0))/${timeInterval}, 0) as packetTotalSpeed,
+				
+				ifnull(connectIn, 0) as connectNumberIn,
+				ifnull(connectOut, 0) as connectNumberOut,
+				ifnull(sum(ifnull(connectIn, 0)+ifnull(connectOut, 0)), 0) as connectNumberTotal,
+				ifnull(ifnull(connectIn, 0)/${timeInterval}, 0) as connectNumberInSpeed,
+				ifnull(ifnull(connectOut, 0)/${timeInterval}, 0) as connectNumberOutSpeed,
+				ifnull(sum(ifnull(connectIn, 0)+ifnull(connectOut, 0)) / ${timeInterval}, 0) as connectNumberTotalSpeed,
+
+				ifnull(sum(ifnull(in_flows,0)+ifnull(out_flows,0))/${wholeFlows}, 0) as flowPctge,
+				ifnull(sum(ifnull(connectIn, 0)+ifnull(connectOut, 0))/${wholePackets}, 0) as packetPctge,
+				ifnull(sum(ifnull(connectIn, 0)+ifnull(connectOut, 0))/${wholeConnects}, 0) as connectPctge
+				
+			from (
+		
+				select 
+					t1.acq_time,in_flows,in_packages,out_flows,out_packages, connectIn, connectOut 
+				from 
+				(
+					(
+						select 
+							acq_time, sum(out_flows) as out_flows,sum(out_packages) as out_packages, sum(connectOut) as connectOut  
+						from
+						(
+						select acq_time,sum(octets_total) as out_flows,sum(packet_total) as out_packages, sum(flow_total) as connectOut 
+						from ANA_IF_IN_NET_APP_TOS_${tableSuffix} 
+						where if_in_id in (${ifId}) and src_ip = #{terminalIp} 
+						and acq_time in (${timeParam})
+						group by acq_time
+						union all
+						select acq_time,sum(octets_total) as out_flows,sum(packet_total) as out_packages, sum(flow_total) as connectOut 
+						from ANA_IF_OUT_NET_APP_TOS_${tableSuffix} 
+						where if_out_id in (${ifId}) and src_ip = #{terminalIp} 
+						and acq_time in (${timeParam})
+						group by acq_time
+						) t
+						group by acq_time
+					) t1 left join 
+		
+					(
+						select 
+							acq_time, sum(in_flows) as in_flows,sum(in_packages) as in_packages, sum(connectIn) as connectIn  
+						from
+						(
+						select acq_time,sum(octets_total) as in_flows,sum(packet_total) as in_packages, sum(flow_total) as connectIn  
+						from ANA_IF_IN_NET_APP_TOS_${tableSuffix} 
+						where if_in_id in (${ifId}) and dst_ip = #{terminalIp} 
+						and acq_time in (${timeParam})
+						group by acq_time
+						union all
+						select acq_time,sum(octets_total) as in_flows,sum(packet_total) as in_packages, sum(flow_total) as connectIn  
+						from ANA_IF_OUT_NET_APP_TOS_${tableSuffix} 
+						where if_out_id in (${ifId}) and dst_ip = #{terminalIp} 
+						and acq_time in (${timeParam})
+						group by acq_time
+						) t
+						group by acq_time
+					)t2  on t1.acq_time = t2.acq_time
+				)
+				union 
+				select t2.acq_time,in_flows,in_packages,out_flows,out_packages, connectIn, connectOut 
+				from (
+		
+					(
+						select 
+							acq_time, sum(out_flows) as out_flows,sum(out_packages) as out_packages, sum(connectOut) as connectOut  
+						from
+						(
+						select acq_time,sum(octets_total) as out_flows,sum(packet_total) as out_packages, sum(flow_total) as connectOut  
+						from ANA_IF_IN_NET_APP_TOS_${tableSuffix} 
+						where if_in_id in (${ifId}) and src_ip = #{terminalIp} 
+						and acq_time in (${timeParam})
+						group by acq_time
+						union all
+						select acq_time,sum(octets_total) as out_flows,sum(packet_total) as out_packages, sum(flow_total) as connectOut  
+						from ANA_IF_OUT_NET_APP_TOS_${tableSuffix} 
+						where if_out_id in (${ifId}) and src_ip = #{terminalIp} 
+						and acq_time in (${timeParam})
+						group by acq_time
+						) t
+						group by acq_time
+					) t1 right join 
+					(
+						select 
+							acq_time, sum(in_flows) as in_flows,sum(in_packages) as in_packages, sum(connectIn) as connectIn  
+						from
+						(
+						select acq_time,sum(octets_total) as in_flows,sum(packet_total) as in_packages, sum(flow_total) as connectIn  
+						from ANA_IF_IN_NET_APP_TOS_${tableSuffix} 
+						where if_in_id in (${ifId}) and dst_ip = #{terminalIp} 
+						and acq_time in (${timeParam})
+						group by acq_time
+						union all
+						select acq_time,sum(octets_total) as in_flows,sum(packet_total) as in_packages, sum(flow_total) as connectIn  
+						from ANA_IF_OUT_NET_APP_TOS_${tableSuffix} 
+						where if_out_id in (${ifId}) and dst_ip = #{terminalIp} 
+						and acq_time in (${timeParam})
+						group by acq_time
+						) t
+						group by acq_time
+					)t2  on t1.acq_time = t2.acq_time
+				)
+		
+			) t3  
+		) t4
+		group by t4.acq_time
+	</select>
+	
+</mapper>

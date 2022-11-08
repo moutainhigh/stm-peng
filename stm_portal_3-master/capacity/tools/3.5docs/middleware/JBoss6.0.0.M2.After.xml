@@ -1,0 +1,1047 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<!--  WEBSPHERE MQ 资源配置文件
+	devicetype:			设备类型名称
+	ismulticoltype:		是否允许采集方式多选
+	majortype:			主要分类（可以理解为设备类型）
+	minortype:			次要分类
+	manufacturer:		厂商
+	devicetype_zh:		设备类型中文描述
+	 -->
+	<devicetypeinfo devicetype="Jboss6.0.0.M2" ismulticoltype="false" majortype="middleware" minortype="JbossAS" manufacturer="RedHat" devicetype_zh="Jboss6.0.M2-">
+		
+		<!-- 该设备类型定义的命令，用于合并命令执行 -->
+		<commands>
+			<!-- coltype:采集方式，comid：命令ID，command：命令 -->
+
+			<!-- JBoss CPU利用率 -->
+			<command coltype="WMI" comid="cpuWmiCmd" command="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Process where Name like '%java%'"/>
+			<!-- JBoss 内存利用率 -->
+			<command coltype="WMI" comid="memWmiCmd" command="root\cimv2::select WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name like '%java%'"/>
+			<!--系统可管理内存-->
+			<command coltype="WMI" comid="chk_pmemcap" command="root\cimv2::select TotalVisibleMemorySize from Win32_OperatingSystem"/>
+			<!--主机说明-->
+			<command coltype="WMI" comid="systemInfo" command="root\cimv2::select description from Win32_OperatingSystem"/>
+			
+			<!-- CLI方式采集-->
+			<command coltype="CLI" comid="mainssh" command="/tmp/os.sh"/>
+			<command coltype="CLI" comid="cpumemssh" command="/tmp/appinfo.sh java"/>
+			
+			<!-- coltype:采集方式，comid：命令ID，command：命令 -->
+			<command coltype="INNER_PROC" comid="findServer" command="com.qwserv.itm.pal.appmdl.jboss.JBossCollector.findServer"/>
+			<command coltype="INNER_PROC" comid="findServerInfo" command="com.qwserv.itm.pal.appmdl.jboss.JBossCollector.findServerInfo"/>
+			<command coltype="INNER_PROC" comid="findSystemProperties" command="com.qwserv.itm.pal.appmdl.jboss.JBossCollector.findSystemProperties"/>
+			<command coltype="INNER_PROC" comid="findThreadPool" command="com.qwserv.itm.pal.appmdl.jboss.JBossCollector.findThreadPool"/>
+			<command coltype="INNER_PROC" comid="findInUseConnection" command="com.qwserv.itm.pal.appmdl.jboss.JBossCollector.findInUseConnection"/>
+			<command coltype="INNER_PROC" comid="findServerProvider" command="com.qwserv.itm.pal.appmdl.jboss.JBossCollector.findServerProvider"/>
+			<command coltype="INNER_PROC" comid="findJVM" command="com.qwserv.itm.pal.appmdl.jboss.JBossCollector.findJVM"/>
+			<command coltype="INNER_PROC" comid="findServerConfig" command="com.qwserv.itm.pal.appmdl.jboss.JBossCollector.findServerConfig"/>
+			<command coltype="INNER_PROC" comid="findThread" command="com.qwserv.itm.pal.appmdl.jboss.JBossCollector.findThread"/>
+			<command coltype="INNER_PROC" comid="findConnector" command="com.qwserv.itm.pal.appmdl.jboss.JBossCollector.findConnector"/>
+			<command coltype="INNER_PROC" comid="findJMS" command="com.qwserv.itm.pal.appmdl.jboss.JBossCollector.findJMS"/>
+			<command coltype="INNER_PROC" comid="findJDBC" command="com.qwserv.itm.pal.appmdl.jboss.JBossCollector.findJDBC"/>
+			<command coltype="INNER_PROC" comid="findWebApp" command="com.qwserv.itm.pal.appmdl.jboss.JBossCollector.findWebApp"/>
+			
+		</commands>
+		<!--配置MQ管理器的KPI-->
+		<!-- 描述该类设备的所有指标采集,一行对应一个指标 -->
+     		<resources>
+			<!-- 一个resource值一个特定的kpi指标,如CPU利用率，kpiid：指标id，coltype：采集方式，value：结果计算表达式（默认为$d1） ，valuetype(Integer/Float/String)：采集值类型，unit：单位 -->
+			<!-- 服务可用性 -->
+			<resource kpiid="M5Availability" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<!-- exeorder：执行序号数字越小，执行越前，comid：命令id，select：select函数(默认为 '([\w]+)'  )，deal：函数 -->
+			      <collect exeorder="10" comid="findServer" select="&lt;Started&gt;([\s\S]*)&lt;/Started&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<!-- 
+				table:数据库表，指标采集数据保存的地方
+				field:数据库字段名，保存的字段名
+				fieldtype:数据库字段属性String、Integer、Float
+				willalert:是否告警
+				alertexp1:告警条件1
+				alertdesc1:告警描述1
+				alertexp2:告警条件2
+				alertdesc2:告警描述2
+				alertexp3:告警条件3
+				alertdesc3:告警描述3
+				alertexp4:告警条件4
+				alertdesc4:告警描述4
+				alertexp5:告警条件5
+				alertdesc5:告警描述5
+				alertcontin:连续若干次告警
+				alertype:事件类型
+				storefactor:存盘倍数（默认值）（采集周期的倍数，0表示不存）
+				circle:采集周期(默认值)
+				 -->
+				<kpipolicy table="res_m5_avail" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.equals(&quot;不可用&quot;)" alertdesc5="JBoss服务不可用"
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				<translations>
+					<translation source="true" dest="1"/>
+					<translation source="false" dest="0"/>
+				</translations>
+				
+			</resource>
+			<!-- 发布日期-->
+		   <resource kpiid="M5BuildDate" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findServer" select="&lt;BuildDate&gt;([\s\S]*)&lt;/BuildDate&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_builddate" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--发布时操作系统版本-->
+            <resource kpiid="M5BuildOS" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findServer" select="&lt;BuildOS&gt;([\s\S]*)&lt;/BuildOS&gt;" merge="" deal=""/>
+				</collects>
+			
+				<kpipolicy table="res_m5_buildos" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+
+           <!-- 启动时间 -->
+			<resource kpiid="M5StartDate" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findServer" select="&lt;StartDate&gt;([\s\S]*)&lt;/StartDate&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_startdate" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+
+			<!--发布时JVM版本号 -->
+			<resource kpiid="M5BuildJVM" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findServer" select="&lt;BuildJVM&gt;([\s\S]*)&lt;/BuildJVM&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_buildjvm" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--JBoss版本 -->
+			<resource kpiid="M5jbossversion" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findServer" select="&lt;Version&gt;([\s\S]*)&lt;/Version&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_jbossversion" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--JVM内存利用率 -->
+			<resource kpiid="M5MemoryUtil" coltype="INNER_PROC" value="" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="findServerInfo" select="&lt;MemoryUtil&gt;([\s\S]*)&lt;/MemoryUtil&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_memoryutil" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			<!--已使用内存 -->
+			<resource kpiid="M5usedMemory" coltype="INNER_PROC" value="$d1/1024/1024" valuetype="Integer" unit="MB">
+				<collects>
+					<collect exeorder="10" comid="findServerInfo" select="&lt;usedMemory&gt;([\s\S]*)&lt;/usedMemory&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_usedmemory" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--空闲的内存 -->
+			<resource kpiid="M5FreeMemory" coltype="INNER_PROC" value="$d1/1024/1024" valuetype="Integer" unit="MB">
+				<collects>
+					<collect exeorder="10" comid="findServerInfo" select="&lt;FreeMemory&gt;([\s\S]*)&lt;/FreeMemory&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_freememory" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--主机操作系统 -->
+			<resource kpiid="M5OSName" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findServerInfo" select="&lt;OSName&gt;([\s\S]*)&lt;/OSName&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_osname" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--主机名 -->
+			<resource kpiid="M5HostName" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findServerInfo" select="&lt;HostName&gt;([\s\S]*)&lt;/HostName&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_hostname" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--操作系统版本 -->
+			<resource kpiid="M5OSVersion" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findServerInfo" select="&lt;OSVersion&gt;([\s\S]*)&lt;/OSVersion&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_osversion" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--最大内存 -->
+			<resource kpiid="M5MaxMemory" coltype="INNER_PROC" value="$d1/1024/1024" valuetype="Integer" unit="MB">
+				<collects>
+					<collect exeorder="10" comid="findServerInfo" select="&lt;MaxMemory&gt;([\s\S]*)&lt;/MaxMemory&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_maxmemory" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--总内存 -->
+			<resource kpiid="M5TotalMemory" coltype="INNER_PROC" value="$d1/1024/1024" valuetype="Integer" unit="MB">
+				<collects>
+					<collect exeorder="10" comid="findServerInfo" select="&lt;TotalMemory&gt;([\s\S]*)&lt;/TotalMemory&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_totalmemory" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--JVM名称  -->
+			<resource kpiid="M5JavaVMName" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findServerInfo" select="&lt;JavaVMName&gt;([\s\S]*)&lt;/JavaVMName&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_javaVMname" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--Java版本 -->
+			<resource kpiid="M5JavaVersion" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findServerInfo" select="&lt;JavaVersion&gt;([\s\S]*)&lt;/JavaVersion&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_JavaVersion" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--活动线程数 -->
+			<resource kpiid="M5ActiveThreadCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="findServerInfo" select="&lt;ActiveThreadCount&gt;([\s\S]*)&lt;/ActiveThreadCount&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_ActiveThreadCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			<!--活动线程组数量 -->
+			<resource kpiid="M5ActiveThreadGCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="findServerInfo" select="&lt;ActiveThreadGroupCount&gt;([\s\S]*)&lt;/ActiveThreadGroupCount&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_ActThreadGroupCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			<!--系统状态码 -->
+			<resource kpiid="M5SystemProperties" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findSystemProperties" select="&lt;State&gt;([\s\S]*)&lt;/State&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_SystemProperties" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--线程池名称
+			<resource kpiid="M5ThreadPoolName" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findThreadPool" select="&lt;Name&gt;([\s\S]*)&lt;/Name&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_ThreadPoolName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			-->
+			<!--线程组名称
+			<resource kpiid="M5ThreadGroupName" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findThreadPool" select="&lt;ThreadGroupName&gt;([\s\S]*)&lt;/ThreadGroupName&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_ThreadGroupName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			-->
+			<!-- 锁模式
+			<resource kpiid="M5BlockingMode" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findThreadPool" select="&lt;BlockingMode&gt;([\s\S]*)&lt;/BlockingMode&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_BlockingMode" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			-->
+			<!--最大队列大小 
+			<resource kpiid="M5MaximumQueueSize" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findThreadPool" select="&lt;MaximumQueueSize&gt;([\s\S]*)&lt;/MaximumQueueSize&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_MaximumQueueSize" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			-->
+			<!-- 队列大小
+			<resource kpiid="M5QueueSize" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findThreadPool" select="&lt;QueueSize&gt;([\s\S]*)&lt;/QueueSize&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_QueueSize" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			-->
+			<!--池数量 
+			<resource kpiid="M5PoolNumber" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findThreadPool" select="&lt;PoolNumber&gt;([\s\S]*)&lt;/PoolNumber&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_PoolNumber" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			-->
+			<!--最大池大小
+			<resource kpiid="M5MaximumPoolSize" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findThreadPool" select="&lt;MaximumPoolSize&gt;([\s\S]*)&lt;/MaximumPoolSize&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_MaximumPoolSize" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			-->
+			<!--最小池大小
+			<resource kpiid="M5MinimumPoolSize" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findThreadPool" select="&lt;MinimumPoolSize&gt;([\s\S]*)&lt;/MinimumPoolSize&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_MinimumPoolSize" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			-->
+			<!--正在使用中的连接数 -->
+			<resource kpiid="M5InUseConnections" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="findInUseConnection" select="&lt;InUseConnections&gt;([\s\S]*)&lt;/InUseConnections&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_InUseConnections" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			<!--服务器提供商 -->
+			<resource kpiid="M5serverVendor" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findServerProvider" select="&lt;serverVendor&gt;([\s\S]*)&lt;/serverVendor&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_serverVendor" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--服务器版本 -->
+			<resource kpiid="M5serverVersion" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findServerProvider" select="&lt;serverVersion&gt;([\s\S]*)&lt;/serverVersion&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_serverVersion" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--父类 -->
+			<resource kpiid="M5parent" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findServerProvider" select="&lt;parent&gt;([\s\S]*)&lt;/parent&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_parent" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!-- 对象名 -->
+			<resource kpiid="M5objectName" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findServerProvider" select="&lt;objectName&gt;([\s\S]*)&lt;/objectName&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_objectName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--事件提供者状态 -->
+			<resource kpiid="M5eventProvider" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findServerProvider" select="&lt;eventProvider&gt;([\s\S]*)&lt;/eventProvider&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_eventProvider" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				<translations>
+					<translation source="true" dest="可用"/>
+					<translation source="false" dest="不可用"/>
+				</translations>
+			</resource>
+			<!--状态可管理性 -->
+			<resource kpiid="M5stateManageable" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findServerProvider" select="&lt;stateManageable&gt;([\s\S]*)&lt;/stateManageable&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_stateManageable" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				<translations>
+					<translation source="true" dest="可用"/>
+					<translation source="false" dest="不可用"/>
+				</translations>
+			</resource>
+			<!--是否提供统计 -->
+			<resource kpiid="M5statisticsProvider" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findServerProvider" select="&lt;statisticsProvider&gt;([\s\S]*)&lt;/statisticsProvider&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_statisticsProvider" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				<translations>
+					<translation source="true" dest="是"/>
+					<translation source="false" dest="否"/>
+				</translations>
+			</resource>
+			<!-- JVM启动时间-->
+			<resource kpiid="M5JVMStartDate" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findJVM" select="&lt;StartDate&gt;([\s\S]*)&lt;/StartDate&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_JVMStartDate" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!-- JVM最后采样时间-->
+			<resource kpiid="M5LastSampleTime" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findJVM" select="&lt;LastSampleTime&gt;([\s\S]*)&lt;/LastSampleTime&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_LastSampleTime" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!-- 最大堆大小-->
+			<resource kpiid="M5MaxHeap" coltype="INNER_PROC" value="$d1/1024/1024" valuetype="Integer" unit="MB">
+				<collects>
+					<collect exeorder="10" comid="findJVM" select="&lt;MaxHeap&gt;([\s\S]*)&lt;/MaxHeap&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_MaxHeap" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!-- 最小堆大小-->
+			<resource kpiid="M5MiniumHeap" coltype="INNER_PROC" value="$d1/1024/1024" valuetype="Integer" unit="MB">
+				<collects>
+					<collect exeorder="10" comid="findJVM" select="&lt;MiniumHeap&gt;([\s\S]*)&lt;/MiniumHeap&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_MiniumHeap" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!-- 实例名称-->
+			<resource kpiid="M5ServerName" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findServerConfig" select="&lt;ServerName&gt;([\s\S]*)&lt;/ServerName&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_ServerName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--HomeDir -->
+			<resource kpiid="M5HomeDir" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findServerConfig" select="&lt;HomeDir&gt;([\s\S]*)&lt;/HomeDir&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_HomeDir" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--JBoss最大线程数 -->
+			<resource kpiid="M5maxThreads" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="findThread" select="&lt;maxThreads&gt;([\s\S]*)&lt;/maxThreads&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_maxThreads" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--JBoss当前繁忙的线程 -->
+			<resource kpiid="M5currentThreadsBusy" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="findThread" select="&lt;currentThreadsBusy&gt;([\s\S]*)&lt;/currentThreadsBusy&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_currentThreadsBusy" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			<!-- JBoss当前线程个数 -->
+			<resource kpiid="M5currentThreadCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="findThread" select="&lt;currentThreadCount&gt;([\s\S]*)&lt;/currentThreadCount&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_currentThreadCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			<!--采集Web服务端口 -->
+			<resource kpiid="M5port" coltype="INNER_PROC" value="" valuetype="Integer" unit="">
+				<collects>
+					<collect exeorder="10" comid="findConnector" select="&lt;port&gt;([\s\S]*)&lt;/port&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_port" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!--连接协议 -->
+			<resource kpiid="M5protocol" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findConnector" select="&lt;protocol&gt;([\s\S]*)&lt;/protocol&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_protocol" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!--连接编码格式 -->
+			<resource kpiid="M5URIEncoding" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findConnector" select="&lt;URIEncoding&gt;([\s\S]*)&lt;/URIEncoding&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_URIEncoding" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--连接策略 -->
+			<resource kpiid="M5strategy" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findConnector" select="&lt;strategy&gt;([\s\S]*)&lt;/strategy&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_strategy" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--连接最大http头寸 -->
+			<resource kpiid="M5maxHttpHeaderSize" coltype="INNER_PROC" value="$d1/1024" valuetype="Integer" unit="KB">
+				<collects>
+					<collect exeorder="10" comid="findConnector" select="&lt;maxHttpHeaderSize&gt;([\s\S]*)&lt;/maxHttpHeaderSize&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_maxHttpHeaderSize" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--连接转发端口 -->
+			<resource kpiid="M5redirectPort" coltype="INNER_PROC" value="" valuetype="Integer" unit="">
+				<collects>
+					<collect exeorder="10" comid="findConnector" select="&lt;redirectPort&gt;([\s\S]*)&lt;/redirectPort&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_redirectPort" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!--连接数 -->
+			<resource kpiid="M5acceptCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="findConnector" select="&lt;acceptCount&gt;([\s\S]*)&lt;/acceptCount&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_acceptCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			<!--连接超时时间 -->
+			<resource kpiid="M5connectionTimeout" coltype="INNER_PROC" value="$d1/1000" valuetype="Integer" unit="s">
+				<collects>
+					<collect exeorder="10" comid="findConnector" select="&lt;connectionTimeout&gt;([\s\S]*)&lt;/connectionTimeout&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_connectionTimeout" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--存活时间 -->
+			<resource kpiid="M5keepAliveTimeout" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findConnector" select="&lt;keepAliveTimeout&gt;([\s\S]*)&lt;/keepAliveTimeout&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_keepAliveTimeout" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--最小备用线程数 -->
+			<resource kpiid="M5minSpareThreads" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="findConnector" select="&lt;minSpareThreads&gt;([\s\S]*)&lt;/minSpareThreads&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_minSpareThreads" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--最大备用线程数 -->
+			<resource kpiid="M5maxSpareThreads" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="findConnector" select="&lt;maxSpareThreads&gt;([\s\S]*)&lt;/maxSpareThreads&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_maxSpareThreads" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!-- 最大传输数 -->
+			<resource kpiid="M5maxPostSize" coltype="INNER_PROC" value="" valuetype="Integer" unit="">
+				<collects>
+					<collect exeorder="10" comid="findConnector" select="&lt;maxPostSize&gt;([\s\S]*)&lt;/maxPostSize&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_maxPostSize" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--最大请求存活数 -->
+			<resource kpiid="M5maxKeepAlivRequest" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="findConnector" select="&lt;maxKeepAliveRequests&gt;([\s\S]*)&lt;/maxKeepAliveRequests&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_maxKeepAliveRequests" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--JMS当前连接数 -->
+			<resource kpiid="M5InUseConnCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="findJMS" select="&lt;InUseConnectionCount&gt;([\s\S]*)&lt;/InUseConnectionCount&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_InUseConnectionCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--JMS总连接数 -->
+			<resource kpiid="M5ConnCreatedCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="findJMS" select="&lt;ConnectionCreatedCount&gt;([\s\S]*)&lt;/ConnectionCreatedCount&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_ConnCreatedCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--JMS最高连接数 -->
+			<resource kpiid="M5MaxConnInUseCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="findJMS" select="&lt;MaxConnectionsInUseCount&gt;([\s\S]*)&lt;/MaxConnectionsInUseCount&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_MaxConnInUseCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--JMS允许的最大连接数 -->
+			<resource kpiid="M5AvailConnCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="findJMS" select="&lt;AvailableConnectionCount&gt;([\s\S]*)&lt;/AvailableConnectionCount&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_AvailConnectionCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			
+			
+			
+			<!-- 以下是子资源-->
+			<!-- JDBC Id-->
+			<resource kpiid="M5JDBCId" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findJDBC" select="($key)\t\w+\t\d+\t\w+\t\d+\t\d+\t.*" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_jdbcid" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<!--JDBC连接池可用状态 -->
+			<resource kpiid="M5JDBCAvail" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findJDBC" select="$key\t(\w+)\t\d+\t\w+\t\d+\t\d+\t.*" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_JDBCAvail" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				<translations>
+					<translation source="Started" dest="可用"/>
+					<translation source="Stoped" dest="不可用"/>
+				</translations>
+			</resource>
+			<!--活动的连接数 -->
+			<resource kpiid="M5JDBCActiveConn" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="findJDBC" select="$key\t\w+\t(\d+)\t\w+\t\d+\t\d+\t.*" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_jdbcactiveConn" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--连接池名称 -->
+			<resource kpiid="M5JDBCThreadName" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findJDBC" select="$key\t\w+\t\d+\t(\w+)\t\d+\t\d+\t.*" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_jdbcThreadName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--最大连接数 -->
+			<resource kpiid="M5JDBCMaxConn" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="findJDBC" select="$key\t\w+\t\d+\t\w+\t(\d+)\t\d+\t.*" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_jdbcMaxConn" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--最小连接数 -->
+			<resource kpiid="M5JDBCMinConn" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="findJDBC" select="$key\t\w+\t\d+\t\w+\t\d+\t(\d+)\t.*" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_jdbcminconn" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			
+			<!--WebApp 子资源 -->
+			<!--Web App Id -->
+			<resource kpiid="M5AppId" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findWebApp" select="($key)\t.*\t.*\t.*\t\d+\t\d+\t\d+" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_webappid" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--Web应用可用状态 -->
+			<resource kpiid="M5Appstate" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findWebApp" select="$key\t(.*)\t.*\t.*\t\d+\t\d+\t\d+" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_webappstate" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				<translations>
+					<translation source="1" dest="可用"/>
+					<translation source="0" dest="不可用"/>
+				</translations>
+			</resource>
+			<!--应用名称 -->
+			<resource kpiid="M5Appname" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findWebApp" select="$key\t.*\t(.*)\t.*\t\d+\t\d+\t\d+" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_webappname" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--上下文根目录 -->
+			<resource kpiid="M5Appcontext" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="findWebApp" select="$key\t.*\t.*\t(.*)\t\d+\t\d+\t\d+" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_webappcontxt" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--当前总会话数 -->
+			<resource kpiid="M5AppsessionCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="findWebApp" select="$key\t.*\t.*\t.*\t(\d+)\t\d+\t\d+" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_webappsessionid" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--活动的会话数 -->
+			<resource kpiid="M5appactivesession" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="findWebApp" select="$key\t.*\t.*\t.*\t\d+\t(\d+)\t\d+" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_webappactivesession" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--最大活动会话数 -->
+			<resource kpiid="M5appmaxsession" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="findWebApp" select="$key\t.*\t.*\t.*\t\d+\t\d+\t(\d+)" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_webappmaxsession" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+
+			<!-- WMI采集-->
+			<!-- JBoss CPU利用率-->
+			<resource kpiid="M5CPURate" coltype="WMI" value="" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="cpuWmiCmd" select="" merge="sum" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_cpurate_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>60"
+					alertdesc3="CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}>80" alertdesc4="CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<resource kpiid="M5CPURate" coltype="CLI" value="" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="cpumemssh" select="&lt;get_cpurate&gt;(.*)&lt;/get_cpurate&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m5_cpurate_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>60"
+					alertdesc3="CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}>80" alertdesc4="CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+
+			<!-- JBoss内存利用率 -->
+			<resource kpiid="M5MEMRate" coltype="WMI" value="$d1/$d2/1024*100" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="memWmiCmd" select="" merge="sum" deal=""/>
+					<collect exeorder="20" comid="chk_pmemcap" select="" merge="" deal=""/>
+					
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_m5_memrate_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>60"
+					alertdesc3="内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}>80" alertdesc4="内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<resource kpiid="M5MEMRate" coltype="CLI" value="" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="cpumemssh" select="&lt;get_appmemrate&gt;(.*)&lt;/get_appmemrate&gt;" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_m5_memrate_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>60"
+					alertdesc3="内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}>80" alertdesc4="内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+
+
+            <!-- 系统可管理内存-->
+			<resource kpiid="M5OSMemory" coltype="WMI" value="$d1/1024/1024" valuetype="Float" unit="GB">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_pmemcap" select="" merge="" deal=""/>
+
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_m5_osmemory_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+
+			<resource kpiid="M5OSMemory" coltype="CLI" value="$d1/1024" valuetype="Float" unit="GB">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="mainssh" select="&lt;memsize&gt;(\w+)&lt;/memsize&gt;" merge="" deal=""/>
+
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_m5_osmemory_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--主机说明-->
+			<resource kpiid="M5SysInfo" coltype="CLI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="mainssh" select="&lt;systeminfo&gt;(\w+)&lt;/systeminfo&gt;" merge="" deal=""/>
+
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_m5_sysInfo_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--主机说明-->
+			<resource kpiid="M5SysInfo" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="systemInfo" select="" merge="" deal=""/>
+
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_m5_sysInfo_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>	
+			
+		</resources>
+
+	</devicetypeinfo>
+</root>

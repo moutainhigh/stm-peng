@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.portal.netflow.dao.IInterfaceGroupDao">
+	<select id="device_interfacec_tree" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select i.id
+		interface_id,concat(i.name,'(',i.interface_index,')')
+		interface_name,d.id
+		device_id,concat(d.name,'(',d.ip,')')
+		device_name
+		from CONF_INTERFACE i left join
+		CONF_DEVICE
+		d on
+		i.device_id =
+		d.id where i.state = 2 and
+		i.resource_interface_id is not null
+		<if test="name!=null">
+			<if test="name != null"> and concat(i.name,i.interface_index,d.ip,d.name) like
+				concat('%', #{name}, '%')
+			</if>
+		</if>
+		<if test="notIds!=null">
+			and i.id not in
+			<foreach collection="notIds" index="index" item="item" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="ids!=null">
+			and i.id in
+			<foreach collection="ids" index="index" item="item" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		order by i.device_id desc,i.interface_index
+	</select>
+
+	<insert id="save_device_interface">
+		insert
+		CONF_INTERFACE_GROUP_NETFLOW(name,conf_interface_ids,description)
+		value(#{name},#{interfaceIds},#{description})
+	</insert>
+
+	<select id="query_interface_group"
+		resultType="com.mainsteam.stm.portal.netflow.po.InterfaceGroupPo">
+		select id,name,description,conf_interface_ids
+		interfaceIds
+		from
+		CONF_INTERFACE_GROUP_NETFLOW
+		<trim prefix="where" prefixOverrides="and |or ">
+			<if test="condition.description != null"> AND name like concat('%',#{condition.description},'%')
+			</if>
+		</trim>
+		<choose>
+			<when test="condition.interfaceIds!=null">
+				order by name ${condition.interfaceIds}
+			</when>
+			<otherwise>
+				order by id desc
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="get_interface_group"
+		resultType="com.mainsteam.stm.portal.netflow.bo.InterfaceGroupBo"
+		parameterType="java.util.HashMap">
+		select id,name,conf_interface_ids
+		interfaceIds,description from
+		CONF_INTERFACE_GROUP_NETFLOW where id =
+		#{id}
+	</select>
+
+	<select id="query_interface_list"
+		resultType="com.mainsteam.stm.portal.netflow.bo.ConfInterfaceBo">
+		select id,concat(name,'(',interface_index,')') name from
+		CONF_INTERFACE where resource_interface_id is not null
+		and id in
+		<foreach collection="ids" index="index" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+	<delete id="delete_interface_group">
+		delete from CONF_INTERFACE_GROUP_NETFLOW where id in
+		<foreach collection="ids" index="index" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<update id="update_device_interface">
+		update CONF_INTERFACE_GROUP_NETFLOW set name =
+		#{name},conf_interface_ids = #{interfaceIds},description =
+		#{description} where id = #{id}
+	</update>
+
+	<select id="interface_group_getCount" resultType="java.lang.Integer"
+		parameterType="java.util.HashMap">
+		select count(1) from CONF_INTERFACE_GROUP_NETFLOW where
+		name = #{name}
+		<if test="id!=null">
+			and id not in(#{id})
+		</if>
+	</select>
+</mapper>

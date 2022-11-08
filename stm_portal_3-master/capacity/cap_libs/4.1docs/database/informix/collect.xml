@@ -1,0 +1,1289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">
+    <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0">
+        <ChangePluginInitParameter pluginid="JdbcPlugin" parameterId="dbType" propertyValue="Informix" parameterProperty="DefaultValue"/>
+        <ChangePluginInitParameter pluginid="JdbcPlugin" parameterId="jdbcPort" parameterProperty="DefaultValue" propertyValue="9089"/>
+        <ChangePluginInitParameter pluginid="SshPlugin" parameterId="InstallPath" parameterProperty="isDisplay" propertyValue="TRUE"/>
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="InstallPath" parameterProperty="isDisplay" propertyValue="TRUE"/>
+        <ChangePluginInitParameter pluginid="SshPlugin" parameterId="port" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="SshPlugin" parameterId="username" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="SshPlugin" parameterId="password" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="WmiPlugin" parameterId="username" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="WmiPlugin" parameterId="password" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="port" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="username" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="password" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="userprompt" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="passprompt" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="opprompt" parameterProperty="mustInput" propertyValue="FALSE"/>
+    </GlobalMetricSetting>
+    <PluginClassAliasList>
+        <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+        <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+        <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+        <PluginClassAlias id="columnPasteProcessor" class="com.mainsteam.stm.plugin.common.ColumnPasteProcessor"/>
+        <PluginClassAlias id="RegularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+        <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+        <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+        <PluginClassAlias id="tableConverter" class="com.mainsteam.stm.plugin.common.TableResultSetConverter"/>
+        <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+        <PluginClassAlias id="ChangeRateProcessor" class="com.mainsteam.stm.plugin.common.ChangeRateProcessor"/>
+        <PluginClassAlias id="processConverter" class="com.mainsteam.stm.plugin.common.ProcessResultSetConverter"/>
+        <PluginClassAlias id="FormatProcessor" class="com.mainsteam.stm.plugin.common.FormatProcessor"/>
+        <PluginClassAlias id="memRateProcessor" class="com.mainsteam.stm.plugin.common.MemRateProcessor"/>
+    </PluginClassAliasList>
+    <MetricPlugin metricid="cpuRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="CPU"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfOS_Processor  where name = '_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="Linux" value="LANG=en_US.utf8;top -b -n 3 -d 2 | grep -i &quot;cpu(s)&quot; | tail -n+3 | awk -F , '{if($4~/id/){printf (&quot;%0.2f&quot;,100-substr($4,1,length($4)-3));}}'"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;sar -u 1 2| awk 'BEGIN{idle=0;idloff=0;}{if($0~/idle/){for(i=1;i&lt;=NF;i++){if($i~/idle/)idloff=i;}}else if(NF&gt;1){idle=$idloff;}}END{syscpuload=100.00-idle;printf &quot;%.2f&quot;, syscpuload}'"/>
+            <Parameter type="" key="SunOS" value="vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+            <Parameter type="" key="AIX" value="vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+            <Parameter type="" key="SCO_SV" value="sar -u 1 2| awk 'BEGIN{idle=0;idloff=0;}{if($0~/idle/){for(i=1;i&lt;=NF;i++){if($i~/idle/)idloff=i;}}else if(NF&gt;1){idle=$idloff;}}END{syscpuload=100.00-idle;printf &quot;%.2f&quot;, syscpuload}'"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="Linux" value="LANG=en_US.utf8;top -b -n 3 -d 2 | grep -i &quot;cpu(s)&quot; | tail -n+3 | awk -F , '{if($4~/id/){printf (&quot;%0.2f&quot;,100-substr($4,1,length($4)-3));}}'"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;sar -u 1 2| awk 'BEGIN{idle=0;idloff=0;}{if($0~/idle/){for(i=1;i&lt;=NF;i++){if($i~/idle/)idloff=i;}}else if(NF&gt;1){idle=$idloff;}}END{syscpuload=100.00-idle;printf &quot;%.2f&quot;, syscpuload}'"/>
+            <Parameter type="" key="SunOS" value="vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+            <Parameter type="" key="AIX" value="vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+            <Parameter type="" key="SCO_SV" value="sar -u 1 2| awk 'BEGIN{idle=0;idloff=0;}{if($0~/idle/){for(i=1;i&lt;=NF;i++){if($i~/idle/)idloff=i;}}else if(NF&gt;1){idle=$idloff;}}END{syscpuload=100.00-idle;printf &quot;%.2f&quot;, syscpuload}'"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="memRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="Memory,totalMemSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select FreePhysicalMemory,TotalVisibleMEMorySize from Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (totalMemSize - Memory)/totalMemSize*100 AS memRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="memRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="Linux" value="LANG=en_US.utf8;cat /proc/meminfo | egrep '(^MemTotal|^MemFree|^Buffers|^Cached)' | awk '{if(NR==1){total=$2}else{free+=$2}};END {print free}'"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;vmstat 1 2 | awk 'BEGIN{flag_fre=0;memfree=0;}NR&gt;1{if($0~/fre/){for(i=1;i&lt;=NF;i++){if($i~/fre/)flag_fre=i;}}memfree=$flag_fre;}END{printf &quot;%.0f&quot;, memfree}'"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;sar -r 1 | awk 'BEGIN{memfree=0}{while(getline &gt;0){memfree=$2;}}END{printf &quot;%.0f&quot;,memfree*4}'"/>
+            <Parameter type="" key="SunOS" value="vmstat 1 2 | awk 'BEGIN{flag_fre=0;memfree=0;}NR&gt;1{if($0~/fre/){for(i=1;i&lt;=NF;i++){if($i~/fre/)flag_fre=i;}}memfree=$flag_fre;}END{printf &quot;%.0f&quot;, memfree}'"/>
+            <Parameter type="" key="AIX" value="svmon -G |egrep '(in use|memory)'|awk 'BEGIN{total=0;inused=0;}{if($1~/memory/){total=$2;}else{inused=$3;}}END{printf &quot;%.0f&quot;,(total-inused)*4}'"/>
+            <Parameter type="" key="SCO_SV" value="sar -r 1 | awk 'BEGIN{memfree=0}{while(getline &gt;0){memfree=$2;}}END{printf &quot;%.0f&quot;,memfree*4}'"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;vmstat 1 2 | awk 'BEGIN{flag_fre=0;memfree=0;}NR&gt;1{if($0~/fre/){for(i=1;i&lt;=NF;i++){if($i~/fre/)flag_fre=i;}}memfree=$flag_fre;}END{printf &quot;%.0f&quot;, memfree*4}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="ResourceProperty" key="totalMemSize" value="totalMemSize"/>
+                <Parameter type="" key="SELECT" value="SELECT (1-memRate/${totalMemSize})*100 as memRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="memRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="Linux" value="LANG=en_US.utf8;cat /proc/meminfo | egrep '(^MemTotal|^MemFree|^Buffers|^Cached)' | awk '{if(NR==1){total=$2}else{free+=$2}};END {print free}'"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;vmstat 1 2 | awk 'BEGIN{flag_fre=0;memfree=0;}NR&gt;1{if($0~/fre/){for(i=1;i&lt;=NF;i++){if($i~/fre/)flag_fre=i;}}memfree=$flag_fre;}END{printf &quot;%.0f&quot;, memfree}'"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;sar -r 1 | awk 'BEGIN{memfree=0}{while(getline &gt;0){memfree=$2;}}END{printf &quot;%.0f&quot;,memfree*4}'"/>
+            <Parameter type="" key="SunOS" value="vmstat 1 2 | awk 'BEGIN{flag_fre=0;memfree=0;}NR&gt;1{if($0~/fre/){for(i=1;i&lt;=NF;i++){if($i~/fre/)flag_fre=i;}}memfree=$flag_fre;}END{printf &quot;%.0f&quot;, memfree}'"/>
+            <Parameter type="" key="AIX" value="svmon -G |egrep '(in use|memory)'|awk 'BEGIN{total=0;inused=0;}{if($1~/memory/){total=$2;}else{inused=$3;}}END{printf &quot;%.0f&quot;,(total-inused)*4}'"/>
+            <Parameter type="" key="SCO_SV" value="sar -r 1 | awk 'BEGIN{memfree=0}{while(getline &gt;0){memfree=$2;}}END{printf &quot;%.0f&quot;,memfree*4}'"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;vmstat 1 2 | awk 'BEGIN{flag_fre=0;memfree=0;}NR&gt;1{if($0~/fre/){for(i=1;i&lt;=NF;i++){if($i~/fre/)flag_fre=i;}}memfree=$flag_fre;}END{printf &quot;%.0f&quot;, memfree*4}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="ResourceProperty" key="totalMemSize" value="totalMemSize"/>
+                <Parameter type="" key="SELECT" value="SELECT (1-memRate/${totalMemSize})*100 as memRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="SessionInfo" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="会话ID,用户名,用户ID,用户进程ID,主机名,tty端口,用户连接时间,进程名,会话池指针"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select sid,username,uid,pid,hostname,tty,connected,feprogram,pooladdr from syssessions"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="tableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="OperatingSystem" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::SELECT Caption from Win32_OperatingSystem"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="OperatingSystem" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="OperatingSystem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="Linux"
+                       value="LANG=en_US.utf8;cat /etc/redflag-release 2&gt;/dev/null ||cat /etc/redhat-release 2&gt;/dev/null ||head -n 1 /etc/SuSE-release 2&gt;/dev/null ||cat /etc/mvl-release 2&gt;/dev/null ||cat /etc/wrs-release 2&gt;/dev/null ||cat /etc/debian_version 2&gt;/dev/null || cat /etc/debian_version 2&gt;/dev/null ||cat /etc/lsb-release"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;uname -srn | awk '{printf &quot;%s %s&quot;,$1,$3}'"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;uname -svn|awk '{printf &quot;%s %s&quot;,$1,$3}'"/>
+            <Parameter type="" key="SunOS" value="uname -a 2&gt;/dev/null|awk '{printf &quot;%s %s&quot;, $1,$3}'"/>
+            <Parameter type="" key="AIX" value="uname"/>
+            <Parameter type="" key="SCO_SV" value="uname -svn|awk '{printf &quot;%s %s&quot;,$1,$3}'"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;uname -a|awk '{printf &quot;%s %s&quot;,$1,$3}'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="OperatingSystem" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="OperatingSystem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="Linux"
+                       value="LANG=en_US.utf8;cat /etc/redflag-release 2&gt;/dev/null ||cat /etc/redhat-release 2&gt;/dev/null ||head -n 1 /etc/SuSE-release 2&gt;/dev/null ||cat /etc/mvl-release 2&gt;/dev/null ||cat /etc/wrs-release 2&gt;/dev/null ||cat /etc/debian_version 2&gt;/dev/null || cat /etc/debian_version 2&gt;/dev/null ||cat /etc/lsb-release"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;uname -srn | awk '{printf &quot;%s %s&quot;,$1,$3}'"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;uname -svn|awk '{printf &quot;%s %s&quot;,$1,$3}'"/>
+            <Parameter type="" key="SunOS" value="uname -a 2&gt;/dev/null|awk '{printf &quot;%s %s&quot;, $1,$3}'"/>
+            <Parameter type="" key="AIX" value="uname"/>
+            <Parameter type="" key="SCO_SV" value="uname -svn|awk '{printf &quot;%s %s&quot;,$1,$3}'"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;uname -a|awk '{printf &quot;%s %s&quot;,$1,$3}'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="hostName" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::SELECT Name FROM Win32_ComputerSystem"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="hostName" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="hostName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="Linux" value="LANG=en_US.utf8;uname -n"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;uname -n"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;uname -n"/>
+            <Parameter type="" key="SunOS" value="uname -n"/>
+            <Parameter type="" key="AIX" value="uname -n"/>
+            <Parameter type="" key="SCO_SV" value="uname -n"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;uname -n"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="hostName" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="hostName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="Linux" value="LANG=en_US.utf8;uname -n"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;uname -n"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;uname -n"/>
+            <Parameter type="" key="SunOS" value="uname -n"/>
+            <Parameter type="" key="AIX" value="uname -n"/>
+            <Parameter type="" key="SCO_SV" value="uname -n"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;uname -n"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalMemSize" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="chk_totalMemSize_wmi"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::SELECT TotalVisibleMEMorySize FROM Win32_OperatingSystem"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalMemSize" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="totalMemSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="Linux" value="LANG=en_US.utf8;cat /proc/meminfo |grep -i MemTotal |awk '{printf &quot;%d&quot;,$2}'"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;cat /var/run/dmesg.boot | grep -i &quot;real memory&quot; | awk '{printf &quot;%d&quot;,$4/1024}'"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;memsize|awk '{printf &quot;%d&quot;,$1/1024}'"/>
+            <Parameter type="" key="SunOS" value="prtconf|awk '/^Memory [Ss]ize/{printf &quot;%d&quot;,$3*1024}'"/>
+            <Parameter type="" key="AIX" value="/usr/sbin/prtconf -m 2&gt;/dev/null| awk '{printf &quot;%d&quot;,$3*1024}'"/>
+            <Parameter type="" key="SCO_SV" value="memsize|awk '{printf &quot;%d&quot;,$1/1024}'"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;grep Physical /var/adm/syslog/syslog.log 2&gt;/dev/null |awk 'BEGIN{pmemsize=0;}{for(i=1;i&lt;=NF;i++){if($i~/Physical:/){pmemsize=$(i+1)}}}END{if(pmemsize==0)exit 1;printf pmemsize}'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalMemSize" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="totalMemSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="Linux" value="LANG=en_US.utf8;cat /proc/meminfo |grep -i MemTotal |awk '{printf &quot;%d&quot;,$2}'"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;cat /var/run/dmesg.boot | grep -i &quot;real memory&quot; | awk '{printf &quot;%d&quot;,$4/1024}'"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;memsize|awk '{printf &quot;%d&quot;,$1/1024}'"/>
+            <Parameter type="" key="SunOS" value="prtconf|awk '/^Memory [Ss]ize/{printf &quot;%d&quot;,$3*1024}'"/>
+            <Parameter type="" key="AIX" value="/usr/sbin/prtconf -m 2&gt;/dev/null| awk '{printf &quot;%d&quot;,$3*1024}'"/>
+            <Parameter type="" key="SCO_SV" value="memsize|awk '{printf &quot;%d&quot;,$1/1024}'"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;grep Physical /var/adm/syslog/syslog.log 2&gt;/dev/null |awk 'BEGIN{pmemsize=0;}{for(i=1;i&lt;=NF;i++){if($i~/Physical:/){pmemsize=$(i+1)}}}END{if(pmemsize==0)exit 1;printf pmemsize}'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="appCpuRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="chk_cpurate_wmi,cpuCore"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Thread where Name like 'onscpah%'"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select name from Win32_PerfFormattedData_PerfOS_Processor where name !='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(chk_cpurate_wmi))/count(cpuCore) as appCpuRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="appCpuRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="appCpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="InstanceName" value="InstallPath"/>
+            <Parameter type="" key="Linux" value="LANG=en_US.utf8;top -bS -d 1 -n 1 | egrep ${InstanceName} | awk 'BEGIN{cpuUsage=0;}{if(cpuUsage&amp;lt;$9){cpuUsage=$9;}if(cpuUsage&gt;100){cpuUsage=99.8;}}END{printf(&amp;quot;%0.2f&amp;quot;,cpuUsage);}'"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;ps -aux | egrep ${InstanceName} | egrep -v egrep | awk '{print $3}'"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;ps -eo 'pcpu comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="SunOS" value="ps -eo 'pcpu comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="AIX" value="ps auwwx |egrep ${InstanceName}|egrep -v egrep | awk '{print $3}'"/>
+            <Parameter type="" key="SCO_SV" value="ps -eo 'pcpu comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;UNIX95= ps -eo 'pcpu comm args' |egrep ${InstanceName}|egrep -v egrep | awk '{print $1}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT sum(appCpuRate) as appCpuRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="appCpuRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="appCpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="InstanceName" value="InstallPath"/>
+            <Parameter type="" key="Linux" value="LANG=en_US.utf8;top -bS -d 1 -n 1 | egrep ${InstanceName} | awk 'BEGIN{cpuUsage=0;}{if(cpuUsage&amp;lt;$9){cpuUsage=$9;}if(cpuUsage&gt;100){cpuUsage=99.8;}}END{printf(&amp;quot;%0.2f&amp;quot;,cpuUsage);}'"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;ps -aux | egrep ${InstanceName} | egrep -v egrep | awk '{print $3}'"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;ps -eo 'pcpu comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="SunOS" value="ps -eo 'pcpu comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="AIX" value="ps auwwx |egrep ${InstanceName}|egrep -v egrep | awk '{print $3}'"/>
+            <Parameter type="" key="SCO_SV" value="ps -eo 'pcpu comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;UNIX95= ps -eo 'pcpu comm args' |egrep ${InstanceName}|egrep -v egrep | awk '{print $1}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT sum(appCpuRate) as appCpuRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="appMemRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="Memory,totalMemSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name like 'onscpah%'"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::SELECT TotalVisibleMEMorySize FROM Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (100*sum(Memory)/totalMemSize/1024) as appMemRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="appMemRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="appMemRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="InstanceName" value="InstallPath"/>
+            <Parameter type="" key="GetUname" value="yes"/>
+            <Parameter type="" key="Linux"
+                       value="LANG=en_US.utf8;top -bS -d 1 -n 1 | grep ${InstanceName} | awk 'BEGIN{res=0;shr=0;real=0;tmp_res=0;tmp_shr=0;}{tmp_res=substr($6,1,length($6)-1);tmp_shr=substr($7,1,length($7)-1);if($6~/m|M/){res=res+tmp_res*1024;}else if($6~/g|G/){res=res+tmp_res*1024*1024;}else{res=res+tmp_res;};if($7~/m|M/){shr=shr+tmp_shr*1024}else if($7~/g|G/){shr=shr+tmp_shr*1024*1024}else{shr=shr+tmp_shr;};}END{real=res-shr;printf(&quot;%d&quot;,real);}'"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;ps -aux | egrep ${InstanceName} | egrep -v egrep | awk '{print $4}'"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;ps -eo 'vsz comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="SunOS" value="ps -eo 'pmem comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="AIX" value="ps auwwx |egrep ${InstanceName}|egrep -v egrep | awk '{print $4}'"/>
+            <Parameter type="" key="SCO_SV" value="ps -eo 'vsz comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;ps -eflx |egrep ${InstanceName}|egrep -v egrep | awk '{print $10*4}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="memRateProcessor">
+                <Parameter type="ResourceProperty" key="totalMemSize" value="totalMemSize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="appMemRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="appMemRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="InstanceName" value="InstallPath"/>
+            <Parameter type="" key="GetUname" value="yes"/>
+            <Parameter type="" key="Linux"
+                       value="LANG=en_US.utf8;top -bS -d 1 -n 1 | grep ${InstanceName} | awk 'BEGIN{res=0;shr=0;real=0;tmp_res=0;tmp_shr=0;}{tmp_res=substr($6,1,length($6)-1);tmp_shr=substr($7,1,length($7)-1);if($6~/m|M/){res=res+tmp_res*1024;}else if($6~/g|G/){res=res+tmp_res*1024*1024;}else{res=res+tmp_res;};if($7~/m|M/){shr=shr+tmp_shr*1024}else if($7~/g|G/){shr=shr+tmp_shr*1024*1024}else{shr=shr+tmp_shr;};}END{real=res-shr;printf(&quot;%d&quot;,real);}'"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;ps -aux | egrep ${InstanceName} | egrep -v egrep | awk '{print $4}'"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;ps -eo 'vsz comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="SunOS" value="ps -eo 'pmem comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="AIX" value="ps auwwx |egrep ${InstanceName}|egrep -v egrep | awk '{print $4}'"/>
+            <Parameter type="" key="SCO_SV" value="ps -eo 'vsz comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;ps -eflx |egrep ${InstanceName}|egrep -v egrep | awk '{print $10*4}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="memRateProcessor">
+                <Parameter type="ResourceProperty" key="totalMemSize" value="totalMemSize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="Version" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select dbinfo('version', 'full') from systables where tabid = 1"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Version (\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sysUpTime" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select sh_curtime- sh_boottime from sysshmvals"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="numberOfDatabase" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="numberOfDb"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select trim (name) from sysdatabases"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (count(numberOfDb)) as numberOfDatabase"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="rootDataSpaceName" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select cf_original from sysconfig where cf_name='ROOTNAME'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(.+\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="rootDataSpacePath" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select cf_original from sysconfig where cf_name='ROOTPATH'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(.+\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="residentMemSize" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="residentMemSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select trim(cf_original) from sysconfig where cf_name='BUFFERS'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (residentMemSize/1024/1024) as residentMemSize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="virMemInitSize" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="virMemInitSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select trim(cf_original) from sysconfig where cf_name='SHMVIRTSIZE'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="DECIMAL"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (virMemInitSize/1024) as virMemInitSize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="virProcessorCount" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select count(*) from sysvpprof"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="numOfLogicLogfile" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select count(*) from syslogfil"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="numOfChunkSpace" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select count(chknum) from syschunks"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="numOfChunk" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select sum(chksize) from syschunks"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="readHitRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select round(decode((a.value+b.value),0,0,100*a.value/(a.value+b.value)),2) from sysprofile a,sysprofile b where a.name='bufreads' and b.name='dskreads'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="availability" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="availability"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select trim(cf_original) from sysconfig where cf_name='DBSERVERNAME'"/>
+            <Parameter type="" key="IS_AVAIL" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (count(availability)) as availability"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="curSessionCount" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select count(*) from syssessions"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="bufferReadHitRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select round(decode((a.value+b.value),0,0,100*a.value/(a.value+b.value)),2) from sysprofile a,sysprofile b where a.name='bufreads' and b.name='dskreads'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="bufWriteHitRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select round(decode((a.value+b.value),0,0,100*a.value/(a.value+b.value)),2) from sysprofile a,sysprofile b where a.name='bufwrites' and b.name='dskwrites'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="bufWaitRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="bufWaitRate,pageReadRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='buffwts'"/>
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='pagreads'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (100*bufWaitRate/(pageReadRate + bufWaitRate)) as bufWaitRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="bufLRUWriteRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='lruwrites'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGR"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sequentialScanRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='seqscans'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGR"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="latchWaitRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='latchwts'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="bufferFlushRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='flushes'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGR"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="foregrdWriteRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='fgwrites'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGR"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="chunkWriteRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='chunkwrites'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGR"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sortsMEMRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='memsorts'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGR"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sortsDiskRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='disksorts'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGR"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="checkPointRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='numckpts'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="checkPointWaitRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='ckptwts'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGR"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="transCommitRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='iscommits'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGR"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="tranRollbackRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='isrollbacks'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGR"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="lockRequireRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='lockreqs'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGR"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="lockDeadRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='deadlks'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGR"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="lockWaitRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='lockwts'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGR"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="lockTimeoutRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='lktouts'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGR"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="phyReadRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='dskreads'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="phyWriteRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='dskwrites'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="PageReadRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='pagreads'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="PageWriteRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='pagwrites'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="logRdsWriteRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='llgrecs'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="logPageWriteRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='llgpagewrites'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="logicLogWriteRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='llgwrites'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="phyLogWriteRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='plgwrites'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="phyLogPgWriteRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select value from sysprofile where name='plgpagewrites'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\d.]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="tablesNumber" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="SELECT count(*) FROM systables WHERE (tabtype= 'T ' or tabtype = 'V ') and (tabid &gt; 99)"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="dbPageSize" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select sh_pagesize from sysshmvals"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="dbdataBaseName" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select trim(name),created from sysdatabases"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column1"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="dbcreatTime" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select trim(name),created from sysdatabases"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column2"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="dbdataBaseName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="dbdatabaseSpace" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select sum( ti_npused) from systabinfo where ti_partnum in (select partnum from systabnames where dbsname='${childid}')"/>
+            <Parameter type="ResourceProperty" key="childid" value="dbdataBaseName"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="dbAvailability" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select trim(cf_original) from sysconfig where cf_name='DBSERVERNAME'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="column1" value="null, ,0;1"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="dbSpaceName" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select trim(name),dbsnum from sysdbspaces"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column1"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="dbSpaceId" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select trim(name),dbsnum from sysdbspaces"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column2"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="dbSpaceName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="dbSpaceSize" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2,column3"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select trim(name),sum(b.chksize)/1024,round(sum(b.chksize-b.nfree)/sum(b.chksize)*100,2) from sysdbspaces a,syschunks b where a.dbsnum=b.dbsnum group by a.name"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column2"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="dbSpaceName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="dbSpaceUtil" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2,column3"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select trim(name),sum(b.chksize),round(sum(b.chksize-b.nfree)/sum(b.chksize)*100,2) from sysdbspaces a,syschunks b where a.dbsnum=b.dbsnum group by a.name"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="column3" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column3"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="dbSpaceName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="phyLogId" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select count(*) from sysplog"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="phyLogName" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select 'Phyname1' phylog_name from sysplog"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="phyLogSize" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select sum(pl_physize)/1024 from sysplog"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="phyLogUtil" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select round(sum(pl_phyused)/sum(pl_physize)*100,2) from sysplog"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="logicLogId" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2,column3"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select number,size,round(used/size*100,2) from syslogfil"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column1"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="logicLogSize" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2,column3"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select number,size/1024,round(used/size*100,2) from syslogfil"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column2"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="logicLogId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="logicLogUtil" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2,column3"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select number,size,round(used/size*100,2) from syslogfil"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="column3" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column3"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="logicLogId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="tableSpaceName" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2,column3,column4,column5"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select trim(name) dbspace,trim(owner), sum(chksize) allocated, sum(nfree) free,round(((sum(chksize) - sum(nfree))/sum(chksize))*100) pcused from sysdbspaces d, syschunks c where d.dbsnum = c.dbsnum group by name,owner order by pcused desc"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column1"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="tableSpaceOwner" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2,column3,column4,column5"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select trim(name) dbspace,trim(owner), sum(chksize) allocated, sum(nfree) free,round(((sum(chksize) - sum(nfree))/sum(chksize))*100) pcused from sysdbspaces d, syschunks c where d.dbsnum = c.dbsnum group by name,owner order by pcused desc"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column2"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="tableSpaceName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="tableSpaceDataFile" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select trim(s.name),trim(f.fname) from sysdbspaces s,syschunks f where s.dbsnum=f.dbsnum"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column2"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="tableSpaceName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="tableSpaceSize" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2,column3,column4,column5"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select trim(name) dbspace,trim(owner), sum(chksize) allocated, sum(nfree) free,round(((sum(chksize) - sum(nfree))/sum(chksize))*100) pcused from sysdbspaces d, syschunks c where d.dbsnum = c.dbsnum group by name,owner order by pcused desc"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column3"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="tableSpaceName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="tableSpaceUsedSize" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2,column3,column4,column5"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select trim(name) dbspace,trim(owner), sum(chksize) allocated, sum(nfree) free,(sum(chksize) - sum(nfree)) pcused from sysdbspaces d, syschunks c where d.dbsnum = c.dbsnum group by name,owner order by pcused desc"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column5"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="tableSpaceName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="tableSpaceFreeSize" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2,column3,column4,column5"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select trim(name) dbspace,trim(owner), sum(chksize) allocated, sum(nfree) free,round(((sum(chksize) - sum(nfree))/sum(chksize))*100) pcused from sysdbspaces d, syschunks c where d.dbsnum = c.dbsnum group by name,owner order by pcused desc"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column4"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="tableSpaceName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="tableSpaceUtil" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2,column3,column4,column5"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select trim(name) dbspace,trim(owner), sum(chksize) allocated, sum(nfree) free,round(((sum(chksize) - sum(nfree))/sum(chksize))*100) pcused from sysdbspaces d, syschunks c where d.dbsnum = c.dbsnum group by name,owner order by pcused desc"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="column5" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column5"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="tableSpaceName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="dataFileId" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2,column3,column4,column5,column6,column7,column8,column9"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select f.chknum,nvl(trim(s.name),''),f.chksize,f.offset,f.nfree,trim(f.fname),trim(f.mfname),c.reads,c.writes from syschunks f,sysdbspaces s,syschkio c where f.dbsnum=s.dbsnum and c.chunknum=f.chknum"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column1"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="dataFileName" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2,column3,column4,column5,column6,column7,column8,column9"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select f.chknum,nvl(trim(s.name),''),f.chksize,f.offset,f.nfree,trim(f.fname),trim(f.mfname),c.reads,c.writes from syschunks f,sysdbspaces s,syschkio c where f.dbsnum=s.dbsnum and c.chunknum=f.chknum"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column6"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="dataFileId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="dataFileUtil" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2,column3,column4,column5,column6,column7,column8,column9"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select f.chknum,nvl(trim(s.name),''),f.chksize,f.offset,f.nfree,trim(f.fname),trim(f.mfname),c.reads,c.writes from syschunks f,sysdbspaces s,syschkio c where f.dbsnum=s.dbsnum and c.chunknum=f.chknum"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT column1, ((column3-column5)/column3*100) as column"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="column" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="dataFileId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="databaseSpace" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2,column3,column4,column5,column6,column7,column8,column9"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select f.chknum,nvl(trim(s.name),''),f.chksize,f.offset,f.nfree,trim(f.fname),trim(f.mfname),c.reads,c.writes from syschunks f,sysdbspaces s,syschkio c where f.dbsnum=s.dbsnum and c.chunknum=f.chknum"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column2"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="dataFileId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="dataFileSize" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2,column3,column4,column5,column6,column7,column8"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select f.chknum,nvl(trim(s.name),''),f.chksize,f.offset,f.nfree,trim(f.fname),trim(f.mfname),sh.sh_pagesize from syschunks f,sysdbspaces s,syschkio c,sysshmvals sh where f.dbsnum=s.dbsnum and c.chunknum=f.chknum"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT column1, (column3*column8/1024/1024) as column"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="dataFileId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="dataFileUsedSize" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2,column3,column4,column5,column6,column7,column8"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select f.chknum,nvl(trim(s.name),''),f.chksize,f.offset,f.nfree,trim(f.fname),trim(f.mfname),sh.sh_pagesize from syschunks f,sysdbspaces s,syschkio c,sysshmvals sh where f.dbsnum=s.dbsnum and c.chunknum=f.chknum"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT column1, ((column3-column5)*column8/1024/1024) as column"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="dataFileId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="dataFileOffset" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2,column3,column4,column5,column6,column7,column8,column9"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select f.chknum,nvl(trim(s.name),''),f.chksize,f.offset,f.nfree,trim(f.fname),trim(f.mfname),c.reads,c.writes from syschunks f,sysdbspaces s,syschkio c where f.dbsnum=s.dbsnum and c.chunknum=f.chknum"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column4"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="dataFileId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="dataFileIORead" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2,column3,column4,column5,column6,column7,column8,column9"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select f.chknum,nvl(trim(s.name),''),f.chksize,f.offset,f.nfree,trim(f.fname),trim(f.mfname),c.reads,c.writes from syschunks f,sysdbspaces s,syschkio c where f.dbsnum=s.dbsnum and c.chunknum=f.chknum"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column8"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="dataFileId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="dataFileIOWrite" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2,column3,column4,column5,column6,column7,column8,column9"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select f.chknum,nvl(trim(s.name),''),f.chksize,f.offset,f.nfree,trim(f.fname),trim(f.mfname),c.reads,c.writes from syschunks f,sysdbspaces s,syschkio c where f.dbsnum=s.dbsnum and c.chunknum=f.chknum"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column9"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="dataFileId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="InformixsInstanceID" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="Port" value="Port"/>
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+        </PluginParameter>
+    </MetricPlugin>
+</MetricPlugins>

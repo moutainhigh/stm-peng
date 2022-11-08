@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.resourcelog.dao.IStrategyDao">
+
+	 
+  <insert id="saveStrategyBasic">
+		insert into
+			STM_SYSLOG_STRATEGY_BASE(ID, DOMAIN_ID, NAME, CREATOR_ID, CREATE_TIME,TYPE)
+		values(#{id}, #{domainId}, #{name}, #{creatorId}, #{createDate}, #{typeId})
+	</insert>
+	 
+  <update id="updateStrategyBasic" parameterType="com.mainsteam.stm.resourcelog.strategy.bo.StrategyBo">
+		update STM_SYSLOG_STRATEGY_BASE set
+			DOMAIN_ID = #{domainId},
+			NAME = #{name},
+			CREATOR_ID = #{creatorId},
+			CREATE_TIME = #{createDate},
+			UPDATER_ID = #{updaterId},
+			UPDATE_TIME = #{updateDate}
+		where id = #{id}
+	</update>
+	 
+  <!-- 删除策略信息 -->
+	 
+  <delete id="batchDel">
+		DELETE base,rule,res,alarm FROM STM_SYSLOG_STRATEGY_BASE base
+			left join STM_SYSLOG_STRATEGY_RULE rule on base.ID = rule.STRATEGY_ID
+			left join stm_syslog_resource res on base.ID = res.STRATEGY_ID
+			left join stm_syslog_alarm_user alarm on base.ID = alarm.STRATEGY_ID
+		 WHERE base.ID = #{id}
+	</delete>
+	
+	 
+  <delete id="batchDelBase">
+		DELETE from STM_SYSLOG_STRATEGY_BASE WHERE ID = #{id}
+	</delete>
+	 
+  <delete id="batchDelRule">
+		DELETE from STM_SYSLOG_STRATEGY_RULE WHERE STRATEGY_ID = #{id}
+	</delete>
+	 
+  <select id="queryStratey" resultType="com.mainsteam.stm.resourcelog.strategy.bo.StrategyBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		SELECT 
+			STRATEGY.ID AS id,
+			STRATEGY.NAME AS name,
+			OCDOMAIN.NAME AS domainName,
+			OCUSER.NAME AS creator
+		FROM STM_SYSLOG_STRATEGY_BASE STRATEGY
+			LEFT JOIN STM_SYS_DOMAIN OCDOMAIN ON STRATEGY.DOMAIN_ID = OCDOMAIN.ID
+			LEFT JOIN STM_SYS_USER OCUSER ON STRATEGY.CREATOR_ID = OCUSER.ID
+		 
+    <trim prefix="where" prefixOverrides="and | or">
+			 
+      <if test="condition != null">
+				AND STRATEGY.TYPE = #{condition.typeId} 
+				 
+        <if test="condition.domainIds != null">
+					AND strategy.DOMAIN_ID IN
+					 
+          <foreach item="domainIds" index="index" collection="condition.domainIds" open="(" separator="," close=")">  
+			 			#{domainIds}
+					</foreach>
+				
+        </if>
+				 
+        <if test="condition.creatorId != null">
+					AND strategy.CREATOR_ID = #{condition.creatorId}
+				</if>
+			
+      </if>
+		
+    </trim>
+	
+  </select>
+	 
+  <select id="get" resultType="com.mainsteam.stm.resourcelog.strategy.bo.StrategyBo" parameterType="long">
+		SELECT 
+			STRATEGY.ID,
+			STRATEGY.NAME,
+			STRATEGY.DOMAIN_ID AS domainId,
+			STRATEGY.CREATOR_ID AS creatorId,
+			STRATEGY.CREATE_TIME AS createDate,
+			STRATEGY.UPDATER_ID AS updaterId,
+			STRATEGY.UPDATE_TIME AS updateDate,
+			STRATEGY.SNMPTRAP_TYPE AS commonType,
+			STRATEGY.TYPE AS typeId,
+			STRATEGY.ALARM_LEVEL AS alarmLevel,
+			OCUSER.NAME AS creator,
+			OCUPDATER.NAME AS updater
+		FROM STM_SYSLOG_STRATEGY_BASE STRATEGY
+			LEFT JOIN STM_SYS_USER OCUSER ON STRATEGY.CREATOR_ID = OCUSER.ID
+			LEFT JOIN STM_SYS_USER OCUPDATER ON STRATEGY.UPDATER_ID = OCUPDATER.ID
+		WHERE STRATEGY.ID=#{id}
+	</select>
+	
+	 
+  <select id="getStrategyResource" parameterType="long" resultType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogResourceBo">
+		SELECT 
+			res.STRATEGY_ID as strategyId,
+			res.RESOURCE_ID as resourceId,
+			res.IS_MONITOR as isMonitor,
+			res.IP as resourceIp
+		FROM STM_SYSLOG_RESOURCE res
+		where res.STRATEGY_ID = #{id}
+	</select>
+	 
+  <update id="updateResourceStrategy" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogResourceBo">
+		update STM_SYSLOG_RESOURCE set
+			STRATEGY_ID = #{strategyId}
+		where id = #{id}
+	</update>
+	 
+  <update id="updateMonitorState" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogResourceBo">
+		update STM_SYSLOG_RESOURCE set
+			IS_MONITOR = #{isMonitor}
+		where id = #{id}
+	</update>
+	
+	 
+  <select id="getResourceStratey" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" resultType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogResourceBo">
+		select 
+			res.ID as id,
+			res.STRATEGY_ID as strategyId,
+			res.RESOURCE_ID as resourceId,
+			res.IS_MONITOR as isMonitor,
+			res.IP as resourceIp,
+			sta.CUR_DATE_COUNT as curDateCount,
+			sta.ALL_COUNT as allCount,
+			sta.LAST_DATE as lastDate,
+			strategy.NAME as strategyName,
+			strategy.DOMAIN_ID as domainId,
+			strategy.CREATOR_ID as userId
+		from stm_syslog_resource res
+			left join stm_syslog_resource_sta sta on res.RESOURCE_ID = sta.RESOURCE_ID
+			left join stm_syslog_strategy_base strategy on res.STRATEGY_ID = strategy.ID
+		 
+    <trim prefix="where" prefixOverrides="and | or">
+			 
+      <if test="condition != null">
+				AND res.STRATEGY_TYPE = #{condition.typeId} 
+				AND sta.STRATEGY_TYPE = #{condition.typeId}
+				 
+        <if test="condition.domainIds != null">
+					AND strategy.DOMAIN_ID IN
+					 
+          <foreach item="domainIds" index="index" collection="condition.domainIds" open="(" separator="," close=")">  
+			 			#{domainIds}
+					</foreach>
+				
+        </if>
+			
+      </if>
+		
+    </trim>
+	
+  </select>
+	
+	 
+  <select id="countRes" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogResourceBo" resultType="int">
+		select count(*) from stm_syslog_resource
+		where RESOURCE_ID = #{resourceId} and STRATEGY_TYPE = #{strategyType}
+	</select>
+	
+	 
+  <delete id="delResourceByStrategyId">
+		delete from stm_syslog_resource where STRATEGY_ID = #{id}
+	</delete>
+	
+	 
+  <delete id="delRelationResource" parameterType="java.util.List">
+		delete from stm_syslog_resource
+		where RESOURCE_ID = #{resourceId} and STRATEGY_TYPE = #{strategyType}
+	</delete>
+
+	 
+  <delete id="delRelationByResourceIdAndStrategyId" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogResourceBo">
+		delete from stm_syslog_resource
+		where RESOURCE_ID = #{resourceId} and STRATEGY_ID = #{strategyId}
+	</delete>
+	 
+  <!-- mysql -->
+	 
+  <insert id="saveStrategyResource" parameterType="java.util.List" databaseId="mysql">
+		insert into
+			STM_SYSLOG_RESOURCE(ID,STRATEGY_ID, RESOURCE_ID,STRATEGY_TYPE,IP)
+		values
+		 
+    <foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id},#{item.strategyId}, #{item.resourceId},#{item.strategyType},#{item.snmptrapIp,jdbcType=VARCHAR})
+		</foreach>
+	
+  </insert>
+	 
+  <!-- oracle -->
+	 
+  <insert id="saveStrategyResource" parameterType="java.util.List" databaseId="oracle">
+		insert into
+			STM_SYSLOG_RESOURCE(ID,STRATEGY_ID, RESOURCE_ID,STRATEGY_TYPE,IP)
+		 
+    <foreach collection="list" item="item" index="index" open="(" separator="union" close=")">
+		select
+			#{item.id},#{item.strategyId}, #{item.resourceId},#{item.strategyType},#{item.snmptrapIp,jdbcType=VARCHAR}
+		from dual
+		</foreach>
+	
+  </insert>
+	 
+  <!-- oscar -->
+	 
+  <insert id="saveStrategyResource" parameterType="java.util.List" databaseId="dm">
+		insert into
+			STM_SYSLOG_RESOURCE(ID,STRATEGY_ID, RESOURCE_ID,STRATEGY_TYPE,IP)
+		 
+    <foreach collection="list" item="item" index="index" open="(" separator="union" close=")">
+		select
+			#{item.id},#{item.strategyId}, #{item.resourceId},#{item.strategyType},#{item.snmptrapIp,jdbcType=VARCHAR}
+		from dual
+		</foreach>
+	
+  </insert>
+  <insert id="saveStrategyResource" parameterType="java.util.List" databaseId="oscar">
+		insert into
+			STM_SYSLOG_RESOURCE(ID,STRATEGY_ID, RESOURCE_ID,STRATEGY_TYPE,IP)
+		 
+    <foreach collection="list" item="item" index="index" open="(" separator="union" close=")">
+		select
+			#{item.id},#{item.strategyId}, #{item.resourceId},#{item.strategyType},#{item.snmptrapIp,jdbcType=VARCHAR}
+		from dual
+		</foreach>
+	
+  </insert>
+	 
+  <select id="countResource" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogResourceBo" resultType="int">
+		select count(*) from stm_syslog_resource_sta
+		where RESOURCE_ID = #{resourceId} and STRATEGY_TYPE = #{strategyType}
+	</select>
+	 
+  <!-- mysql -->
+	 
+  <insert id="saveResourceSta" parameterType="java.util.List" databaseId="mysql">
+		insert into
+			stm_syslog_resource_sta(RESOURCE_ID, STRATEGY_TYPE,CUR_DATE_COUNT,ALL_COUNT,LAST_DATE)
+		values
+		 
+    <foreach collection="list" item="item" index="index" separator=",">
+			(#{item.resourceId}, #{item.strategyType},#{item.curDateCount},#{item.allCount},#{item.lastDate})
+		</foreach>
+	
+  </insert>
+	 
+  <!-- oracle -->
+	 
+  <insert id="saveResourceSta" parameterType="java.util.List" databaseId="oracle">
+		insert into
+			stm_syslog_resource_sta(RESOURCE_ID, STRATEGY_TYPE,CUR_DATE_COUNT,ALL_COUNT,LAST_DATE)
+		 
+    <foreach collection="list" item="item" index="index" open="(" separator="union" close=")">
+		select
+			#{item.resourceId}, #{item.strategyType},#{item.curDateCount},#{item.allCount},#{item.lastDate}
+		from dual
+		</foreach>
+	
+  </insert>
+	 
+  <insert id="saveResourceSta" parameterType="java.util.List" databaseId="dm">
+		insert into
+			stm_syslog_resource_sta(RESOURCE_ID, STRATEGY_TYPE,CUR_DATE_COUNT,ALL_COUNT,LAST_DATE)
+		 
+    <foreach collection="list" item="item" index="index" open="(" separator="union" close=")">
+		select
+			#{item.resourceId}, #{item.strategyType},#{item.curDateCount},#{item.allCount},#{item.lastDate}
+		from dual
+		</foreach>
+	
+  </insert>
+  <insert id="saveResourceSta" parameterType="java.util.List" databaseId="oscar">
+		insert into
+			stm_syslog_resource_sta(RESOURCE_ID, STRATEGY_TYPE,CUR_DATE_COUNT,ALL_COUNT,LAST_DATE)
+		 
+    <foreach collection="list" item="item" index="index" open="(" separator="union" close=")">
+		select
+			#{item.resourceId}, #{item.strategyType},#{item.curDateCount},#{item.allCount},#{item.lastDate}
+		from dual
+		</foreach>
+	
+  </insert>
+	 
+  <update id="updateAllResourceSta" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogResourceBo">
+		update stm_syslog_resource_sta set CUR_DATE_COUNT = #{curDateCount}
+	</update>
+	
+	 
+  <select id="countStrategyName" parameterType="com.mainsteam.stm.resourcelog.strategy.bo.StrategyBo" resultType="int">
+		select count(*) from stm_syslog_strategy_base
+		where NAME = #{name} and DOMAIN_ID = #{domainId} and TYPE = #{typeId}
+		 
+    <if test="id != null">
+			and ID != #{id}
+		</if>
+	
+  </select>
+</mapper>

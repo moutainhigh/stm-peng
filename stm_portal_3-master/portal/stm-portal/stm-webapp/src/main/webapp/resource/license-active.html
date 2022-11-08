@@ -1,0 +1,91 @@
+
+<div>
+	<div>
+		<ul class="pop-con">
+			<li class="help-t-tit">您可以申请并上传新的授权文件，步骤如下：</li>
+			<li>1. 从本系统下载模板文件。
+				<a class="help-t-download fa fa-download" id="downloadFile2">下载</a>
+				<a id="downloadFile"></a>
+			</li>
+			<li>2. 将MainSteam模板文件发送给本公司服务人员。</li>
+			<li>
+				<div>3. 导入新授权文件到本系统。</div>
+				<div class="ipu-dwon-posi">
+					<form class="oc-form" id="uploadForm" method="post" enctype="multipart/form-data" encoding="multipart/form-data">
+						<input type="text" id="showLicenseFilePath" class="oc-checkbox-locate">
+						<a href="javascript:void(0);" class="file-button" id="chooseFile">
+							浏览
+							<input class="file-button-file" type="file" name="licenseFile" id="choiceFile">
+						</a>
+						<a id="importBtn" href="javascript:void(0);">导入</a>
+					</form>
+				</div>
+			</li>
+		</ul>
+	</div>
+	<!-- <div class="active-bg-but"></div> -->
+</div>
+<script type="text/javascript">
+	$(function() {
+		$("#chooseFile").linkbutton("RenderLB",{
+			iconCls : 'fa fa-file-text-o'
+		});
+
+		$("#choiceFile").change(function(){
+			var value=$("#choiceFile").val();
+			$("#showLicenseFilePath").val(value.substr(value.lastIndexOf("\\") + 1));
+		});
+		$("#importBtn").linkbutton('RenderLB', {
+			iconCls : 'fa fa-sign-in',
+			onClick : function() {
+				var fileName = $("#choiceFile").val();
+				if(fileName && fileName!=""){
+					if(fileName.substring(fileName.lastIndexOf("."))==".steam"){
+						$("#uploadForm").ajaxSubmit({
+							url:oc.resource.getUrl("system/license/importLicenseV.htm"),
+							timeout: 3000,
+							iframe : true,
+							dataType: "json",
+							success : function(response, statusText, xhr, $form) {
+								if(response && response.data==1){
+									alert("License文件导入成功！3秒后自动跳转登陆页面！");
+									setTimeout(function () {
+										if($('#licenseActiveId') && $('#licenseActiveId').length > 0 && $('#licenseActiveId').attr('isOneCenter')){
+											location.reload(true);
+										}else{
+											window.location.href=oc.resource.getUrl('resource/login.html');
+										}
+									}, 3000);
+								}else{
+									alert("License文件无效或过期！");
+								}
+							},
+							error:function(response, statusText, xhr){
+								alert("导入失败！");
+							}
+						});
+
+
+
+					}else{
+						alert("请选择正确的License文件！");
+					}
+				}else{
+					alert("请选择License文件！");
+				}
+			}
+		});
+
+		$("#downloadFile").click(function(){
+			window.location.href=oc.resource.getUrl('system/license/getDatFile.htm');
+		});
+		$("#downloadFile2").click(function(){
+			window.location.href=oc.resource.getUrl('system/license/getDatFile.htm');
+		});
+
+		$("#closeLicenseActive").click(function(){
+			window.location.href=oc.resource.getUrl("login.html");
+		});
+	});
+
+</script>

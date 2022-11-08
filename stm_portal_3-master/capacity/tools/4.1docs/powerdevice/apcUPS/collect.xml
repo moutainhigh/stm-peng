@@ -1,0 +1,591 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">
+    <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0"/>
+    <PluginClassAliasList>
+        <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+        <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+        <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+        <PluginClassAlias id="columnPasteProcessor" class="com.mainsteam.stm.plugin.common.ColumnPasteProcessor"/>
+        <PluginClassAlias id="RegularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+        <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+        <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+        <PluginClassAlias id="tableConverter" class="com.mainsteam.stm.plugin.common.TableResultSetConverter"/>
+        <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+        <PluginClassAlias id="ChangeRateProcessor" class="com.mainsteam.stm.plugin.common.ChangeRateProcessor"/>
+        <PluginClassAlias id="rowFilterProcessor" class="com.mainsteam.stm.plugin.common.RowFilterProcessor"/>
+        <PluginClassAlias id="FormatProcessor" class="com.mainsteam.stm.plugin.common.FormatProcessor"/>
+        <PluginClassAlias id="RowFilterByInstPropertyProcessor" class="com.mainsteam.stm.plugin.common.RowFilterByInstPropertyProcessor"/>
+        <PluginClassAlias id="rangeCheckProcessor" class="com.mainsteam.stm.plugin.common.RangeCheckProcessor"/>
+    </PluginClassAliasList>
+    <MetricPlugin metricid="snmpAvailability" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="sysoid"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.1.2.0"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (count(sysoid)) as availability"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="availability" value="0,16;1"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="macAddress" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="NICIndex,NICPhysAddress"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.6"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT NICPhysAddress"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="rowFilterProcessor">
+                <Parameter value="" key="MacAddress"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="Name" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.1.5.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="availability" collectType="" pluginid="IcmpPlugin">
+        <PluginResultMetaInfo columns="ip,isAlive,ResponseTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT isAlive"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="icmpDelayTime" collectType="" pluginid="IcmpPlugin">
+        <PluginResultMetaInfo columns="ip,isAlive,ResponseTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ResponseTime"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sysObjectID" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.1.2.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="sysUpTime" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="sysUpTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.1.3.0"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT sysUpTime/100 as sysUpTime"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sysDescr" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.1.1.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ip" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.4.20.1.1"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="upsName" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.1.1.1.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="upsID" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.1.1.2.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="upsFirmwareRevision" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.1.2.1.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="upsManufactureDate" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.1.2.2.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="upsSerialNumber" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.1.2.3.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="upsBatteryState" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="batteryState"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.2.1.1.0"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="batteryState" value="1,unknow;2,normal;3,low;4,fault;other"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="upsBatElapsedTime" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.2.1.2.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="upsBatRemain" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.2.2.1.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="upsBatTemperature" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.2.2.2.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="upsBatRemainTime" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="upsBatRemainTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.2.2.3.0"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT upsBatRemainTime/100 as upsBatRemainTime"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="upsBatReplaceState" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="batteryState"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.2.2.4.0"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="batteryState" value="1,no;2,yes;other"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="upsBatNormalVoltage" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.2.2.7.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="upsBatActualVoltage" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.2.2.8.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="upsCurrentInVoltage" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.3.2.1.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="upsCurrentInFrequenc" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.3.2.4.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="upsCurrentState" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="batteryState"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.4.1.1.0"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="batteryState" value="2,1;0"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="upsOutputVoltage" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.4.2.1.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="upsCurrentOutFrequen" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.4.2.2.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="upsLoad" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.4.2.3.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="upsLoadCurrent" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.4.2.4.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <!-- UPS Output -->
+    <MetricPlugin metricid="OutputIndex" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="OutputIndex"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.9.3.3.1.2.1.1"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="OutputIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="OutputIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="OutputVoltage" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="OutputIndex,OutputVoltage"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.9.3.3.1.3.1.1"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="OutputIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="OutputIndex"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="OutputIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="OutputVoltage"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="OutputIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="OutputLoadCurrent" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="OutputIndex,OutputLoadCurrent"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.9.3.3.1.4.1.1"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="OutputIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="OutputIndex"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="OutputIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="OutputLoadCurrent"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="OutputIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="OutputLoadVoltage" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="OutputIndex,OutputLoadVoltage"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.9.3.3.1.7.1.1"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="OutputIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="OutputIndex"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="OutputIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="OutputLoadVoltage"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="OutputIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="OutputPowerWattsRate" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="OutputIndex,OutputPowerWattsRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.9.3.3.1.16.1.1"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="OutputIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="OutputIndex"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="OutputIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="OutputPowerWattsRate"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="OutputIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <!-- Intelligence Modules -->
+    <MetricPlugin metricid="IntellIndex" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="IntellIndex"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.13.1.2.1.1"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="IntellIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="IntellIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="IntellSerialNumber" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="IntellIndex,IntellSerialNumber"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.13.1.2.1.7"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="IntellIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="IntellIndex"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="IntellIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="IntellSerialNumber"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="IntellIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="IntellType" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="IntellIndex,IntellType"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.13.1.2.1.2"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="IntellIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="IntellIndex"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="IntellType" value="1,imUnknown;2,imMIM;3,imRIM;other"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="IntellIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="IntellType"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="IntellIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="IntellState" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="IntellIndex,IntellState"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.13.1.2.1.3"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="IntellIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="IntellIndex"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="IntellState" value="4,1;0"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="IntellIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="IntellState"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="IntellIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="IntellFirmwaRevision" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="IntellIndex,IntellFirmwaRevision"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.13.1.2.1.4"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="IntellIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="IntellIndex"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="IntellIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="IntellFirmwaRevision"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="IntellIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="IntellHardwaRevision" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="IntellIndex,IntellHardwaRevision"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.13.1.2.1.6"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="IntellIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="IntellIndex"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="IntellIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="IntellHardwaRevision"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="IntellIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="IntellManufacturDate" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="IntellIndex,IntellManufacturDate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.13.1.2.1.8"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="IntellIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="IntellIndex"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="IntellIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="IntellManufacturDate"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="IntellIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <!-- Power Modules -->
+    <MetricPlugin metricid="PowerIndex" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="PowerIndex"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.13.2.2.1.1"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="PowerIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="PowerIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="PowerSerialNumber" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="PowerIndex,PowerSerialNumber"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.13.2.2.1.5"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="PowerIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="PowerIndex"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="PowerIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="PowerSerialNumber"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="PowerIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="PowerState" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="PowerIndex,PowerState"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.13.2.2.1.2"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="PowerIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="PowerIndex"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="PowerState" value="4,1;0"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="PowerIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="PowerState"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="PowerIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="PowerFirmwaRevision" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="PowerIndex,PowerFirmwaRevision"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.13.2.2.1.3"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="PowerIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="PowerIndex"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="PowerIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="PowerFirmwaRevision"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="PowerIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="PowerHardwaRevision" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="PowerIndex,PowerHardwaRevision"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.13.2.2.1.4"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="PowerIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="PowerIndex"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="PowerIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="PowerHardwaRevision"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="PowerIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="PowerManufacturDate" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="PowerIndex,PowerManufacturDate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.318.1.1.1.13.2.2.1.6"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="PowerIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="PowerIndex"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="PowerIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="PowerManufacturDate"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="PowerIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+</MetricPlugins>

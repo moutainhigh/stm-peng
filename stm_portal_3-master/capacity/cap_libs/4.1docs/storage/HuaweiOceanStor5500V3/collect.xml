@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">  
+  <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0">
+  	<ChangePluginInitParameter pluginid="SmisPlugin" parameterId="vendor" propertyValue="HUAWEI" parameterProperty="DefaultValue"/>
+  </GlobalMetricSetting>  
+  <PluginClassAliasList> 
+    <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+    <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+    <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+    <PluginClassAlias id="RegularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+    <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+    <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+    <PluginClassAlias id="tableConverter" class="com.mainsteam.stm.plugin.common.TableResultSetConverter"/>
+    <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+    <PluginClassAlias id="columnSplitProcessor" class="com.mainsteam.stm.plugin.common.ColumnSplitProcessor"/>
+    <PluginClassAlias id="ChangeRateProcessor" class="com.mainsteam.stm.plugin.common.ChangeRateProcessor"/>
+	<PluginClassAlias id="regexTransProcessor" class="com.mainsteam.stm.plugin.common.RegexTransProcessor"/>
+	<PluginClassAlias id="subInstAvailableProcessor" class="com.mainsteam.stm.plugin.common.SubInstAvailableProcessor"/>
+  </PluginClassAliasList>  
+  <MetricPlugin metricid="Name" collectType="" pluginid="SmisPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="Property" value="Name"/> 
+    </PluginParameter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ElementName" collectType="" pluginid="SmisPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="Property" value="ElementName"/> 
+    </PluginParameter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="OperationalStatus" collectType="" pluginid="SmisPlugin"> 
+    <PluginResultMetaInfo columns="OperationalStatus"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="Property" value="OperationalStatus"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="[{,](2)[},]"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="OperationalStatus" value="2,1;0"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="availableConverter"/> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="TotalManagedSpace" collectType="" pluginid="SmisPlugin"> 
+    <PluginResultMetaInfo columns="TotalManagedSpace"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="Device" value="ConcreteStoragePool"/>  
+      <Parameter key="Property" value="TotalManagedSpace"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT SUM(TotalManagedSpace) AS TotalManagedSpace"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="RemainManagedSpace" collectType="" pluginid="SmisPlugin"> 
+    <PluginResultMetaInfo columns="RemainingManagedSpace"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="Device" value="ConcreteStoragePool"/>  
+      <Parameter key="Property" value="RemainingManagedSpace"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT SUM(RemainingManagedSpace) AS RemainingManagedSpace"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>
+  <MetricPlugin metricid="KBytesReadSpeed" collectType="" pluginid="SmisPlugin">
+        <PluginResultMetaInfo columns="ClockTickInterval,IOTimeCounter,ReadIOTimeCounter,WriteIOTimeCounter,KBytesTransferred,KBytesRead,KBytesWritten,TotalIOs,ReadIOs,WriteIOs,ReadHitIOs,WriteHitIOs"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="StatisticsCapabilities" value="ClockTickInterval"/>
+            <Parameter key="StatisticalData" value="IOTimeCounter"/>
+            <Parameter key="StatisticalData" value="ReadIOTimeCounter"/>
+            <Parameter key="StatisticalData" value="WriteIOTimeCounter"/>
+            <Parameter key="StatisticalData" value="KBytesTransferred"/>
+            <Parameter key="StatisticalData" value="KBytesRead"/>
+            <Parameter key="StatisticalData" value="KBytesWritten"/>
+            <Parameter key="StatisticalData" value="TotalIOs"/>
+            <Parameter key="StatisticalData" value="ReadIOs"/>
+            <Parameter key="StatisticalData" value="WriteIOs"/>
+            <Parameter key="StatisticalData" value="ReadHitIOs"/>
+            <Parameter key="StatisticalData" value="WriteHitIOs"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="ROUND_CHG"/>
+                <Parameter type="" key="MOD" value="2^64"/>
+                <Parameter type="" key="IGNORED" value="ClockTickInterval"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT KBytesRead*1000000/(ReadIOTimeCounter*ClockTickInterval) AS KBytesReadSpeed"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="KBytesWrittenSpeed" collectType="" pluginid="SmisPlugin">
+        <PluginResultMetaInfo columns="ClockTickInterval,IOTimeCounter,ReadIOTimeCounter,WriteIOTimeCounter,KBytesTransferred,KBytesRead,KBytesWritten,TotalIOs,ReadIOs,WriteIOs,ReadHitIOs,WriteHitIOs"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="StatisticsCapabilities" value="ClockTickInterval"/>
+            <Parameter key="StatisticalData" value="IOTimeCounter"/>
+            <Parameter key="StatisticalData" value="ReadIOTimeCounter"/>
+            <Parameter key="StatisticalData" value="WriteIOTimeCounter"/>
+            <Parameter key="StatisticalData" value="KBytesTransferred"/>
+            <Parameter key="StatisticalData" value="KBytesRead"/>
+            <Parameter key="StatisticalData" value="KBytesWritten"/>
+            <Parameter key="StatisticalData" value="TotalIOs"/>
+            <Parameter key="StatisticalData" value="ReadIOs"/>
+            <Parameter key="StatisticalData" value="WriteIOs"/>
+            <Parameter key="StatisticalData" value="ReadHitIOs"/>
+            <Parameter key="StatisticalData" value="WriteHitIOs"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="ROUND_CHG"/>
+                <Parameter type="" key="MOD" value="2^64"/>
+                <Parameter type="" key="IGNORED" value="ClockTickInterval"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT KBytesWritten*1000000/(WriteIOTimeCounter*ClockTickInterval) AS KBytesWrittenSpeed"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="KBytesTransSpeed" collectType="" pluginid="SmisPlugin">
+        <PluginResultMetaInfo columns="ClockTickInterval,IOTimeCounter,ReadIOTimeCounter,WriteIOTimeCounter,KBytesTransferred,KBytesRead,KBytesWritten,TotalIOs,ReadIOs,WriteIOs,ReadHitIOs,WriteHitIOs"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="StatisticsCapabilities" value="ClockTickInterval"/>
+            <Parameter key="StatisticalData" value="IOTimeCounter"/>
+            <Parameter key="StatisticalData" value="ReadIOTimeCounter"/>
+            <Parameter key="StatisticalData" value="WriteIOTimeCounter"/>
+            <Parameter key="StatisticalData" value="KBytesTransferred"/>
+            <Parameter key="StatisticalData" value="KBytesRead"/>
+            <Parameter key="StatisticalData" value="KBytesWritten"/>
+            <Parameter key="StatisticalData" value="TotalIOs"/>
+            <Parameter key="StatisticalData" value="ReadIOs"/>
+            <Parameter key="StatisticalData" value="WriteIOs"/>
+            <Parameter key="StatisticalData" value="ReadHitIOs"/>
+            <Parameter key="StatisticalData" value="WriteHitIOs"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="ROUND_CHG"/>
+                <Parameter type="" key="MOD" value="2^64"/>
+                <Parameter type="" key="IGNORED" value="ClockTickInterval"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT KBytesTransferred*1000000/(IOTimeCounter*ClockTickInterval) AS KBytesTransferredSpeed"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>  
+  <!-- StoragePool -->  
+  <MetricPlugin metricid="PoolInstanceID" collectType="" pluginid="SmisPlugin"> 
+    <PluginResultMetaInfo columns="InstanceID"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="Device" value="ConcreteStoragePool"/>  
+      <Parameter key="Property" value="InstanceID"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="InstanceID"/>  
+      <Parameter type="" key="ValueColumnTitle" value="InstanceID"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="PoolElementName" collectType="" pluginid="SmisPlugin"> 
+    <PluginResultMetaInfo columns="InstanceID,ElementName"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="Device" value="ConcreteStoragePool"/>  
+      <Parameter key="Property" value="InstanceID"/>  
+      <Parameter key="Property" value="ElementName"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="InstanceID"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ElementName"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="PoolInstanceID"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="PoolStatus" collectType="" pluginid="SmisPlugin"> 
+    <PluginResultMetaInfo columns="InstanceID,OperationalStatus"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="Device" value="ConcreteStoragePool"/>  
+      <Parameter key="Property" value="InstanceID"/>  
+      <Parameter key="Property" value="OperationalStatus"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="columnSplitProcessor"> 
+        <Parameter type="" key="Regular" value="SPLIT OperationalStatus AS [{,](2)[},] TO Status"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="Status" value="2,1;0"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="InstanceID"/>  
+      <Parameter type="" key="ValueColumnTitle" value="Status"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="PoolInstanceID"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="PoolTotalManaged" collectType="" pluginid="SmisPlugin"> 
+    <PluginResultMetaInfo columns="InstanceID,TotalManagedSpace"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="Device" value="ConcreteStoragePool"/>  
+      <Parameter key="Property" value="InstanceID"/>  
+      <Parameter key="Property" value="TotalManagedSpace"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="InstanceID"/>  
+      <Parameter type="" key="ValueColumnTitle" value="TotalManagedSpace"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="PoolInstanceID"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="PoolRemainManaged" collectType="" pluginid="SmisPlugin"> 
+    <PluginResultMetaInfo columns="InstanceID,RemainingManagedSpace"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="Device" value="ConcreteStoragePool"/>  
+      <Parameter key="Property" value="InstanceID"/>  
+      <Parameter key="Property" value="RemainingManagedSpace"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="InstanceID"/>  
+      <Parameter type="" key="ValueColumnTitle" value="RemainingManagedSpace"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="PoolInstanceID"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>    
+  <!-- DiskDrive -->  
+  <MetricPlugin metricid="DiskDriveDeviceID" collectType="" pluginid="SmisPlugin"> 
+    <PluginResultMetaInfo columns="DeviceID"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="Device" value="DiskExtent"/>  
+      <Parameter key="Property" value="DeviceID"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>  
+      <Parameter type="" key="ValueColumnTitle" value="DeviceID"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="DiskDriveName" collectType="" pluginid="SmisPlugin"> 
+    <PluginResultMetaInfo columns="DeviceID,Name"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="Device" value="DiskExtent"/>  
+      <Parameter key="Property" value="DeviceID"/>  
+      <Parameter key="Property" value="Name"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>  
+      <Parameter type="" key="ValueColumnTitle" value="Name"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="DiskDriveDeviceID"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="DiskDriveStatus" collectType="" pluginid="SmisPlugin"> 
+    <PluginResultMetaInfo columns="DeviceID,OperationalStatus"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="Device" value="DiskExtent"/>  
+      <Parameter key="Property" value="DeviceID"/>  
+      <Parameter key="Property" value="OperationalStatus"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="regexTransProcessor">
+                <Parameter type="" key="Column" value="OperationalStatus"/>
+                <Parameter type="" key="Patten" value=".*[,{]2[,}].*"/>
+                <Parameter type="" key="Target" value="1"/>
+                <Parameter type="" key="Default" value="0"/>
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>  
+      <Parameter type="" key="ValueColumnTitle" value="OperationalStatus"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="DiskDriveDeviceID"/> 
+    </PluginDataConverter> 
+  </MetricPlugin> 
+  <MetricPlugin metricid="DiskDriveTotalSpace" collectType="" pluginid="SmisPlugin"> 
+    <PluginResultMetaInfo columns="DeviceID,NumberOfBlocks,BlockSize"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="Device" value="DiskExtent"/>  
+      <Parameter key="Property" value="DeviceID"/>  
+      <Parameter key="Property" value="NumberOfBlocks"/>
+      <Parameter key="Property" value="BlockSize"/> 
+    </PluginParameter>  
+    <PluginDataHandlers>
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT (NumberOfBlocks*BlockSize) AS DiskDriveTotalSpace,DeviceID"/> 
+      </PluginDataHandler>
+    </PluginDataHandlers>
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>  
+      <Parameter type="" key="ValueColumnTitle" value="DiskDriveTotalSpace"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="DiskDriveDeviceID"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>
+	<!-- DiskStoragePool -->
+	<MetricPlugin metricid="DSPoolID" collectType="" pluginid="SmisPlugin"> 
+    <PluginResultMetaInfo columns="InstanceID"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="Device" value="DiskStoragePool"/>  
+      <Parameter key="Property" value="InstanceID"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="InstanceID"/>  
+      <Parameter type="" key="ValueColumnTitle" value="InstanceID"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="DSPoolElementName" collectType="" pluginid="SmisPlugin"> 
+    <PluginResultMetaInfo columns="InstanceID,ElementName"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="Device" value="DiskStoragePool"/>  
+      <Parameter key="Property" value="InstanceID"/>  
+      <Parameter key="Property" value="ElementName"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="InstanceID"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ElementName"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="DSPoolID"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>
+  <MetricPlugin metricid="DSPoolStatus" collectType="" pluginid="SmisPlugin"> 
+    <PluginResultMetaInfo columns="InstanceID,OperationalStatus"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="Device" value="DiskStoragePool"/>  
+      <Parameter key="Property" value="InstanceID"/>  
+      <Parameter key="Property" value="OperationalStatus"/> 
+    </PluginParameter> 
+    <PluginDataHandlers>
+    	<PluginDataHandler classKey="regexTransProcessor">
+                <Parameter type="" key="Column" value="OperationalStatus"/>
+                <Parameter type="" key="Patten" value=".*[{,](2)[,}].*"/>
+                <Parameter type="" key="Target" value="1"/>
+                <Parameter type="" key="Default" value="0"/>
+        </PluginDataHandler>
+    </PluginDataHandlers> 
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="InstanceID"/>  
+      <Parameter type="" key="ValueColumnTitle" value="OperationalStatus"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="DSPoolID"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>
+  <MetricPlugin metricid="DSPoolManagedSpace" collectType="" pluginid="SmisPlugin"> 
+    <PluginResultMetaInfo columns="InstanceID,TotalManagedSpace"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="Device" value="DiskStoragePool"/>  
+      <Parameter key="Property" value="InstanceID"/>  
+      <Parameter key="Property" value="TotalManagedSpace"/> 
+    </PluginParameter> 
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="InstanceID"/>  
+      <Parameter type="" key="ValueColumnTitle" value="TotalManagedSpace"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="DSPoolID"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>
+  <MetricPlugin metricid="DSPoolUsedSpace" collectType="" pluginid="SmisPlugin"> 
+    <PluginResultMetaInfo columns="InstanceID,RemainingManagedSpace,TotalManagedSpace"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="Device" value="DiskStoragePool"/>  
+      <Parameter key="Property" value="InstanceID"/>  
+      <Parameter key="Property" value="RemainingManagedSpace"/> 
+      <Parameter key="Property" value="TotalManagedSpace"/>
+    </PluginParameter> 
+    <PluginDataHandlers>
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT (TotalManagedSpace-RemainingManagedSpace) AS DSPoolUsedSpace,InstanceID"/> 
+      </PluginDataHandler>
+    </PluginDataHandlers>
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="InstanceID"/>  
+      <Parameter type="" key="ValueColumnTitle" value="DSPoolUsedSpace"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="DSPoolID"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>
+  <!-- FCPort -->
+  <MetricPlugin metricid="FCPortDeviceID" collectType="" pluginid="SmisPlugin">
+        <PluginResultMetaInfo columns="DeviceID"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="Device" value="FrontEndFCPort"/>
+            <Parameter key="Property" value="DeviceID"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>
+            <Parameter type="" key="ValueColumnTitle" value="DeviceID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="FCPortElementName" collectType="" pluginid="SmisPlugin">
+        <PluginResultMetaInfo columns="DeviceID,ElementName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="Device" value="FrontEndFCPort"/>
+            <Parameter key="Property" value="DeviceID"/>
+            <Parameter key="Property" value="ElementName"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>
+            <Parameter type="" key="ValueColumnTitle" value="ElementName"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="FCPortDeviceID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="FCPortStatus" collectType="" pluginid="SmisPlugin">
+        <PluginResultMetaInfo columns="DeviceID,OperationalStatus"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="Device" value="FrontEndFCPort"/>
+            <Parameter key="Property" value="DeviceID"/>
+            <Parameter key="Property" value="OperationalStatus"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regexTransProcessor">
+                <Parameter type="" key="Column" value="OperationalStatus"/>
+                <Parameter type="" key="Patten" value=".*[,{]10[,}].*"/>
+                <Parameter type="" key="Target" value="0"/>
+                <Parameter type="" key="Patten" value=".*[,{]2[,}].*"/>
+                <Parameter type="" key="Target" value="1"/>
+                <Parameter type="" key="Default" value="0"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>
+            <Parameter type="" key="ValueColumnTitle" value="OperationalStatus"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="FCPortDeviceID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="FCPortType" collectType="" pluginid="SmisPlugin">
+        <PluginResultMetaInfo columns="DeviceID,PortType"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="Device" value="FrontEndFCPort"/>
+            <Parameter key="Property" value="DeviceID"/>
+            <Parameter key="Property" value="PortType"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="PortType" value="0,Unkown;1,Other;10,N;11,NL;12,F/NL;13,Nx;14,E;15,F;16,FL;17,B;18,G;Vendor Reserved"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>
+            <Parameter type="" key="ValueColumnTitle" value="PortType"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="FCPortDeviceID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="FCPortSpeed" collectType="" pluginid="SmisPlugin">
+        <PluginResultMetaInfo columns="DeviceID,Speed"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="Device" value="FrontEndFCPort"/>
+            <Parameter key="Property" value="DeviceID"/>
+            <Parameter key="Property" value="Speed"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>
+            <Parameter type="" key="ValueColumnTitle" value="Speed"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="FCPortDeviceID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <!-- EthernetPort -->
+    <MetricPlugin metricid="ETPortDeviceID" collectType="" pluginid="SmisPlugin">
+        <PluginResultMetaInfo columns="DeviceID"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="Device" value="FrontEndEthernetPort"/>
+            <Parameter key="Property" value="DeviceID"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>
+            <Parameter type="" key="ValueColumnTitle" value="DeviceID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ETPortElementName" collectType="" pluginid="SmisPlugin">
+        <PluginResultMetaInfo columns="DeviceID,ElementName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="Device" value="FrontEndEthernetPort"/>
+            <Parameter key="Property" value="DeviceID"/>
+            <Parameter key="Property" value="ElementName"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>
+            <Parameter type="" key="ValueColumnTitle" value="ElementName"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="FCPortDeviceID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ETPortStatus" collectType="" pluginid="SmisPlugin">
+        <PluginResultMetaInfo columns="DeviceID,OperationalStatus"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="Device" value="FrontEndEthernetPort"/>
+            <Parameter key="Property" value="DeviceID"/>
+            <Parameter key="Property" value="OperationalStatus"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regexTransProcessor">
+                <Parameter type="" key="Column" value="OperationalStatus"/>
+                <Parameter type="" key="Patten" value=".*[,{]10[,}].*"/>
+                <Parameter type="" key="Target" value="0"/>
+                <Parameter type="" key="Patten" value=".*[,{]2[,}].*"/>
+                <Parameter type="" key="Target" value="1"/>
+                <Parameter type="" key="Default" value="0"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>
+            <Parameter type="" key="ValueColumnTitle" value="OperationalStatus"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="FCPortDeviceID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+</MetricPlugins>

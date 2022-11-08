@@ -1,0 +1,1426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.system.um.user.dao.IUserDao">
+	 
+   
+   
+   
+  <insert id="insert" parameterType="com.mainsteam.stm.system.um.user.bo.User">
+	    insert into STM_SYS_USER
+	    (ID,NAME,SEX,ACCOUNT,PASSWORD,USER_TYPE,MOBILE,EMAIL,STATUS,CREATOR_ID,CREATED_TIME,UP_PASS_TIME) 
+	    values 
+	    (#{id},#{name}, #{sex}, #{account}, #{password}, #{userType}, #{mobile}, #{email}, #{status}, #{creatorId}, #{createdTime}, #{upPassTime})
+	</insert>
+	 
+   
+   
+   
+  <select id="pageSelect" resultType="com.mainsteam.stm.system.um.user.bo.User" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="mysql">
+		SELECT OCUSER.ID AS id,
+		OCUSER.NAME AS name,
+		OCUSER.SEX AS sex,
+		OCUSER.USER_TYPE AS userType,
+		OCUSER.MOBILE AS mobile,
+		OCUSER.EMAIL AS email,
+		OCUSER.ACCOUNT AS account,
+		OCUSER.CREATOR_ID AS creatorId,
+		OCUSER.CREATED_TIME AS createdTime,
+		OCUSER.STATUS AS status
+		FROM STM_SYS_USER OCUSER
+		 
+		 
+     
+     
+     
+    <if test="condition!=null">
+			  
+			 
+       
+       
+       
+      <if test="condition.domainId != null">
+			 JOIN  (SELECT DISTINCT USER_ID FROM STM_SYS_USER_DOMAIN_ROLE_REL WHERE DOMAIN_ID in
+				 
+				 
+         
+         
+         
+        <foreach item="item" index="index" collection="condition.domainId" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+				) REL ON OCUSER.ID=REL.USER_ID
+			 
+			
+      
+      
+      
+      </if>
+		
+		
+    
+    
+    
+    </if>
+		 
+     
+     
+     
+    <trim prefix="where" prefixOverrides="and |or ">
+			  
+			 
+       
+       
+       
+      <if test="condition!=null">
+			 	 
+				 
+         
+         
+         
+        <if test="condition.keyword != null"> 
+			 	AND (
+			 			OCUSER.NAME like CONCAT('%',#{condition.keyword},'%') 
+				 		OR OCUSER.ACCOUNT like CONCAT('%',#{condition.keyword},'%')
+				 		OR OCUSER.MOBILE like CONCAT('%',#{condition.keyword},'%')
+				 		OR OCUSER.EMAIL like CONCAT('%',#{condition.keyword},'%')
+			 		)
+			 	</if>
+			     <!-- <![CDATA[	AND OCUSER.USER_TYPE <= #{condition.userType}]]>-->
+			 
+			
+      
+      
+      
+      </if>
+		
+		
+    
+    
+    
+    </trim>
+		 
+		 
+     
+     
+     
+    <if test="sort==null">
+			ORDER BY OCUSER.CREATED_TIME DESC, OCUSER.ID ASC
+		</if>
+	
+	
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+  <select id="pageSelect" resultType="com.mainsteam.stm.system.um.user.bo.User" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oracle">
+		SELECT OCUSER.ID AS id,
+		OCUSER.NAME AS name,
+		OCUSER.SEX AS sex,
+		OCUSER.USER_TYPE AS userType,
+		OCUSER.MOBILE AS mobile,
+		OCUSER.EMAIL AS email,
+		OCUSER.ACCOUNT AS account,
+		OCUSER.CREATOR_ID AS creatorId,
+		OCUSER.CREATED_TIME AS createdTime,
+		OCUSER.STATUS AS status
+		FROM STM_SYS_USER OCUSER
+		 
+		 
+     
+     
+     
+    <if test="condition!=null">
+			  
+			 
+       
+       
+       
+      <if test="condition.domainId != null">
+			 JOIN  (SELECT DISTINCT USER_ID FROM STM_SYS_USER_DOMAIN_ROLE_REL WHERE DOMAIN_ID in
+				 
+				 
+         
+         
+         
+        <foreach item="item" index="index" collection="condition.domainId" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+				) REL ON OCUSER.ID=REL.USER_ID
+			 
+			
+      
+      
+      
+      </if>
+		
+		
+    
+    
+    
+    </if>
+		
+		 
+		 
+     
+     
+     
+    <trim prefix="where" prefixOverrides="and |or ">
+			  
+			 
+       
+       
+       
+      <if test="condition!=null">
+			 	 
+				 
+         
+         
+         
+        <if test="condition.keyword != null"> 
+			 	AND (
+			 			OCUSER.NAME like '%'||#{condition.keyword}||'%' 
+				 		OR OCUSER.ACCOUNT like '%'||#{condition.keyword}||'%' 
+				 		OR OCUSER.MOBILE like '%'||#{condition.keyword}||'%' 
+				 		OR OCUSER.EMAIL like '%'||#{condition.keyword}||'%' 
+			 		)
+			 	</if>
+			     <![CDATA[	AND OCUSER.USER_TYPE <= #{condition.userType}]]>
+			 
+			
+      
+      
+      
+      </if>
+		
+		
+    
+    
+    
+    </trim>
+		 
+		 
+     
+     
+     
+    <if test="sort==null">
+			ORDER BY OCUSER.CREATED_TIME DESC, OCUSER.ID ASC
+		</if>
+	
+	
+  
+  
+  
+  </select>
+	 
+  
+   
+  
+   
+  
+   
+  <select id="pageSelect" resultType="com.mainsteam.stm.system.um.user.bo.User" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="dm">
+		SELECT OCUSER.ID AS id,
+		OCUSER.NAME AS name,
+		OCUSER.SEX AS sex,
+		OCUSER.USER_TYPE AS userType,
+		OCUSER.MOBILE AS mobile,
+		OCUSER.EMAIL AS email,
+		OCUSER.ACCOUNT AS account,
+		OCUSER.CREATOR_ID AS creatorId,
+		OCUSER.CREATED_TIME AS createdTime,
+		OCUSER.STATUS AS status
+		FROM STM_SYS_USER OCUSER
+		 
+		 
+     
+     
+     
+    <if test="condition!=null">
+			  
+			 
+       
+       
+       
+      <if test="condition.domainId != null">
+			 JOIN  (SELECT DISTINCT USER_ID FROM STM_SYS_USER_DOMAIN_ROLE_REL WHERE DOMAIN_ID in
+				 
+				 
+         
+         
+         
+        <foreach item="item" index="index" collection="condition.domainId" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+				) REL ON OCUSER.ID=REL.USER_ID
+			 
+			
+      
+      
+      
+      </if>
+		
+		
+    
+    
+    
+    </if>
+		
+		 
+		 
+     
+     
+     
+    <trim prefix="where" prefixOverrides="and |or ">
+			  
+			 
+       
+       
+       
+      <if test="condition!=null">
+			 	 
+				 
+         
+         
+         
+        <if test="condition.keyword != null"> 
+			 	AND (
+			 			OCUSER.NAME like '%'||#{condition.keyword}||'%' 
+				 		OR OCUSER.ACCOUNT like '%'||#{condition.keyword}||'%' 
+				 		OR OCUSER.MOBILE like '%'||#{condition.keyword}||'%' 
+				 		OR OCUSER.EMAIL like '%'||#{condition.keyword}||'%' 
+			 		)
+			 	</if>
+			     <![CDATA[	AND OCUSER.USER_TYPE <= #{condition.userType}]]>
+			 
+			
+      
+      
+      
+      </if>
+		
+		
+    
+    
+    
+    </trim>
+		 
+		 
+     
+     
+     
+    <if test="sort==null">
+			ORDER BY OCUSER.CREATED_TIME DESC, OCUSER.ID ASC
+		</if>
+	
+	
+  
+  
+  
+  </select>
+  <select id="pageSelect" resultType="com.mainsteam.stm.system.um.user.bo.User" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oscar">
+		SELECT OCUSER.ID AS id,
+		OCUSER.NAME AS name,
+		OCUSER.SEX AS sex,
+		OCUSER.USER_TYPE AS userType,
+		OCUSER.MOBILE AS mobile,
+		OCUSER.EMAIL AS email,
+		OCUSER.ACCOUNT AS account,
+		OCUSER.CREATOR_ID AS creatorId,
+		OCUSER.CREATED_TIME AS createdTime,
+		OCUSER.STATUS AS status
+		FROM STM_SYS_USER OCUSER
+		 
+		 
+     
+     
+     
+    <if test="condition!=null">
+			  
+			 
+       
+       
+       
+      <if test="condition.domainId != null">
+			 JOIN  (SELECT DISTINCT USER_ID FROM STM_SYS_USER_DOMAIN_ROLE_REL WHERE DOMAIN_ID in
+				 
+				 
+         
+         
+         
+        <foreach item="item" index="index" collection="condition.domainId" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+				) REL ON OCUSER.ID=REL.USER_ID
+			 
+			
+      
+      
+      
+      </if>
+		
+		
+    
+    
+    
+    </if>
+		
+		 
+		 
+     
+     
+     
+    <trim prefix="where" prefixOverrides="and |or ">
+			  
+			 
+       
+       
+       
+      <if test="condition!=null">
+			 	 
+				 
+         
+         
+         
+        <if test="condition.keyword != null"> 
+			 	AND (
+			 			OCUSER.NAME like '%'||#{condition.keyword}||'%' 
+				 		OR OCUSER.ACCOUNT like '%'||#{condition.keyword}||'%' 
+				 		OR OCUSER.MOBILE like '%'||#{condition.keyword}||'%' 
+				 		OR OCUSER.EMAIL like '%'||#{condition.keyword}||'%' 
+			 		)
+			 	</if>
+			     <![CDATA[	AND OCUSER.USER_TYPE <= #{condition.userType}]]>
+			 
+			
+      
+      
+      
+      </if>
+		
+		
+    
+    
+    
+    </trim>
+		 
+		 
+     
+     
+     
+    <if test="sort==null">
+			ORDER BY OCUSER.CREATED_TIME DESC,OCUSER.ID ASC
+		</if>
+	
+	
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+  <select id="get" resultType="com.mainsteam.stm.system.um.user.bo.User" parameterType="long">
+		SELECT ID,
+		NAME,
+		SEX,
+		ACCOUNT,
+		PASSWORD,
+		USER_TYPE AS userType,
+		MOBILE,
+		EMAIL,
+		STATUS,
+		CREATOR_ID AS creatorId,
+		CREATED_TIME AS createdTime
+		FROM STM_SYS_USER where ID=#{id}
+	</select>
+	 
+   
+   
+   
+  <select id="getByAccount" parameterType="string" resultType="com.mainsteam.stm.system.um.user.bo.User">
+		SELECT ID,
+		NAME,
+		SEX,
+		ACCOUNT,
+		PASSWORD,
+		USER_TYPE AS userType,
+		MOBILE,
+		EMAIL,
+		STATUS,
+		LOCK_TYPE AS lockType,
+		LOCK_TIME AS lockTime,
+		UP_PASS_TIME AS upPassTime,
+		PASS_ERROR_CNT AS passErrorCnt
+		FROM STM_SYS_USER where account=#{account}
+	</select>
+	 
+   
+   
+   
+  <select id="checkAccount" parameterType="com.mainsteam.stm.system.um.user.bo.User" resultType="java.lang.Integer">
+		SELECT COUNT(ID) FROM STM_SYS_USER where account=#{account}
+		 
+		 
+     
+     
+     
+    <if test="id != null">AND ID != #{id} </if>
+	
+	
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+  <update id="update" parameterType="com.mainsteam.stm.system.um.user.bo.User">
+		update STM_SYS_USER
+		 
+		 
+     
+     
+     
+    <set>
+			 
+			 
+       
+       
+       
+      <if test="name != null"> NAME = #{name}, </if>
+			 
+			 
+       
+       
+       
+      <if test="sex != null"> SEX = #{sex} ,</if>
+			 
+			 
+       
+       
+       
+      <!-- 需求不能修改用户名 -->
+ 
+			 
+       
+       
+       
+      <!-- 			<if test="account != null"> ACCOUNT = #{account}, </if> -->
+			 
+			 
+       
+       
+       
+      <if test="userType != null"> USER_TYPE = #{userType}, </if>
+			 
+			 
+       
+       
+       
+      <if test="password != null and password != ''"> PASSWORD = #{password}, </if>
+			 
+			 
+       
+       
+       
+      <if test="mobile != null"> MOBILE = #{mobile} ,</if>
+			 
+			 
+       
+       
+       
+      <if test="email != null"> EMAIL = #{email}, </if>
+			 
+			 
+       
+       
+       
+      <if test="status != null"> STATUS = #{status}, </if>
+			 
+			 
+       
+       
+       
+      <if test="lockType != null"> LOCK_TYPE = #{lockType}, </if>
+			 
+			 
+       
+       
+       
+      <if test="lockTime != null"> LOCK_TIME = #{lockTime}, </if>
+			 
+			 
+       
+       
+       
+      <if test="upPassTime != null"> UP_PASS_TIME = #{upPassTime}, </if>
+			 
+			 
+       
+       
+       
+      <if test="passErrorCnt != null"> PASS_ERROR_CNT = #{passErrorCnt}, </if>
+		
+		
+    
+    
+    
+    </set>
+		 where ID = #{id}
+	
+	
+  
+  
+  
+  </update>
+	 
+   
+   
+   
+  <update id="batchUpdate" parameterType="com.mainsteam.stm.system.um.user.bo.User">
+		update STM_SYS_USER
+		 
+		 
+     
+     
+     
+    <set>
+			 
+			 
+       
+       
+       
+      <if test="status != null"> STATUS = #{status}, </if>
+			 
+			 
+       
+       
+       
+      <if test="lockType != null"> LOCK_TYPE = #{lockType}, </if>
+			 
+			 
+       
+       
+       
+      <if test="lockTime != null"> LOCK_TIME = #{lockTime}, </if>
+			 
+			 
+       
+       
+       
+      <if test="passErrorCnt != null"> PASS_ERROR_CNT = #{passErrorCnt}, </if>
+		
+		
+    
+    
+    
+    </set>
+		  where ID = #{id}
+	
+	
+  
+  
+  
+  </update>
+	 
+   
+   
+   
+  <update id="updatePassword" parameterType="com.mainsteam.stm.system.um.user.bo.User">
+		update STM_SYS_USER
+		 
+		 
+     
+     
+     
+    <set>
+			PASSWORD = #{password},
+			UP_PASS_TIME = #{upPassTime},
+			PASS_ERROR_CNT = 0
+		</set>
+		 where ACCOUNT = #{account} 
+	
+	
+  
+  
+  
+  </update>
+	 
+   
+   
+   
+  <delete id="batchDel">
+		DELETE from STM_SYS_USER WHERE
+				  ID = #{userId}
+	</delete>
+	 
+   
+   
+   
+  <select id="getAllUserByPage" resultType="com.mainsteam.stm.system.um.user.bo.User" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		SELECT OCUSER.ID,
+		OCUSER.NAME AS name,
+		OCUSER.SEX AS sex,
+		OCUSER.USER_TYPE AS userType,
+		OCUSER.MOBILE AS mobile,
+		OCUSER.EMAIL AS email,
+		OCUSER.ACCOUNT AS account,
+		OCUSER.CREATOR_ID AS creatorId,
+		OCUSER.CREATED_TIME AS createdTime,
+		OCUSER.STATUS AS status
+		FROM STM_SYS_USER OCUSER
+		WHERE OCUSER.STATUS=1
+	</select>
+	 
+   
+   
+   
+  <select id="getUsersByType" resultType="com.mainsteam.stm.system.um.user.bo.User" parameterType="int">
+		SELECT OCUSER.ID,
+		OCUSER.NAME AS name,
+		OCUSER.SEX AS sex,
+		OCUSER.USER_TYPE AS userType,
+		OCUSER.MOBILE AS mobile,
+		OCUSER.EMAIL AS email,
+		OCUSER.ACCOUNT AS account,
+		OCUSER.CREATOR_ID AS creatorId,
+		OCUSER.CREATED_TIME AS createdTime,
+		OCUSER.STATUS AS status
+		FROM STM_SYS_USER OCUSER
+		WHERE OCUSER.STATUS=1 AND OCUSER.USER_TYPE=#{userType}
+	</select>
+	 
+   
+   
+   
+  <insert id="saveUserResourceRels" databaseId="mysql">
+		insert into STM_USER_RESOURCE_REL(USER_ID, RESOURCE_ID, TYPE, DOMAIN_ID) values
+		 
+		 
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="" separator="," close="">
+			(#{item.userId}, #{item.resourceId}, #{item.type}, #{item.domainId})
+		</foreach>
+	
+	
+  
+  
+  
+  </insert>
+	 
+   
+   
+   
+  <insert id="saveUserResourceRels" databaseId="oracle">
+		insert into STM_USER_RESOURCE_REL(USER_ID, RESOURCE_ID, TYPE, DOMAIN_ID)
+		 
+		 
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="" separator="UNION ALL" close="">
+			(select #{item.userId}, #{item.resourceId}, #{item.type}, #{item.domainId} from dual)
+		</foreach>
+	
+	
+  
+  
+  
+  </insert>
+	 
+  
+   
+  
+   
+  
+   
+  <insert id="saveUserResourceRels" databaseId="dm">
+		insert into STM_USER_RESOURCE_REL(USER_ID, RESOURCE_ID, TYPE, DOMAIN_ID)
+		 
+		 
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="" separator="UNION ALL" close="">
+			(select #{item.userId}, #{item.resourceId}, #{item.type}, #{item.domainId} from dual)
+		</foreach>
+	
+	
+  
+  
+  
+  </insert>
+  <insert id="saveUserResourceRels" databaseId="oscar">
+		insert into STM_USER_RESOURCE_REL(USER_ID, RESOURCE_ID, TYPE, DOMAIN_ID)
+		 
+		 
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="" separator="UNION ALL" close="">
+			(select #{item.userId}, #{item.resourceId}, #{item.type}, #{item.domainId} from dual)
+		</foreach>
+	
+	
+  
+  
+  
+  </insert>
+	 
+   
+   
+   
+  <select id="getUserResourceRel" parameterType="map" resultType="com.mainsteam.stm.system.um.user.bo.UserResourceRel">
+		select USER_ID as userId, RESOURCE_ID as resourceId, TYPE, DOMAIN_ID as domainId
+		 from STM_USER_RESOURCE_REL where USER_ID=#{userId}
+		  
+		 
+     
+     
+     
+    <if test="domainId!=null">and DOMAIN_ID=#{domainId}</if>
+	
+	
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+  <select id="getUserResourceRelByDomains" parameterType="map" resultType="com.mainsteam.stm.system.um.user.bo.UserResourceRel">
+		select USER_ID as userId, RESOURCE_ID as resourceId, TYPE, DOMAIN_ID as domainId
+		 from STM_USER_RESOURCE_REL where USER_ID=#{userId}
+		  
+		 
+     
+     
+     
+    <if test="domainIds.size()&gt;0">and DOMAIN_ID in 
+		 	 
+			 
+       
+       
+       
+      <foreach item="domainId" index="index" collection="domainIds" open="(" separator="," close=")">
+				#{domainId}
+			</foreach>
+		 
+		
+    
+    
+    
+    </if>
+	
+	
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+  <delete id="deleteUserResourceRel">
+		delete from STM_USER_RESOURCE_REL where USER_ID=#{userId}
+	</delete>
+	 
+   
+   
+   
+  <delete id="deleteUserResourceRelByDomains">
+		delete from STM_USER_RESOURCE_REL where USER_ID=#{userId}
+		 
+		 
+     
+     
+     
+    <if test="domainIds.size()&gt;0">
+			and DOMAIN_ID not in
+			 
+			 
+       
+       
+       
+      <foreach item="domainId" index="index" collection="domainIds" open="(" separator="," close=")">
+				#{domainId}
+			</foreach>
+		
+		
+    
+    
+    
+    </if>
+	
+	
+  
+  
+  
+  </delete>
+	 
+   
+   
+   
+  <delete id="deleteUserResourceRelByResourceIds">
+		delete from STM_USER_RESOURCE_REL where RESOURCE_ID in
+		 
+		 
+     
+     
+     
+    <foreach item="resourceId" index="index" collection="array" open="(" separator="," close=")">
+			#{resourceId}
+		</foreach>
+	
+	
+  
+  
+  
+  </delete>
+	 
+   
+   
+   
+  <select id="getAll" resultType="com.mainsteam.stm.system.um.user.bo.User" parameterType="com.mainsteam.stm.system.um.user.bo.User" databaseId="mysql">
+		SELECT ID,NAME,SEX,ACCOUNT,PASSWORD,USER_TYPE userType,MOBILE,EMAIL,STATUS FROM STM_SYS_USER where 1=1
+		 
+		 
+     
+     
+     
+    <if test="name!=null">AND (NAME LIKE CONCAT('%',#{name},'%') or ACCOUNT LIKE CONCAT('%',#{name},'%'))</if>
+	
+	
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+  <select id="getAll" resultType="com.mainsteam.stm.system.um.user.bo.User" parameterType="com.mainsteam.stm.system.um.user.bo.User" databaseId="oracle">
+		SELECT ID,NAME,SEX,ACCOUNT,PASSWORD,USER_TYPE userType,MOBILE,EMAIL,STATUS FROM STM_SYS_USER where 1=1
+		 
+		 
+     
+     
+     
+    <if test="name!=null">AND (NAME LIKE '%'||#{name}||'%' or ACCOUNT LIKE '%'||#{name}||'%')</if>
+	
+	
+  
+  
+  
+  </select>
+	 
+  
+   
+  
+   
+  
+   
+  <select id="getAll" resultType="com.mainsteam.stm.system.um.user.bo.User" parameterType="com.mainsteam.stm.system.um.user.bo.User" databaseId="dm">
+		SELECT ID,NAME,SEX,ACCOUNT,PASSWORD,USER_TYPE userType,MOBILE,EMAIL,STATUS FROM STM_SYS_USER where 1=1
+		 
+		 
+     
+     
+     
+    <if test="name!=null">AND (NAME LIKE '%'||#{name}||'%' or ACCOUNT LIKE '%'||#{name}||'%')</if>
+	
+	
+  
+  
+  
+  </select>
+  <select id="getAll" resultType="com.mainsteam.stm.system.um.user.bo.User" parameterType="com.mainsteam.stm.system.um.user.bo.User" databaseId="oscar">
+		SELECT ID,NAME,SEX,ACCOUNT,PASSWORD,USER_TYPE userType,MOBILE,EMAIL,STATUS FROM STM_SYS_USER where 1=1
+		 
+		 
+     
+     
+     
+    <if test="name!=null">AND (NAME LIKE '%'||#{name}||'%' or ACCOUNT LIKE '%'||#{name}||'%')</if>
+	
+	
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+  <select id="getAllDomains" resultType="com.mainsteam.stm.system.um.user.bo.DomainRole">
+		select ID, NAME from STM_SYS_DOMAIN
+	</select>
+	 
+   
+   
+   
+  <select id="getAllRoles" resultType="com.mainsteam.stm.system.um.role.bo.Role">
+		select ID, NAME from STM_SYS_ROLE
+	</select>
+	 
+   
+   
+   
+  <select id="getDomainRoleByUserId" resultType="com.mainsteam.stm.system.um.user.bo.DomainRole">
+		select 
+		DOMAIN.ID as id,
+		DOMAIN.NAME as name,
+		ROLE.NAME as roleName
+		from STM_SYS_USER_DOMAIN_ROLE_REL REL
+		left join STM_SYS_DOMAIN DOMAIN on REL.DOMAIN_ID=DOMAIN.ID
+		left join STM_SYS_ROLE ROLE on REL.ROLE_ID=ROLE.ID
+		where REL.USER_ID=#{userId}
+	</select>
+	<!-- dm -->
+	<!-- BUG#47723 dm数据库中DOMAIN和ROLE是关键字 -->
+	<select id="getDomainRoleByUserId" resultType="com.mainsteam.stm.system.um.user.bo.DomainRole" databaseId="dm">
+		select 
+		"DOMAI".ID as id,
+		"DOMAI".NAME as name,
+		ROL.NAME as roleName
+		from STM_SYS_USER_DOMAIN_ROLE_REL REL
+		left join STM_SYS_DOMAIN "DOMAI" on REL.DOMAIN_ID=DOMAI.ID
+		left join STM_SYS_ROLE ROL on REL.ROLE_ID=ROL.ID
+		where REL.USER_ID=#{userId}
+	</select>	 
+   
+   
+   
+  <select id="getUserCommonDomains" resultType="com.mainsteam.stm.system.um.domain.bo.Domain">
+		select distinct
+		DOMAIN.ID as id,
+		DOMAIN.NAME as name,
+		1 as adminUser
+		from STM_SYS_USER_DOMAIN_ROLE_REL REL
+		left join STM_SYS_DOMAIN DOMAIN on REL.DOMAIN_ID=DOMAIN.ID
+		where REL.USER_ID=#{userId} 
+		and REL.DOMAIN_ID not in
+		(select distinct DOMAIN_ID FROM STM_SYS_USER_DOMAIN_ROLE_REL WHERE USER_ID=#{userId} AND ROLE_ID IN(1,2))
+		union
+		select distinct
+		DOMAIN.ID as id,
+		DOMAIN.NAME as name,
+		2 as adminUser
+		from STM_SYS_USER_DOMAIN_ROLE_REL REL
+		left join STM_SYS_DOMAIN DOMAIN on REL.DOMAIN_ID=DOMAIN.ID
+		where REL.USER_ID=#{userId} 
+		and REL.DOMAIN_ID in
+		(select distinct DOMAIN_ID FROM STM_SYS_USER_DOMAIN_ROLE_REL WHERE USER_ID=#{userId} AND ROLE_ID IN(1,2))
+	</select>
+	<!-- dm -->
+	<select id="getUserCommonDomains" resultType="com.mainsteam.stm.system.um.domain.bo.Domain" databaseId="dm">
+		select distinct
+		"DOMAI".ID as id,
+		"DOMAI".NAME as name,
+		1 as adminUser
+		from STM_SYS_USER_DOMAIN_ROLE_REL REL
+		left join STM_SYS_DOMAIN "DOMAI" on REL.DOMAIN_ID="DOMAI".ID
+		where REL.USER_ID=#{userId} 
+		and REL.DOMAIN_ID not in
+		(select distinct DOMAIN_ID FROM STM_SYS_USER_DOMAIN_ROLE_REL WHERE USER_ID=#{userId} AND ROLE_ID IN(1,2))
+		union
+		select distinct
+		"DOMAI".ID as id,
+		"DOMAI".NAME as name,
+		2 as adminUser
+		from STM_SYS_USER_DOMAIN_ROLE_REL REL
+		left join STM_SYS_DOMAIN "DOMAI" on REL.DOMAIN_ID="DOMAI".ID
+		where REL.USER_ID=#{userId} 
+		and REL.DOMAIN_ID in
+		(select distinct DOMAIN_ID FROM STM_SYS_USER_DOMAIN_ROLE_REL WHERE USER_ID=#{userId} AND ROLE_ID IN(1,2))
+	</select>
+	 
+   
+   
+   
+  <select id="getDomainUsersDomains" resultType="com.mainsteam.stm.system.um.domain.bo.Domain">
+		select distinct
+		DOMAIN.ID as id,
+		DOMAIN.NAME as name
+		from STM_SYS_USER_DOMAIN_ROLE_REL REL
+		left join STM_SYS_DOMAIN DOMAIN on REL.DOMAIN_ID=DOMAIN.ID
+		where REL.USER_ID=#{userId} 
+		and REL.DOMAIN_ID in
+		(select distinct DOMAIN_ID FROM STM_SYS_USER_DOMAIN_ROLE_REL WHERE USER_ID=#{userId} AND ROLE_ID IN(1,2))
+	</select>
+	 
+	 <!-- dm -->
+	 <select id="getDomainUsersDomains" resultType="com.mainsteam.stm.system.um.domain.bo.Domain" databaseId="dm">
+		select distinct
+		"DOMAI".ID as id,
+		"DOMAI".NAME as name
+		from STM_SYS_USER_DOMAIN_ROLE_REL REL
+		left join STM_SYS_DOMAIN "DOMAI" on REL.DOMAIN_ID="DOMAI".ID
+		where REL.USER_ID=#{userId} 
+		and REL.DOMAIN_ID in
+		(select distinct DOMAIN_ID FROM STM_SYS_USER_DOMAIN_ROLE_REL WHERE USER_ID=#{userId} AND ROLE_ID IN(1,2))
+	</select>
+   
+   
+   
+  <delete id="delUserRelations">
+		delete from STM_SYS_USER_DOMAIN_ROLE_REL where USER_ID in
+		 
+		 
+     
+     
+     
+    <foreach item="userId" index="index" collection="array" open="(" separator="," close=")">
+			#{userId}
+		</foreach>
+	
+	
+  
+  
+  
+  </delete>
+	 
+   
+   
+   
+  <select id="getUsers" resultType="com.mainsteam.stm.system.um.user.bo.User" parameterType="com.mainsteam.stm.system.um.user.vo.UserConditionVo" databaseId="mysql">
+		SELECT OCUSER.ID,
+		OCUSER.NAME AS name,
+		OCUSER.SEX AS sex,
+		OCUSER.USER_TYPE AS userType,
+		OCUSER.MOBILE AS mobile,
+		OCUSER.EMAIL AS email,
+		OCUSER.ACCOUNT AS account,
+		OCUSER.CREATOR_ID AS creatorId,
+		OCUSER.CREATED_TIME AS createdTime,
+		OCUSER.STATUS AS status
+		FROM STM_SYS_USER OCUSER
+		  
+		 
+     
+     
+     
+    <if test="domainId != null">
+		 JOIN  (SELECT DISTINCT USER_ID FROM STM_SYS_USER_DOMAIN_ROLE_REL WHERE DOMAIN_ID in
+			 
+			 
+       
+       
+       
+      <foreach item="item" index="index" collection="domainId" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+			) REL ON OCUSER.ID=REL.USER_ID
+		 
+		
+    
+    
+    
+    </if>
+		
+		 
+		 
+     
+     
+     
+    <trim prefix="where" prefixOverrides="and |or ">
+		 	 
+			 
+       
+       
+       
+      <if test="keyword != null"> 
+		 	AND (
+		 			OCUSER.NAME like CONCAT('%',#{keyword},'%') 
+			 		OR OCUSER.ACCOUNT like CONCAT('%',#{keyword},'%')
+			 		OR OCUSER.MOBILE like CONCAT('%',#{keyword},'%')
+			 		OR OCUSER.EMAIL like CONCAT('%',#{keyword},'%')
+		 		)
+		 	</if>
+		     <![CDATA[	AND OCUSER.USER_TYPE <= #{userType}]]>
+		
+		
+    
+    
+    
+    </trim>
+	
+	
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+  <select id="getUsers" resultType="com.mainsteam.stm.system.um.user.bo.User" parameterType="com.mainsteam.stm.system.um.user.vo.UserConditionVo" databaseId="oracle">
+		SELECT OCUSER.ID,
+		OCUSER.NAME AS name,
+		OCUSER.SEX AS sex,
+		OCUSER.USER_TYPE AS userType,
+		OCUSER.MOBILE AS mobile,
+		OCUSER.EMAIL AS email,
+		OCUSER.ACCOUNT AS account,
+		OCUSER.CREATOR_ID AS creatorId,
+		OCUSER.CREATED_TIME AS createdTime,
+		OCUSER.STATUS AS status
+		FROM STM_SYS_USER OCUSER
+		  
+		 
+     
+     
+     
+    <if test="domainId != null">
+		 JOIN  (SELECT DISTINCT USER_ID FROM STM_SYS_USER_DOMAIN_ROLE_REL WHERE DOMAIN_ID in
+			 
+			 
+       
+       
+       
+      <foreach item="item" index="index" collection="domainId" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+			) REL ON OCUSER.ID=REL.USER_ID
+		 
+		
+    
+    
+    
+    </if>
+		
+		 
+		 
+     
+     
+     
+    <trim prefix="where" prefixOverrides="and |or ">
+		 	 
+			 
+       
+       
+       
+      <if test="keyword != null"> 
+		 	AND (
+		 			OCUSER.NAME like '%'||#{keyword}||'%' 
+			 		OR OCUSER.ACCOUNT like '%'||#{keyword}||'%' 
+			 		OR OCUSER.MOBILE like '%'||#{keyword}||'%' 
+			 		OR OCUSER.EMAIL like '%'||#{keyword}||'%' 
+		 		)
+		 	</if>
+		     <![CDATA[	AND OCUSER.USER_TYPE <= #{userType}]]>
+		
+		
+    
+    
+    
+    </trim>
+	
+	
+  
+  
+  
+  </select>
+	 
+  
+   
+  
+   
+  
+   
+  <select id="getUsers" resultType="com.mainsteam.stm.system.um.user.bo.User" parameterType="com.mainsteam.stm.system.um.user.vo.UserConditionVo" databaseId="dm">
+		SELECT OCUSER.ID,
+		OCUSER.NAME AS name,
+		OCUSER.SEX AS sex,
+		OCUSER.USER_TYPE AS userType,
+		OCUSER.MOBILE AS mobile,
+		OCUSER.EMAIL AS email,
+		OCUSER.ACCOUNT AS account,
+		OCUSER.CREATOR_ID AS creatorId,
+		OCUSER.CREATED_TIME AS createdTime,
+		OCUSER.STATUS AS status
+		FROM STM_SYS_USER OCUSER
+		  
+		 
+     
+     
+     
+    <if test="domainId != null">
+		 JOIN  (SELECT DISTINCT USER_ID FROM STM_SYS_USER_DOMAIN_ROLE_REL WHERE DOMAIN_ID in
+			 
+			 
+       
+       
+       
+      <foreach item="item" index="index" collection="domainId" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+			) REL ON OCUSER.ID=REL.USER_ID
+		 
+		
+    
+    
+    
+    </if>
+		
+		 
+		 
+     
+     
+     
+    <trim prefix="where" prefixOverrides="and |or ">
+		 	 
+			 
+       
+       
+       
+      <if test="keyword != null"> 
+		 	AND (
+		 			OCUSER.NAME like '%'||#{keyword}||'%' 
+			 		OR OCUSER.ACCOUNT like '%'||#{keyword}||'%' 
+			 		OR OCUSER.MOBILE like '%'||#{keyword}||'%' 
+			 		OR OCUSER.EMAIL like '%'||#{keyword}||'%' 
+		 		)
+		 	</if>
+		     <![CDATA[	AND OCUSER.USER_TYPE <= #{userType}]]>
+		
+		
+    
+    
+    
+    </trim>
+	
+	
+  
+  
+  
+  </select>
+  <select id="getUsers" resultType="com.mainsteam.stm.system.um.user.bo.User" parameterType="com.mainsteam.stm.system.um.user.vo.UserConditionVo" databaseId="oscar">
+		SELECT OCUSER.ID,
+		OCUSER.NAME AS name,
+		OCUSER.SEX AS sex,
+		OCUSER.USER_TYPE AS userType,
+		OCUSER.MOBILE AS mobile,
+		OCUSER.EMAIL AS email,
+		OCUSER.ACCOUNT AS account,
+		OCUSER.CREATOR_ID AS creatorId,
+		OCUSER.CREATED_TIME AS createdTime,
+		OCUSER.STATUS AS status
+		FROM STM_SYS_USER OCUSER
+		  
+		 
+     
+     
+     
+    <if test="domainId != null">
+		 JOIN  (SELECT DISTINCT USER_ID FROM STM_SYS_USER_DOMAIN_ROLE_REL WHERE DOMAIN_ID in
+			 
+			 
+       
+       
+       
+      <foreach item="item" index="index" collection="domainId" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+			) REL ON OCUSER.ID=REL.USER_ID
+		 
+		
+    
+    
+    
+    </if>
+		
+		 
+		 
+     
+     
+     
+    <trim prefix="where" prefixOverrides="and |or ">
+		 	 
+			 
+       
+       
+       
+      <if test="keyword != null"> 
+		 	AND (
+		 			OCUSER.NAME like '%'||#{keyword}||'%' 
+			 		OR OCUSER.ACCOUNT like '%'||#{keyword}||'%' 
+			 		OR OCUSER.MOBILE like '%'||#{keyword}||'%' 
+			 		OR OCUSER.EMAIL like '%'||#{keyword}||'%' 
+		 		)
+		 	</if>
+		     <![CDATA[	AND OCUSER.USER_TYPE <= #{userType}]]>
+		
+		
+    
+    
+    
+    </trim>
+	
+	
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+  <select id="getUserResourceGroupRelCount" parameterType="long" resultType="int">
+		select count(1) from STM_USER_RESOURCE_REL where RESOURCE_ID=#{resourceGroupId} and TYPE=2
+	</select>
+	 
+   
+   
+   
+  <update id="updatePassErrorCnt2Zero">
+		UPDATE stm_sys_user
+		   SET PASS_ERROR_CNT = 0
+		 WHERE STATUS = 1
+	</update>
+	 
+   
+   
+   
+  <update id="updateUpPassTime2Now" databaseId="mysql">
+		UPDATE stm_sys_user
+		   SET UP_PASS_TIME = now()
+		 WHERE STATUS = 1
+	</update>
+	 
+   
+   
+   
+  <update id="updateUpPassTime2Now" databaseId="oracle">
+		UPDATE stm_sys_user
+		   SET UP_PASS_TIME = sysdate
+		 WHERE STATUS = 1
+	</update>
+	 
+  
+   
+  
+   
+  
+   
+  <update id="updateUpPassTime2Now" databaseId="dm">
+		UPDATE stm_sys_user
+		   SET UP_PASS_TIME = sysdate
+		 WHERE STATUS = 1
+	</update>
+  <update id="updateUpPassTime2Now" databaseId="oscar">
+		UPDATE stm_sys_user
+		   SET UP_PASS_TIME = sysdate
+		 WHERE STATUS = 1
+	</update>
+</mapper>

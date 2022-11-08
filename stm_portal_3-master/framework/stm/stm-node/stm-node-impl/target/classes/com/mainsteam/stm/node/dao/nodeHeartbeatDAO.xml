@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.node.dao.pojo.NodeHeartbeatDAO">
+	<insert id="insert"
+		parameterType="com.mainsteam.stm.node.dao.pojo.NodeHeartbeatDO"> insert into
+		STM_NODE_HEARTBEAT(ID,NODEID,OCCURTIME,NEXTOCCURTIME,EXPIREOCCURTIME,OCCURCOUNT)
+		VALUES
+		(#{id},#{nodeId},#{occurtime},#{nextOccurtime},#{expireOccurtime},#{occurCount})
+		</insert>
+	<delete id="delete" parameterType="long">
+		delete from STM_NODE_HEARTBEAT where OCCURTIME &lt;= #{value}
+	</delete>
+		<delete id="deleteByExample" parameterType="com.mainsteam.stm.node.dao.pojo.NodeHeartbeatDO">
+		delete from STM_NODE_HEARTBEAT where OCCURTIME &lt;= #{occurtime} and NODEID = #{nodeId}
+	</delete>
+	<select id="selectByDate" parameterType="com.mainsteam.stm.node.dao.pojo.NodeHeartbeatDO"  resultType="com.mainsteam.stm.node.dao.pojo.NodeHeartbeatDO">
+		select ID,NODEID,OCCURTIME,NEXTOCCURTIME,EXPIREOCCURTIME,OCCURCOUNT from STM_NODE_HEARTBEAT
+		where OCCURTIME &gt;= #{occurtime} and OCCURTIME &lt;= #{expireOccurtime}
+	</select>
+	<select id="selectLatest" resultType="com.mainsteam.stm.node.dao.pojo.NodeHeartbeatDO">
+			SELECT ID,NODEID,OCCURTIME,NEXTOCCURTIME,EXPIREOCCURTIME,OCCURCOUNT FROM STM_NODE_HEARTBEAT a WHERE a.OCCURTIME IN (SELECT MAX(OCCURTIME) FROM STM_NODE_HEARTBEAT GROUP BY NODEID)
+	</select>
+</mapper>

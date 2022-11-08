@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.portal.config.dao.IConfigDeviceDao">
+   
+   
+   
+   
+   
+  <select id="get" parameterType="Long" resultType="com.mainsteam.stm.portal.config.bo.ConfigDeviceBo">
+		SELECT RESOURCE_ID AS ID,IPADDRESS,USERNAME,PASSWORD,ENABLE_USERNAME AS ENABLEUSERNAME,ENABLE_PASSWORD AS 
+		ENABLEPASSWORD,LOGIN_TYPE AS LOGINTYPE,PUBLIC_NAME AS PUBLICNAME,SNMP_PORT AS SNMPPORT,BACKUP_ID AS BACKUPID,
+		DEVICE_DESC AS DEVICEDESC,SOFT_VERSION AS SOFTVERSION,IS_SAVE AS ISSAVE
+		FROM STM_CONFIG_RESOURCE_PROP WHERE RESOURCE_ID = #{id}
+	</select>
+   
+   
+   
+   
+   
+  <select id="pageSelect4ConfigDevice" resultType="com.mainsteam.stm.portal.config.bo.ConfigDeviceBo" parameterType="com.mainsteam.stm.portal.config.bo.ConfigDeviceBo" databaseId="mysql">
+		SELECT A.RESOURCE_ID AS ID,B.CHANGE_STATE AS CHANGESTATE,B.BACKUP_TIME AS LASTBACKUPTIME,IS_SAVE AS ISSAVE,
+		B.BACKUP_STATE AS BACKUPSTATE,A.BACKUP_ID AS BACKUPID,A.DEVICE_DESC AS DEVICEDESC,A.SOFT_VERSION AS SOFTVERSION FROM STM_CONFIG_RESOURCE_PROP A
+		LEFT JOIN
+		(SELECT  DISTINCT C.RESOURCE_ID ,C.BACKUP_TIME, D.CHANGE_STATE,D.BACKUP_STATE FROM 
+			(SELECT MAX(BACKUP_TIME) BACKUP_TIME,RESOURCE_ID 
+			FROM STM_CONFIG_RES_BACKUP_HIS GROUP BY RESOURCE_ID) C
+			LEFT JOIN STM_CONFIG_RES_BACKUP_HIS D
+			ON C.RESOURCE_ID = D.RESOURCE_ID AND C.BACKUP_TIME = D.BACKUP_TIME 
+			GROUP BY C.RESOURCE_ID
+		) B ON A.RESOURCE_ID = B.RESOURCE_ID
+ 		 
+		 
+     
+     
+     
+     
+     
+    <if test="groupId != null">
+            	WHERE A.RESOURCE_ID IN 
+           		(SELECT RESOURCE_ID FROM STM_CONFIG_GROUP_RES WHERE GROUP_ID =#{groupId})
+		</if>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="pageSelect4ConfigDevice" resultType="com.mainsteam.stm.portal.config.bo.ConfigDeviceBo" parameterType="com.mainsteam.stm.portal.config.bo.ConfigDeviceBo" databaseId="oracle">
+		SELECT A.RESOURCE_ID AS ID,B.CHANGE_STATE AS CHANGESTATE,B.BACKUP_TIME AS LASTBACKUPTIME,IS_SAVE AS ISSAVE,
+		B.BACKUP_STATE AS BACKUPSTATE,A.BACKUP_ID AS BACKUPID,A.DEVICE_DESC AS DEVICEDESC,A.SOFT_VERSION AS SOFTVERSION FROM STM_CONFIG_RESOURCE_PROP A
+		LEFT JOIN
+		(SELECT  DISTINCT C.RESOURCE_ID ,C.BACKUP_TIME, D.CHANGE_STATE,D.BACKUP_STATE FROM 
+			(SELECT MAX(BACKUP_TIME) BACKUP_TIME,RESOURCE_ID 
+			FROM STM_CONFIG_RES_BACKUP_HIS GROUP BY RESOURCE_ID) C
+			LEFT JOIN STM_CONFIG_RES_BACKUP_HIS D
+			ON C.RESOURCE_ID = D.RESOURCE_ID AND C.BACKUP_TIME = D.BACKUP_TIME 
+			GROUP BY C.RESOURCE_ID, C.BACKUP_TIME, D.CHANGE_STATE,  D.BACKUP_STATE
+		) B ON A.RESOURCE_ID = B.RESOURCE_ID
+ 		 
+		 
+     
+     
+     
+     
+     
+    <if test="groupId != null">
+            	WHERE A.RESOURCE_ID IN 
+           		(SELECT RESOURCE_ID FROM STM_CONFIG_GROUP_RES WHERE GROUP_ID = #{groupId})
+		</if>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="pageSelect4ConfigDevice" resultType="com.mainsteam.stm.portal.config.bo.ConfigDeviceBo" parameterType="com.mainsteam.stm.portal.config.bo.ConfigDeviceBo" databaseId="dm">
+		SELECT A.RESOURCE_ID AS ID,B.CHANGE_STATE AS CHANGESTATE,B.BACKUP_TIME AS LASTBACKUPTIME,IS_SAVE AS ISSAVE,
+		B.BACKUP_STATE AS BACKUPSTATE,A.BACKUP_ID AS BACKUPID,A.DEVICE_DESC AS DEVICEDESC,A.SOFT_VERSION AS SOFTVERSION FROM STM_CONFIG_RESOURCE_PROP A
+		LEFT JOIN
+		(SELECT  DISTINCT C.RESOURCE_ID ,C.BACKUP_TIME, D.CHANGE_STATE,D.BACKUP_STATE FROM 
+			(SELECT MAX(BACKUP_TIME) BACKUP_TIME,RESOURCE_ID 
+			FROM STM_CONFIG_RES_BACKUP_HIS GROUP BY RESOURCE_ID) C
+			LEFT JOIN STM_CONFIG_RES_BACKUP_HIS D
+			ON C.RESOURCE_ID = D.RESOURCE_ID AND C.BACKUP_TIME = D.BACKUP_TIME 
+			GROUP BY C.RESOURCE_ID, C.BACKUP_TIME, D.CHANGE_STATE,  D.BACKUP_STATE
+		) B ON A.RESOURCE_ID = B.RESOURCE_ID
+ 		 
+		 
+     
+     
+     
+     
+     
+    <if test="groupId != null">
+            	WHERE A.RESOURCE_ID IN 
+           		(SELECT RESOURCE_ID FROM STM_CONFIG_GROUP_RES WHERE GROUP_ID = #{groupId})
+		</if>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+  <select id="pageSelect4ConfigDevice" resultType="com.mainsteam.stm.portal.config.bo.ConfigDeviceBo" parameterType="com.mainsteam.stm.portal.config.bo.ConfigDeviceBo" databaseId="oscar">
+		SELECT A.RESOURCE_ID AS ID,B.CHANGE_STATE AS CHANGESTATE,B.BACKUP_TIME AS LASTBACKUPTIME,IS_SAVE AS ISSAVE,
+		B.BACKUP_STATE AS BACKUPSTATE,A.BACKUP_ID AS BACKUPID,A.DEVICE_DESC AS DEVICEDESC,A.SOFT_VERSION AS SOFTVERSION FROM STM_CONFIG_RESOURCE_PROP A
+		LEFT JOIN
+		(SELECT  DISTINCT C.RESOURCE_ID ,C.BACKUP_TIME, D.CHANGE_STATE,D.BACKUP_STATE FROM 
+			(SELECT MAX(BACKUP_TIME) BACKUP_TIME,RESOURCE_ID 
+			FROM STM_CONFIG_RES_BACKUP_HIS GROUP BY RESOURCE_ID) C
+			LEFT JOIN STM_CONFIG_RES_BACKUP_HIS D
+			ON C.RESOURCE_ID = D.RESOURCE_ID AND C.BACKUP_TIME = D.BACKUP_TIME 
+			GROUP BY C.RESOURCE_ID, C.BACKUP_TIME, D.CHANGE_STATE,  D.BACKUP_STATE
+		) B ON A.RESOURCE_ID = B.RESOURCE_ID
+ 		 
+		 
+     
+     
+     
+     
+     
+    <if test="groupId != null">
+            	WHERE A.RESOURCE_ID IN 
+           		(SELECT RESOURCE_ID FROM STM_CONFIG_GROUP_RES WHERE GROUP_ID = #{groupId})
+		</if>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="getAllResourceIds" resultType="Long">
+		SELECT RESOURCE_ID AS RESOURCEID FROM STM_CONFIG_RESOURCE_PROP
+	</select>
+   
+   
+   
+   
+   
+  <select id="getAllResources" resultType="com.mainsteam.stm.portal.config.bo.ConfigDeviceBo">
+		SELECT RESOURCE_ID AS ID,IPADDRESS FROM STM_CONFIG_RESOURCE_PROP
+	</select>
+   
+   
+   
+   
+   
+  <insert id="insert" parameterType="com.mainsteam.stm.portal.config.bo.ConfigDeviceBo">
+		INSERT INTO STM_CONFIG_RESOURCE_PROP (RESOURCE_ID,IPADDRESS,IS_SAVE) VALUES( #{id},#{ipAddress},#{isSave} )
+	</insert>
+   
+   
+   
+   
+   
+  <insert id="batchInsert" parameterType="com.mainsteam.stm.portal.config.bo.ConfigDeviceBo">
+		INSERT INTO STM_CONFIG_RESOURCE_PROP (RESOURCE_ID,IPADDRESS,IS_SAVE) VALUES( #{id},#{ipAddress},#{isSave} )
+	</insert>
+   
+   
+   
+   
+   
+  <update id="update" parameterType="com.mainsteam.stm.portal.config.bo.ConfigDeviceBo">
+		UPDATE STM_CONFIG_RESOURCE_PROP
+		 
+		 
+     
+     
+     
+     
+     
+    <set>
+			 
+			 
+       
+       
+       
+       
+       
+      <if test="ipAddress != null"> IPADDRESS = #{ipAddress}, </if>
+			 
+			 
+       
+       
+       
+       
+       
+      <if test="userName != null"> USERNAME = #{userName} ,</if>
+			 
+			 
+       
+       
+       
+       
+       
+      <if test="password != null"> PASSWORD = #{password}, </if>
+			 
+			 
+       
+       
+       
+       
+       
+      <if test="enableUserName != null"> ENABLE_USERNAME = #{enableUserName}, </if>
+			 
+			 
+       
+       
+       
+       
+       
+      <if test="enablePassword != null"> ENABLE_PASSWORD = #{enablePassword}, </if>
+			 
+			 
+       
+       
+       
+       
+       
+      <if test="loginType != null"> LOGIN_TYPE = #{loginType}, </if>
+			 
+			 
+       
+       
+       
+       
+       
+      <if test="publicName != null"> PUBLIC_NAME = #{publicName}, </if>
+			 
+			 
+       
+       
+       
+       
+       
+      <if test="snmpPort != null"> SNMP_PORT = #{snmpPort}, </if>
+			 
+			 
+       
+       
+       
+       
+       
+      <if test="backupId != null"> BACKUP_ID = #{backupId}, </if>
+			 
+			 
+       
+       
+       
+       
+       
+      <if test="softVersion != null"> SOFT_VERSION = #{softVersion}, </if>
+			 
+			 
+       
+       
+       
+       
+       
+      <if test="deviceDesc != null"> DEVICE_DESC = #{deviceDesc}, </if>
+			 
+			 
+       
+       
+       
+       
+       
+      <if test="isSave != null"> IS_SAVE = #{isSave}, </if>
+		
+		
+    
+    
+    
+    
+    
+    </set>
+		WHERE RESOURCE_ID=#{id}
+	
+	
+  
+  
+  
+  
+  
+  </update>
+   
+   
+   
+   
+   
+  <delete id="del" parameterType="Long">
+		DELETE FROM STM_CONFIG_RESOURCE_PROP WHERE RESOURCE_ID=#{id}
+	</delete>
+   
+   
+   
+   
+   
+  <delete id="batchDelConfigDevice">
+		DELETE FROM STM_CONFIG_RESOURCE_PROP WHERE RESOURCE_ID IN
+		  
+		 
+     
+     
+     
+     
+     
+    <foreach item="ids" index="index" collection="array" open="(" separator="," close=")">  
+  			#{ids}
+ 		 </foreach> 
+	
+	
+  
+  
+  
+  
+  
+  </delete>
+   
+   
+   
+   
+   
+  <delete id="deleteResourceByResourceIds">
+		DELETE FROM STM_CONFIG_GROUP_RES WHERE RESOURCE_ID IN
+		  
+		 
+     
+     
+     
+     
+     
+    <foreach item="ids" index="index" collection="array" open="(" separator="," close=")">  
+  			#{ids}  
+ 		 </foreach>  
+	
+	
+  
+  
+  
+  
+  
+  </delete>
+   
+   
+   
+   
+   
+  <select id="getByPlanId" parameterType="Long" resultType="com.mainsteam.stm.portal.config.bo.ConfigDeviceBo">
+		SELECT RESOURCE_ID AS ID,BACKUP_ID AS BACKUPID FROM STM_CONFIG_RESOURCE_PROP WHERE BACKUP_ID = #{planId}
+	</select>
+   
+   
+   
+   
+   
+  <select id="getExcept" parameterType="com.mainsteam.stm.portal.config.bo.ConfigDeviceBo" resultType="com.mainsteam.stm.portal.config.bo.ConfigDeviceBo">
+		SELECT RESOURCE_ID AS ID,BACKUP_ID AS BACKUPID FROM STM_CONFIG_RESOURCE_PROP WHERE 1=1
+		 
+		 
+     
+     
+     
+     
+     
+    <if test="backupId != null">
+			AND BACKUP_ID != #{backupId} OR BACKUP_ID IS NULL
+		</if>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+</mapper>

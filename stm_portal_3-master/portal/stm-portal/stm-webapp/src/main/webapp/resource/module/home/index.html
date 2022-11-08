@@ -1,0 +1,120 @@
+<div class="home-content">
+	<div class="tabs-header">
+         <div class="tabs-header edit-mode">
+            <ul class="tabs">
+                <li class="tabs-box">
+                  <a class="tabs-inner">
+                  	<span data-type="show-page"  class="tab">当前页面</span>
+                  </a>
+                </li>
+                <li class="tabs-box">
+                  <a class="tabs-inner">
+                  	<span data-type="manage-page"  class="tab">页面管理</span>
+                  </a>
+                </li>
+            </ul>
+            <div class="right">
+                 <div class="show-page">
+                    <a data-type="edit-widge">添加图表</a>
+                    <a data-type="select-temp">首页模板</a>
+                    <a data-type="save-change">保存</a>
+                </div>
+                <div class="manage-page">
+                    <a data-type="set-add">添加</a>
+                    <a data-type="set-del">删除</a>
+                    <a data-type="set-slide">轮播设置</a>
+                    <a data-type="set-authority">权限设置</a>
+                </div>
+                <a data-type ="view-change">浏览模式</a>
+            </div>
+        </div>
+    </div> 
+
+<div class="main-gridster" style="height: 99.1%;">
+	<div class="view-mode" style="display: block;">
+	<span class="page-close light_blue fa fa-minus-circle" id="page-close" title="关闭" style="display:none;"></span>
+	<div class="oc-m-page-open"><span class="page-open light_blue fa fa-plus-circle" id="page-open" title="打开"></span></div>
+    <div class="view-mode-box" style="display:none;">
+		<span class="page-edit light_blue icon-edit quickSelectDiscoverParamter" id="page-edit" title="编辑模式"></span>
+		<span class="page-refesh light_blue fa fa-refresh" id="page-refesh" title="刷新"></span>
+		<span class="page-fullscreen light_blue fa fa-arrows-alt" id="page-fullscreen" title="全屏"></span>
+	</div>
+</div>
+    <div class="gridster ready" style="height: 100%;">
+        <ul></ul>
+    </div>
+    </div>
+     	<div style="height:94%;width:100%;display:none;" class="managetab" >
+        	<div class="main-gridster-manage oc-datagrid " id="managetab"  ></div>
+        </div>
+    </div>
+</div>
+<!-- <script type="text/javascript" src="third/echarts3.0/echarts.min.gzjs"></script> -->
+<script type="text/javascript">
+    
+    $(document).ready(function(){
+       
+        loadResource(function(){
+            var widgetLoader = new oc.index.home.widgetLoader({
+                theme:Highcharts.theme.currentSkin,//肤色方案
+            });
+
+            var widgetMger = new widgetManager({
+                managerMode:false,
+                gridster:'.gridster.ready',
+                widgetLoader:widgetLoader,
+                //layoutId:106501
+            });
+            var homePageMger = new pageManage({managerMode:true,
+             widgetManager:widgetMger,
+             widgetLoader:widgetLoader,
+            });
+            oc.ns('oc.index.home');
+            oc.index.home.widgetMger = widgetMger;
+            $(document.body).unbind('.homePage').bind('menuCollapsed.homePage',function(e){
+                if(oc.index.isCurrentActiveModule('home')){
+                    setTimeout(function(){
+                        oc.index.home.widgetMger.resize();
+                    },100);
+                }
+            });
+        });
+
+        
+        function loadResource(fn){
+     
+        	oc.util.ajax({
+				url:oc.resource.getUrl('system/skin/get.htm'),
+				successMsg:null,
+				failureMsg:'',
+				asnyc:false,
+				success:function(d){
+					var data=$.parseJSON(d.data);
+				var	currentskin = data.selected;
+				
+					if(currentskin=="darkgreen"){
+						currentskin="default";
+						}
+				
+				      oc.resource.loadCss('resource/themes/'+currentskin+'/css/home.css',false);
+			            oc.resource.loadCss('resource/third/jquery-gridster/jquery.gridster.min.css',false);
+			          
+			            //初始化模块加载器的代码
+			            oc.resource.loadScripts([
+			                'resource/third/jquery-gridster/jquery.gridster.min.js',
+			                'resource/third/echarts3.0/echarts.min.gzjs',
+			                'resource/third/jquery.fullscreen.js',
+			                'resource/module/home/widgets/widgetLoader.js',
+			                'resource/module/home/index.js'],function(){
+			                    fn&&fn();
+			            });
+				}
+        	})
+        
+      
+              
+        }
+    });
+</script>
+
+

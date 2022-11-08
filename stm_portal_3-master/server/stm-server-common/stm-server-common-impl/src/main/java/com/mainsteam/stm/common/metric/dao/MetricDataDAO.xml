@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.common.metric.dao.MetricDataDAO">
+	
+	 
+  <update id="createHistoryMetricTable" databaseId="mysql">
+		CREATE TABLE ${tableName}(
+			INSTANCE_ID		BIGINT(20),
+			METRIC_DATA		DECIMAL(20,2),
+		  	COLLECT_TIME	DATETIME,
+		  	TIMELINE_ID		BIGINT(20),
+		  	PROFILE_ID		BIGINT(20)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8 PARTITION BY RANGE COLUMNS(COLLECT_TIME) (
+			PARTITION P${lastPartitionName} VALUES LESS THAN ('${lastPartitionDate}'),
+   	 		PARTITION P${partitionName} VALUES LESS THAN ('${partitionDate}'),
+    		PARTITION P${nextPartitionName} VALUES LESS THAN ('${nextPartitionDate}')		
+		)	
+	</update>
+	 
+  <update id="createHistoryMetricTable" databaseId="oracle">
+		CREATE TABLE ${tableName}(
+			INSTANCE_ID		NUMBER(20,0),
+			METRIC_DATA		NUMBER(20,2),
+		  	COLLECT_TIME	TIMESTAMP,
+		  	TIMELINE_ID		NUMBER(20,0),
+		  	PROFILE_ID		NUMBER(20,0)
+		)	PARTITION BY RANGE (COLLECT_TIME)(
+			PARTITION P${lastPartitionName} VALUES LESS THAN (TO_DATE('${lastPartitionDate}', 'yyyy-MM-dd')),
+			PARTITION P${partitionName} VALUES LESS THAN (TO_DATE('${partitionDate}', 'yyyy-MM-dd')),
+			PARTITION P${nextPartitionName} VALUES LESS THAN (TO_DATE('${nextPartitionDate}', 'yyyy-MM-dd'))
+		)	
+	</update>
+	 
+  <update id="createHistoryMetricTable" databaseId="dm">
+		CREATE TABLE ${tableName}(
+			INSTANCE_ID		NUMBER(20,0),
+			METRIC_DATA		NUMBER(20,2),
+		  	COLLECT_TIME	TIMESTAMP,
+		  	TIMELINE_ID		NUMBER(20,0),
+		  	PROFILE_ID		NUMBER(20,0)
+		)	PARTITION BY RANGE (COLLECT_TIME)(
+			PARTITION P${lastPartitionName} VALUES LESS THAN (TO_DATE('${lastPartitionDate}', 'yyyy-MM-dd')),
+			PARTITION P${partitionName} VALUES LESS THAN (TO_DATE('${partitionDate}', 'yyyy-MM-dd')),
+			PARTITION P${nextPartitionName} VALUES LESS THAN (TO_DATE('${nextPartitionDate}', 'yyyy-MM-dd'))
+		)	
+	</update>
+	<update id="createHistoryMetricTable" databaseId="kingbase">
+		CREATE TABLE ${tableName}(
+			INSTANCE_ID		NUMBER(20,0),
+			METRIC_DATA		NUMBER(20,2),
+		  	COLLECT_TIME	TIMESTAMP,
+		  	TIMELINE_ID		NUMBER(20,0),
+		  	PROFILE_ID		NUMBER(20,0)
+		)	PARTITION BY RANGE (COLLECT_TIME)(
+			PARTITION P${lastPartitionName} VALUES LESS THAN (TO_DATE('${lastPartitionDate}', 'yyyy-MM-dd')),
+			PARTITION P${partitionName} VALUES LESS THAN (TO_DATE('${partitionDate}', 'yyyy-MM-dd')),
+			PARTITION P${nextPartitionName} VALUES LESS THAN (TO_DATE('${nextPartitionDate}', 'yyyy-MM-dd'))
+		)
+	</update>
+  <update id="createHistoryMetricTable" databaseId="oscar">
+		CREATE TABLE ${tableName}(
+			INSTANCE_ID		NUMBER(20,0),
+			METRIC_DATA		NUMBER(20,2),
+		  	COLLECT_TIME	TIMESTAMP,
+		  	TIMELINE_ID		NUMBER(20,0),
+		  	PROFILE_ID		NUMBER(20,0)
+		)	PARTITION BY RANGE (COLLECT_TIME)(
+			PARTITION P${lastPartitionName} VALUES LESS THAN (TO_DATE('${lastPartitionDate}', 'yyyy-MM-dd')),
+			PARTITION P${partitionName} VALUES LESS THAN (TO_DATE('${partitionDate}', 'yyyy-MM-dd')),
+			PARTITION P${nextPartitionName} VALUES LESS THAN (TO_DATE('${nextPartitionDate}', 'yyyy-MM-dd'))
+		)
+	</update>
+	 
+  <update id="createRealtimeMetricTable" databaseId="mysql">
+		CREATE TABLE ${tableName}(
+			INSTANCE_ID		bigint(20),
+			METRIC_DATA		decimal(20,2),
+		  	COLLECT_TIME	DATETIME,
+		  	TIMELINE_ID		bigint,
+		  	PROFILE_ID		bigint,
+			PRIMARY KEY (INSTANCE_ID)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8
+	</update>
+	 
+  <update id="createRealtimeMetricTable" databaseId="oracle">
+		CREATE TABLE ${tableName}(
+			INSTANCE_ID		NUMBER(20,0),
+			METRIC_DATA		NUMBER(20,2),
+		  	COLLECT_TIME	TIMESTAMP,
+		  	TIMELINE_ID		NUMBER(20,0),
+		  	PROFILE_ID		NUMBER(20,0),
+		    PRIMARY KEY (INSTANCE_ID)
+		)
+	</update>
+	 
+  <update id="createRealtimeMetricTable" databaseId="dm">
+		CREATE TABLE ${tableName}(
+			INSTANCE_ID		NUMBER(20,0),
+			METRIC_DATA		NUMBER(20,2),
+		  	COLLECT_TIME	TIMESTAMP,
+		  	TIMELINE_ID		NUMBER(20,0),
+		  	PROFILE_ID		NUMBER(20,0),
+		    PRIMARY KEY (INSTANCE_ID)
+		)
+	</update>
+	<update id="createRealtimeMetricTable" databaseId="kingbase">
+		CREATE TABLE ${tableName}(
+			INSTANCE_ID		NUMBER(20,0),
+			METRIC_DATA		NUMBER(20,2),
+		  	COLLECT_TIME	TIMESTAMP,
+		  	TIMELINE_ID		NUMBER(20,0),
+		  	PROFILE_ID		NUMBER(20,0),
+		    PRIMARY KEY (INSTANCE_ID)
+		)
+	</update>
+  <update id="createRealtimeMetricTable" databaseId="oscar">
+		CREATE TABLE ${tableName}(
+			INSTANCE_ID		NUMBER(20,0),
+			METRIC_DATA		NUMBER(20,2),
+		  	COLLECT_TIME	TIMESTAMP,
+		  	TIMELINE_ID		NUMBER(20,0),
+		  	PROFILE_ID		NUMBER(20,0),
+			PRIMARY KEY (INSTANCE_ID)
+		)
+	</update>
+	 
+  <update id="createHistoryMetricIndex" databaseId="mysql">
+		ALTER TABLE ${tableName} ADD CONSTRAINT pk_${metricId} PRIMARY KEY (INSTANCE_ID,COLLECT_TIME)
+	</update>
+	 
+  <update id="createHistoryMetricIndex" databaseId="oracle">
+		ALTER TABLE ${tableName} ADD CONSTRAINT pk_${metricId} PRIMARY KEY (INSTANCE_ID,COLLECT_TIME) USING INDEX TABLESPACE OC4INDEX LOCAL
+	</update>
+	 
+  <update id="createHistoryMetricIndex" databaseId="dm">
+		ALTER TABLE ${tableName} ADD CONSTRAINT pk_${metricId} PRIMARY KEY (INSTANCE_ID,COLLECT_TIME) USING INDEX TABLESPACE OC4INDEX 
+	</update>
+	<update id="createHistoryMetricIndex" databaseId="kingbase">
+		ALTER TABLE ${tableName} ADD CONSTRAINT pk_${metricId} PRIMARY KEY (INSTANCE_ID,COLLECT_TIME) USING INDEX TABLESPACE OC4INDEX
+	</update>
+  <update id="createHistoryMetricIndex" databaseId="oscar">
+		ALTER TABLE ${tableName} ADD CONSTRAINT pk_${metricId} PRIMARY KEY (INSTANCE_ID,COLLECT_TIME) USING INDEX TABLESPACE OC4INDEX LOCAL
+	</update>
+	 
+  <select id="selectExistRealTimeMetric" resultType="long">
+		SELECT DISTINCT INSTANCE_ID FROM ${tableName}
+	</select>
+	 
+  <select id="selectExistRealTimeMetricOne" resultType="int">
+		SELECT COUNT(*) FROM ${tableName} WHERE INSTANCE_ID = #{resourceInstanceId}
+	</select>
+	 
+  <update id="updateRealTimeMetricData" parameterType="com.mainsteam.stm.common.metric.obj.MetricDataPO">
+	    UPDATE ${tableName} 
+		SET METRIC_DATA = #{metricData},
+		COLLECT_TIME =  #{collectTime},
+		TIMELINE_ID = #{timelineId},
+		PROFILE_ID = #{profileId}
+		WHERE INSTANCE_ID =#{resourceInstanceId}
+	</update>
+	 
+  <insert id="insertRealTimeMetricData" parameterType="com.mainsteam.stm.common.metric.obj.MetricDataPO">
+	    INSERT INTO ${tableName}
+	           (INSTANCE_ID,METRIC_DATA,COLLECT_TIME,TIMELINE_ID,PROFILE_ID) 
+	    VALUES (#{resourceInstanceId},#{metricData}, #{collectTime},#{timelineId},#{profileId})
+	</insert>
+	
+	 
+  <select id="selectCustomMetricOne" resultType="int">
+		SELECT COUNT(*) FROM STM_METRIC_CUSTOM WHERE
+			INSTANCE_ID=#{resourceInstanceId} and METRIC_ID=#{metricId}
+	</select>
+	
+	 
+  <insert id="addCustomerData" parameterType="com.mainsteam.stm.common.metric.obj.MetricDataPO">
+	    INSERT INTO STM_METRIC_CUSTOM
+	           (INSTANCE_ID,METRIC_ID,TIMELINE_ID,PROFILE_ID,METRIC_TYPE,METRIC_DATA,COLLECT_TIME) 
+	    VALUES (#{resourceInstanceId},#{metricId},#{timelineId},#{profileId},#{metricType},#{metricData}, #{collectTime})
+	</insert>
+	 
+  <insert id="updateCustomerData" parameterType="com.mainsteam.stm.common.metric.obj.MetricDataPO">
+	    UPDATE STM_METRIC_CUSTOM SET
+	    	TIMELINE_ID=#{timelineId},
+	    	PROFILE_ID=#{profileId},
+	    	METRIC_TYPE=#{metricType},
+	    	METRIC_DATA=#{metricData},
+	    	COLLECT_TIME=#{collectTime}
+	    	WHERE INSTANCE_ID=#{resourceInstanceId} AND METRIC_ID=#{metricId}
+	</insert>
+	
+	 
+  <insert id="addCustomerHistoryData" parameterType="com.mainsteam.stm.common.metric.obj.MetricDataPO">
+	    INSERT INTO STM_METRIC_CUSTOM_HISTORY
+	           (INSTANCE_ID,METRIC_ID,TIMELINE_ID,PROFILE_ID,METRIC_TYPE,METRIC_DATA,COLLECT_TIME) 
+	    VALUES (#{resourceInstanceId},#{metricId},#{timelineId,jdbcType=NUMERIC},#{profileId,jdbcType=NUMERIC},#{metricType,jdbcType=VARCHAR},#{metricData,jdbcType=VARCHAR}, #{collectTime,jdbcType=TIMESTAMP})
+	</insert>
+		
+	 
+  <insert id="addHistoryMetricData" parameterType="com.mainsteam.stm.common.metric.obj.MetricDataPO">
+	   INSERT INTO ${tableName}
+	           (INSTANCE_ID,TIMELINE_ID,PROFILE_ID,METRIC_DATA,COLLECT_TIME)
+	    VALUES (#{resourceInstanceId,jdbcType=BIGINT},#{timelineId,jdbcType=NUMERIC},#{profileId,jdbcType=NUMERIC},#{metricData,jdbcType=NUMERIC}, #{collectTime,jdbcType=TIMESTAMP})
+	</insert>	
+	 
+  <select id="getMetricTableList" parameterType="map" resultType="String" databaseId="mysql">
+		SELECT TABLE_NAME as tableName
+			FROM INFORMATION_SCHEMA.TABLES 
+		WHERE 
+			 TABLE_SCHEMA=#{dbName} AND TABLE_NAME LIKE #{tablePrefix}
+	</select>
+	 
+  <select id="getMetricTableList" parameterType="map" resultType="String" databaseId="oracle">
+		SELECT TABLE_NAME as tableName
+			FROM USER_TABLES
+		WHERE 
+			TABLE_NAME LIKE #{tablePrefix}
+	</select>
+	 
+  <select id="getMetricTableList" parameterType="map" resultType="String" databaseId="dm">
+		SELECT TABLE_NAME as tableName
+			FROM USER_TABLES
+		WHERE 
+			TABLE_NAME LIKE #{tablePrefix}
+	</select>
+	<select id="getMetricTableList" parameterType="map" resultType="String" databaseId="kingbase">
+		SELECT TABLE_NAME as tableName
+			FROM USER_TABLES
+		WHERE
+			TABLE_NAME LIKE #{tablePrefix}
+	</select>
+  <select id="getMetricTableList" parameterType="map" resultType="String" databaseId="oscar">
+		SELECT TABLE_NAME as tableName
+			FROM USER_TABLES
+		WHERE 
+			TABLE_NAME LIKE #{tablePrefix}
+	</select>
+	 
+  <select id="selectMetricTable" parameterType="map" resultType="String" databaseId="mysql">
+		SELECT TABLE_NAME as tableName
+			FROM INFORMATION_SCHEMA.TABLES 
+		WHERE 
+			 TABLE_SCHEMA=#{dbName} AND TABLE_NAME = #{table}
+	</select>
+	 
+  <select id="selectMetricTable" parameterType="map" resultType="String" databaseId="oracle">
+		SELECT TABLE_NAME as tableName
+			FROM USER_TABLES
+		WHERE 
+			TABLE_NAME = #{table}
+	</select>
+	 
+  <select id="selectMetricTable" parameterType="map" resultType="String" databaseId="dm">
+		SELECT TABLE_NAME as tableName
+			FROM USER_TABLES
+		WHERE 
+			TABLE_NAME = #{table}
+	</select>
+	<select id="selectMetricTable" parameterType="map" resultType="String" databaseId="kingbase">
+		SELECT TABLE_NAME as tableName
+			FROM USER_TABLES
+		WHERE
+			TABLE_NAME = #{table}
+	</select>
+  <select id="selectMetricTable" parameterType="map" resultType="String" databaseId="oscar">
+		SELECT TABLE_NAME as tableName
+			FROM USER_TABLES
+		WHERE 
+			TABLE_NAME = #{table}
+	</select>
+	
+	 
+  <select id="getMetricPerformanceData" parameterType="Map" resultType="com.mainsteam.stm.common.metric.obj.MetricDataPO">
+		SELECT 
+			INSTANCE_ID as resourceInstanceId, 
+			'${metricID}' as metricId,
+			TIMELINE_ID	as timelineId,
+		  	PROFILE_ID	as profileId, 
+			METRIC_DATA as metricData,
+			COLLECT_TIME as collectTime
+		FROM  STM_M_R_${metricID}
+		WHERE INSTANCE_ID =#{instanceID}
+	</select>
+	
+	 
+  <select id="getMetricAvailableData" parameterType="Map" resultType="com.mainsteam.stm.common.metric.obj.MetricDataPO">
+		SELECT
+			INSTANCE_ID as resourceInstanceId, 
+			METRIC_ID as metricId,
+			TIMELINE_ID	as timelineId,
+		  	PROFILE_ID	as profileId, 
+			METRIC_DATA as metricData,
+			COLLECT_TIME as collectTime
+		FROM  STM_METRIC_AVAILABLE
+		WHERE INSTANCE_ID =#{instanceID} AND METRIC_ID= #{metricID}
+	</select>
+	
+	 
+  <select id="getCustomerMetricData" parameterType="Map" resultType="com.mainsteam.stm.common.metric.obj.MetricDataPO">
+		SELECT 
+			INSTANCE_ID as resourceInstanceID, 
+			METRIC_ID as metricId,
+			TIMELINE_ID	as timelineId,
+		  	PROFILE_ID	as profileId, 
+			METRIC_DATA as metricData,
+			COLLECT_TIME as collectTime
+		FROM  STM_METRIC_CUSTOM
+		WHERE INSTANCE_ID =#{instanceID} AND METRIC_ID= #{metricID}
+	</select>
+	
+	 
+  <select id="getAllCustom" resultType="com.mainsteam.stm.common.metric.obj.MetricDataPO">
+		SELECT 
+			INSTANCE_ID as resourceInstanceID, 
+			METRIC_ID as metricId
+		FROM  STM_METRIC_CUSTOM
+	</select>
+	 
+  <select id="queryHistoryCustomerMetricData" resultType="com.mainsteam.stm.common.metric.obj.MetricDataPO">
+		SELECT 
+			INSTANCE_ID as resourceInstanceID, 
+			METRIC_ID as metricId,
+			TIMELINE_ID	as timelineId,
+		  	PROFILE_ID	as profileId, 
+			METRIC_DATA as metricData,
+			COLLECT_TIME  as collectTime
+			FROM STM_METRIC_CUSTOM_HISTORY
+		WHERE INSTANCE_ID=#{instanceID}
+			AND METRIC_ID=#{metricID}
+			AND COLLECT_TIME &gt; #{startTime} AND COLLECT_TIME &lt; #{endTime}
+			ORDER BY COLLECT_TIME ASC
+	</select>
+	 
+  <select id="queryRealTimeMetricDatas" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" resultType="map">
+		SELECT INS.INSTANCEID as "instanceid"
+		 
+		 
+    <foreach collection="condition.metricID" item="mid" index="i">,${mid}.${mid} as "${mid}" ,${mid}.COLLECT_TIME as "${mid}CollTime",
+		${mid}.TIMELINE_ID as "${mid}TimelineId",${mid}.PROFILE_ID as "${mid}ProfileId"</foreach> 
+		FROM STM_INSTANCELIB_RESOURCE_MAIN  INS
+		 
+		 
+    <foreach collection="condition.metricID" item="mid">
+		 LEFT JOIN (SELECT METRIC_DATA AS ${mid},INSTANCE_ID,COLLECT_TIME,PROFILE_ID,TIMELINE_ID FROM STM_M_R_${mid.toUpperCase()} ) ${mid} on INS.INSTANCEID=${mid}.INSTANCE_ID
+		</foreach>
+		WHERE 
+			INS.INSTANCEID IN 
+			 
+    <foreach item="item" index="index" collection="condition.instanceID" open="(" close=")" separator=",">
+				#{item}
+      <if test="index%900&gt;898">) OR INS.INSTANCEID IN('-1'</if>
+			
+    </foreach>
+		 
+    <if test="condition.orderMetricID!=null"> 
+				order by ${condition.orderMetricID}  
+			 
+      <if test="condition.orderForDesc">DESC</if>
+			
+		
+    </if>
+	
+	
+  </select>
+	
+	 
+  <select id="queryHistoryMetricDatas" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" resultType="com.mainsteam.stm.common.metric.obj.MetricDataPO">
+		select * from (SELECT 
+			INSTANCE_ID as resourceInstanceID, 
+			'${condition.metricID}' as metricId,
+			TIMELINE_ID	as timelineId,
+		  	PROFILE_ID	as profileId, 
+			CONCAT(METRIC_DATA,'') as metricData,
+			COLLECT_TIME  as collectTime
+		FROM STM_M_H_${condition.metricID.toUpperCase()}
+		WHERE 
+			INSTANCE_ID=#{condition.instanceID} and COLLECT_TIME &gt; #{condition.startTime,jdbcType=TIMESTAMP} and  COLLECT_TIME &lt; #{condition.endTime,jdbcType=TIMESTAMP}) a ORDER BY collectTime ASC
+	
+  </select>
+  
+  <select id="queryHistoryMetricDatas_old" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" resultType="com.mainsteam.stm.common.metric.obj.MetricDataPO">
+		select * from (SELECT 
+			INSTANCE_ID as resourceInstanceID, 
+			'${condition.metricID}' as metricId,
+			TIMELINE_ID	as timelineId,
+		  	PROFILE_ID	as profileId, 
+			CONCAT(METRIC_DATA,'') as metricData,
+			COLLECT_TIME  as collectTime
+		FROM STM_M_H_${condition.metricID.toUpperCase()} PARTITION(P${condition.startParttion})
+		WHERE 
+			INSTANCE_ID=#{condition.instanceID} and COLLECT_TIME &gt; #{condition.startTime,jdbcType=TIMESTAMP} and  COLLECT_TIME &lt; #{condition.endTime,jdbcType=TIMESTAMP}
+			 
+		 
+    <if test="condition.startParttion != condition.endParttion">
+				UNION ALL
+		SELECT 
+				INSTANCE_ID as resourceInstanceID, 
+				'${condition.metricID}' as metricId,
+				TIMELINE_ID	as timelineId,
+			  	PROFILE_ID	as profileId, 
+				CONCAT(METRIC_DATA,'') as metricData,
+				COLLECT_TIME  as collectTime
+		FROM STM_M_H_${condition.metricID.toUpperCase()} PARTITION(P${condition.endParttion})
+		WHERE 
+			INSTANCE_ID=#{condition.instanceID} and COLLECT_TIME &gt; #{condition.startTime,jdbcType=TIMESTAMP} and  COLLECT_TIME &lt; #{condition.endTime,jdbcType=TIMESTAMP}
+			</if>
+			) a ORDER BY collectTime ASC
+	
+  </select>
+	
+	
+	 
+  <select id="countHistory" parameterType="Map" resultType="com.mainsteam.stm.common.metric.obj.MetricSummaryData">
+		SELECT 
+			INSTANCE_ID as instanceId, 
+			'${metricID}' as metricId,
+			avg(METRIC_DATA) as metricData,
+			max(METRIC_DATA) as maxMetricData,
+			min(METRIC_DATA) as minMetricData,
+			#{startTime} as startTime,
+			#{endTime} as endTime
+		FROM ${tableName} 
+		WHERE 
+			METRIC_DATA is not NULL
+			AND COLLECT_TIME &gt; #{startTime} AND COLLECT_TIME &lt; #{endTime}
+			GROUP BY(INSTANCE_ID)
+	</select>
+	
+	 
+  <sql id="sql_findTop">
+		SELECT 
+			INSTANCE_ID as resourceInstanceID, 
+			'${metricID}' as metricId,
+			METRIC_DATA as metricData,
+			COLLECT_TIME as collectTime
+		FROM  ${tableName}
+		WHERE 
+		 INSTANCE_ID IN
+		 
+    <foreach item="item" index="index" collection="instanceIDes" open="(" close=")" separator=",">
+			#{item}
+      <if test="index%900&gt;898">) OR INSTANCE_ID IN ('-1'</if>
+		
+    </foreach>
+		ORDER BY METRIC_DATA ${order} 
+	
+  </sql>
+	 
+  <select id="findTop" parameterType="Map" resultType="com.mainsteam.stm.common.metric.obj.MetricDataPO" databaseId="mysql">
+		 
+		 
+    <include refid="sql_findTop"/>
+		LIMIT 0,#{top}
+	
+	
+  </select>
+	 
+  <select id="findTop" parameterType="Map" resultType="com.mainsteam.stm.common.metric.obj.MetricDataPO" databaseId="oracle">
+		SELECT A.* FROM (
+			 
+		 
+    <include refid="sql_findTop"/>
+			NULLS LAST
+		) A WHERE ROWNUM &lt;= #{top} 		
+	
+	
+  </select>
+	 
+  <select id="findTop" parameterType="Map" resultType="com.mainsteam.stm.common.metric.obj.MetricDataPO" databaseId="dm">
+	SELECT A.* FROM (
+
+
+	<include refid="sql_findTop"/>
+	NULLS LAST
+	) A WHERE ROWNUM &lt;= #{top}
+
+
+</select>
+	<select id="findTop" parameterType="Map" resultType="com.mainsteam.stm.common.metric.obj.MetricDataPO" databaseId="kingbase">
+		SELECT A.* FROM (
+
+
+		<include refid="sql_findTop"/>
+		NULLS LAST
+		) A WHERE ROWNUM &lt;= #{top}
+
+
+	</select>
+  <select id="findTop" parameterType="Map" resultType="com.mainsteam.stm.common.metric.obj.MetricDataPO" databaseId="oscar">
+		SELECT A.* FROM (
+			 
+		 
+    <include refid="sql_findTop"/>
+			NULLS LAST
+		) A WHERE ROWNUM &lt;= #{top} 		
+	
+	
+  </select>
+</mapper>

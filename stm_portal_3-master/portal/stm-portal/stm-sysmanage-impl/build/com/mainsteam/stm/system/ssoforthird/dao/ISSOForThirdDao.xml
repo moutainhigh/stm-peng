@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.system.ssoforthird.dao.ISSOForThirdDao">
+	
+	
+	<insert id="saveSSOForThird" parameterType="com.mainsteam.stm.system.ssoforthird.bo.SSOForThirdBo">
+	    insert into STM_SSOFORTHIRD_BASIC(ID,NAME,WSDL_URL,DESCRIBLE,IS_OPEN) values (#{id},#{name}, #{wsdlURL}, #{describle},#{isOpen})
+	</insert>
+	<select id="querySSOForThird" resultType="com.mainsteam.stm.system.ssoforthird.bo.SSOForThirdBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		SELECT 
+			BASIC.ID AS id,
+			BASIC.NAME AS name,
+			BASIC.WSDL_URL AS wsdlURL,
+			BASIC.DESCRIBLE AS describle,
+			BASIC.IS_OPEN AS isOpen
+		FROM STM_SSOFORTHIRD_BASIC BASIC
+		<trim prefix="where" prefixOverrides="and | or">
+			<if test="condition != null">
+				<if test="condition.id != 0">
+					AND BASIC.ID = #{condition.id}
+				</if>
+			</if>
+		</trim>
+	</select>
+	<select id="queryAllSSOForThird" resultType="com.mainsteam.stm.system.ssoforthird.bo.SSOForThirdBo">
+		SELECT 
+			BASIC.ID AS id,
+			BASIC.NAME AS name,
+			BASIC.WSDL_URL AS wsdlURL,
+			BASIC.DESCRIBLE AS describle,
+			BASIC.IS_OPEN AS isOpen
+		FROM STM_SSOFORTHIRD_BASIC BASIC
+	</select>
+	<delete id="batchDel">
+		DELETE FROM STM_SSOFORTHIRD_BASIC WHERE ID = #{id}
+	</delete>
+	<select id="getSSOForThirdById" resultType="com.mainsteam.stm.system.ssoforthird.bo.SSOForThirdBo" parameterType="long">
+		SELECT 
+			SSOFORTHIRD.ID,
+			SSOFORTHIRD.NAME,
+			SSOFORTHIRD.WSDL_URL AS wsdlURL,
+			SSOFORTHIRD.DESCRIBLE AS describle,
+			SSOFORTHIRD.IS_OPEN AS isOpen
+		FROM STM_SSOFORTHIRD_BASIC SSOFORTHIRD
+		WHERE SSOFORTHIRD.ID=#{id}
+	</select>
+	<update id="updateSSOForThird" parameterType="com.mainsteam.stm.system.ssoforthird.bo.SSOForThirdBo">
+		update STM_SSOFORTHIRD_BASIC set
+			NAME = #{name},
+			WSDL_URL = #{wsdlURL},
+			DESCRIBLE = #{describle}
+		where id = #{id}
+	</update>
+	<update id="updateSSOForThirdStartState" parameterType="com.mainsteam.stm.system.ssoforthird.bo.SSOForThirdBo">
+		update STM_SSOFORTHIRD_BASIC set
+			IS_OPEN = #{isOpen}
+		where id = #{id}
+	</update>
+	<select id="countssoWsdlUrl" parameterType="com.mainsteam.stm.system.ssoforthird.bo.SSOForThirdBo" resultType="int">
+		select count(*) from STM_SSOFORTHIRD_BASIC
+		where WSDL_URL = #{wsdlURL}
+		<if test="id != null">
+			and ID != #{id}
+		</if>
+	</select>
+</mapper>

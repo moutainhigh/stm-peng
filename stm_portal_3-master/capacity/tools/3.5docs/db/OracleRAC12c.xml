@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root> <import src="OracleRAC.xml" />
+	<!-- 
+	devicetype:			设备类型名称
+	ismulticoltype:		是否允许采集方式多选
+	majortype:			主要分类（可以理解为设备类型）
+	minortype:			次要分类
+	manufacturer:		厂商
+	devicetype_zh:		设备类型中文描述
+	 -->
+	<devicetypeinfo devicetype="OracleRAC12c" ismulticoltype="true" majortype="database" minortype="oracle" manufacturer="" devicetype_zh="OracleRAC12c数据库">
+		
+		<!-- 用于定位设备为该类设备的多个sysoid标识，如果snmp采集为sysoid，如果其他方式自行定义 -->
+		<devicetypes>
+		</devicetypes>
+		
+		<!-- 该设备类型定义的命令，用于合并命令执行 -->
+		<commands>
+			<!-- coltype:采集方式，comid：命令ID，command：命令 -->
+			
+					
+			<command coltype="JDBC" comid="dbBufferCacheSize" command="select round(sum(bytes)/1024/1024,2) from v$sgastat where name='buffer_cache'"/><!--高速缓冲池 -->
+			<command coltype="JDBC" comid="sharePoolSize" command="select round(current_size/1024/1024,2) from v$sga_dynamic_components where component='shared pool'"/><!--共享池 -->
+			<command coltype="JDBC" comid="sgaSize" command="select round((s1+s2)/1024/1024,2) from (select sum(bytes) s1 from v$sgastat where (not (pool ='shared pool')) or pool is null) a,(select current_size s2 from v$sga_dynamic_components where component='shared pool') b"/><!--SGA -->
+			
+      <command coltype="JDBC" comid="pgaHitRate" command="select decode((a.value+b.value),0,0,round(a.value/(a.value+b.value)*100,2)) from v$pgastat a,v$pgastat b where a.name = 'bytes processed' and b.name = 'extra bytes read/written'"/><!--PGA命中率 -->
+		  
+			<command coltype="JDBC" comid="shareMEMRate" command="select round((1 - bytes/summem)*100,2) fct from v$sgastat a,(select current_size summem from v$sga_dynamic_components where component='shared pool') b where pool='shared pool' and name='free memory'"/><!--共享内存使用率 -->
+			<command coltype="JDBC" comid="redoLogWaitRate" command="select (select value from v$sysstat where statistic#=142)/(select sum(value) from v$sysstat where statistic# in(91,137,140,142)) redowait from dual"/><!--重做日志等待率 -->
+			<command coltype="JDBC" comid="databasesizetotal" command="select round(data1+data2+data3+data4) database_size from (select sum(bytes)/1024/1024 data1 from dba_data_files) a,(select sum(bytes)/1024/1024 data2 from dba_temp_files) b,(select sum(block_size*file_size_blks/1024/1024) data3 from v$controlfile) c,(select sum(bytes*members)/1024/1024 data4 from v$log) d"/><!--数据库大小 -->
+			
+			</commands>
+		<!-- 描述该类设备的所有指标采集,一行对应一个指标 -->
+		<!-- kpiid的命名规范：长度不超过20，命名规范，前两位为模块标识，分别以以下字符打头， N（网络）、H（主机）、D（数据库）、M（中间件）、A（应用）；第二位为数字，由模块内部进行标识定义-->
+		<resources>
+			<!--高速缓冲池 -->
+			<resource kpiid="D1dbBufferCacheSize" coltype="JDBC" value="" valuetype="Integer" unit="MB">
+				<collects>
+					<collect exeorder="10" comid="dbBufferCacheSize" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1dbBufferCacheSize" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="60" storefactor="0"/>
+				
+			</resource>
+			
+			<!--共享池 -->
+			<resource kpiid="D1sharePoolSize" coltype="JDBC" value="" valuetype="Float" unit="MB">
+				<collects>
+					<collect exeorder="10" comid="sharePoolSize" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1sharePoolSize" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="60" storefactor="0"/>
+				
+			</resource>
+					<!--SGA -->
+			<resource kpiid="D1sgaSize" coltype="JDBC" value="" valuetype="Float" unit="MB">
+				<collects>
+					<collect exeorder="10" comid="sgaSize" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1sgaSize" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="60" storefactor="0"/>
+				
+			</resource>
+			
+				<!--PGA命中率 -->
+			<resource kpiid="D1pgaHitRate" coltype="JDBC" value="" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="pgaHitRate" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1pgaHitRate" field="value" fieldtype="" willalert="y"
+					alertexp1="${value}>95%" alertdesc1="PGA命中率恢复正常，当前值为${value}%。" alertexp2="" alertdesc2="" alertexp3="${value}&lt;=95%"
+					alertdesc3="PGA命中率小于等于${trigervalue1}，当前值为${value}%。" alertexp4="${value}&lt;=90%" alertdesc4="PGA命中率小于等于${trigervalue1}，当前值为${value}%。" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="5" storefactor="1"/>
+				
+			</resource>
+		
+		<!--共享内存使用率 -->
+			<resource kpiid="D1shareMEMRate" coltype="JDBC" value="" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="shareMEMRate" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1shareMEMRate" field="value" fieldtype="" willalert="y"
+					alertexp1="${value}&lt;60" alertdesc1="共享内存使用率恢复正常，当前值为${value}%。" alertexp2="" alertdesc2="" alertexp3="${value}>=60%"
+					alertdesc3="共享内存使用率大于等于${trigervalue1}，当前值为${value}%。" alertexp4="${value}>=80%" alertdesc4="共享内存使用率大于等于${trigervalue1}，当前值为${value}%。" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!--重做日志等待率 -->
+			<resource kpiid="D1redoLogWaitRate" coltype="JDBC" value="$d1*100" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="redoLogWaitRate" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1redoLogWaitRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="5" storefactor="1"/>
+				
+			</resource>
+	
+				<resource kpiid="D1dataBaseSize" coltype="JDBC" value="" valuetype="Float" unit="MB">
+				<collects>
+					<collect exeorder="10" comid="databasesizetotal" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1dataBaseSize" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>
+				
+			</resource>			
+		</resources>
+	</devicetypeinfo>
+</root>

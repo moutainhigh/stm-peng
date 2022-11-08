@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.ct.dao.ResourceMapper">
+
+	<!--  <resultMap type="com.mainsteam.stm.ct.bo.MsResourceMain" id="index">
+		<id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="test_name" jdbcType="VARCHAR" property="test_name"/>
+        <result column="test_way" jdbcType="VARCHAR" property="test_way"/>
+        <result column="resource_type" jdbcType="VARCHAR" property="resource_type"/>
+        <result column="test_ip" jdbcType="VARCHAR" property="test_ip"/>
+        <result column="repeat_time" jdbcType="INTEGER" property="repeat_time"/>
+        <result column="profilelib_id" jdbcType="VARCHAR" property="profilelib_id"/>
+        <result column="probe_id" jdbcType="INTEGER" property="probe_id"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="create_time"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="update_time"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <association property="msWebsiteMetric" javaType="com.mainsteam.stm.ct.bo.MsWebsiteMetric">
+            <id column="id" jdbcType="VARCHAR" property="id"/>
+            <result column="first_char" jdbcType="INTEGER" property="first_char"/>
+            <result column="dom_ready" jdbcType="INTEGER" property="dom_ready"/>
+            <result column="page_ready" jdbcType="INTEGER" property="page_ready"/>
+            <result column="dns_select" jdbcType="INTEGER" property="dns_select"/>
+            <result column="tcp_collect" jdbcType="INTEGER" property="tcp_collect"/>
+            <result column="first_char" jdbcType="VARCHAR" property="first_char"/>
+            <result column="first_char" jdbcType="VARCHAR" property="first_char"/>
+            <result column="first_char" jdbcType="VARCHAR" property="first_char"/>
+            <result column="first_char" jdbcType="VARCHAR" property="first_char"/>
+            <result column="first_char" jdbcType="VARCHAR" property="first_char"/>
+            <result column="first_char" jdbcType="VARCHAR" property="first_char"/>
+            <result column="first_char" jdbcType="VARCHAR" property="first_char"/>
+        </association>
+        <association property="diagnosisResult" javaType="com.itvm.pojo.DiagnosisResult">
+            <id column="id" jdbcType="INTEGER" property="id"/>
+            <result column="alarm_rank" jdbcType="INTEGER" property="alarmRank"/>
+            <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        </association>
+        <association property="deviceGeo" javaType="com.itvm.pojo.DeviceGeo">
+            <id column="id" jdbcType="INTEGER" property="id"/>
+            <result column="longitude" jdbcType="VARCHAR" property="longitude"/>
+            <result column="latitude" jdbcType="VARCHAR" property="latitude"/>
+            <result column="area" jdbcType="VARCHAR" property="area"/>
+        </association>
+	
+	</resultMap>-->
+    <sql id="whereIfSql">
+        <if test="condition.test_name != null and condition.test_name != ''">
+            AND test_name like CONCAT('%',#{condition.test_name},'%')
+        </if>
+        <if test="condition.test_way != null and condition.test_way != ''">
+            AND test_way = #{condition.test_way}
+        </if>
+        <if test="condition.resource_type != null and condition.resource_type != ''">
+            AND resource_type = #{condition.resource_type}
+        </if>
+        <if test="condition.test_ip != null and condition.test_ip != ''">
+            AND test_ip like CONCAT('%',#{condition.test_ip},'%')
+        </if>
+        <if test="condition.profilelib_id != null and condition.profilelib_id != ''">
+            AND profilelib_id = #{condition.profilelib_id}
+        </if>
+        <if test="condition.probe_id != null and condition.probe_id != ''">
+            AND probe_id = #{condition.probe_id}
+        </if>
+        <if test="condition.status != null">
+        	and status=#{condition.status}
+        </if>
+    </sql>
+
+    <select id="getResourceList" resultType="com.mainsteam.stm.ct.bo.MsResourceMain">
+    <!--  SELECT
+            r.id,r.test_name,r.test_way,r.resource_type,r.test_ip,r.repeat_time,r.profilelib_id,r.probe_id,r.`status`,r.success_count,r.fail_count,w.*
+        FROM
+            ms_resource_main r
+            <if test="condition.test_way != null and condition.test_way != ''">
+            	<if test="condition.test_way == 'web'">
+            		left join ms_website_metric w on r.id=w.resource_id
+            	</if>
+            	<if test="condition.test_way == 'ping'">
+            		left join ms_ping_metric w on r.id=w.resource_id
+            	</if>
+       		</if>
+            
+						
+        WHERE
+            1 = 1 
+            <if test="condition.test_way != null and condition.test_way != ''">
+            	and w.create_time= (select MAX(create_time) from ms_website_metric w where w.resource_id=r.id );
+			</if>	
+			<if test="condition.test_name != null and condition.test_name != ''">
+            AND test_name like CONCAT('%',#{condition.test_name},'%')
+        </if>
+        <if test="condition.test_way != null and condition.test_way != ''">
+            AND r.test_way = #{condition.test_way}
+        </if>
+        <if test="condition.resource_type != null and condition.resource_type != ''">
+            AND r.resource_type = #{condition.resource_type}
+        </if>
+        <if test="condition.test_ip != null and condition.test_ip != ''">
+            AND r.test_ip like CONCAT('%',#{condition.test_ip},'%')
+        </if>
+        <if test="condition.profilelib_id != null and condition.profilelib_id != ''">
+            AND r.profilelib_id = #{condition.profilelib_id}
+        </if>
+        <if test="condition.probe_id != null and condition.probe_id != ''">
+            AND r.probe_id = #{condition.probe_id}
+        </if>
+        <if test="condition.status != null">
+        	and r.status=#{condition.status}
+        </if>-->
+        SELECT
+            *
+        FROM
+            ms_resource_main
+        WHERE
+            1 = 1
+            <include refid="whereIfSql"/>
+        ORDER BY
+            id ASC
+    </select>
+
+    <select id="getFullResource"  resultType="com.mainsteam.stm.ct.bo.MsResourceMain">
+        SELECT
+            *
+        FROM
+            ms_resource_main
+        WHERE
+            1 = 1
+        <if test="test_name != null and test_name != ''">
+            AND test_name like CONCAT('%',#{test_name},'%')
+        </if>
+        <if test="test_way != null and test_way != ''">
+            AND test_way = #{test_way}
+        </if>
+        <if test="resource_type != null and resource_type != ''">
+            AND resource_type = #{resource_type}
+        </if>
+        <if test="test_ip != null and test_ip != ''">
+            AND test_ip like CONCAT('%',#{test_ip},'%')
+        </if>
+        <if test="profilelib_id != null and profilelib_id != ''">
+            AND profilelib_id = #{profilelib_id}
+        </if>
+        <if test="probe_id != null and probe_id != ''">
+            AND probe_id = #{probe_id}
+        </if>
+        <if test="status != null">
+        	and status=#{status}
+        </if>
+    </select>
+
+    <select id="getResourceIdList"  resultType="java.lang.String">
+        SELECT id FROM ms_resource_main WHERE 1 = 1
+        <if test="test_way != null and test_way != ''">
+            AND test_way = #{test_way}
+        </if>
+        order by create_time desc
+    </select>
+    <select id="getResourceIdAndTestName" parameterType="java.lang.String" resultType="com.mainsteam.stm.ct.bo.MsResourceMain">
+    	SELECT id,test_name FROM ms_resource_main WHERE 1 = 1
+        <if test="testWay != null and testWay != ''">
+            AND test_way = #{testWay}
+        </if>
+        order by create_time desc
+    </select>
+    <select id="getOne" parameterType="java.lang.String" resultType="com.mainsteam.stm.ct.bo.MsResourceMain">
+    	select * from ms_resource_main WHERE id = #{id}
+    </select>
+    <insert id="insert" parameterType="com.mainsteam.stm.ct.bo.MsResourceMain">
+    	INSERT INTO `ms_resource_main` 
+    	(`id`, `test_name`, `test_way`, `resource_type`, `test_ip`, `repeat_time`, `profilelib_id`, `probe_id`, `create_time`, `update_time`) 
+    	VALUES 
+    	(#{id}, #{test_name}, #{test_way}, #{resource_type},#{test_ip}, #{repeat_time}, #{profilelib_id}, #{probe_id},#{create_time},#{update_time});
+    	
+    </insert>
+    <update id="update" parameterType="com.mainsteam.stm.ct.bo.MsResourceMain">
+    	UPDATE `ms_resource_main` SET 
+    	`test_name`=#{test_name}, 
+    	`test_way`=#{test_way}, 
+    	`resource_type`=#{resource_type}, 
+    	`test_ip`=#{test_ip}, 
+    	`repeat_time`=#{repeat_time}, 
+    	`profilelib_id`=#{profilelib_id}, 
+    	`probe_id`=#{probe_id}, 
+    	`update_time`=#{update_time},
+    	`status`=#{status} 
+    	WHERE (`id`=#{id});
+    </update>
+    <update id="success" parameterType="java.lang.String">
+    	UPDATE `ms_resource_main` SET 
+    	`success_count` =`success_count`+1
+    	WHERE (`id`=#{id});
+    </update>
+    <update id="fail" parameterType="java.lang.String">
+    	UPDATE `ms_resource_main` SET 
+    	`fail_count` =`fail_count`+1
+    	WHERE (`id`=#{id});
+    </update>
+    <delete id="del" parameterType="java.lang.String">
+    	delete from ms_resource_main where id=#{id}
+    </delete>
+</mapper>

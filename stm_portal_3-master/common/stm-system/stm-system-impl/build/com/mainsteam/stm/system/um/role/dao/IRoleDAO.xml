@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.system.um.role.dao.IRoleDAO">
+	 
+  <resultMap type="com.mainsteam.stm.system.um.role.bo.Role" id="roleMap">
+		 
+    <id property="id" column="ID"/>
+		 
+    <id property="name" column="NAME"/>
+		 
+    <id property="status" column="STATUS"/>
+		 
+    <id property="creatorId" column="CREATOR_ID"/>
+		 
+    <id property="createdTime" column="CREATED_TIME"/>
+		 
+    <id property="description" column="DESCRIPTION"/>
+	
+  </resultMap>
+	 
+  <select id="pageSelect" resultType="com.mainsteam.stm.system.um.role.bo.Role" resultMap="roleMap" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		select ID,NAME,STATUS,CREATOR_ID,CREATED_TIME,DESCRIPTION from STM_SYS_ROLE
+	</select>
+	 
+  <insert id="insert" parameterType="com.mainsteam.stm.system.um.role.bo.Role">
+	    insert into STM_SYS_ROLE(ID,NAME,STATUS,CREATOR_ID,CREATED_TIME,DESCRIPTION) values (#{id},#{name}, #{status}, #{creatorId}, #{createdTime}, #{description})
+	</insert>
+	 
+  <update id="batchUpdate">
+            update STM_SYS_ROLE
+             
+		 
+    <set>
+				 
+			 
+      <if test="status != null"> STATUS =#{status},</if>
+            
+		
+    </set>
+            where ID = #{id}
+	
+	
+  </update>
+	 
+  <select id="get" resultType="com.mainsteam.stm.system.um.role.bo.Role" resultMap="roleMap" parameterType="long">
+		select ID,NAME,STATUS,CREATOR_ID,CREATED_TIME,DESCRIPTION from STM_SYS_ROLE where ID=#{id}
+	</select>
+	 
+  <update id="update" parameterType="com.mainsteam.stm.system.um.role.bo.Role">
+		update STM_SYS_ROLE
+		 
+		 
+    <set>
+			 
+			 
+      <if test="name != null"> NAME = #{name}, </if>
+			DESCRIPTION = #{description} ,
+		
+		
+    </set>
+		where ID=#{id}
+	
+	
+  </update>
+	 
+  <select id="count" resultType="java.lang.Integer" parameterType="com.mainsteam.stm.system.um.role.bo.Role">
+		select count(ID) from STM_SYS_ROLE
+		 
+		 
+    <trim prefix="where" prefixOverrides="and |or ">
+	        AND NAME=#{name} 
+             
+			 
+      <if test="id != null">AND ID != #{id} </if>
+		
+		
+    </trim>
+	
+	
+  </select>
+	 
+  <resultMap type="com.mainsteam.stm.system.um.role.bo.RoleRightRel" id="roleRightRefMap">
+		 
+    <id property="id" column="ID"/>
+		 
+    <id property="roleId" column="ROLE_ID"/>
+		 
+    <id property="rightId" column="RIGHT_ID"/>
+	
+  </resultMap>
+	 
+  <select id="getRightByRoleId" resultType="com.mainsteam.stm.system.um.role.bo.RoleRight">
+		select 
+		REL.ROLE_ID as roleId,
+		OCRIGHT.ID as rightId,
+		OCRIGHT.PID as pId,
+		OCRIGHT.NAME as rightName
+		 from STM_SYS_RIGHT OCRIGHT
+		 LEFT JOIN (select RIGHT_ID, ROLE_ID from STM_SYS_ROLE_RIGHT_REL where ROLE_ID=#{roleId}) REL
+		  ON REL.RIGHT_ID=OCRIGHT.ID
+		  where OCRIGHT.IS_ROLE_USED=1 and OCRIGHT.STATUS=1 and OCRIGHT.PID &lt;= 0 
+		  order by OCRIGHT.ID
+	</select>
+	 
+  <select id="getRightByRoleIds" resultType="com.mainsteam.stm.system.um.role.bo.RoleRight">
+		select 
+		REL.ROLE_ID as roleId,
+		OCRIGHT.ID as rightId,
+		OCRIGHT.NAME as rightName
+		 from STM_SYS_RIGHT OCRIGHT
+		 LEFT JOIN (select RIGHT_ID, ROLE_ID from STM_SYS_ROLE_RIGHT_REL where ROLE_ID in
+		  
+		 
+    <foreach item="roleId" index="index" collection="array" open="(" separator="," close=")">
+ 			#{roleId}
+		 </foreach>
+		 ) REL
+		  ON REL.RIGHT_ID=OCRIGHT.ID
+		  where OCRIGHT.IS_ROLE_USED=1 and OCRIGHT.STATUS=1 and OCRIGHT.PID &lt;= 0 
+		  order by OCRIGHT.ID
+	
+	
+  </select>
+	 
+  <insert id="batchInsertRoleRightRel" parameterType="com.mainsteam.stm.system.um.role.bo.RoleRightRel">
+	    insert into STM_SYS_ROLE_RIGHT_REL(ID,ROLE_ID,RIGHT_ID) values (#{id},#{roleId}, #{rightId})
+	</insert>
+	 
+  <select id="getRoles" parameterType="long" resultType="com.mainsteam.stm.system.um.role.bo.Role">
+		SELECT id,name FROM 
+			(SELECT rel.roleId id,role.name name FROM
+				(SELECT DISTINCT ROLE_ID roleId FROM STM_SYS_USER_DOMAIN_ROLE_REL
+				WHERE USER_ID=#{userId}) rel
+			LEFT JOIN STM_SYS_ROLE role ON rel.roleId=role.ID) res
+	</select>
+	 
+  <delete id="batchDel">
+		DELETE from STM_SYS_ROLE WHERE ID = #{roleId}
+	</delete>
+	 
+  <select id="getRelByRoleId" resultType="java.lang.Integer" parameterType="java.lang.Long">
+		select count(USER_ID) from STM_SYS_USER_DOMAIN_ROLE_REL
+		 
+		 
+    <trim prefix="where" prefixOverrides="and |or ">
+	        and ROLE_ID=#{roleId}
+		</trim>
+	
+	
+  </select>
+	 
+  <delete id="delRoleRightRelByRoleId">
+		DELETE from STM_SYS_ROLE_RIGHT_REL WHERE ROLE_ID = #{roleId}
+	</delete>
+	 
+  <insert id="addRoleRightRels" parameterType="com.mainsteam.stm.system.um.role.bo.RoleRightRel" databaseId="mysql">
+		insert into STM_SYS_ROLE_RIGHT_REL(ROLE_ID, RIGHT_ID) values
+		 
+		 
+    <foreach item="item" index="index" collection="list" open="" separator="," close="">
+ 			(#{item.roleId}, #{item.rightId})
+		</foreach>
+	
+	
+  </insert>
+	 
+  <insert id="addRoleRightRels" parameterType="com.mainsteam.stm.system.um.role.bo.RoleRightRel" databaseId="oracle">
+		insert into STM_SYS_ROLE_RIGHT_REL(ROLE_ID, RIGHT_ID)
+		 
+		 
+    <foreach item="item" index="index" collection="list" open="" separator="UNION ALL" close="">
+ 			(select #{item.roleId}, #{item.rightId} from dual)
+		</foreach>
+	
+	
+  </insert>
+	 
+  <insert id="addRoleRightRels" parameterType="com.mainsteam.stm.system.um.role.bo.RoleRightRel" databaseId="dm">
+		insert into STM_SYS_ROLE_RIGHT_REL(ROLE_ID, RIGHT_ID)
+		 
+		 
+    <foreach item="item" index="index" collection="list" open="" separator="UNION ALL" close="">
+ 			(select #{item.roleId}, #{item.rightId} from dual)
+		</foreach>
+	
+	
+  </insert>
+  <insert id="addRoleRightRels" parameterType="com.mainsteam.stm.system.um.role.bo.RoleRightRel" databaseId="oscar">
+		insert into STM_SYS_ROLE_RIGHT_REL(ROLE_ID, RIGHT_ID)
+		 
+		 
+    <foreach item="item" index="index" collection="list" open="" separator="UNION ALL" close="">
+ 			(select #{item.roleId}, #{item.rightId} from dual)
+		</foreach>
+	
+	
+  </insert>
+	 
+  <select id="queryAllRoles" resultType="com.mainsteam.stm.system.um.role.bo.Role">
+		select ID,NAME,STATUS,CREATOR_ID,CREATED_TIME,DESCRIPTION from STM_SYS_ROLE
+	</select>
+	 
+  <select id="getUserDomainByRoleId" resultType="com.mainsteam.stm.system.um.relation.bo.UserDomain">
+		select 
+		USERT.ID as userId,
+		USERT.NAME as userName,
+		USERT.ACCOUNT as userAccount,
+		USERT.STATUS as userStatus,
+		DOMAIN.NAME as domainName
+		from STM_SYS_USER_DOMAIN_ROLE_REL REL
+		left join STM_SYS_USER USERT on REL.USER_ID=USERT.ID
+		left join STM_SYS_DOMAIN DOMAIN on REL.DOMAIN_ID=DOMAIN.ID
+		where REL.ROLE_ID=#{roleId}
+	</select>
+	 
+	 <!-- dm -->
+  <select id="getUserDomainByRoleId" resultType="com.mainsteam.stm.system.um.relation.bo.UserDomain" databaseId="dm">
+		select 
+		USERT.ID as userId,
+		USERT.NAME as userName,
+		USERT.ACCOUNT as userAccount,
+		USERT.STATUS as userStatus,
+		"DOMAIN".NAME as domainName
+		from STM_SYS_USER_DOMAIN_ROLE_REL REL
+		left join STM_SYS_USER USERT on REL.USER_ID=USERT.ID
+		left join STM_SYS_DOMAIN "DOMAIN" on REL.DOMAIN_ID="DOMAIN".ID
+		where REL.ROLE_ID=#{roleId}
+	</select>
+	 
+  <delete id="delRelationByRoleIds">
+		DELETE from STM_SYS_USER_DOMAIN_ROLE_REL WHERE ROLE_ID in
+		 
+		 
+    <foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+ 			#{item}
+		</foreach>
+	
+	
+  </delete>
+</mapper>

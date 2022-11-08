@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.portal.report.dao.IReportTemplateDirectoryInstanceDao">
+	
+	<insert id="insert" parameterType="com.mainsteam.stm.portal.report.po.ReportTemplateDirectoryInstancePo">
+	    insert into STM_REP_TEMP_DIR_INSTANCE(
+	    		 REP_DIR_INSTANCE_ID
+		    	,REP_TEMP_DIR_ID
+		    	,INSTANCE_ID
+	    	) values (
+	    		#{reportDirectoryInstanceId}
+	    		,#{reportTemplateDirectoryId}
+	    		,#{instanceId}
+			)
+	</insert>
+	
+	<delete id="deleteInstanceRelationByDirectoryId">
+		delete from STM_REP_TEMP_DIR_INSTANCE where  REP_TEMP_DIR_ID = #{reportTemplateDirectoryId}
+	</delete>
+	
+	<delete id="deleteInstanceRelationByInstanceId">
+		delete from STM_REP_TEMP_DIR_INSTANCE where  INSTANCE_ID in
+		 <foreach item="ids" index="index" collection="array" open="(" separator="," close=")">  
+  			#{ids}
+ 		 </foreach> 
+	</delete>
+	
+	<select id="select" resultType="com.mainsteam.stm.portal.report.po.ReportTemplateDirectoryInstancePo" parameterType="com.mainsteam.stm.portal.report.po.ReportTemplateDirectoryInstancePo">
+		select  
+				REP_DIR_INSTANCE_ID as reportDirectoryInstanceId
+				,REP_TEMP_DIR_ID as reportTemplateDirectoryId
+		    	,INSTANCE_ID as instanceId
+			from STM_REP_TEMP_DIR_INSTANCE where REP_TEMP_DIR_ID = #{reportTemplateDirectoryId}
+	</select>
+	
+</mapper>

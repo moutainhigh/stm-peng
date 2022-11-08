@@ -1,0 +1,778 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.portal.inspect.dao.IInspectReportDaoApi">
+	 
+  <!-- mysql -->
+	 
+  <select id="getAllReportList" resultType="com.mainsteam.stm.portal.inspect.bo.InspectReportBasicBo" parameterType="com.mainsteam.stm.portal.inspect.bo.InspectReportConditionBo" databaseId="mysql">
+		SELECT id,
+		DOMAIN AS inspectReportDomain,
+		INSPECTOR AS
+		inspectReportInspector,
+		PRODUCE_TIME_SHOW AS
+		inspectReportProduceTimeShow,
+		MODIFY_TIME_SHOW AS
+		inspectReportModifyTimeShow,
+		MODIFIOR_SHOW AS
+		inspectReportModifiorShow,
+		RESOURCE_NAME AS inspectReportResourceName,
+		BUSINESS_NAME AS inspectReportBusinessName,
+		STATUS AS
+		inspectReportStatus,
+		TASK_CREATOR AS inspectReportTaskCreator,
+		if(SUBMIT_TIME='0000-00-00
+		00:00:00',null,DATE_FORMAT(SUBMIT_TIME,'%Y-%m-%d %H:%i')) AS
+		inspectReportSubmitTime,
+		NAME AS inspectReportName,
+		TASK
+		AS
+		inspectReportPlanName,
+		DATE_FORMAT(PRODUCE_TIME,'%Y-%m-%d %H:%i') AS
+		inspectReportProduceTime,
+		DATE_FORMAT(EDIT_TIME,'%Y-%m-%d %H:%i') AS
+		editTime,
+		INSPECTOR AS editUserName,
+		EDIT AS edit,
+		CREATOR_ID AS
+		creatorId,
+		INSPECTOR_ID AS inspectorId
+		FROM
+		STM_INSPECT_REPORT
+		where 1 = 1
+		 
+    <if test="condition.inspectReportInspector != null and condition.inspectReportInspector != '' ">
+			and INSPECTOR like
+			concat('%',#{condition.inspectReportInspector},'%')
+		</if>
+		 
+    <if test="condition.reportName != null and condition.reportName != ''">
+			and NAME like
+			concat('%',#{condition.reportName},'%')
+		</if>
+		 
+    <if test="condition.inspectReportPlanName != null and condition.inspectReportPlanName != ''">
+			and TASK like
+			concat('%',#{condition.inspectReportPlanName},'%')
+		</if>
+		 
+    <if test="condition.inspectReportProduceStartTime != null and condition.inspectReportProduceStartTime != ''">
+			and PRODUCE_TIME  <![CDATA[ >= ]]>
+			#{condition.inspectReportProduceStartTime}
+		</if>
+		 
+    <if test="condition.inspectReportProduceEndTime != null and condition.inspectReportProduceEndTime != ''">
+			and PRODUCE_TIME  <![CDATA[ <= ]]>
+			#{condition.inspectReportProduceEndTime}
+		</if>
+		 
+    <if test="condition.userId != null and condition.userId != ''">
+			and (CREATOR_ID  <![CDATA[ = ]]>
+			#{condition.userId} OR INSPECTOR_ID  <![CDATA[ = ]]>
+			#{condition.userId})
+		</if>
+		 
+    <if test="condition.inspectReportCreator != null and condition.inspectReportCreator != ''">
+			and TASK_CREATOR like
+			concat('%',#{condition.inspectReportCreator},'%')
+		</if>
+		 
+    <if test="condition.inspectReportDomain != null and condition.inspectReportDomain != ''">
+			and
+			 
+      <foreach collection="condition.inspectReportDomain" item="item" open="(" close=")" index="index">
+				 
+        <if test="index !=0">or</if>
+				DOMAIN like concat('%',#{item},'%')
+			
+      </foreach>
+		
+    </if>
+		 
+    <if test="condition.status != null">
+			and
+			 
+      <foreach collection="condition.status" item="item" open="(" close=")" index="index">
+				 
+        <if test="index !=0">or</if>
+				STATUS = #{item}
+			
+      </foreach>
+		
+    </if>
+		 
+    <if test="condition.authorityUserId != null and condition.authorityUserId != ''">
+			and (
+			INSPECTOR_ID = #{condition.authorityUserId}
+			 
+      <if test="condition.authorityDomainIds != null">
+				or DOMAIN in
+				 
+        <foreach collection="condition.authorityDomainIds" item="item" open="(" close=")" index="index">
+					#{item}
+				</foreach>
+			
+      </if>
+			)
+		
+    </if>
+		order by PRODUCE_TIME  desc
+	
+  </select>
+	
+	 
+  <!-- oracle -->
+	 
+  <select id="getAllReportList" resultType="com.mainsteam.stm.portal.inspect.bo.InspectReportBasicBo" parameterType="com.mainsteam.stm.portal.inspect.bo.InspectReportConditionBo" databaseId="oracle">
+		SELECT id,
+		DOMAIN AS inspectReportDomain,
+		INSPECTOR AS
+		inspectReportInspector,
+		PRODUCE_TIME_SHOW AS
+		inspectReportProduceTimeShow,
+		MODIFY_TIME_SHOW AS
+		inspectReportModifyTimeShow,
+		MODIFIOR_SHOW AS
+		inspectReportModifiorShow,
+		RESOURCE_NAME AS inspectReportResourceName,
+		BUSINESS_NAME AS inspectReportBusinessName,
+		STATUS AS
+		inspectReportStatus,
+		TASK_CREATOR AS inspectReportTaskCreator,
+		decode(SUBMIT_TIME,'0000-00-00 00:00:00',null,to_char(SUBMIT_TIME,'yyyy-MM-dd HH24:mi')) AS inspectReportSubmitTime,
+		NAME AS inspectReportName,
+		TASK
+		AS inspectReportPlanName,
+		to_char(PRODUCE_TIME,'yyyy-MM-dd HH24:mi') AS inspectReportProduceTime,
+		to_char(EDIT_TIME,'yyyy-MM-dd HH24:mi') AS editTime,
+		INSPECTOR AS editUserName,
+		EDIT AS edit,
+		CREATOR_ID AS creatorId,
+		INSPECTOR_ID AS inspectorId
+		FROM
+		STM_INSPECT_REPORT
+		where (INSPECTOR_ID = ${condition.inspectorId} or CREATOR_ID = ${condition.inspectorId})
+		 
+    <if test="condition.inspectReportInspector != null and condition.inspectReportInspector != '' ">
+			and INSPECTOR like '%'||#{condition.inspectReportInspector}||'%'
+		</if>
+		 
+    <if test="condition.reportName != null and condition.reportName != ''">
+			and NAME like '%'||#{condition.reportName}||'%'
+		</if>
+		 
+    <if test="condition.inspectReportPlanName != null and condition.inspectReportPlanName != ''">
+			and TASK like '%'||#{condition.inspectReportPlanName}||'%'
+		</if>
+		 
+    <if test="condition.inspectReportProduceStartTime != null and condition.inspectReportProduceStartTime != ''">
+			and PRODUCE_TIME  <![CDATA[ >= ]]>
+			to_date(#{condition.inspectReportProduceStartTime},'yyyy-mm-dd hh24:mi:ss')
+		</if>
+		 
+    <if test="condition.inspectReportProduceEndTime != null and condition.inspectReportProduceEndTime != ''">
+			and PRODUCE_TIME  <![CDATA[ <= ]]>
+			to_date(#{condition.inspectReportProduceEndTime}, 'yyyy-mm-dd hh24:mi:ss')
+		</if>
+		 
+    <if test="condition.userId != null and condition.userId != ''">
+			and (CREATOR_ID  <![CDATA[ = ]]>
+			#{condition.userId} OR INSPECTOR_ID  <![CDATA[ = ]]>
+			#{condition.userId})
+		</if>
+		 
+    <if test="condition.inspectReportCreator != null and condition.inspectReportCreator != ''">
+			and TASK_CREATOR like '%'||#{condition.inspectReportCreator}||'%'
+		</if>
+		 
+    <if test="condition.inspectReportDomain != null and condition.inspectReportDomain != ''">
+			and
+			 
+      <foreach collection="condition.inspectReportDomain" item="item" open="(" close=")" index="index">
+				 
+        <if test="index !=0">or</if>
+				DOMAIN like '%'||#{item}||'%'
+			
+      </foreach>
+		
+    </if>
+		 
+    <if test="condition.status != null">
+			and
+			 
+      <foreach collection="condition.status" item="item" open="(" close=")" index="index">
+				 
+        <if test="index !=0">or</if>
+				STATUS = #{item}
+			
+      </foreach>
+		
+    </if>
+		 
+    <if test="condition.authorityUserId != null and condition.authorityUserId != ''">
+			and (
+			INSPECTOR_ID = #{condition.authorityUserId}
+			 
+      <if test="condition.authorityDomainIds != null">
+				or DOMAIN in
+				 
+        <foreach collection="condition.authorityDomainIds" item="item" open="(" close=")" index="index">
+					#{item}
+				</foreach>
+			
+      </if>
+			)
+		
+    </if>
+		order by PRODUCE_TIME  desc
+	
+  </select>
+	 
+  <!-- oscar -->
+	 
+  <select id="getAllReportList" resultType="com.mainsteam.stm.portal.inspect.bo.InspectReportBasicBo" parameterType="com.mainsteam.stm.portal.inspect.bo.InspectReportConditionBo" databaseId="dm">
+		SELECT id,
+		"DOMAIN" AS inspectReportDomain,
+		INSPECTOR AS
+		inspectReportInspector,
+		PRODUCE_TIME_SHOW AS
+		inspectReportProduceTimeShow,
+		MODIFY_TIME_SHOW AS
+		inspectReportModifyTimeShow,
+		MODIFIOR_SHOW AS
+		inspectReportModifiorShow,
+		RESOURCE_NAME AS inspectReportResourceName,
+		BUSINESS_NAME AS inspectReportBusinessName,
+		STATUS AS
+		inspectReportStatus,
+		TASK_CREATOR AS inspectReportTaskCreator,
+		SUBMIT_TIME AS inspectReportSubmitTime,
+		NAME AS inspectReportName,
+		TASK
+		AS inspectReportPlanName,
+		PRODUCE_TIME AS inspectReportProduceTime,
+		EDIT_TIME AS editTime,
+		INSPECTOR AS editUserName,
+		EDIT AS edit,
+		CREATOR_ID AS creatorId,
+		INSPECTOR_ID AS inspectorId
+		FROM
+		STM_INSPECT_REPORT
+		where (INSPECTOR_ID = ${condition.inspectorId} or CREATOR_ID = ${condition.inspectorId})
+		 
+    <if test="condition.inspectReportInspector != null and condition.inspectReportInspector != '' ">
+			and INSPECTOR like '%'||#{condition.inspectReportInspector}||'%'
+		</if>
+		 
+    <if test="condition.reportName != null and condition.reportName != ''">
+			and NAME like '%'||#{condition.reportName}||'%'
+		</if>
+		 
+    <if test="condition.inspectReportPlanName != null and condition.inspectReportPlanName != ''">
+			and TASK like '%'||#{condition.inspectReportPlanName}||'%'
+		</if>
+		 
+    <if test="condition.inspectReportProduceStartTime != null and condition.inspectReportProduceStartTime != ''">
+			and PRODUCE_TIME  <![CDATA[ >= ]]>
+			to_date(#{condition.inspectReportProduceStartTime},'yyyy-mm-dd hh24:mi:ss')
+		</if>
+		 
+    <if test="condition.inspectReportProduceEndTime != null and condition.inspectReportProduceEndTime != ''">
+			and PRODUCE_TIME  <![CDATA[ <= ]]>
+			to_date(#{condition.inspectReportProduceEndTime}, 'yyyy-mm-dd hh24:mi:ss')
+		</if>
+		 
+    <if test="condition.userId != null and condition.userId != ''">
+			and (CREATOR_ID  <![CDATA[ = ]]>
+			#{condition.userId} OR INSPECTOR_ID  <![CDATA[ = ]]>
+			#{condition.userId})
+		</if>
+		 
+    <if test="condition.inspectReportCreator != null and condition.inspectReportCreator != ''">
+			and TASK_CREATOR like '%'||#{condition.inspectReportCreator}||'%'
+		</if>
+		 
+    <if test="condition.inspectReportDomain != null and condition.inspectReportDomain != ''">
+			and
+			 
+      <foreach collection="condition.inspectReportDomain" item="item" open="(" close=")" index="index">
+				 
+        <if test="index !=0">or</if>
+				"DOMAIN" like '%'||#{item}||'%'
+			
+      </foreach>
+		
+    </if>
+		 
+    <if test="condition.status != null">
+			and
+			 
+      <foreach collection="condition.status" item="item" open="(" close=")" index="index">
+				 
+        <if test="index !=0">or</if>
+				STATUS = #{item}
+			
+      </foreach>
+		
+    </if>
+		 
+    <if test="condition.authorityUserId != null and condition.authorityUserId != ''">
+			and (
+			INSPECTOR_ID = #{condition.authorityUserId}
+			 
+      <if test="condition.authorityDomainIds != null">
+				or "DOMAIN" in
+				 
+        <foreach collection="condition.authorityDomainIds" item="item" open="(" close=")" index="index">
+					#{item}
+				</foreach>
+			
+      </if>
+			)
+		
+    </if>
+		order by PRODUCE_TIME  desc
+	
+  </select>
+  <select id="getAllReportList" resultType="com.mainsteam.stm.portal.inspect.bo.InspectReportBasicBo" parameterType="com.mainsteam.stm.portal.inspect.bo.InspectReportConditionBo" databaseId="oscar">
+		SELECT id,
+		DOMAIN AS inspectReportDomain,
+		INSPECTOR AS
+		inspectReportInspector,
+		PRODUCE_TIME_SHOW AS
+		inspectReportProduceTimeShow,
+		MODIFY_TIME_SHOW AS
+		inspectReportModifyTimeShow,
+		MODIFIOR_SHOW AS
+		inspectReportModifiorShow,
+		RESOURCE_NAME AS inspectReportResourceName,
+		BUSINESS_NAME AS inspectReportBusinessName,
+		STATUS AS
+		inspectReportStatus,
+		TASK_CREATOR AS inspectReportTaskCreator,
+		to_char(SUBMIT_TIME,'yyyy-MM-dd HH24:mi')  AS inspectReportSubmitTime,
+		NAME AS inspectReportName,
+		TASK
+		AS inspectReportPlanName,
+		to_char(PRODUCE_TIME,'yyyy-MM-dd HH24:mi') AS inspectReportProduceTime,
+		to_char(EDIT_TIME,'yyyy-MM-dd HH24:mi') AS editTime,
+		INSPECTOR AS editUserName,
+		EDIT AS edit,
+		CREATOR_ID AS creatorId,
+		INSPECTOR_ID AS inspectorId
+		FROM
+		STM_INSPECT_REPORT
+		where (INSPECTOR_ID = ${condition.inspectorId} or CREATOR_ID = ${condition.inspectorId})
+		 
+    <if test="condition.inspectReportInspector != null and condition.inspectReportInspector != '' ">
+			and INSPECTOR like '%'||#{condition.inspectReportInspector}||'%'
+		</if>
+		 
+    <if test="condition.reportName != null and condition.reportName != ''">
+			and NAME like '%'||#{condition.reportName}||'%'
+		</if>
+		 
+    <if test="condition.inspectReportPlanName != null and condition.inspectReportPlanName != ''">
+			and TASK like '%'||#{condition.inspectReportPlanName}||'%'
+		</if>
+		 
+    <if test="condition.inspectReportProduceStartTime != null and condition.inspectReportProduceStartTime != ''">
+			and PRODUCE_TIME  <![CDATA[ >= ]]>
+			to_date(#{condition.inspectReportProduceStartTime},'yyyy-mm-dd hh24:mi:ss')
+		</if>
+		 
+    <if test="condition.inspectReportProduceEndTime != null and condition.inspectReportProduceEndTime != ''">
+			and PRODUCE_TIME  <![CDATA[ <= ]]>
+			to_date(#{condition.inspectReportProduceEndTime}, 'yyyy-mm-dd hh24:mi:ss')
+		</if>
+		 
+    <if test="condition.userId != null and condition.userId != ''">
+			and (CREATOR_ID  <![CDATA[ = ]]>
+			#{condition.userId} OR INSPECTOR_ID  <![CDATA[ = ]]>
+			#{condition.userId})
+		</if>
+		 
+    <if test="condition.inspectReportCreator != null and condition.inspectReportCreator != ''">
+			and TASK_CREATOR like '%'||#{condition.inspectReportCreator}||'%'
+		</if>
+		 
+    <if test="condition.inspectReportDomain != null and condition.inspectReportDomain != ''">
+			and
+			 
+      <foreach collection="condition.inspectReportDomain" item="item" open="(" close=")" index="index">
+				 
+        <if test="index !=0">or</if>
+				DOMAIN like '%'||#{item}||'%'
+			
+      </foreach>
+		
+    </if>
+		 
+    <if test="condition.status != null">
+			and
+			 
+      <foreach collection="condition.status" item="item" open="(" close=")" index="index">
+				 
+        <if test="index !=0">or</if>
+				STATUS = #{item}
+			
+      </foreach>
+		
+    </if>
+		 
+    <if test="condition.authorityUserId != null and condition.authorityUserId != ''">
+			and (
+			INSPECTOR_ID = #{condition.authorityUserId}
+			 
+      <if test="condition.authorityDomainIds != null">
+				or DOMAIN in
+				 
+        <foreach collection="condition.authorityDomainIds" item="item" open="(" close=")" index="index">
+					#{item}
+				</foreach>
+			
+      </if>
+			)
+		
+    </if>
+		order by PRODUCE_TIME  desc
+	
+  </select>
+	 
+  <!-- mysql -->
+	 
+  <update id="updateReportStatus" databaseId="mysql">
+		update STM_INSPECT_REPORT set STATUS = 1 ,SUBMIT_TIME
+		= now()
+		where
+		ID
+		=
+		#{id}
+	</update>
+	 
+  <!-- oracle -->
+	 
+  <update id="updateReportStatus" databaseId="oracle">
+		update STM_INSPECT_REPORT set STATUS = 1 ,SUBMIT_TIME = SYSDATE
+		where ID = #{id}
+	</update>
+	 
+  <!-- oscar -->
+	 
+  <update id="updateReportStatus" databaseId="dm">
+		update STM_INSPECT_REPORT set STATUS = 1 ,SUBMIT_TIME = SYSDATE
+		where ID = #{id}
+	</update>
+  <update id="updateReportStatus" databaseId="oscar">
+		update STM_INSPECT_REPORT set STATUS = 1 ,SUBMIT_TIME = SYSDATE
+		where ID = #{id}
+	</update>
+	 
+  <!-- mysql -->
+	 
+  <select id="loadReportBasic" parameterType="HashMap" resultType="com.mainsteam.stm.portal.inspect.bo.InspectReportBasicBo" databaseId="mysql">
+		SELECT
+		ID AS id,
+		DOMAIN AS inspectReportDomain,
+		INSPECTOR AS
+		inspectReportInspector,
+		PRODUCE_TIME_SHOW AS
+		inspectReportProduceTimeShow,
+		DATE_FORMAT(PRODUCE_TIME,'%Y-%m-%d
+		%H:%i') AS inspectReportProduceTime,
+		MODIFY_TIME_SHOW AS
+		inspectReportModifyTimeShow,
+		DATE_FORMAT(EDIT_TIME,'%Y-%m-%d %H:%i') AS
+		editTime,
+		MODIFIOR_SHOW AS inspectReportModifiorShow,
+		INSPECTOR AS
+		inspectReportLastEditUser,
+		RESOURCE_NAME AS
+		inspectReportResourceName,
+		BUSINESS_NAME AS inspectReportBusinessName,
+		STATUS AS
+		inspectReportStatus,
+		TASK_CREATOR AS
+		inspectReportTaskCreator,
+		if(SUBMIT_TIME='0000-00-00
+		00:00:00',null,DATE_FORMAT(SUBMIT_TIME,'%Y-%m-%d %H:%i')) AS
+		inspectReportSubmitTime,
+		NAME
+		AS inspectReportName,
+		TASK AS
+		inspectReportPlanName,
+		EDIT AS
+		edit,
+		INSPECTOR AS editUserName
+		FROM
+		STM_INSPECT_REPORT
+		where
+		ID=#{id}
+	</select>
+	
+	 
+  <!-- oracle -->
+	 
+  <select id="loadReportBasic" parameterType="HashMap" resultType="com.mainsteam.stm.portal.inspect.bo.InspectReportBasicBo" databaseId="oracle">
+		SELECT
+		ID AS id,
+		DOMAIN AS inspectReportDomain,
+		INSPECTOR AS
+		inspectReportInspector,
+		PRODUCE_TIME_SHOW AS
+		inspectReportProduceTimeShow,
+		to_char(PRODUCE_TIME,'yyyy-MM-dd HH24:mi') AS inspectReportProduceTime,
+		MODIFY_TIME_SHOW AS inspectReportModifyTimeShow,
+		to_char(EDIT_TIME,'yyyy-MM-dd HH24:mi') AS
+		editTime,
+		MODIFIOR_SHOW AS inspectReportModifiorShow,
+		INSPECTOR AS inspectReportLastEditUser,
+		RESOURCE_NAME AS
+		inspectReportResourceName,
+		BUSINESS_NAME AS inspectReportBusinessName,
+		STATUS AS inspectReportStatus,
+		TASK_CREATOR AS
+		inspectReportTaskCreator,
+		decode(SUBMIT_TIME,'0000-00-00 00:00:00',null,to_char(SUBMIT_TIME,'yyyy-MM-dd HH24:mi')) AS inspectReportSubmitTime,
+		NAME
+		AS inspectReportName,
+		TASK AS inspectReportPlanName,
+		EDIT AS
+		edit,
+		INSPECTOR AS editUserName
+		FROM STM_INSPECT_REPORT
+		where
+		ID=#{id}
+	</select>
+	 
+  <!-- oscar -->
+	 
+  <select id="loadReportBasic" parameterType="HashMap" resultType="com.mainsteam.stm.portal.inspect.bo.InspectReportBasicBo" databaseId="dm">
+		SELECT
+		ID AS id,
+		"DOMAIN" AS inspectReportDomain,
+		INSPECTOR AS
+		inspectReportInspector,
+		PRODUCE_TIME_SHOW AS
+		inspectReportProduceTimeShow,
+		PRODUCE_TIME AS inspectReportProduceTime,
+		MODIFY_TIME_SHOW AS inspectReportModifyTimeShow,
+		EDIT_TIME AS
+		editTime,
+		MODIFIOR_SHOW AS inspectReportModifiorShow,
+		INSPECTOR AS inspectReportLastEditUser,
+		RESOURCE_NAME AS
+		inspectReportResourceName,
+		BUSINESS_NAME AS inspectReportBusinessName,
+		STATUS AS inspectReportStatus,
+		TASK_CREATOR AS
+		inspectReportTaskCreator,
+		SUBMIT_TIME AS inspectReportSubmitTime,
+		NAME
+		AS inspectReportName,
+		TASK AS inspectReportPlanName,
+		EDIT AS
+		edit,
+		INSPECTOR AS editUserName
+		FROM STM_INSPECT_REPORT
+		where
+		ID=#{id}
+	</select>
+  <select id="loadReportBasic" parameterType="HashMap" resultType="com.mainsteam.stm.portal.inspect.bo.InspectReportBasicBo" databaseId="oscar">
+		SELECT
+		ID AS id,
+		DOMAIN AS inspectReportDomain,
+		INSPECTOR AS
+		inspectReportInspector,
+		PRODUCE_TIME_SHOW AS
+		inspectReportProduceTimeShow,
+		to_char(PRODUCE_TIME,'yyyy-MM-dd HH24:mi') AS inspectReportProduceTime,
+		MODIFY_TIME_SHOW AS inspectReportModifyTimeShow,
+		to_char(EDIT_TIME,'yyyy-MM-dd HH24:mi') AS
+		editTime,
+		MODIFIOR_SHOW AS inspectReportModifiorShow,
+		INSPECTOR AS inspectReportLastEditUser,
+		RESOURCE_NAME AS
+		inspectReportResourceName,
+		BUSINESS_NAME AS inspectReportBusinessName,
+		STATUS AS inspectReportStatus,
+		TASK_CREATOR AS
+		inspectReportTaskCreator,
+		to_char(SUBMIT_TIME,'yyyy-MM-dd HH24:mi') AS inspectReportSubmitTime,
+		NAME
+		AS inspectReportName,
+		TASK AS inspectReportPlanName,
+		EDIT AS
+		edit,
+		INSPECTOR AS editUserName
+		FROM STM_INSPECT_REPORT
+		where
+		ID=#{id}
+	</select>
+	 
+  <select id="loadReportRoutine" parameterType="HashMap" resultType="com.mainsteam.stm.portal.inspect.bo.InspectReportSelfItemBo">
+		SELECT ID AS id,
+		INSPECT_REPORT_ID AS inspectReportId,
+		SELF_ITEM_NAME AS inspectReportSelfItemName,
+		SELF_ITME_TYPE AS
+		inspectReportSelfItemType,
+		ITEM_CONTENT AS inspectReportItemContent
+		FROM STM_INSPECT_REPORT_SELF_ITEM
+		WHERE INSPECT_REPORT_ID = #{id}
+	</select>
+
+	 
+  <select id="loadReportConclusions" parameterType="HashMap" resultType="com.mainsteam.stm.portal.inspect.bo.InspectReportResultsSettingBo">
+		SELECT ID AS id,
+		INSPECT_REPORT_ID AS inspectReportId,
+		SUMMERISE_NAME AS inspectReportSummeriseName,
+		SUMERISE_DESCRIBLE AS
+		InspectReportSumeriseDescrible
+		FROM STM_INSPECT_RPT_SUMRIES_SET
+		WHERE
+		INSPECT_REPORT_ID = #{id}
+	</select>
+
+	 
+  <select id="loadInspectionItems" parameterType="HashMap" resultType="com.mainsteam.stm.portal.inspect.bo.InspectReportContentBo">
+		SELECT ID AS id,
+		CHILD_ITME AS inspectReportItemName,
+		ITEM_DESCRIBLE AS inspectReportItemDescrible
+		FROM
+		STM_INSPECT_REPORT_CONTENT
+		WHERE INSPECT_REPORT_ID = #{id}
+		AND PARENT_ID
+		IS NULL order by id asc
+	</select>
+
+	 
+  <select id="loadItem" parameterType="HashMap" resultType="com.mainsteam.stm.portal.inspect.bo.InspectReportContentBo">
+		SELECT ID AS id,
+		INSPECT_REPORT_ID AS inspectReportid,
+		PARENT_ID AS inspectReportParentId,
+		CHILD_ITME AS
+		inspectReportItemName,
+		ITEM_DESCRIBLE AS inspectReportItemDescrible,
+		ITEM_VALUE AS inspectReportItemValue,
+		ITEM_REFERENCE_PREFIX AS
+		reportItemReferencePrefix,
+		ITEM_REFERENCE_SUBFIX AS
+		reportItemReferenceSubfix,
+		ITEM_UNIT AS inspectReportItemUnit,
+		ITEM_CONDITION_DESCRIBLE AS reportItemConditionDescrible,
+		ITEM_RESULT AS inspectReportItemResult,
+		EDIT AS edit,
+		TYPE AS type,
+		INDICATOR_AS_ITEM
+		AS indicatorAsItem
+		FROM STM_INSPECT_REPORT_CONTENT
+		WHERE PARENT_ID =
+		#{id}
+	</select>
+	 
+  <!--  inspectReportItemReferencePrefix,inspectR_reportItemReferenceSubfix-->
+	 
+  <select id="inspect_report_loadItem_hierarchy_two" parameterType="HashMap" resultType="HashMap">
+		SELECT c1.ID AS id,
+		c1.INSPECT_REPORT_ID AS inspectReportid,
+		c1.PARENT_ID AS inspectReportParentId,
+		c1.CHILD_ITME AS
+		inspectReportItemName,
+		c1.ITEM_DESCRIBLE AS inspectReportItemDescrible,
+		c1.ITEM_VALUE AS inspectReportItemValue,
+		c1.ITEM_REFERENCE_PREFIX AS reportItemReferencePrefix,
+		c1.ITEM_REFERENCE_SUBFIX AS reportItemReferenceSubfix,
+		c1.ITEM_UNIT AS
+		inspectReportItemUnit,
+		c1.ITEM_CONDITION_DESCRIBLE AS
+		reportItemConditionDescrible,
+		c1.ITEM_RESULT AS
+		inspectReportItemResult,
+		c1.EDIT AS edit,
+		c1.TYPE AS type,
+		c1.INDICATOR_AS_ITEM
+		AS indicatorAsItem,
+
+		c2.ID AS id2,
+		c2.INSPECT_REPORT_ID AS inspectReportid2,
+		c2.PARENT_ID AS
+		inspectReportParentId2,
+		c2.CHILD_ITME AS
+		inspectReportItemName2,
+		c2.ITEM_DESCRIBLE AS inspectReportItemDescrible2,
+		c2.ITEM_VALUE AS
+		inspectReportItemValue2,
+		c2.ITEM_REFERENCE_PREFIX AS
+		reportItemReferencePrefix2,
+		c2.ITEM_REFERENCE_SUBFIX AS
+		reportItemReferenceSubfix2,
+		c2.ITEM_UNIT AS
+		inspectReportItemUnit2,
+		c2.ITEM_CONDITION_DESCRIBLE AS
+		reportItemConditionDescrible2,
+		c2.ITEM_RESULT AS
+		inspectReportItemResult2,
+		c2.EDIT AS edit2,
+		c2.TYPE AS type2,
+		c2.INDICATOR_AS_ITEM
+		AS indicatorAsItem2
+		FROM STM_INSPECT_REPORT_CONTENT
+		c1
+		left join  STM_INSPECT_REPORT_CONTENT c2 on c1.id = c2.PARENT_ID
+		where
+		c1.PARENT_ID =
+		#{id}
+	</select>
+	 
+  <select id="inspect_report_loadItem_hierarchy_twos" parameterType="long" resultType="com.mainsteam.stm.portal.inspect.bo.InspectReportContentBo">
+		SELECT c1.ID AS id,
+		c1.INSPECT_REPORT_ID AS inspectReportid,
+		c1.PARENT_ID AS inspectReportParentId,
+		c1.CHILD_ITME AS
+		inspectReportItemName,
+		c1.ITEM_DESCRIBLE AS inspectReportItemDescrible,
+		c1.ITEM_VALUE AS inspectReportItemValue,
+		c1.ITEM_REFERENCE_PREFIX AS reportItemReferencePrefix,
+		c1.ITEM_REFERENCE_SUBFIX AS reportItemReferenceSubfix,
+		c1.ITEM_UNIT AS
+		inspectReportItemUnit,
+		c1.ITEM_CONDITION_DESCRIBLE AS
+		reportItemConditionDescrible,
+		c1.ITEM_RESULT AS
+		inspectReportItemResult,
+		c1.EDIT AS edit,
+		c1.TYPE AS type,
+		c1.INDICATOR_AS_ITEM
+		AS indicatorAsItem,
+
+		c2.ID AS id2,
+		c2.INSPECT_REPORT_ID AS inspectReportid2,
+		c2.PARENT_ID AS
+		inspectReportParentId2,
+		c2.CHILD_ITME AS
+		inspectReportItemName2,
+		c2.ITEM_DESCRIBLE AS inspectReportItemDescrible2,
+		c2.ITEM_VALUE AS
+		inspectReportItemValue2,
+		c2.ITEM_REFERENCE_PREFIX AS
+		reportItemReferencePrefix2,
+		c2.ITEM_REFERENCE_SUBFIX AS
+		reportItemReferenceSubfix2,
+		c2.ITEM_UNIT AS
+		inspectReportItemUnit2,
+		c2.ITEM_CONDITION_DESCRIBLE AS
+		reportItemConditionDescrible2,
+		c2.ITEM_RESULT AS
+		inspectReportItemResult2,
+		c2.EDIT AS edit2,
+		c2.TYPE AS type2,
+		c2.INDICATOR_AS_ITEM
+		AS indicatorAsItem2
+		FROM STM_INSPECT_REPORT_CONTENT
+		c1
+		, STM_INSPECT_REPORT_CONTENT c2 WHERE c1.id = c2.PARENT_ID
+		and
+		c2.PARENT_ID =
+		#{catalogId}
+	</select>
+</mapper>

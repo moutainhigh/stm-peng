@@ -1,0 +1,3 @@
+@echo off
+echo 信息处理正在关闭...
+net stop <OC4_DHS_SERVICE_NAME>

@@ -1,0 +1,669 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.portal.business.dao.IBizMainNewDao">
+   
+   
+   
+   
+   
+  <!-- 查询增加domain_id字段，方便修改 20161205 dfw -->
+   
+   
+   
+   
+   
+  <select id="getBasicInfo" resultType="com.mainsteam.stm.portal.business.bo.BizMainNewBo" parameterType="long">
+		SELECT 
+		A.ID, 
+		A.NAME, 
+		A.REMARK,
+		A.MANAGER_ID as managerId,
+		A.CREATE_ID as createId,
+		B.NAME as managerName,
+		A.FILE_ID as fileId,
+		A.STATUS_DEFINE as statusDefine,
+		A.CREATE_TIME as createTime,
+		A.DOMAIN_ID as domainId
+		FROM STM_BIZ_MAIN A LEFT JOIN STM_SYS_USER B ON B.ID = A.MANAGER_ID
+		WHERE A.ID = #{id}
+	</select>
+   
+   
+   
+   
+   
+  <select id="getCreateTime" resultType="java.util.Date" parameterType="long">
+		SELECT 
+		CREATE_TIME as createTime 
+		FROM STM_BIZ_MAIN
+		WHERE ID = #{id}
+	</select>
+   
+   
+   
+   
+   
+  <select id="getCanvasStatusDefine" resultType="string" parameterType="long">
+		SELECT 
+		STATUS_DEFINE as statusDefine 
+		FROM STM_BIZ_MAIN
+		WHERE ID = #{id}
+	</select>
+   
+   
+   
+   
+   
+  <!-- 修改时增加域 20161205 dfw -->
+   
+   
+   
+   
+   
+  <update id="updateBasicInfo" parameterType="com.mainsteam.stm.portal.business.bo.BizMainNewBo">
+		UPDATE STM_BIZ_MAIN
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <set>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="name != null"> NAME = #{name}, </if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="managerId != null"> MANAGER_ID = #{managerId}, </if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="remark != null"> REMARK = #{remark}, </if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="fileId != null"> FILE_ID = #{fileId}, </if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="updateTime != null"> UPDATE_TIME = #{updateTime}, </if>
+			
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="domainId &gt; 0"> DOMAIN_ID = #{domainId}, </if>
+		
+    
+    
+    
+    
+    
+    
+    
+    
+    </set>
+		WHERE ID = #{id}
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </update>
+   
+   
+   
+   
+   
+  <insert id="insertBasicInfo" parameterType="com.mainsteam.stm.portal.business.bo.BizMainNewBo">
+		INSERT INTO STM_BIZ_MAIN(ID,NAME,REMARK,MANAGER_ID,CREATE_ID,CREATE_TIME,FILE_ID,DOMAIN_ID)
+		VALUES(#{id},#{name},#{remark},#{managerId},#{createId},#{createTime},#{fileId},#{domainId})
+	</insert>
+   
+   
+   
+   
+   
+  <select id="getAllList" resultType="com.mainsteam.stm.portal.business.bo.BizMainNewBo">
+		SELECT 
+		A.ID, 
+		A.NAME, 
+		A.REMARK,
+		A.MANAGER_ID as managerId,
+		B.NAME as managerName,
+		A.FILE_ID as fileId,
+		A.CREATE_TIME as createTime,
+		A.CREATE_ID as createId ,
+	  	A.DOMAIN_ID as domainId
+		FROM STM_BIZ_MAIN A LEFT JOIN STM_SYS_USER B ON B.ID = A.MANAGER_ID
+	</select>
+   
+   
+   
+   
+   
+  <select id="getAllPermissionsInfoList" resultType="com.mainsteam.stm.portal.business.bo.BizMainNewBo">
+		SELECT 
+		ID, 
+		CREATE_ID as createId,
+		MANAGER_ID as managerId 
+		FROM STM_BIZ_MAIN
+	</select>
+   
+   
+   
+   
+   
+  <select id="getAllStatusDefineList" resultType="com.mainsteam.stm.portal.business.bo.BizMainNewBo">
+		SELECT 
+		ID, 
+		STATUS_DEFINE as statusDefine  
+		FROM STM_BIZ_MAIN
+	</select>
+   
+   
+   
+   
+   
+  <select id="getBizListForSearch" resultType="com.mainsteam.stm.portal.business.bo.BizMainNewBo" parameterType="string" databaseId="mysql">
+		SELECT 
+		ID, 
+		NAME, 
+		REMARK 
+		FROM STM_BIZ_MAIN
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="_parameter != null and _parameter != ''"> WHERE NAME LIKE CONCAT('%',#{_parameter},'%') </if>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="getBizListForSearch" resultType="com.mainsteam.stm.portal.business.bo.BizMainNewBo" parameterType="string" databaseId="oracle">
+		SELECT 
+		ID, 
+		NAME, 
+		REMARK 
+		FROM STM_BIZ_MAIN
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="_parameter != null and _parameter != ''"> WHERE NAME LIKE CONCAT('%',CONCAT(#{_parameter},'%')) </if>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="getBizListForSearch" resultType="com.mainsteam.stm.portal.business.bo.BizMainNewBo" parameterType="string" databaseId="dm">
+		SELECT 
+		ID, 
+		NAME, 
+		REMARK 
+		FROM STM_BIZ_MAIN
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="_parameter != null and _parameter != ''"> WHERE NAME LIKE CONCAT('%',CONCAT(#{_parameter},'%')) </if>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+  <select id="getBizListForSearch" resultType="com.mainsteam.stm.portal.business.bo.BizMainNewBo" parameterType="string" databaseId="oscar">
+		SELECT 
+		ID, 
+		NAME, 
+		REMARK 
+		FROM STM_BIZ_MAIN
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="_parameter != null and _parameter != ''"> WHERE NAME LIKE CONCAT('%',CONCAT(#{_parameter},'%')) </if>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <!-- 查询业务列表，参数为业务对象 20161205 dfw -->
+   
+   
+   
+   
+   
+  <select id="getBizList" resultType="com.mainsteam.stm.portal.business.bo.BizMainNewBo" parameterType="com.mainsteam.stm.portal.business.bo.BizMainNewBo" databaseId="mysql">
+		SELECT 
+		ID, 
+		NAME, 
+		REMARK 
+		FROM STM_BIZ_MAIN
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <where>
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="name != null and name != ''">
+				AND NAME LIKE CONCAT('%',#{name},'%')
+			</if>
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="domainId &gt; 0">
+				AND DOMAIN_ID = #{domainId} 
+			</if>
+		
+    
+    
+    
+    
+    
+    
+    
+    
+    </where>
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="getBizList" resultType="com.mainsteam.stm.portal.business.bo.BizMainNewBo" parameterType="com.mainsteam.stm.portal.business.bo.BizMainNewBo" databaseId="oracle">
+		SELECT 
+		ID, 
+		NAME, 
+		REMARK 
+		FROM STM_BIZ_MAIN
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <where>
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="name != null and name != ''">
+				AND NAME LIKE CONCAT('%',CONCAT(#{name},'%'))
+			</if>
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="domainId &gt; 0">
+				AND DOMAIN_ID = #{domainId} 
+			</if>
+		
+    
+    
+    
+    
+    
+    
+    
+    
+    </where>
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="getBizList" resultType="com.mainsteam.stm.portal.business.bo.BizMainNewBo" parameterType="com.mainsteam.stm.portal.business.bo.BizMainNewBo" databaseId="dm">
+		SELECT 
+		ID, 
+		NAME, 
+		REMARK 
+		FROM STM_BIZ_MAIN
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <where>
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="name != null and name != ''">
+				AND NAME LIKE CONCAT('%',CONCAT(#{name},'%'))
+			</if>
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="domainId &gt; 0">
+				AND DOMAIN_ID = #{domainId} 
+			</if>
+		
+    
+    
+    
+    
+    
+    
+    
+    
+    </where>
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+  <select id="getBizList" resultType="com.mainsteam.stm.portal.business.bo.BizMainNewBo" parameterType="com.mainsteam.stm.portal.business.bo.BizMainNewBo" databaseId="oscar">
+		SELECT 
+		ID, 
+		NAME, 
+		REMARK 
+		FROM STM_BIZ_MAIN
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <where>
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="name != null and name != ''">
+				AND NAME LIKE CONCAT('%',CONCAT(#{name},'%'))
+			</if>
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="domainId &gt; 0">
+				AND DOMAIN_ID = #{domainId} 
+			</if>
+		
+    
+    
+    
+    
+    
+    
+    
+    
+    </where>
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <update id="updateBizStatusDefine" parameterType="com.mainsteam.stm.portal.business.bo.BizMainNewBo">
+		UPDATE STM_BIZ_MAIN SET STATUS_DEFINE = #{statusDefine} WHERE ID = #{id}
+	</update>
+   
+   
+   
+   
+   
+  <select id="checkBizNameIsExsit" resultType="Integer" parameterType="map">
+		SELECT COUNT(*) FROM STM_BIZ_CANVAS_NODE  WHERE SHOW_NAME = #{name}
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="oldName!='' and oldName!=null ">
+			AND SHOW_NAME != #{oldName}
+		</if>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <delete id="deleteBizById" parameterType="long">
+		DELETE FROM STM_BIZ_MAIN WHERE ID = #{id}
+	</delete>
+   
+   
+   
+   
+   
+  <select id="getBizCountByManagerId" resultType="Integer" parameterType="long">
+		SELECT COUNT(*) 
+		FROM STM_BIZ_MAIN WHERE MANAGER_ID = #{managerId}
+	</select>
+</mapper>

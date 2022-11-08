@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="IReportTemplateDao"
+		class="com.mainsteam.stm.portal.report.dao.impl.IReportTemplateDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+	</bean>
+	
+	<bean id="IReportDao"
+		class="com.mainsteam.stm.portal.report.dao.impl.IReportDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+	</bean>
+	
+	<bean id="IReportTemplateDirectoryDao"
+		class="com.mainsteam.stm.portal.report.dao.impl.IReportTemplateDirectoryDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+	</bean>
+	
+	<bean id="IReportTemplateDirectoryInstanceDao"
+		class="com.mainsteam.stm.portal.report.dao.impl.IReportTemplateDirectoryInstanceDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+	</bean>
+	
+	<bean id="IReportTemplateDirectoryMetricDao"
+		class="com.mainsteam.stm.portal.report.dao.impl.IReportTemplateDirectoryMetricDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+	</bean>
+	
+	<bean id="ReportTemplateSeq" factory-bean="platformSeqFactory"
+		factory-method="getSeq">
+		<constructor-arg value="STM_REPORT_TEMPLATE_MAIN"></constructor-arg>
+	</bean>
+	
+	<bean id="ReportSeq" factory-bean="platformSeqFactory"
+		factory-method="getSeq">
+		<constructor-arg value="STM_REPORT_LIST"></constructor-arg>
+	</bean>
+	
+	<bean id="ReportTemplateDirectorySeq" factory-bean="platformSeqFactory"
+		factory-method="getSeq">
+		<constructor-arg value="STM_REPORT_TEMPLATE_DIRECTORY"></constructor-arg>
+	</bean>
+	
+	<bean id="ReportTemplateDirectoryInstanceSeq" factory-bean="platformSeqFactory"
+		factory-method="getSeq">
+		<constructor-arg value="STM_REPORT_TEMPLATE_DIRECTORY_INSTANCE"></constructor-arg>
+	</bean>
+	
+	<bean id="ReportTemplateDirectoryMetricSeq" factory-bean="platformSeqFactory"
+		factory-method="getSeq">
+		<constructor-arg value="STM_REPORT_TEMPLATE_DIRECTORY_METRIC"></constructor-arg>
+	</bean>
+	
+	<bean id="ReportTemplateApi" class="com.mainsteam.stm.portal.report.service.impl.ReportTemplateImpl">
+	</bean>
+	
+	<bean id="ReportApi" class="com.mainsteam.stm.portal.report.service.impl.ReportImpl">
+	<property name="fileClient" ref="fileClient" />
+	</bean>
+	
+	<bean id="xmlHandlerApi" class="com.mainsteam.stm.portal.report.service.impl.XMLHandlerImpl">
+	<property name="fileClient" ref="fileClient" />
+	</bean>
+	
+	<bean id="reportEngine" class="com.mainsteam.stm.portal.report.engine.ReportEngine">
+		<property name="scheduleManager" ref="scheduleManager"></property>
+	</bean>
+	
+	<bean id="reportModelUtil" class="com.mainsteam.stm.portal.report.service.impl.ReportModelUtil">
+	</bean>
+</beans>

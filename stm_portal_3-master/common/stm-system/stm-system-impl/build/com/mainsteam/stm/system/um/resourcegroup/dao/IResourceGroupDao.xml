@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.system.um.resourcegroup.dao.IResourceGroupDao">
+	<insert id="insert" parameterType="com.mainsteam.stm.system.um.resourcegroup.bo.DomainResourceGroupRel">
+		INSERT INTO STM_SYS_GROUP_DOMAIN_REL (GROUP_ID,DOMAIN_ID) VALUES(#{id},#{domainId})
+	</insert>
+	
+	<delete id="batchDel" parameterType="long">
+		DELETE FROM STM_SYS_GROUP_DOMAIN_REL WHERE GROUP_ID = #{id}
+	</delete>
+	
+	<select id="get" parameterType="long" resultType="com.mainsteam.stm.system.um.resourcegroup.bo.DomainResourceGroupRel">
+		select GROUP_ID AS "id",DOMAIN_ID AS "domainId" 
+		from STM_SYS_GROUP_DOMAIN_REL where  GROUP_ID = #{id}
+	</select>
+	
+	<select id="queryRelByDomain" parameterType="long" resultType="com.mainsteam.stm.system.um.resourcegroup.bo.DomainResourceGroupRel">
+		select GROUP_ID AS "id",DOMAIN_ID AS "domainId" 
+		from STM_SYS_GROUP_DOMAIN_REL where  DOMAIN_ID = #{domainId}
+	</select>
+	<select id="pageSelect" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" resultType="com.mainsteam.stm.system.um.resourcegroup.bo.DomainResourceGroupRel">
+		select GROUP_ID AS "id",DOMAIN_ID AS "domainId" from STM_SYS_GROUP_DOMAIN_REL where 1=1
+		<if test="condition!=null">
+			<if test="condition.domainIds != null">
+			AND DOMAIN_ID IN 
+				<foreach item="item" index="index" collection="condition.domainIds" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</if>
+	</select>
+</mapper>

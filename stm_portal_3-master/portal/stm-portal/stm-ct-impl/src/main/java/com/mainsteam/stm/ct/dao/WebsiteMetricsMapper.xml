@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.ct.dao.WebsiteMetricsMapper">
+
+    <select id="getList" resultType="com.mainsteam.stm.ct.bo.MsWebsiteMetric" parameterType="com.mainsteam.stm.ct.bo.WebsiteMetricVo">
+        SELECT
+            *
+        FROM
+            ms_website_metric
+        WHERE
+            1 = 1
+            and resource_id = #{resourceId}
+            and create_time >#{startTime}
+            and #{endTime} > create_time
+        ORDER BY
+            create_time desc
+         
+    </select>
+
+    <!--<select id="getAvg" resultType="com.mainsteam.stm.ct.bo.MsWebsiteMetric" parameterType="com.mainsteam.stm.ct.bo.WebsiteMetricVo">
+        SELECT
+            CONVERT(AVG(first_char),SIGNED) AS first_char,
+            CONVERT(AVG(dom_ready),SIGNED) AS dom_ready,
+            CONVERT(AVG(page_ready),SIGNED) AS page_ready,
+            CONVERT(AVG(dns_select),SIGNED) AS dns_select,
+            CONVERT(AVG(tcp_collect),SIGNED) AS tcp_collect,
+            CONVERT(AVG(req_answer),SIGNED) AS req_answer,
+            CONVERT(AVG(send_content),SIGNED) AS send_content,
+            CONVERT(AVG(dom_parse),SIGNED) AS dom_parse,
+            CONVERT(AVG(resource_load),SIGNED) AS resource_load
+        FROM
+            ms_website_metric
+        WHERE
+            1 = 1
+            and create_time > #{startTime}
+            and #{endTime} > create_time
+    </select>-->
+    <select id="getAvg" resultType="com.mainsteam.stm.ct.bo.MsWebsiteMetric" parameterType="com.mainsteam.stm.ct.bo.WebsiteMetricVo">
+        SELECT
+            AVG(first_char) AS first_char,
+            AVG(dom_ready)AS dom_ready,
+            AVG(page_ready) AS page_ready,
+            AVG(dns_select) AS dns_select,
+            AVG(tcp_collect) AS tcp_collect,
+            AVG(req_answer) AS req_answer,
+            AVG(send_content) AS send_content,
+            AVG(dom_parse) AS dom_parse,
+            AVG(resource_load) AS resource_load
+        FROM
+            ms_website_metric
+        WHERE
+            1 = 1
+            and create_time > #{startTime}
+            and #{endTime} > create_time
+    </select>
+
+    <select id="getAvgByResourceId" resultType="com.mainsteam.stm.ct.bo.MsWebsiteMetric" parameterType="com.mainsteam.stm.ct.bo.WebsiteMetricVo">
+        SELECT
+            CONVERT(AVG(first_char),SIGNED) AS first_char,
+            CONVERT(AVG(dom_ready),SIGNED) AS dom_ready,
+            CONVERT(AVG(page_ready),SIGNED) AS page_ready,
+            CONVERT(AVG(dns_select),SIGNED) AS dns_select,
+            CONVERT(AVG(tcp_collect),SIGNED) AS tcp_collect,
+            CONVERT(AVG(req_answer),SIGNED) AS req_answer,
+            CONVERT(AVG(send_content),SIGNED) AS send_content,
+            CONVERT(AVG(dom_parse),SIGNED) AS dom_parse,
+            CONVERT(AVG(resource_load),SIGNED) AS resource_load
+            
+        FROM
+            ms_website_metric
+        WHERE
+            1 = 1
+            and resource_id = #{resourceId}
+            and create_time > #{startTime}
+            and #{endTime} > create_time
+    </select>
+    <select id="getLatest" parameterType="com.mainsteam.stm.ct.bo.MsWebsiteMetric" resultType="com.mainsteam.stm.ct.bo.MsWebsiteMetric" >
+    	select * from ms_website_metric where resource_id=#{resource_id} ORDER BY create_time DESC LIMIT 1;
+    </select>
+    <insert id="insert" parameterType="com.mainsteam.stm.ct.bo.MsWebsiteMetric">
+    	INSERT INTO `ms_website_metric` 
+    	(`id`, `first_char`, `dom_ready`, `page_ready`, `dns_select`, `tcp_collect`, `req_answer`, `send_content`, `dom_parse`, `resource_load`, `name`, `type`, `initiator_type`, `entry_type`, `redirect_count`, `transfer_size`, `encoded_body_size`, `duration`, `start_time`, `worker_start`, `server_timing`, `resource_id`, `create_time`) 
+    	VALUES 
+    	(#{id}, #{first_char}, #{dom_ready},#{page_ready},#{dns_select},#{tcp_collect},#{req_answer},#{send_content},#{dom_parse}, #{resource_load},#{name},#{type},#{initiator_type}, #{entry_type},#{redirect_count},#{transfer_size},#{encoded_body_size},#{duration},#{start_time},#{worker_start}, #{server_timing},#{resource_id}, #{create_time});
+    </insert>
+</mapper>

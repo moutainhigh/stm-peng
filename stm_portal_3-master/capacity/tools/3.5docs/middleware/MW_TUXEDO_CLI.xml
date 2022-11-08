@@ -1,0 +1,1004 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<!-- devicetype: 设备类型名称 ismulticoltype: 是否允许采集方式多选 majortype: 主要分类（可以理解为设备类型）
+     minortype: 次要分类 manufacturer: 厂商 devicetype_zh: 设备类型中文描述 -->
+	<devicetypeinfo devicetype="MW_TUXEDO" ismulticoltype="false"
+		majortype="middleware" minortype="Tuxedo" manufacturer="Oracle"
+		devicetype_zh="Tuxedo">
+		<!-- 6个指标，3个采集脚本 -->
+		<commands>
+            
+			<!-- 操作系统 主机名 内存大小 -->
+			<command coltype="WMI" comid="get_hostname"
+            command="root\cimv2::SELECT Name FROM Win32_ComputerSystem" />
+			<command coltype="WMI" comid="get_os"
+            command="root\cimv2::select Caption from Win32_OperatingSystem" />
+			<command coltype="WMI" comid="get_TotalMemSize"
+            command="root\cimv2::SELECT TotalVisibleMEMorySize FROM Win32_OperatingSystem" />
+			<command coltype="WMI" comid="get_FreePhysicalMemory"
+            command="root\cimv2::Select FreePhysicalMemory from Win32_OperatingSystem" />
+            
+			<command coltype="CLI" comid="chk_os" command="/tmp/os.sh" />
+			<!-- 服务可用性 -->
+			<command coltype="WMI" comid="getStatus"
+            command="root\cimv2::SELECT State FROM Win32_Service WHERE like='%slisten%'" />
+            
+			<!-- CPU和内存利用率 -->
+			<command coltype="WMI" comid="cpuIdelModeTimePer" command="root\cimv2::select percentidletime from Win32_PerfFormattedData_PerfOS_Processor  where name = '_Total'"/><!--CPU空闲模式百分比 -->
+			<command coltype="WMI" comid="chk_memrate"
+            command="root\cimv2::select WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name like '%slisten%'" />
+			<command coltype="WMI" comid="chk_cpurate"
+            command="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Process where Name like '%slisten%'" />
+			<command coltype="CLI" comid="get_mem_cpu"
+            command="/tmp/appinfo.sh ${InstallPath}" />
+            
+			<command coltype="WMI" comid="get_tuxedo" command="tuxedo.vbs  ${InstallPath}+${configFile}" />
+			<command coltype="CLI" comid="get_tuxedo_sh" command="/tmp/tuxedo.sh  ${InstallPath}+${configFile}" />
+            <!-- c:\oracle\tuxedo10gr3_vs2005+C:\simpapp -->
+		</commands>
+        
+		<resources>
+			<!-- 操作系统-->
+            <resource kpiid="M4OperateSystem" coltype="WMI" value="" valuetype="String"
+				unit=""> <collects> <collect exeorder="10" comid="get_os" select="" merge=""
+                    deal="" /> </collects> <kpipolicy table="res_d_M4OperateSystem" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" /> </resource>
+			
+			<!-- 主机名-->
+            <resource kpiid="M4HostName" coltype="WMI" value="" valuetype="String"
+				unit=""> <collects> <collect exeorder="10" comid="get_hostname" select=""
+                    merge="" deal="" /> </collects> <kpipolicy table="res_d_M4HostName" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" /> </resource>
+            
+			<!-- 内存大小 -->
+			<resource kpiid="M4TotalMemSize" coltype="WMI" value="$d1/1047896"
+				valuetype="Integer" unit="GB"> <collects> <collect exeorder="10" comid="get_TotalMemSize"
+                    select="" merge="" deal="" /> </collects> <kpipolicy table="res_d_M4TotalMemSize"
+				field="value" fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2=""
+				alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5=""
+				alertdesc5="" alertcontin="0" alertype="" circle="1440" storefactor="1" />
+            </resource>
+            
+			<!-- 服务可用性 -->
+			<resource kpiid="M4Availability" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select="tux_avail=(\d+)" merge="" deal="" />
+				</collects>
+				<!--
+				<translations>
+					<translation source="1" dest="正常"/>
+					<translation source="0" dest="无法连接"/>
+					<translation source="-1" dest="无法连接"/>
+				</translations>-->
+				<kpipolicy table="res_d_M4Availability" field="value"
+                fieldtype="" willalert="y" alertexp1="&quot;正常&quot;.equals(&quot;${value}&quot;)" alertdesc1="目标机器${ipaddress}的TUXEDO恢复正常"
+                alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4=""
+                alertdesc4="" alertexp5="!&quot;正常&quot;.equals(&quot;${value}&quot;)" alertdesc5="目标机器${ipaddress}的TUXEDO不可用"
+                alertcontin="1" alertype="500001" circle="5" storefactor="1" />
+			</resource>
+			
+            
+			<resource kpiid="M4Ver" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select="tux_ver=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4Ver" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			<resource kpiid="M4Maxclients" coltype="WMI" value="" valuetype="String" unit="个">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select="tux_maxclients=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4Maxclients" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4Master" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select="tux_master=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4Master" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			<resource kpiid="M4Backup" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select="tux_backup=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4Backup" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+				
+			</resource>
+			
+			<resource kpiid="M4Domainid" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select="tux_domainid=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4Domainid" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+				
+			</resource>
+            
+			<resource kpiid="M4Model" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select="tux_model=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4Model" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+				
+			</resource>
+            
+			<resource kpiid="M4Lhost" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select="tux_lhost=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4Lhost" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+				
+			</resource>
+            
+			<resource kpiid="M4Lmid" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select="tux_lmid=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4Lmid" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+				
+			</resource>
+			
+			<!-- 服务器组个数 -->
+			<resource kpiid="M4NumGrp" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select="num_grp=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4NumGrp" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+				
+			</resource>
+			
+			<!--
+             
+             <resource kpiid="M4NumInfs" coltype="WMI" value="" valuetype="Integer" unit="">
+             <collects>
+             <collect exeorder="10" comid="get_tuxedo" select="num_infs=(.*)" merge="" deal="" />
+             </collects>
+             <kpipolicy table="res_d_M4NumInfs" field="value"
+             fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+             alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+             alertcontin="1" alertype="" circle="1440" storefactor="1" />
+             </resource>
+			 -->
+            
+			<resource kpiid="M4NumSvr" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select="num_svr=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4NumSvr" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			<resource kpiid="M4NumSvc" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select="num_svc=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4NumSvc" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4NumRq" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select="num_rq=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4NumRq" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4SubSvrProgramName" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select="(.*)`.*`.*`$key`.*`.*`SVREND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvrProgramName" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4SubSvrQueueName" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select=".*`(.*)`.*`$key`.*`.*`SVREND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvrQueueName" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4SubSvrGroupName" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select=".*`.*`(.*)`$key`.*`.*`SVREND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvrGroupName" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			<resource kpiid="M4SubSvrIndex" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select=".*`.*`.*`(.*)`.*`.*`SVREND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvrIndex" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+            <!-- 已接受的请求数 -->
+			<resource kpiid="M4SubSvrRqDone" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select=".*`.*`.*`$key`(.*)`.*`SVREND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvrRqDone" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<!-- resource kpiid="M4SubSvrLoadDone" coltype="WMI" value="" valuetype="Integer" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select=".*`.*`.*`$key`.*`(.*)`SVREND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvrLoadDone" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource-->
+            
+			<resource kpiid="M4SubSvcName" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+                    <collect exeorder="10" comid="get_tuxedo" select="(.*)`.*`.*`.*`$key`.*`.*`.*`SVCEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvcName" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4SubSvcRtName" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select=".*`(.*)`.*`.*`$key`.*`.*`.*`SVCEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvcRtName" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4SubSvcProgName" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select=".*`.*`(.*)`.*`$key`.*`.*`.*`SVCEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvcProgName" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			<resource kpiid="M4SubSvcGrpName" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select=".*`.*`.*`(.*)`$key`.*`.*`.*`SVCEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvcGrpName" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4SubSvcIndex" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select=".*`.*`.*`.*`(.*)`.*`.*`.*`SVCEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvcIndex" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4SubSvcMachine" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select=".*`.*`.*`.*`$key`(.*)`.*`.*`SVCEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvcMachine" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			<!-- resource kpiid="M4SubSvcDone" coltype="WMI" value="" valuetype="Integer" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select=".*`.*`.*`.*`$key`.*`(.*)`.*`SVCEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvcDone" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource-->
+            
+			<resource kpiid="M4SubSvcStatus" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select=".*`.*`.*`.*`$key`.*`.*`(.*)`SVCEND" merge="" deal="" />
+                    <translations>
+                        <translation source="AVAIL" dest="正常"/>
+                    </translations>
+				</collects>
+				<kpipolicy table="res_d_M4SubSvcStatus" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4SubPqProg" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select="(.*)`$key`.*`.*`.*`.*`.*`PQEND" merge="" deal="" />
+				</collects>
+                <kpipolicy table="res_d_M4SubPqProg" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4SubPqIndex" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select=".*`(.*)`.*`.*`.*`.*`.*`PQEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubPqIndex" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			<resource kpiid="M4SubPqQueue" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select=".*`($key)`.*`.*`.*`.*`.*`PQEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubPqQueue" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			<resource kpiid="M4SubPqServe" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select=".*`$key`(.*)`.*`.*`.*`.*`PQEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubPqServe" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+ 			
+			<resource kpiid="M4SubPqWkQd" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select=".*`$key`.*`(.*)`.*`.*`.*`PQEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubPqWkQd" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			<resource kpiid="M4SubPqQd" coltype="WMI" value="" valuetype="Integer" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select=".*`$key`.*`.*`(.*)`.*`.*`PQEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubPqQd" field="value"
+                fieldtype="" willalert="" alertexp1="${value}>0" alertdesc1="TUXEDO队列${childname}当前请求数恢复正常"
+                alertexp2="" alertdesc2="" alertexp3="${value}>10"
+                alertdesc3="TUXEDO队列${childname}当前请求数超过${trigervalue1},当前值为${value}" alertexp4="${value}>20"
+                alertdesc4="TUXEDO队列${childname}当前请求数超过${trigervalue1},当前值为${value}" alertexp5=""
+                alertdesc5="" alertcontin="1" alertype="500006" circle="15"
+                storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4SubPqAveLen" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select=".*`$key`.*`.*`.*`(.*)`.*`PQEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubPqAveLen" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			<resource kpiid="M4SubPqMachine" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo" select=".*`$key`.*`.*`.*`.*`(.*)`PQEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubPqMachine" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			<!-- CPU利用率  -->
+			<resource kpiid="M4HostCPURate" coltype="WMI" value="100-$d1" valuetype="Float"
+				unit="%">
+				<collects>
+                    <collect exeorder="10" comid="cpuIdelModeTimePer" select="" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4HostCPURate" field="value"
+				fieldtype="" willalert="" alertexp1="${value}>0" alertdesc1="TUXEDO所在主机CPU利用率恢复正常"
+				alertexp2="" alertdesc2="" alertexp3="${value}>70" alertdesc3="TUXEDO所在主机CPU利用率超过${trigervalue1},当前值为${value}"
+				alertexp4="${value}>90" alertdesc4="TUXEDO所在主机CPU利用率超过${trigervalue1},当前值为${value}"
+				alertexp5="" alertdesc5="" alertcontin="1" alertype="500002" circle="15"
+				storefactor="1" /> </resource>
+            
+			<!-- 内存利用率
+			<resource kpiid="M4HostMEMRate" coltype="WMI" value="100 * ($d2 - $d1) / $d2" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="get_FreePhysicalMemory" select="" merge="" deal="" />
+					<collect exeorder="20" comid="get_TotalMemSize" select="" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4HostMEMRate" field="value" fieldtype="" willalert="y"
+                alertexp1="${value}>=0" alertdesc1="CICS所在主机的内存利用率恢复正常。" alertexp2=""
+                alertdesc2="" alertexp3="${value}>=70" alertdesc3="CICS所在主机的内存利用率超过${trigervalue1}，当前值为${value}"
+                alertexp4="${value}>=90" alertdesc4="CICS所在主机的内存利用率严重超过${trigervalue1}，当前值为${value}"
+                alertexp5="" alertdesc5="" alertcontin="1" alertype="500003" circle="15" storefactor="1" />
+			</resource>-->
+			
+			<!-- 应用CPU利用率  -->
+			<resource kpiid="M4CPURate" coltype="WMI" value="" valuetype="Float"
+				unit="%"> <collects> <collect exeorder="10" comid="chk_cpurate" select=""
+                    merge="" deal="" /> </collects> <kpipolicy table="res_d_M4CPURate" field="value"
+				fieldtype="" willalert="" alertexp1="${value}>0" alertdesc1="TUXEDO CPU利用率恢复正常"
+				alertexp2="" alertdesc2="" alertexp3="${value}>70" alertdesc3="TUXEDO CPU利用率超过${trigervalue1},当前值为${value}"
+				alertexp4="${value}>90" alertdesc4="TUXEDO CPU利用率超过${trigervalue1},当前值为${value}"
+				alertexp5="" alertdesc5="" alertcontin="1" alertype="500004" circle="15"
+				storefactor="1" /> </resource>
+            
+			<!-- 应用内存利用率 -->
+			<resource kpiid="M4MEMRate" coltype="WMI" value="100 * $d1 / ($d2 * 1024)" valuetype="Float" unit="%">
+                <collects>
+                    <collect exeorder="10" comid="chk_memrate" select="" merge="" deal="" />
+                    <collect exeorder="20" comid="get_TotalMemSize" select="" merge="" deal="" />
+                </collects>
+				<kpipolicy table="res_d_M4MEMRate"
+				field="value" fieldtype="" willalert="" alertexp1="${value}>0" alertdesc1="TUXEDO内存利用率恢复正常"
+				alertexp2="" alertdesc2="" alertexp3="${value}>70" alertdesc3="TUXEDO内存利用率超过${trigervalue1},当前值为${value}"
+				alertexp4="${value}>90" alertdesc4="TUXEDO内存利用率超过${trigervalue1},当前值为${value}"
+				alertexp5="" alertdesc5="" alertcontin="1" alertype="500005" circle="15"
+				storefactor="1" />
+            </resource>
+            
+            
+			<resource kpiid="M4OperateSystem" coltype="CLI" value=""
+				valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="chk_os" select="&lt;os&gt;(.*)&lt;/os&gt;"
+                    merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4OperateSystem" field="value"
+                fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2=""
+                alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4=""
+                alertexp5="" alertdesc5="" alertcontin="1" alertype="" circle="1440"
+                storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4HostName" coltype="CLI" value=""
+				valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="chk_os"
+                    select="&lt;hostname&gt;(.*)&lt;/hostname&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4HostName" field="value"
+                fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2=""
+                alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4=""
+                alertexp5="" alertdesc5="" alertcontin="1" alertype="" circle="1440"
+                storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4TotalMemSize" coltype="CLI" value="$d1/1024"
+				valuetype="Integer" unit="GB">
+				<collects>
+					<collect exeorder="10" comid="chk_os"
+                    select="&lt;memsize&gt;(.*)&lt;/memsize&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_TotalMemSize" field="value"
+                fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2=""
+                alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4=""
+                alertexp5="" alertdesc5="" alertcontin="0" alertype="" circle="1440"
+                storefactor="1" />
+			</resource>
+ 			
+			<resource kpiid="M4Availability" coltype="CLI" value=""
+				valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh"
+                    select="tux_avail=(.*)" merge="" deal="" />
+				</collects>
+				<translations>
+					<translation source="1" dest="正常"/>
+					<translation source="0" dest="无法连接"/>
+					<translation source="-1" dest="无法连接"/>
+				</translations>
+				<kpipolicy table="res_d_M4Availability" field="value"
+                fieldtype="" willalert="y" alertexp1="&quot;正常&quot;.equals(&quot;${value}&quot;)" alertdesc1="目标机器${ipaddress}的TUXEDO恢复正常"
+                alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4=""
+                alertdesc4="" alertexp5="!&quot;正常&quot;.equals(&quot;${value}&quot;)" alertdesc5="目标机器${ipaddress}的TUXEDO不可用"
+                alertcontin="1" alertype="500001" circle="5" storefactor="1" />
+			</resource>
+            
+			<!--
+             <resource kpiid="M4Res" coltype="CLI" value="" valuetype="String" unit="">
+             <collects>
+             <collect exeorder="10" comid="get_tuxedo" select="tux_res=(.*)" merge="" deal="" />
+             </collects>
+             </resource>
+			 -->
+            
+			<resource kpiid="M4Ver" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select="tux_ver=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4Ver" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4Maxclients" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select="tux_maxclients=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4Maxclients" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4Master" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select="tux_master=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4Master" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4Backup" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select="tux_backup=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4Backup" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4Domainid" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select="tux_domainid=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4Domainid" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4Model" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select="tux_model=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4Model" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4Lhost" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select="tux_lhost=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4Lhost" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4Lmid" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select="tux_lmid=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4Lmid" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			<resource kpiid="M4NumGrp" coltype="CLI" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select="num_grp=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4NumGrp" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			<!--
+             <resource kpiid="M4NumInfs" coltype="CLI" value="" valuetype="Integer" unit="">
+             <collects>
+             <collect exeorder="10" comid="get_tuxedo_sh" select="num_infs=(.*)" merge="" deal="" />
+             </collects>
+             <kpipolicy table="res_d_M4NumInfs" field="value"
+             fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+             alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+             alertcontin="1" alertype="" circle="1440" storefactor="1" />
+             </resource>
+             <resource kpiid="M4NumInfs" coltype="WMI" value="" valuetype="Integer" unit="">
+             <collects>
+             <collect exeorder="10" comid="get_tuxedo_sh" select="num_infs=(.*)" merge="" deal="" />
+             </collects>
+             <kpipolicy table="res_d_M4NumInfs" field="value"
+             fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+             alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+             alertcontin="1" alertype="" circle="1440" storefactor="1" />
+             </resource>
+			 -->
+            
+            <!-- 服务器个数 -->
+			<resource kpiid="M4NumSvr" coltype="CLI" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select="num_svr=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4NumSvr" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+            <!-- 服务个数 -->
+			<resource kpiid="M4NumSvc" coltype="CLI" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select="num_svc=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4NumSvc" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+ 			
+ 			<!-- 请求队列个数 -->
+			<resource kpiid="M4NumRq" coltype="CLI" value="" valuetype="Integer" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select="num_rq=(.*)" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4NumRq" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            <!-- SVR SUB-->
+			<resource kpiid="M4SubSvrProgramName" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select="(.*)`.*`.*`$key`.*`.*`SVREND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvrProgramName" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4SubSvrQueueName" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select=".*`(.*)`.*`$key`.*`.*`SVREND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvrQueueName" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			<resource kpiid="M4SubSvrGroupName" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select=".*`.*`(.*)`$key`.*`.*`SVREND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvrGroupName" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			<resource kpiid="M4SubSvrIndex" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select=".*`.*`.*`(.*)`.*`.*`SVREND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvrIndex" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+            <!-- 已接受的请求数 -->
+			<resource kpiid="M4SubSvrRqDone" coltype="CLI" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select=".*`.*`.*`$key`(.*)`.*`SVREND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvrRqDone" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			<!-- resource kpiid="M4SubSvrLoadDone" coltype="CLI" value="" valuetype="Integer" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select=".*`.*`.*`$key`.*`(.*)`SVREND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvrLoadDone" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource-->
+            <!-- SVC SUB-->
+			<resource kpiid="M4SubSvcName" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select="(.*)`.*`.*`.*`$key`.*`.*`.*`SVCEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvcName" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4SubSvcRtName" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select=".*`(.*)`.*`.*`$key`.*`.*`.*`SVCEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvcRtName" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			<resource kpiid="M4SubSvcProgName" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select=".*`.*`(.*)`.*`$key`.*`.*`.*`SVCEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvcProgName" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			<resource kpiid="M4SubSvcGrpName" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select=".*`.*`.*`(.*)`$key`.*`.*`.*`SVCEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvcGrpName" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			<resource kpiid="M4SubSvcIndex" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select=".*`.*`.*`.*`(.*)`.*`.*`.*`SVCEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvcIndex" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			<resource kpiid="M4SubSvcMachine" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select=".*`.*`.*`.*`$key`(.*)`.*`.*`SVCEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvcMachine" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			<!-- resource kpiid="M4SubSvcDone" coltype="CLI" value="" valuetype="Integer" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select=".*`.*`.*`.*`$key`.*`(.*)`.*`SVCEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubSvcDone" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource-->
+            
+			<resource kpiid="M4SubSvcStatus" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select=".*`.*`.*`.*`$key`.*`.*`(.*)`SVCEND" merge="" deal="" />
+				</collects>
+				<translations>
+					<translation source="AVAIL" dest="正常"/>
+				</translations>
+				<kpipolicy table="res_d_M4SubSvcStatus" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            <!-- PQ SUB-->
+			<resource kpiid="M4SubPqProg" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select="(.*)`$key`.*`.*`.*`.*`.*`PQEND" merge="" deal="" />
+				</collects>
+                <kpipolicy table="res_d_M4SubPqProg" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			<resource kpiid="M4SubPqIndex" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select=".*`(.*)`.*`.*`.*`.*`.*`PQEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubPqIndex" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+			
+			<resource kpiid="M4SubPqQueue" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select=".*`($key)`.*`.*`.*`.*`.*`PQEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubPqQueue" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+				
+			</resource>
+			
+			<resource kpiid="M4SubPqServe" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select=".*`$key`(.*)`.*`.*`.*`.*`PQEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubPqServe" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4SubPqWkQd" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select=".*`$key`.*`(.*)`.*`.*`.*`PQEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubPqWkQd" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4SubPqQd" coltype="CLI" value="" valuetype="Integer" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select=".*`$key`.*`.*`(.*)`.*`.*`PQEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubPqQd" field="value"
+                fieldtype="" willalert="" alertexp1="${value}>0" alertdesc1="TUXEDO队列${childname}当前请求数恢复正常"
+                alertexp2="" alertdesc2="" alertexp3="${value}>10"
+                alertdesc3="TUXEDO队列${childname}当前请求数超过${trigervalue1},当前值为${value}" alertexp4="${value}>20"
+                alertdesc4="TUXEDO队列${childname}当前请求数超过${trigervalue1},当前值为${value}" alertexp5=""
+                alertdesc5="" alertcontin="1" alertype="500006" circle="15"
+                storefactor="1" />
+			</resource>
+			
+			<resource kpiid="M4SubPqAveLen" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select=".*`$key`.*`.*`.*`(.*)`.*`PQEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubPqAveLen" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4SubPqMachine" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_tuxedo_sh" select=".*`$key`.*`.*`.*`.*`(.*)`PQEND" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4SubPqMachine" field="value"
+				fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+				alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1" />
+			</resource>
+            <!--
+			<resource kpiid="M4HostCPURate" coltype="CLI" value=""
+				valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="get_mem_cpu"
+                    select="&lt;get_cpurate&gt;(.*)&lt;/get_cpurate&gt;" merge=""
+                    deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4HostCPURate" field="value"
+                fieldtype="" willalert="" alertexp1="${value}>0" alertdesc1="TUXEDO所在主机CPU利用率恢复正常"
+                alertexp2="" alertdesc2="" alertexp3="${value}>70"
+                alertdesc3="TUXEDO所在主机CPU利用率超过${trigervalue1},当前值为${value}"
+                alertexp4="${value}>90" alertdesc4="TUXEDO所在主机CPU利用率超过${trigervalue1},当前值为${value}"
+                alertexp5="" alertdesc5="" alertcontin="1" alertype="500002"
+                circle="15" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4HostMEMRate" coltype="CLI" value=""
+				valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="get_mem_cpu"
+                    select="&lt;get_pmemrate&gt;(.*)&lt;/get_pmemrate&gt;" merge=""
+                    deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4HostMEMRate" field="value"
+                fieldtype="" willalert="" alertexp1="${value}>0" alertdesc1="TUXEDO所在主机内存利用率恢复正常"
+                alertexp2="" alertdesc2="" alertexp3="${value}>70"
+                alertdesc3="TUXEDO所在主机内存利用率超过${trigervalue1},当前值为${value}"
+                alertexp4="${value}>90" alertdesc4="TUXEDO所在主机内存利用率超过${trigervalue1},当前值为${value}"
+                alertexp5="" alertdesc5="" alertcontin="1" alertype="500003"
+                circle="15" storefactor="1" />
+			</resource>-->
+            
+			<resource kpiid="M4CPURate" coltype="CLI" value=""
+				valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="get_mem_cpu"
+                    select="&lt;get_appcpurate&gt;(.*)&lt;/get_appcpurate&gt;" merge=""
+                    deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4CPURate" field="value"
+                fieldtype="" willalert="" alertexp1="${value}>0" alertdesc1="TUXEDO CPU利用率恢复正常"
+                alertexp2="" alertdesc2="" alertexp3="${value}>70"
+                alertdesc3="TUXEDO CPU利用率超过${trigervalue1},当前值为${value}"
+                alertexp4="${value}>90" alertdesc4="TUXEDO CPU利用率超过${trigervalue1},当前值为${value}"
+                alertexp5="" alertdesc5="" alertcontin="1" alertype="500004"
+                circle="15" storefactor="1" />
+			</resource>
+            
+			<resource kpiid="M4MEMRate" coltype="CLI" value=""
+				valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="get_mem_cpu"
+                    select="&lt;get_appmemrate&gt;(.*)&lt;/get_appmemrate&gt;" merge=""
+                    deal="" />
+				</collects>
+				<kpipolicy table="res_d_M4MEMRate" field="value"
+                fieldtype="" willalert="" alertexp1="${value}>0" alertdesc1="TUXEDO内存利用率恢复正常"
+                alertexp2="" alertdesc2="" alertexp3="${value}>70"
+                alertdesc3="TUXEDO内存利用率超过${trigervalue1},当前值为${value}" alertexp4="${value}>90"
+                alertdesc4="TUXEDO内存利用率超过${trigervalue1},当前值为${value}" alertexp5=""
+                alertdesc5="" alertcontin="1" alertype="500005" circle="15"
+                storefactor="1" />
+			</resource>
+		</resources>
+	</devicetypeinfo>
+</root>

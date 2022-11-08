@@ -1,0 +1,220 @@
+<div id="backupHistoryDiv">
+	<form class="oc-form h-pad-mar backupHistoryForm col2">
+		<input type="hidden" id="id" name="id">
+		<div style="text-align:left;" class="form-group h-pad-mar">
+			<div><label>IP地址：</label><span name="ipAddress"/></div>
+		</div>
+<!-- 		<div style="text-align:left;" class="form-group h-pad-mar"> -->
+<!-- 			<div><label>OS类型：</label><span name="osType"/></div> -->
+<!-- 		</div> -->
+		<div style="text-align:left;" class="form-group h-pad-mar">
+			<div><label>设备名称：</label><span name="intanceName"/></div>
+		</div>
+		<div style="text-align:left;" class="form-group h-pad-mar">
+			<div><label>厂商：</label><span name="vendorName"/></div>
+		</div>
+		<div style="text-align:left;" class="form-group h-pad-mar">
+			<div><label>软件版本：</label><span name="softVersion"/></div>
+		</div>
+		<div style="text-align:left;" class="form-group h-pad-mar">
+			<div><label>设备类型：</label><span name="deviceType"/></div>
+		</div>
+		<div style="text-align:left;" class="form-group h-pad-mar">
+			<div style=" width:100%;"><label>设备描述：</label><span name="deviceDesc"/>
+				<a href='javascript:void(0);' class='easyui-linkbutton' data-options="iconCls:'icon-tactics'"
+					id="backupLogBtn" style=" float:right;">备份记录</a>
+			</div>
+		</div>
+		<div style="text-align:left;" class="form-group h-pad-mar window-hbg">
+				<div>
+					<input name="fileNameInput" class="oc-enter" type='text' placeholder="按文件名称搜索"/>
+					<a href='javascript:void(0);' id='searchByFileNameBtn' class='easyui-linkbutton' data-options="iconCls:'icon-search'"/>
+ 					<!-- 增加批量下载操作 dfw 20170119 -->
+					<a href='javascript:void(0);' class='easyui-linkbutton' data-options="iconCls:'icon-download'" id="downloadBtn">批量下载</a>
+				</div>
+		</div>
+	</form>
+	<div id="oc_module_config_device_backuphistory_main">
+	<div style="height: 100%;">
+		<div class="oc_module_config_device_backuphistory_datagrid"></div>
+	</div>
+</div>
+</div>
+<script type="text/javascript">
+$(function(){
+	var mainDiv=$('#oc_module_config_device_backuphistory_main').attr('id',oc.util.generateId()).panel({
+		fit:true,
+		isOcAutoWidth:true
+	}),
+	datagridDiv=mainDiv.find('.oc_module_config_device_backuphistory_datagrid');
+	var datagrid=null;
+	var form =mainDiv.find('.oc-form.col1.h-pad-mar.backupHistoryForm');
+	
+	function open(id,ipAddress){
+		datagrid=oc.ui.datagrid({
+			selector:datagridDiv,
+			pagination:false,
+			url:oc.resource.getUrl('portal/config/backup/log/getPage.htm?resourceId='+id+"&all=false"),
+			columns:[[
+		         {field:'id',title:'-',checkbox:true,width:20},
+		         {field:'fileName',title:'文件名称',sortable:true,width:30},
+		         {field:'backupTime',title:'备份时间',sortable:true,width:40,formatter:function(value){
+		        	  var datetime = new Date();
+		        	    datetime.setTime(value);
+		        	    var year = datetime.getFullYear();
+		        	    var month = datetime.getMonth() + 1 < 10 ? "0" + (datetime.getMonth() + 1) : datetime.getMonth() + 1;
+		        	    var date = datetime.getDate() < 10 ? "0" + datetime.getDate() : datetime.getDate();
+		        	    var hour = datetime.getHours()< 10 ? "0" + datetime.getHours() : datetime.getHours();
+		        	    var minute = datetime.getMinutes()< 10 ? "0" + datetime.getMinutes() : datetime.getMinutes();
+		        	    var second = datetime.getSeconds()< 10 ? "0" + datetime.getSeconds() : datetime.getSeconds();
+	   	 			if(value == undefined||value == "" || value==null){
+	   	 			return "";
+	   	 			} else{
+	   	 				return year + "-" + month + "-" + date+" "+hour+":"+minute+":"+second;
+	   	 			}
+	     				
+		     	/* 	var unixTimestamp = new Date(value),hours = unixTimestamp.getHours();
+		     		if(0==hours)
+		     			return unixTimestamp.toLocaleString().replace('12:',"0:");
+		     		else
+	             	 	return unixTimestamp.toLocaleString(); */
+		         }},
+		         {field:'fileSize',title:'文件大小',sortable:true, width:20,formatter:function(value){
+		        	 return value;
+		         }},
+		         //增加下载操作 dfw 20170119
+		         {field:'btns',title:'操作',sortable:false,width:10,
+		        	 formatter: function(value, row, rowIndex) {
+					 return '<a data-index="' + rowIndex + '" class="ico ico-download" title="下载"></a>';
+				 }}
+		     ]],
+	         onClickCell:function(rowIndex, field, value){
+	        	 if("fileName" == field){
+	        		 var rows = $(this).datagrid('getRows'),row;
+	        		 for(var i in rows){
+	        			 if(i==rowIndex){
+	        				 row = rows[i];
+							 oc.module.config.file.device.openCompareWin('view',row,null,ipAddress);
+	        				 break;
+	        			 }
+	        		 }
+	        	 }
+	        	 //单行下载处理  dfw 20170119
+	        	 if('btns' == field){
+	        		 var rows = $(this).datagrid('getRows'), row;
+	        		 for(var i in rows){
+	        			 if(i == rowIndex){
+	        				 row = rows[i];
+	        				 $('<iframe style="display:none;" src="' + oc.resource.getUrl('portal/config/backup/log/getFileDownload.htm?fileIds=' + row.fileId) + '"/>').appendTo('body');
+	        				 break;
+	        			 }
+	        		 }
+	        	 }
+	         }
+		});
+/* 	$("input[name='fileNameInput']").keypress(function(e,i){
+			if(e.keyCode==13)
+				form.find('#searchByFileNameBtn').trigger('click');
+		});   */
+	
+		//备份日志
+		$("#backupLogBtn").linkbutton('RenderLB',{
+		  	onClick:function(){
+		  		viewBackupLogWin(id);
+			}
+	  	})
+		//批量下载时间处理  dfw 20170119
+		$("#downloadBtn").linkbutton('RenderLB',{
+		  	onClick:function(){
+		  		var selections = datagrid.selector.datagrid('getSelections');
+				var fileIds = new Array();
+				if(selections.length < 1){
+					alert('请至少选择一项');
+					return false;
+				}
+				for(var i=0; i<selections.length; i++){
+					fileIds.push(selections[i].fileId);
+				}
+				$('<iframe style="display:none;" src="' + oc.resource.getUrl('portal/config/backup/log/getFileDownload.htm?fileIds=' + fileIds) + '"/>').appendTo('body');
+			}
+	  	})
+		//查看配置备份日志窗口
+		function viewBackupLogWin(id){
+			var backupLogWin = $('<div/>');
+			//构建dialog
+			backupLogWin.dialog({
+				title:"备份记录",
+				href:oc.resource.getUrl('resource/module/config-file/device/backupLog.html'),
+				width:900,
+				height:510,
+				modal:true,
+				buttons:[{
+					text:'关闭',
+					iconCls:'fa fa-times-circle',
+					handler:function(){
+						backupLogWin.dialog('close');
+					}
+				}],
+				onLoad:function(){
+					oc.module.config.device.backuplog.open(id);
+				}
+			});
+		}
+		var $fileNameInput = $('[name=fileNameInput]');
+		$fileNameInput.bind('keypress',function(event){
+	            if(event.keyCode == 13) {
+	            	datagrid.selector.datagrid('reload',{resourceId:id,all:false,
+	    				searchKey:$fileNameInput.val()});
+	            	return false;
+	            }
+        });
+	/* 	$fileNameInput.on('focus',function(){if($(this).val()=="") $(this).val("按文件名称搜索"); else $(this).val("");})
+	    .on('blur',function(){if($(this).val()=="") $(this).val("按文件名称搜索");}); */
+		var searchBtn = $("#searchByFileNameBtn").on('click',function(e){
+			datagrid.selector.datagrid('reload',{resourceId:id,all:false,
+				searchKey:$fileNameInput.val()});
+		});
+	}
+	function compare(type){
+		if(type="compare"){
+			if(datagrid.selector.datagrid('getSelections').length!=2){
+				alert("只能选择两条记录！")
+			}else{
+				return datagrid.selector.datagrid('getSelections');
+			}
+		}
+		return [];
+	}
+	function recovery(type){
+		if(type="recovery"){
+			if(datagrid.selector.datagrid('getSelections').length!=1){
+				alert("只能选择一条记录！")
+			}else{
+				return datagrid.selector.datagrid('getSelections');
+			}
+		}
+		return [];
+	}
+	oc.ns('oc.module.config.device.backuphistory');
+	oc.module.config.device.backuphistory = {
+		setProperties:function(row){
+			$("span[name='ipAddress']").text(row.ipAddress||"");
+// 			$("span[name='osType']").text(row.osType||"");
+			$("span[name='intanceName']").text(row.intanceName||"");
+			$("span[name='vendorName']").text(row.vendorName||"");
+			$("span[name='softVersion']").text(row.softVersion||"");
+			$("span[name='deviceType']").text(row.deviceType||"");
+			$("span[name='deviceDesc']").text(row.deviceDesc||"");
+		},
+		open:function(id,ipAddress){
+			return open(id,ipAddress);
+		},
+		compare:function(type){
+			return compare(type);
+		},
+		recovery:function(type){
+			return recovery(type);
+		}
+	}
+});
+</script>

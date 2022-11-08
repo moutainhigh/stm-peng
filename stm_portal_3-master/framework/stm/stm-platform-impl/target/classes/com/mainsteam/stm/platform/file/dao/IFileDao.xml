@@ -1,0 +1,565 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.platform.file.dao.IFileDao">
+	 
+   
+   
+   
+  <resultMap autoMapping="true" type="com.mainsteam.stm.platform.file.bean.FileModel" id="fileModel">
+		 
+     
+     
+     
+    <id column="ID" property="id"/>
+		 
+     
+     
+     
+    <result column="FILE_GROUP" property="fileGroup"/>
+		 
+     
+     
+     
+    <result column="FILE_NAME" property="fileName"/>
+		 
+     
+     
+     
+    <!-- 
+		<result column="FINAL_NAME" property="finalName"  />
+		 -->
+		 
+     
+     
+     
+    <result column="FILE_PATH" property="filePath"/>
+		 
+     
+     
+     
+    <result column="MIME_TYPE" property="mimeType"/>
+		 
+     
+     
+     
+    <result column="FILE_EXT" property="fileExt"/>
+		 
+     
+     
+     
+    <result column="FILE_SIZE" property="fileSize"/>
+		 
+     
+     
+     
+    <result column="MD5" property="MD5"/>
+		 
+     
+     
+     
+    <result column="CREATE_DATETIME" property="createDatetime"/>
+		 
+     
+     
+     
+    <result column="IS_LOCK" property="lock"/>
+	
+  
+  
+  
+  </resultMap>
+	 
+   
+   
+   
+  <select id="pageSelect" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" resultMap="fileModel" databaseId="mysql">
+		select
+		   ID as id,     
+	       FILE_GROUP as fileGroup,
+	       FILE_NAME as fileName,
+	       FILE_PATH as filePath,
+	       MIME_TYPE as mimeType,
+	       FILE_EXT as fileExt,
+	       FILE_SIZE as fileSize,
+	       MD5,
+	       CREATE_DATETIME as createDatetime,
+	       stm_file_list.IS_LOCK as "lock"
+	    from stm_file_list
+	     
+		 
+     
+     
+     
+    <if test="condition!=null">
+			where 1=1
+			 
+			 
+       
+       
+       
+      <if test="condition.fileGroup != null"> AND FILE_GROUP = #{condition.fileGroup}</if>
+			 
+			 
+       
+       
+       
+      <if test="condition.fileName != null"> AND FILE_NAME like concat('%',#{condition.fileName},'%')</if>
+		
+		
+    
+    
+    
+    </if>
+	    order by CREATE_DATETIME desc
+	
+	
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+  <select id="pageSelect" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" resultMap="fileModel" databaseId="oracle">
+		select
+		   ID as id,     
+	       FILE_GROUP as fileGroup,
+	       FILE_NAME as fileName,
+	       FILE_PATH as filePath,
+	       MIME_TYPE as mimeType,
+	       FILE_EXT as fileExt,
+	       FILE_SIZE as fileSize,
+	       MD5,
+	     to_char(CREATE_DATETIME,'yyyy-MM-dd HH24:mi:ss') as createDatetime,
+	       stm_file_list.IS_LOCK as "lock"
+	    from stm_file_list
+	     
+		 
+     
+     
+     
+    <if test="condition!=null">
+			where 1=1
+			 
+			 
+       
+       
+       
+      <if test="condition.fileGroup != null"> AND FILE_GROUP = #{condition.fileGroup}</if>
+			 
+			 
+       
+       
+       
+      <if test="condition.fileName != null"> AND FILE_NAME like '%'||#{condition.fileName}||'%'</if>
+		
+		
+    
+    
+    
+    </if>
+	    order by CREATE_DATETIME desc
+	
+	
+  
+  
+  
+  </select>
+	 
+  
+   
+  
+   
+  
+   
+  <select id="pageSelect" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" resultMap="fileModel" databaseId="dm">
+		select
+		   ID as id,     
+	       FILE_GROUP as fileGroup,
+	       FILE_NAME as fileName,
+	       FILE_PATH as filePath,
+	       MIME_TYPE as mimeType,
+	       FILE_EXT as fileExt,
+	       FILE_SIZE as fileSize,
+	       MD5,
+	       to_char(CREATE_DATETIME,'yyyy-mm-dd HH:MM:SS') as createDatetime,
+	       stm_file_list.IS_LOCK as "lock"
+	    from stm_file_list
+	     
+		 
+     
+     
+     
+    <if test="condition!=null">
+			where 1=1
+
+
+
+       
+      <if test="condition.fileGroup != null"> AND FILE_GROUP = #{condition.fileGroup}</if>
+			 
+			 
+       
+       
+       
+      <if test="condition.fileName != null"> AND FILE_NAME like '%'||#{condition.fileName}||'%'</if>
+		
+		
+    
+    
+    
+    </if>
+	    order by CREATE_DATETIME desc
+	
+	
+  
+  
+  
+  </select>
+  <select id="pageSelect" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" resultMap="fileModel" databaseId="oscar">
+		select
+		   ID as id,     
+	       FILE_GROUP as fileGroup,
+	       FILE_NAME as fileName,
+	       FILE_PATH as filePath,
+	       MIME_TYPE as mimeType,
+	       FILE_EXT as fileExt,
+	       FILE_SIZE as fileSize,
+	       MD5,
+	       to_char(CREATE_DATETIME,'yyyy-mm-dd HH:MM:SS') as createDatetime,
+	       stm_file_list.IS_LOCK as "lock"
+	    from stm_file_list
+	     
+		 
+     
+     
+     
+    <if test="condition!=null">
+			where 1=1
+			 
+			 
+       
+       
+       
+      <if test="condition.fileGroup != null"> AND FILE_GROUP = #{condition.fileGroup}</if>
+			 
+			 
+       
+       
+       
+      <if test="condition.fileName != null"> AND FILE_NAME like '%'||#{condition.fileName}||'%'</if>
+		
+		
+    
+    
+    
+    </if>
+	    order by CREATE_DATETIME desc
+	
+	
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+  <insert id="insertFile" databaseId="mysql" parameterType="com.mainsteam.stm.platform.file.bean.FileModel">
+	    insert into stm_file_list(
+	  	   ID,     
+	       FILE_GROUP,
+	       FILE_NAME,
+	       FILE_PATH,
+	       MIME_TYPE,
+	       FILE_EXT,
+	       FILE_SIZE,
+	       MD5,
+	       CREATE_DATETIME
+	    ) values (
+	       #{id},
+	       #{fileGroup}, 
+	       #{fileName}, 
+	       #{filePath},
+	       #{mimeType},
+	       #{fileExt},
+	       #{fileSize},
+	       #{MD5},
+	       #{createDatetime}
+	       )
+	</insert>
+	 
+   
+   
+   
+  <insert id="insertFile" databaseId="oracle" parameterType="com.mainsteam.stm.platform.file.bean.FileModel">
+	    insert into stm_file_list(
+	  	   ID,     
+	       FILE_GROUP,
+	       FILE_NAME,
+	       FILE_PATH,
+	       MIME_TYPE,
+	       FILE_EXT,
+	       FILE_SIZE,
+	       MD5,
+	       CREATE_DATETIME
+	    ) values (
+	       	#{id,jdbcType=INTEGER},
+		    #{fileGroup,jdbcType=VARCHAR}, 
+		    #{fileName,jdbcType=VARCHAR}, 
+		    #{filePath,jdbcType=VARCHAR},
+		    #{mimeType,jdbcType=VARCHAR},
+		    #{fileExt,jdbcType=VARCHAR},
+		    #{fileSize,jdbcType=INTEGER},
+		    #{MD5,jdbcType=VARCHAR},
+		    #{createDatetime,jdbcType=DATE}
+	       )
+	</insert>
+	 
+  
+   
+  
+   
+  
+   
+  <insert id="insertFile" databaseId="dm" parameterType="com.mainsteam.stm.platform.file.bean.FileModel">
+	    insert into stm_file_list(
+	  	   ID,     
+	       FILE_GROUP,
+	       FILE_NAME,
+	       FILE_PATH,
+	       MIME_TYPE,
+	       FILE_EXT,
+	       FILE_SIZE,
+	       MD5,
+	       CREATE_DATETIME
+	    ) values (
+	       	#{id,jdbcType=INTEGER},
+		    #{fileGroup,jdbcType=VARCHAR}, 
+		    #{fileName,jdbcType=VARCHAR}, 
+		    #{filePath,jdbcType=VARCHAR},
+		    #{mimeType,jdbcType=VARCHAR},
+		    #{fileExt,jdbcType=VARCHAR},
+		    #{fileSize,jdbcType=INTEGER},
+		    #{MD5,jdbcType=VARCHAR},
+		    #{createDatetime,jdbcType=DATE}
+	       )
+	</insert>
+  <insert id="insertFile" databaseId="oscar" parameterType="com.mainsteam.stm.platform.file.bean.FileModel">
+	    insert into stm_file_list(
+	  	   ID,     
+	       FILE_GROUP,
+	       FILE_NAME,
+	       FILE_PATH,
+	       MIME_TYPE,
+	       FILE_EXT,
+	       FILE_SIZE,
+	       MD5,
+	       CREATE_DATETIME
+	    ) values (
+	       	#{id,jdbcType=INTEGER},
+		    #{fileGroup,jdbcType=VARCHAR}, 
+		    #{fileName,jdbcType=VARCHAR}, 
+		    #{filePath,jdbcType=VARCHAR},
+		    #{mimeType,jdbcType=VARCHAR},
+		    #{fileExt,jdbcType=VARCHAR},
+		    #{fileSize,jdbcType=INTEGER},
+		    #{MD5,jdbcType=VARCHAR},
+		    #{createDatetime,jdbcType=DATE}
+	       )
+	</insert>
+	 
+   
+   
+   
+  <insert id="insertFiles" parameterType="com.mainsteam.stm.platform.file.bean.FileModel">
+	    insert into stm_file_list(
+	  	   ID,     
+	       FILE_GROUP,
+	       FILE_NAME,
+	       FILE_PATH,
+	       MIME_TYPE,
+	       FILE_EXT,
+	       FILE_SIZE,
+	       MD5,
+	       CREATE_DATETIME
+	    ) values  (
+		       #{id},
+		       #{fileGroup}, 
+		       #{fileName}, 
+		       #{filePath},
+		       #{mimeType},
+		       #{fileExt},
+		       #{fileSize},
+		       #{MD5},
+		       #{createDatetime}
+	        )  
+
+	
+	</insert>
+
+	 
+   
+   
+   
+  <delete id="delFileByID" parameterType="long">
+		delete from stm_file_list  where ID = #{id}
+	</delete>
+	 
+   
+   
+   
+  <select id="getFileById" parameterType="long" resultMap="fileModel">
+		select
+		   ID as id,     
+	       FILE_GROUP as fileGroup,
+	       FILE_NAME as fileName,
+	       FILE_PATH as filePath,
+	       MIME_TYPE as mimeType,
+	       FILE_EXT as fileExt,
+	       FILE_SIZE as fileSize,
+	       MD5,
+	       CREATE_DATETIME as createDatetime,
+	       stm_file_list.IS_LOCK as "lock"
+	    from stm_file_list
+	    where ID=#{fileId}
+	</select>
+	 
+   
+   
+   
+  <update id="updateFileLock" databaseId="mysql" parameterType="com.mainsteam.stm.platform.file.bean.FileModel">
+		update stm_file_list set stm_file_list.IS_LOCK=#{lock} where ID=#{id}
+	</update>
+	 
+   
+   
+   
+  <update id="updateFileLock" databaseId="oracle" parameterType="com.mainsteam.stm.platform.file.bean.FileModel">
+		update stm_file_list set stm_file_list.IS_LOCK=#{lock,jdbcType=INTEGER} where ID=#{id}
+	</update>
+	 
+  
+   
+  
+   
+  
+   
+  <update id="updateFileLock" databaseId="dm" parameterType="com.mainsteam.stm.platform.file.bean.FileModel">
+		update stm_file_list set stm_file_list.IS_LOCK=#{lock,jdbcType=INTEGER} where ID=#{id}
+	</update>
+  <update id="updateFileLock" databaseId="oscar" parameterType="com.mainsteam.stm.platform.file.bean.FileModel">
+		update stm_file_list set stm_file_list.IS_LOCK=#{lock,jdbcType=INTEGER} where ID=#{id}
+	</update>
+	 
+   
+   
+   
+  <update id="updateFile" databaseId="mysql" parameterType="com.mainsteam.stm.platform.file.bean.FileModel">
+		update stm_file_list 
+		set
+		   FILE_GROUP=#{fileGroup},
+	       FILE_NAME=#{fileName},
+	       FILE_PATH=#{filePath},
+	       MIME_TYPE=#{mimeType},
+	       FILE_EXT=#{fileExt},
+	       FILE_SIZE=#{fileSize},
+	       MD5=#{MD5},
+	       CREATE_DATETIME=#{createDatetime}
+		where ID=#{id}
+	</update>
+	 
+   
+   
+   
+  <update id="updateFile" databaseId="oracle" parameterType="com.mainsteam.stm.platform.file.bean.FileModel">
+		update stm_file_list 
+		set
+		   FILE_GROUP=#{fileGroup,jdbcType=VARCHAR},
+	       FILE_NAME=#{fileName,jdbcType=VARCHAR},
+	       FILE_PATH=#{filePath,jdbcType=VARCHAR},
+	       MIME_TYPE=#{mimeType,jdbcType=VARCHAR},
+	       FILE_EXT=#{fileExt,jdbcType=VARCHAR},
+	       FILE_SIZE=#{fileSize,jdbcType=INTEGER},
+	       MD5=#{MD5,jdbcType=VARCHAR}},
+	       CREATE_DATETIME=#{createDatetime,jdbcType=DATE}
+		where ID=#{id}
+	</update>
+	 
+  
+   
+  
+   
+  
+   
+  <update id="updateFile" databaseId="dm" parameterType="com.mainsteam.stm.platform.file.bean.FileModel">
+		update stm_file_list 
+		set
+		   FILE_GROUP=#{fileGroup,jdbcType=VARCHAR},
+	       FILE_NAME=#{fileName,jdbcType=VARCHAR},
+	       FILE_PATH=#{filePath,jdbcType=VARCHAR},
+	       MIME_TYPE=#{mimeType,jdbcType=VARCHAR},
+	       FILE_EXT=#{fileExt,jdbcType=VARCHAR},
+	       FILE_SIZE=#{fileSize,jdbcType=INTEGER},
+	       MD5=#{MD5,jdbcType=VARCHAR}},
+	       CREATE_DATETIME=#{createDatetime,jdbcType=DATE}
+		where ID=#{id}
+	</update>
+  <update id="updateFile" databaseId="oscar" parameterType="com.mainsteam.stm.platform.file.bean.FileModel">
+		update stm_file_list 
+		set
+		   FILE_GROUP=#{fileGroup,jdbcType=VARCHAR},
+	       FILE_NAME=#{fileName,jdbcType=VARCHAR},
+	       FILE_PATH=#{filePath,jdbcType=VARCHAR},
+	       MIME_TYPE=#{mimeType,jdbcType=VARCHAR},
+	       FILE_EXT=#{fileExt,jdbcType=VARCHAR},
+	       FILE_SIZE=#{fileSize,jdbcType=INTEGER},
+	       MD5=#{MD5,jdbcType=VARCHAR}},
+	       CREATE_DATETIME=#{createDatetime,jdbcType=DATE}
+		where ID=#{id}
+	</update>
+	 
+   
+   
+   
+  <delete id="deleteFileByIds">
+		delete from STM_FILE_LIST  where ID in
+		 
+		 
+     
+     
+     
+    <foreach item="id" index="index" collection="list" open="(" separator="," close=")">
+ 			#{id}
+		</foreach>
+	
+	
+  
+  
+  
+  </delete>
+	 
+   
+   
+   
+  <select id="getAllDefaultsFiles" parameterType="long" resultMap="fileModel">
+		     <![CDATA[
+			select
+			   ID as id,     
+		       FILE_GROUP as fileGroup,
+		       FILE_NAME as fileName,
+		       FILE_PATH as filePath,
+		       MIME_TYPE as mimeType,
+		       FILE_EXT as fileExt,
+		       FILE_SIZE as fileSize,
+		       MD5,
+		       CREATE_DATETIME as createDatetime,
+		       IS_LOCK as "lock"
+		    from stm_file_list
+		    where ID <= 100000
+		]]>
+
+	</select>
+</mapper>

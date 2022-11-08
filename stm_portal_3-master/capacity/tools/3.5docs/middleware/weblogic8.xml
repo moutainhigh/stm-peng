@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	
+	<devicetypeinfo devicetype="Weblogic8x" ismulticoltype="true" majortype="middleware" minortype="Weblogic" manufacturer="Oracle" devicetype_zh="Weblogic8">
+		
+		<devicetypes>
+		</devicetypes>
+		<!-- 该设备类型定义的命令，用于合并命令执行 -->
+		<commands>
+		<!-- CPU利用率 -->
+			<command coltype="WMI" comid="wmi_chk_hostname" command="root\cimv2::select Name from Win32_ComputerSystem"/>
+			<command coltype="WMI" comid="wmi_chk_pmemcap" command="root\cimv2::SELECT TotalPhysicalMemory FROM Win32_ComputerSystem"/>
+			<command coltype="WMI" comid="wmi_chk_cpurate" command="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Process where Name like '%java%'"/>
+			<command coltype="WMI" comid="wmi_chk_memrate" command="root\cimv2::select WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name like '%java%'"/>
+			<command coltype="WMI" comid="wmi_chk_osversion" command="root\cimv2::select version from Win32_OperatingSystem"/><!--操作系统版本 -->
+			<command coltype="WMI" comid="wmi_chk_sysinfo" command="root\cimv2::select description from Win32_OperatingSystem"/><!--主机说明 -->
+			<command coltype="CLI" comid="chk_common" command="/tmp/os.sh"/>
+			<command coltype="CLI" comid="chk_physicalrate" command="/tmp/appinfo.sh javaw"/>
+			<command coltype="SNMP" comid="getAvailability" command="1.3.6.1.4.1.140.625.360.1.60"/>
+			<command coltype="SNMP" comid="getSocketsOpenedTotalCount" command="1.3.6.1.4.1.140.625.360.1.82"/>
+			<command coltype="SNMP" comid="getRestartsTotalCount" command="1.3.6.1.4.1.140.625.360.1.55"/>
+			<command coltype="SNMP" comid="getCurHeapSize" command="1.3.6.1.4.1.140.625.340.1.30"/>
+			<command coltype="SNMP" comid="getHeapFreeCurrent" command="1.3.6.1.4.1.140.625.340.1.25"/>
+			<command coltype="SNMP" comid="getClusterName" command="1.3.6.1.4.1.140.625.110.1.15"/>
+			<command coltype="SNMP" comid="getResendRequestsCount" command="1.3.6.1.4.1.140.625.110.1.30"/>
+			<command coltype="SNMP" comid="getMulticastMessagesLostCount" command="1.3.6.1.4.1.140.625.110.1.45"/>
+			<command coltype="SNMP" comid="getClusterAliveServerCount" command="1.3.6.1.4.1.140.625.110.1.25"/>
+<!-- JVM子资源 -->
+			<command coltype="SNMP" comid="getJVMName" command="1.3.6.1.4.1.140.625.180.1.15"/>
+			<command coltype="SNMP" comid="getJVMServicedRequestTotalCount" command="1.3.6.1.4.1.140.625.180.1.15,1.3.6.1.4.1.140.625.180.1.40"/>
+			<command coltype="SNMP" comid="getJVMExecuteThreadCurrentIdleCount" command="1.3.6.1.4.1.140.625.180.1.15,1.3.6.1.4.1.140.625.180.1.25"/>
+			<command coltype="SNMP" comid="getJVMPendingRequestOldestTime" command="1.3.6.1.4.1.140.625.180.1.15,1.3.6.1.4.1.140.625.180.1.30"/>
+			<command coltype="SNMP" comid="getJVMPendingRequestCurrentCount" command="1.3.6.1.4.1.140.625.180.1.15,1.3.6.1.4.1.140.625.180.1.35"/>
+<!-- JDBCPool -->
+			<command coltype="SNMP" comid="getJPJdbcPoolName" command="1.3.6.1.4.1.140.625.190.1.15"/>
+			<command coltype="SNMP" comid="getJPActiveConnCount" command="1.3.6.1.4.1.140.625.190.1.15,1.3.6.1.4.1.140.625.190.1.25"/>
+			<command coltype="SNMP" comid="getJPActiveConnAverageCount" command="1.3.6.1.4.1.140.625.190.1.15,1.3.6.1.4.1.140.625.190.1.61"/>
+			<command coltype="SNMP" comid="getJPCurWaitingConnCount" command="1.3.6.1.4.1.140.625.190.1.15,1.3.6.1.4.1.140.625.190.1.45"/>
+			<command coltype="SNMP" comid="getJPActiveConnectionsHighCount" command="1.3.6.1.4.1.140.625.190.1.15,1.3.6.1.4.1.140.625.190.1.40"/>
+			<command coltype="SNMP" comid="getJPConnectionDelayTime" command="1.3.6.1.4.1.140.625.190.1.15,1.3.6.1.4.1.140.625.190.1.62"/>
+			<command coltype="SNMP" comid="getJPConnectionsTotalCount" command="1.3.6.1.4.1.140.625.190.1.15,1.3.6.1.4.1.140.625.190.1.55"/>
+			<command coltype="SNMP" comid="getJPLeakedConnCount" command="1.3.6.1.4.1.140.625.190.1.15,1.3.6.1.4.1.140.625.190.1.68"/>
+		</commands>
+		<resources>
+<!-- 主资源 -->
+			<!-- 系统可管理内存 -->
+			<resource kpiid="M7totalMemSize" coltype="WMI" value="$d1/1024/1024/1024" valuetype="Float" unit="GB">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="wmi_chk_pmemcap" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7totalMemSize" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 系统可管理内存-->
+			<resource kpiid="M7totalMemSize" coltype="CLI" value="$d1/1024" valuetype="Float" unit="GB">
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;memsize&gt;(\w+)&lt;/memsize&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M7totalMemSize" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<resource kpiid="M7OSVersion" coltype="WMI" value="" valuetype="String" unit="">
+			<!-- 定义采集流程 -->
+			<collects>
+				<collect exeorder="10" comid="wmi_chk_osversion" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7OSVersion" field="value" fieldtype="" willalert=""
+				alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+				alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<!-- 操作系统版本 -->
+			<resource kpiid="M7OSVersion" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+				<collect exeorder="10" comid="chk_common" select="&lt;osversion&gt;([\s\S]*)&lt;/osversion&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M7OSVersion" field="value" fieldtype="" willalert=""
+				alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+				alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<!-- 主机说明 -->
+			<resource kpiid="M7SysInfo" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+				<collect exeorder="10" comid="wmi_chk_sysinfo" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7OSVersion" field="value" fieldtype="" willalert=""
+				alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+				alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<!-- 主机说明 -->
+			<resource kpiid="M7SysInfo" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+				<collect exeorder="10" comid="chk_common" select="&lt;systeminfo&gt;([\s\S]*)&lt;/systeminfo&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M7OSVersion" field="value" fieldtype="" willalert=""
+				alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+				alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+				alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<!-- 主机名称 -->
+			<resource kpiid="M7HostName" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="wmi_chk_hostname" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7HostName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 主机名称 -->
+			<resource kpiid="M7HostName" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;hostname&gt;(\w+)&lt;/hostname&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M7HostName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<!-- Oracle AS 内存利用率 -->
+			<resource kpiid="M7MEMRate" coltype="WMI" value="$d1*100/$d2" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="wmi_chk_memrate" select="" merge="sum" deal=""/>
+					<collect exeorder="20" comid="wmi_chk_pmemcap" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7MEMRate" field="value" fieldtype="" willalert="y"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>=80"
+					alertdesc3="内存利用率利用率超过${trigervalue1}%，当前值为${value}%" alertexp4="${value}>=90" alertdesc4="内存利用率利用率超过${trigervalue1}%，当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- Oracle AS 内存利用率 -->
+			<resource kpiid="M7MEMRate" coltype="CLI" value="" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="chk_physicalrate" select="&lt;get_appmemrate&gt;([\s\S]*)&lt;/get_appmemrate&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_d_M7MEMRate" field="value" fieldtype="" willalert="y"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>=80"
+					alertdesc3="内存利用率利用率超过${trigervalue1}%，当前值为${value}%" alertexp4="${value}>=90" alertdesc4="内存利用率利用率超过${trigervalue1}%，当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			<!-- Oracle AS CPU利用率 -->
+			<resource kpiid="M7CPURate" coltype="WMI" value="" valuetype="Integer" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="wmi_chk_cpurate" select="" merge="sum" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7CPURate" field="value" fieldtype="" willalert="y"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>=60"
+					alertdesc3="CPU利用率利用率超过${trigervalue1}%，当前值为${value}%" alertexp4="${value}>=80" alertdesc4="CPU利用率利用率超过${trigervalue1}%，当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- Oracle AS CPU利用率 -->
+			<resource kpiid="M7CPURate" coltype="CLI" value="" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="chk_physicalrate" select="&lt;get_appcpurate&gt;([\s\S]*)&lt;/get_appcpurate&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_d_M7CPURate" field="value" fieldtype="" willalert="y"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>=60"
+					alertdesc3="CPU利用率利用率超过${trigervalue1}%，当前值为${value}%" alertexp4="${value}>=80" alertdesc4="CPU利用率利用率超过${trigervalue1}%，当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/> 
+			</resource>
+			<!-- 服务器可用性 -->
+			<resource kpiid="M7Availability" coltype="SNMP" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getAvailability" select="" merge="" deal=""/>
+				</collects>
+				
+				<translations>
+					<translation source="1" dest="1"/>
+					<translation source="-1" dest="0"/>
+				</translations>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7Availability" field="value" fieldtype="" willalert="y"
+					alertexp1="&quot;${value}&quot;.contains(&quot;可用&quot;)" alertdesc1="服务器可用" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.contains(&quot;不可用&quot;)" alertdesc5="服务器不可用"
+					alertcontin="1" alertype="501504" circle="5" storefactor="1"/>
+			</resource>
+			<!-- 打开的Socket数 -->
+			<resource kpiid="M7SocketsOpdTotCnt" coltype="SNMP" value="" valuetype="Float" unit="次">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getSocketsOpenedTotalCount" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7SocketsOpdTotCnt" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501526" circle="5" storefactor="1"/>
+			</resource>
+			<!-- 重启次数 -->
+			<resource kpiid="M7RestartsTotalCnt" coltype="SNMP" value="" valuetype="Float" unit="次">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getRestartsTotalCount" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7RestartsTotalCnt" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501527" circle="5" storefactor="1"/>
+			</resource>
+			<!-- 当前堆大小 -->
+			<resource kpiid="M7CurHeapSize" coltype="SNMP" value="" valuetype="Float" unit="Byte">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getCurHeapSize" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7CurHeapSize" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501514" circle="5" storefactor="1"/>
+			</resource>
+			<!-- 空闲堆空间 -->
+			<resource kpiid="M7HeapFreeCurrent" coltype="SNMP" value="" valuetype="Float" unit="Byte">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getHeapFreeCurrent" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7HeapFreeCurrent" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501515" circle="5" storefactor="1"/>
+			</resource>
+			<resource kpiid="M7ClusterName" coltype="SNMP" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getClusterName" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7ClusterName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501537" circle="15" storefactor="1"/>
+			</resource>
+			<resource kpiid="M7ResendRequestsCoun" coltype="SNMP" value="" valuetype="Float" unit="次/分钟">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getResendRequestsCount" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7ResendRequestsCoun" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501533" circle="5" storefactor="1"/>
+			</resource>
+			<!-- 集群的时候在没有集群的情况下会返回空字符串 -->
+			<resource kpiid="M7MulticastMessagesL" coltype="SNMP" value="" valuetype="Float" unit="次">
+				<collects>
+					<collect exeorder="10" comid="getMulticastMessagesLostCount" select="" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_d_M7MulticastMessagesL" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501529" circle="5" storefactor="1"/>
+			</resource>
+			<resource kpiid="M7ClusterAliveServer" coltype="SNMP" value="" valuetype="Float" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getClusterAliveServerCount" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7ClusterAliveServer" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501534" circle="5" storefactor="1"/>
+			</resource>
+<!-- JVM子资源 -->	
+			<!-- jvm Name -->		
+			<resource kpiid="M7JVMName" coltype="SNMP" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getJVMName" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7JVMName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="513500" circle="15" storefactor="1"/>
+			</resource>
+			<!-- jvm 请求的运行数 -->		
+			<resource kpiid="M7JVMSerReqTotCnt" coltype="SNMP" value="" valuetype="Float" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getJVMServicedRequestTotalCount" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7JVMSerReqTotCnt" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="513501" circle="15" storefactor="1"/>
+			</resource>
+			<!-- jvm 空闲的线程数 -->		
+			<resource kpiid="M7JVMExeThCurIdleCnt" coltype="SNMP" value="" valuetype="Float" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getJVMExecuteThreadCurrentIdleCount" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7JVMExeThCurIdleCnt" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="513502" circle="15" storefactor="1"/>
+			</resource>
+			<!-- jvm 最长等待时间	该指标当前有问题，暂时去掉	
+			<resource kpiid="M7JVMPdReqOldestTime" coltype="SNMP" value="" valuetype="Float" unit="s">
+				<collects>
+					<collect exeorder="10" comid="getJVMPendingRequestOldestTime" select="$key=(.*)" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_d_M7JVMPdReqOldestTime" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="513503" circle="15" storefactor="1"/>
+			</resource> -->
+			<!-- jvm 等待的请求数 -->		
+			<resource kpiid="M7JVMPdReqCurCnt" coltype="SNMP" value="" valuetype="Float" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getJVMPendingRequestCurrentCount" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7JVMPdReqCurCnt" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="513504" circle="15" storefactor="1"/>
+			</resource>
+<!-- 连接池名称 -->
+			<resource kpiid="M7JPJdbcPoolName" coltype="SNMP" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getJPJdbcPoolName" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7JPJdbcPoolName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="502500" circle="15" storefactor="1"/>
+			</resource>
+			<!-- 活动的连接数 -->
+			<resource kpiid="M7JPActiveConnCount" coltype="SNMP" value="" valuetype="Float" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getJPActiveConnCount" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7JPActiveConnCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="502502" circle="15" storefactor="1"/>
+			</resource>
+			<!-- 平均的活动连接数 -->
+			<resource kpiid="M7JPActiveConnAverag" coltype="SNMP" value="" valuetype="Float" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getJPActiveConnAverageCount" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7JPActiveConnAverag" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="502503" circle="15" storefactor="1"/>
+			</resource>
+			<!-- 等待的连接数 -->
+			<resource kpiid="M7JPCurWaitingConnCo" coltype="SNMP" value="" valuetype="Float" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getJPCurWaitingConnCount" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7JPCurWaitingConnCo" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="502504" circle="15" storefactor="1"/>
+			</resource>
+			<!-- 最高活动连接数 -->
+			<resource kpiid="M7JPActiveConnection" coltype="SNMP" value="" valuetype="Float" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getJPActiveConnectionsHighCount" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7JPActiveConnection" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="502505" circle="15" storefactor="1"/>
+			</resource>
+			<!-- 连接延迟时间 -->
+			<resource kpiid="M7JPConnectionDelayT" coltype="SNMP" value="" valuetype="Float" unit="s">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getJPConnectionDelayTime" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7JPConnectionDelayT" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="502507" circle="15" storefactor="1"/>
+			</resource>
+			<!-- 连接总数 -->
+			<resource kpiid="M7JPConnectionsTotal" coltype="SNMP" value="" valuetype="Float" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getJPConnectionsTotalCount" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7JPConnectionsTotal" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="502508" circle="15" storefactor="1"/>
+			</resource>
+			<!-- 泄漏的连接数 -->
+			<resource kpiid="M7JPLeakedConnCount" coltype="SNMP" value="" valuetype="Float" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getJPLeakedConnCount" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M7JPLeakedConnCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="502510" circle="15" storefactor="1"/>
+			</resource>
+		</resources>
+	</devicetypeinfo>
+</root>

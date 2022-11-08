@@ -1,0 +1,674 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.topo.dao.INodeDao">
+    <resultMap type="com.mainsteam.stm.topo.bo.NodeBo" id="NodeResult">
+        <id property="id" column="id"/>
+        <result property="oid" column="oid"/>
+        <result property="instanceId" column="instance_id"/>
+        <result property="type" column="type"/>
+        <result property="x" column="x"/>
+        <result property="y" column="y"/>
+        <result property="visible" column="visible"/>
+        <result property="rx" column="rx"/>
+        <result property="ry" column="ry"/>
+        <result property="icon" column="icon_prefix"/>
+        <result property="iconWidth" column="icon_width"/>
+        <result property="iconHeight" column="icon_height"/>
+        <result property="groupId" column="group_id"/>
+        <result property="ip" column="ip"/>
+        <result property="deviceId" column="deviceId"/>
+    </resultMap>
+    <select id="queryOne" parameterType="Map"
+            resultType="com.mainsteam.stm.topo.bo.NodeBo" resultMap="NodeResult" databaseId="mysql">
+        select
+        *
+        from STM_TOPO_NODE
+        <where>
+            1=1
+            <if test="ip!=null">
+                and ip = #{ip}
+            </if>
+            <if test="subtopoid!=null">
+                and subtopoid = #{subtopoid}
+            </if>
+            <if test="type!=null">
+                and type = #{type}
+            </if>
+        </where>
+    </select>
+    <select id="queryOne1" parameterType="Map"
+            resultType="com.mainsteam.stm.topo.bo.NodeBo" resultMap="NodeResult" databaseId="mysql">
+        select
+        *
+        from STM_TOPO_NODE
+        <where>
+            1=1
+            <if test="ip!=null">
+                and ip like CONCAT('%',#{ip},'%')
+            </if>
+            <if test="subtopoid!=null">
+                and subtopoid like CONCAT('%',#{subtopoid},'%')
+            </if>
+            <if test="type!=null">
+                and type = #{type}
+            </if>
+        </where>
+    </select>
+    <update id="updatePelSize" parameterType="com.mainsteam.stm.topo.bo.NodeBo">
+        <!-- 0:二层拓扑,1:三层拓扑,2:机房视图-->
+        UPDATE STM_TOPO_NODE
+        SET icon_width=#{iconWidth},icon_height=#{iconHeight}
+        WHERE subTopoId IS NULL OR subTopoId=0 or subTopoId NOT IN (1,2) and deleteFlag=0
+    </update>
+    <select id="matchedIp" resultMap="NodeResult" parameterType="java.util.Map">
+		SELECT * FROM STM_TOPO_NODE where instr(#{ip},ip) &gt; 0 and (subTopoId is null or subTopoId=0) and deleteFlag=0
+	</select>
+    <!--<select id="pageSelect" resultMap="NodeResult" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+          SELECT * FROM STM_TOPO_NODE t RIGHT JOIN(
+              SELECT MIN(id) id
+              FROM STM_TOPO_NODE
+              WHERE (SUBTOPOID !=1 OR SUBTOPOID IS NULL) AND INSTANCE_ID IS NOT NULL AND deleteFlag=0 GROUP BY DEVICEID
+          ) t1 ON t.id = t1.id
+          ORDER BY t.ID DESC
+      </select>-->
+    <select id="pageSelect" resultMap="NodeResult"
+            parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+        SELECT * FROM STM_TOPO_NODE t RIGHT JOIN(
+        SELECT MIN(id) id
+        FROM STM_TOPO_NODE
+        WHERE (SUBTOPOID !=1 OR SUBTOPOID IS NULL) AND INSTANCE_ID IS NOT NULL AND deleteFlag=0 GROUP BY INSTANCE_ID
+        ) t1 ON t.id = t1.id
+        ORDER BY t.ID DESC
+    </select>
+    <select id="getByInstanceId" resultMap="NodeResult" parameterType="java.util.Map">
+		select * from STM_TOPO_NODE where instance_id = #{instanceId} and (subTopoId is null or subTopoId=0) and deleteFlag=0
+	</select>
+    <select id="getByInstanceIdInSubtopo" resultMap="NodeResult" parameterType="java.util.Map">
+        select * from STM_TOPO_NODE
+        where
+        instance_id=#{instanceId}
+        <if test="topoId==null or topoId==0">
+            and (subTopoId is null or subTopoId=0)
+        </if>
+        <if test="topoId!=null and topoId!=0">
+            and subTopoId=#{topoId}
+        </if>
+    </select>
+    <select id="getNodeIdByInstanceIds" resultType="long" parameterType="list">
+        select id from STM_TOPO_NODE where instance_id in
+        <foreach collection="list" close=")" open="(" separator="," item="id">
+            #{id}
+        </foreach>
+    </select>
+    <!--BUG #49605 【中软国产化】Admin账号登录系统，拓扑设备一览表未显示完整 huangping 2017/01/10 start-->
+    <!--<select id="getAllInstances" resultMap="NodeResult">
+          SELECT * FROM STM_TOPO_NODE t RIGHT JOIN(
+                SELECT MIN(id) id
+              FROM STM_TOPO_NODE
+              WHERE (SUBTOPOID !=1 OR SUBTOPOID IS NULL) AND INSTANCE_ID IS NOT NULL AND deleteFlag=0 GROUP BY DEVICEID
+          )t1 ON t.id = t1.id
+          ORDER BY t.ID DESC
+      </select>-->
+    <select id="getAllInstances" resultMap="NodeResult">
+        SELECT * FROM STM_TOPO_NODE t RIGHT JOIN(
+        SELECT MIN(id) id
+        FROM STM_TOPO_NODE
+        WHERE (SUBTOPOID !=1 OR SUBTOPOID IS NULL) AND INSTANCE_ID IS NOT NULL AND deleteFlag=0 GROUP BY INSTANCE_ID
+        )t1 ON t.id = t1.id
+        ORDER BY t.ID DESC
+    </select>
+    <!--BUG #49605 【中软国产化】Admin账号登录系统，拓扑设备一览表未显示完整 huangping 2017/01/10 end-->
+    <select id="hasTopo" resultType="long">
+		select count(id) from STM_TOPO_NODE where deleteFlag=0
+	</select>
+    <select id="getAllInstanceIds" resultType="java.lang.Long">
+		select distinct instance_id from STM_TOPO_NODE where instance_id is not null and (subTopoId is null or subTopoId=0) and deleteFlag=0
+	</select>
+    <insert id="insert" parameterType="com.mainsteam.stm.topo.bo.NodeBo">
+		insert into STM_TOPO_NODE
+			(id,oid,instance_id,type,x,y,rx,ry,icon_width,icon_height,visible,icon_prefix,group_id,ip,deviceId,subTopoId,parentId,attr)
+		values
+			(#{id},#{oid},#{instanceId},#{type},#{x},#{y},#{rx},#{ry},#{iconWidth},#{iconHeight},#{visible},#{icon},#{groupId},#{ip},#{deviceId},#{subTopoId},#{parentId},#{attr})
+	</insert>
+    <select id="getByIp" parameterType="map" resultMap="NodeResult" resultType="com.mainsteam.stm.topo.bo.NodeBo">
+        select
+        *
+        from STM_TOPO_NODE
+        where
+        ip=#{ip}
+        <if test="subTopoId==null or subTopoId==0">
+            and (subTopoId is null or subTopoId=0)
+        </if>
+        <if test="subTopoId!=null and subTopoId!=0">
+            and subTopoId=#{subTopoId}
+        </if>
+        and deleteFlag=0
+    </select>
+    <select id="getFortopoFindByIp" parameterType="map" resultMap="NodeResult"
+            resultType="com.mainsteam.stm.topo.bo.NodeBo">
+		select 
+			*
+		from STM_TOPO_NODE
+		where
+			ip=#{ip}
+			and
+			(subTopoId is null or subTopoId=0)
+			and deleteFlag=0
+	</select>
+    <select id="queryByIps" parameterType="map" resultMap="NodeResult" resultType="com.mainsteam.stm.topo.bo.NodeBo">
+        select
+        *
+        from STM_TOPO_NODE
+        <where>
+            <foreach collection="ips" open="ip in (" close=")" separator="," item="ip">
+                #{ip}
+            </foreach>
+            and
+            <if test="subTopoId==null or subTopoId==0">subTopoId is null or subTopoId=0</if>
+            <if test="subTopoId!=null and subTopoId!=0">subTopoId=#{subTopoId}</if>
+            and deleteFlag=0
+        </where>
+    </select>
+    <select id="getAll" resultType="com.mainsteam.stm.topo.bo.NodeBo" resultMap="NodeResult">
+		select 
+			* 
+		from STM_TOPO_NODE
+		where deleteFlag=0
+	</select>
+    <select id="query" parameterType="com.mainsteam.stm.topo.bo.QueryNode"
+            resultType="com.mainsteam.stm.topo.bo.NodeBo" resultMap="NodeResult" databaseId="mysql">
+        select
+        *
+        from STM_TOPO_NODE
+        <where>
+            <if test="ip!=null">
+                ip like CONCAT('%',#{ip},'%')
+            </if>
+            <if test="oid!=null">
+                oid like CONCAT('%',#{oid},'%')
+            </if>
+            <if test="type!=null">
+                type=#{type}
+            </if>
+            <if test="id!=null">
+                id=#{id}
+            </if>
+        </where>
+    </select>
+    <select id="query" parameterType="com.mainsteam.stm.topo.bo.QueryNode"
+            resultType="com.mainsteam.stm.topo.bo.NodeBo" resultMap="NodeResult" databaseId="oracle">
+        select
+        *
+        from STM_TOPO_NODE
+        <where>
+            <if test="ip!=null">
+                ip like '%'||#{ip}||'%'
+            </if>
+            <if test="oid!=null">
+                oid like '%'||#{oid}||'%'
+            </if>
+            <if test="type!=null">
+                type=#{type}
+            </if>
+            <if test="id!=null">
+                id=#{id}
+            </if>
+        </where>
+    </select>
+    <select id="query" parameterType="com.mainsteam.stm.topo.bo.QueryNode"
+            resultType="com.mainsteam.stm.topo.bo.NodeBo" resultMap="NodeResult" databaseId="dm">
+        select
+        *
+        from STM_TOPO_NODE
+        <where>
+            <if test="ip!=null">
+                ip like '%'||#{ip}||'%'
+            </if>
+            <if test="oid!=null">
+                oid like '%'||#{oid}||'%'
+            </if>
+            <if test="type!=null">
+                type=#{type}
+            </if>
+            <if test="id!=null">
+                id=#{id}
+            </if>
+        </where>
+    </select>
+    <select id="query" parameterType="com.mainsteam.stm.topo.bo.QueryNode"
+            resultType="com.mainsteam.stm.topo.bo.NodeBo" resultMap="NodeResult" databaseId="kingbase">
+        select
+        *
+        from STM_TOPO_NODE
+        <where>
+            <if test="ip!=null">
+                ip like '%'||#{ip}||'%'
+            </if>
+            <if test="oid!=null">
+                oid like '%'||#{oid}||'%'
+            </if>
+            <if test="type!=null">
+                type=#{type}
+            </if>
+            <if test="id!=null">
+                id=#{id}
+            </if>
+        </where>
+    </select>
+    <select id="query" parameterType="com.mainsteam.stm.topo.bo.QueryNode"
+            resultType="com.mainsteam.stm.topo.bo.NodeBo" resultMap="NodeResult" databaseId="oscar">
+        select
+        *
+        from STM_TOPO_NODE
+        <where>
+            <if test="ip!=null">
+                ip like '%'||#{ip}||'%'
+            </if>
+            <if test="oid!=null">
+                oid like '%'||#{oid}||'%'
+            </if>
+            <if test="type!=null">
+                type=#{type}
+            </if>
+            <if test="id!=null">
+                id=#{id}
+            </if>
+        </where>
+    </select>
+    <select id="getByDeviceId" parameterType="string" resultType="com.mainsteam.stm.topo.bo.NodeBo"
+            resultMap="NodeResult">
+        select * from STM_TOPO_NODE
+        <where>
+            deviceId=#{deviceId} and (subTopoId is null or subTopoId=0) and deleteFlag=0
+        </where>
+    </select>
+    <select id="getByIds" resultMap="NodeResult" parameterType="list" resultType="com.mainsteam.stm.topo.bo.NodeBo">
+        select * from STM_TOPO_NODE
+        <where>
+            <foreach collection="list" open="id in (" close=") and " separator="," item="id">
+                #{id}
+            </foreach>
+            deleteFlag=0
+        </where>
+    </select>
+    <select id="getBySubTopoId" resultMap="NodeResult" parameterType="long"
+            resultType="com.mainsteam.stm.topo.bo.NodeBo">
+        select
+        *
+        from STM_TOPO_NODE
+        <where>
+            <if test="id != null">
+                subTopoId=#{id}
+            </if>
+            <if test="id == null">
+                (subTopoId is null or subTopoId=0)
+            </if>
+            and deleteFlag=0
+        </where>
+    </select>
+    <select id="getDeviceInOrder" resultType="com.mainsteam.stm.topo.bo.NodeBo" resultMap="NodeResult"
+            parameterType="map">
+        select
+        *
+        from
+        STM_TOPO_NODE
+        where
+        deleteFlag=0
+        <if test="sort!=null">
+            order by ${sort} ${order}
+        </if>
+    </select>
+    <select id="getIdByDeviceId" resultType="long" parameterType="string">
+		select id from STM_TOPO_NODE where deviceId=#{deviceId} and deleteFlag=0
+	</select>
+    <update id="updateForGraph" parameterType="com.mainsteam.stm.topo.bo.NodeBo">
+        update STM_TOPO_NODE
+        set
+        x=#{x},y=#{y},visible=#{visible},rx=#{rx},ry=#{ry},group_id=#{groupId},parentId=#{parentId},subTopoId=#{subTopoId}
+        <if test="ip!=null">
+            ,ip=#{ip}
+        </if>
+        <if test="instanceId!=null">
+            ,instance_id=#{instanceId}
+        </if>
+        <if test="iconWidth&gt;0">
+            ,icon_width=#{iconWidth}
+        </if>
+        <if test="iconHeight&gt;0">
+            ,icon_height=#{iconHeight}
+        </if>
+        <if test="attr!=null">
+            ,attr=#{attr}
+        </if>
+        where
+        id=#{id} and deleteFlag=0
+    </update>
+    <update id="updateInstanceId" parameterType="com.mainsteam.stm.topo.bo.NodeBo">
+        update STM_TOPO_NODE
+        set
+        instance_id=#{instanceId}
+        <if test="ip!=null">
+            ,ip=#{ip}
+        </if>
+        where
+        (
+        deviceId=#{deviceId}
+        or
+        id=#{id}
+        )
+        and deleteFlag=0
+    </update>
+    <update id="replaceIcon" parameterType="map">
+		update 
+			STM_TOPO_NODE
+		set
+			icon_prefix=#{src}
+		where
+			id=#{id} and deleteFlag=0
+	</update>
+    <update id="clearGroup" parameterType="java.util.Map">
+		update STM_TOPO_NODE
+		set
+			group_id=null
+		where 
+			group_id=#{groupId} and deleteFlag=0
+	</update>
+    <update id="addGroup" parameterType="java.util.Map">
+        update STM_TOPO_NODE
+        set
+        group_id=#{groupId}
+        where
+        id in
+        <foreach collection="ids" open="(" close=")" separator="," item="id">
+            #{id}
+        </foreach>
+        and deleteFlag=0
+    </update>
+    <select id="groupNodes" resultType="long" parameterType="long">
+		select 
+			id 
+		from STM_TOPO_NODE
+		where
+			group_id=#{groupId} and deleteFlag=0
+	</select>
+    <select id="selectById" resultMap="NodeResult" resultType="com.mainsteam.stm.topo.bo.NodeBo" parameterType="long">
+		select * from STM_TOPO_NODE where id=#{id} and deleteFlag=0
+	</select>
+    <select id="selectIps" resultType="java.lang.String">
+		SELECT DISTINCT IP
+		FROM STM_TOPO_NODE
+		WHERE IP IS NOT NULL AND (SUBTOPOID !=1 OR SUBTOPOID IS NULL) AND deleteFlag=0
+	</select>
+    <delete id="physicalDeleteNodeByIds">
+        delete
+        from
+        STM_TOPO_NODE
+        <where>
+            <foreach collection="list" item="id" open="id in (" close=")" separator=",">
+                #{id}
+            </foreach>
+        </where>
+    </delete>
+    <update id="logicalDeleteNodeByIds">
+        update STM_TOPO_NODE set deleteFlag=1
+        <where>
+            <foreach collection="list" item="id" open="id in (" close=")" separator=",">
+                #{id}
+            </foreach>
+        </where>
+    </update>
+    <select id="getByInstanceIdOrIpForSubtopo" parameterType="map" resultMap="NodeResult"
+            resultType="com.mainsteam.stm.topo.bo.NodeBo">
+        select
+        *
+        from
+        STM_TOPO_NODE
+        <where>
+            (
+            <if test="instanceId!=null">
+                instance_id=#{instanceId}
+            </if>
+            <if test="instanceId!=null and ip!=null">
+                or
+            </if>
+            <if test="ip!=null">
+                ip=#{ip}
+            </if>
+            )
+            and
+            <if test="topoId!=null">
+                subTopoId=#{topoId}
+            </if>
+            <if test="topoId==null">
+                subTopoId is null
+            </if>
+            and deleteFlag=0
+        </where>
+    </select>
+    <delete id="physicalDeleteLinkByIds">
+        delete
+        from
+        STM_TOPO_LINK
+        <where>
+            <foreach collection="list" item="id" open="from_node_id in (" close=")" separator=",">
+                #{id}
+            </foreach>
+            or
+            <foreach collection="list" item="id" open="to_node_id in (" close=")" separator=",">
+                #{id}
+            </foreach>
+        </where>
+    </delete>
+    <update id="logicalDeleteLinkByIds">
+        update
+        STM_TOPO_LINK
+        set
+        deleteFlag=1
+        <where>
+            <foreach collection="list" item="id" open="from_node_id in (" close=")" separator=",">
+                #{id}
+            </foreach>
+            or
+            <foreach collection="list" item="id" open="to_node_id in (" close=")" separator=",">
+                #{id}
+            </foreach>
+        </where>
+    </update>
+    <!-- 删除资源后，解除相应资源实例的节点关系 -->
+    <update id="updateNodeRelationOnResourceDelete" parameterType="java.util.Map">
+        update STM_TOPO_NODE
+        set
+        instance_id=null
+        where
+        instance_id in
+        <foreach collection="ids" open="(" close=")" separator="," item="id">
+            #{id}
+        </foreach>
+    </update>
+    <select id="getCoreNodesById" parameterType="map" resultMap="NodeResult"
+            resultType="com.mainsteam.stm.topo.bo.NodeBo">
+        select
+        *
+        from
+        STM_TOPO_NODE
+        where
+        id
+        in (
+        select to_node_id from STM_TOPO_LINK where from_node_id=#{id}
+        )
+        or
+        id in (
+        select from_node_id from STM_TOPO_LINK where to_node_id=#{id}
+        )
+        and
+        <if test="subTopoId==null or subTopoId==0">
+            (subTopoId is null or subTopoId=0)
+        </if>
+        <if test="subTopoId!=null and subTopoId!=0">
+            subTopoId=#{subTopoId}
+        </if>
+        and
+        type&lt;&gt;'SERVER'
+        and
+        type&lt;&gt;'HOST'
+        and
+        deleteFlag=0
+    </select>
+    <select id="getCoreNodesInSubtopoById" parameterType="map" resultMap="NodeResult"
+            resultType="com.mainsteam.stm.topo.bo.NodeBo">
+        select
+        *
+        from
+        STM_TOPO_NODE
+        where
+        (
+        <if test="parentSubTopoId==null or parentSubTopoId==0">
+            subTopoId is null or subTopoId=0
+        </if>
+        <if test="parentSubTopoId!=null and parentSubTopoId!=0">
+            subTopoId=#{parentSubTopoId}
+        </if>
+        )
+        and
+        ip in (
+        select
+        distinct(ip)
+        from
+        STM_TOPO_NODE
+        where
+        subTopoId=#{subTopoId}
+        )
+        and
+        type&lt;&gt;'SERVER'
+        and
+        type&lt;&gt;'HOST'
+        and deleteFlag=0
+    </select>
+    <update id="hideNodes" parameterType="long">
+        update
+        STM_TOPO_NODE
+        <set>
+            visible=0
+        </set>
+        <where>
+            <foreach collection="array" open=" id in (" close=")" item="id" separator=",">
+                #{id}
+            </foreach>
+        </where>
+    </update>
+    <select id="getHideNodesBySubtopoId" parameterType="map" resultMap="NodeResult"
+            resultType="com.mainsteam.stm.topo.bo.NodeBo">
+        select
+        *
+        from
+        STM_TOPO_NODE
+        <where>
+            visible=0
+            and
+            <if test="subTopoId==null or subTopoId==0">(subTopoId is null or subTopoId=0)</if>
+            <if test="subTopoId!=null and subTopoId!=0">subTopoId=#{subTopoId}</if>
+            and deleteFlag=0
+        </where>
+    </select>
+    <update id="setVisibleable" parameterType="long">
+        update
+        STM_TOPO_NODE
+        <set>
+            visible=1
+        </set>
+        <where>
+            <foreach collection="array" open=" id in (" close=")" item="id" separator=",">
+                #{id}
+            </foreach>
+        </where>
+    </update>
+    <select id="getChildrenIdByParentIds" parameterType="map" resultType="long">
+        select id from STM_TOPO_NODE where parentId in
+        <foreach collection="ids" open="(" close=")" item="id" separator=",">
+            #{id}
+        </foreach>
+        and deleteFlag=0
+    </select>
+    <select id="listLogicalDeleted" resultMap="NodeResult" resultType="com.mainsteam.stm.topo.bo.NodeBo">
+		select * from STM_TOPO_NODE where deleteFlag=1 order by subTopoId
+	</select>
+    <update id="recoverNodeLogicalDelete">
+        update
+        STM_TOPO_NODE
+        set
+        deleteFlag=0
+        where
+        id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">#{id}</foreach>
+    </update>
+    <update id="recoverLinkLogicalDelete">
+        update
+        STM_TOPO_LINK
+        set
+        deleteFlag=0
+        <where>
+            <foreach collection="array" item="id" open="from_node_id in (" close=")" separator=",">
+                #{id}
+            </foreach>
+            or
+            <foreach collection="array" item="id" open="to_node_id in (" close=")" separator=",">
+                #{id}
+            </foreach>
+        </where>
+    </update>
+    <select id="findCopyNodesForTopo" parameterType="map" resultMap="NodeResult"
+            resultType="com.mainsteam.stm.topo.bo.NodeBo">
+        select * from
+        STM_TOPO_NODE
+        <where>
+            attr like ${attr}
+            and
+            <if test="topoId==null or topoId==0">
+                subTopoId is null or subTopoId=0
+            </if>
+            <if test="topoId!=null and topoId!=0">
+                subTopoId=#{topoId}
+            </if>
+        </where>
+    </select>
+    <select id="getSubtopoNodeBySubtopoId" parameterType="map" resultMap="NodeResult"
+            resultType="com.mainsteam.stm.topo.bo.NodeBo">
+        select * from
+        STM_TOPO_NODE
+        <where>
+            type='subtopo'
+            and
+            attr like ${attr}
+        </where>
+    </select>
+    <update id="unbindAllRelation" parameterType="map">
+        update ${table} set
+        <if test="instanceId == 0">INSTANCEID=null</if>
+        <if test="instanceId == 1">INSTANCEID=null</if>
+        <where>
+            <foreach collection="ids" open="INSTANCEID in (" close=")" item="id" separator=",">
+                #{id}
+            </foreach>
+        </where>
+    </update>
+    <update id="unbindAllRelation2" parameterType="map">
+        update ${table} set
+        <if test="instanceId == 0">INSTANCE_ID=null</if>
+        <if test="instanceId == 1">INSTANCE_ID=null</if>
+        <where>
+            <foreach collection="ids" open="INSTANCE_ID in (" close=")" item="id" separator=",">
+                #{id}
+            </foreach>
+        </where>
+    </update>
+    <update id="unbindAllMapRelation" parameterType="map">
+        update STM_TOPO_MAP_NODE set
+        <if test="instanceId == 0">INSTANCEID=null</if>
+        <if test="instanceId == 1">INSTANCEID=null</if>
+        <where>
+            <foreach collection="ids" open="instanceid in (" close=")" item="id" separator=",">
+                #{id}
+            </foreach>
+        </where>
+    </update>
+</mapper>

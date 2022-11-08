@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.home.workbench.main.dao.IUserWorkbenchDao">
+   
+   
+   
+   
+   
+  <select id="getUserWorkBenchs" parameterType="long" resultType="com.mainsteam.stm.home.workbench.main.bo.WorkBench">
+		select workbench.id workbenchId,workbench.title,workbench.url,workbench.icon,mix.sort,mix.selfExt,mix.selfExt1,mix.domainId,mix.defaultId defaultId from 
+			(select WORKBENCH_ID workbenchId,sort,self_ext selfExt,self_ext1 selfExt1,domain_id domainId,interface_default defaultId from STM_HOME_USER_WBH_REL
+			where USER_ID=#{userId} order by sort) mix
+		left join STM_HOME_WORKBENCH workbench on mix.workbenchId=workbench.id
+	</select>
+   
+   
+   
+   
+   
+  <select id="getUserWorkBenchById" parameterType="com.mainsteam.stm.home.workbench.main.bo.WorkBench" resultType="com.mainsteam.stm.home.workbench.main.bo.WorkBench">
+		select workbench.id,workbench.title,workbench.url,workbench.icon,mix.sort,mix.selfExt,mix.selfExt1,mix.domainId from 
+			(select WORKBENCH_ID workbenchId,sort,self_ext selfExt,self_ext1 selfExt1,domain_id domainId from STM_HOME_USER_WBH_REL
+			where USER_ID=#{userId} and WORKBENCH_ID=#{workbenchId} and SORT=#{sort} order by sort) mix
+		left join STM_HOME_WORKBENCH workbench on mix.workbenchId=workbench.id
+	</select>
+   
+   
+   
+   
+   
+  <insert id="insertUserWorkBenchs" parameterType="com.mainsteam.stm.home.workbench.main.bo.WorkBench">
+		insert into STM_HOME_USER_WBH_REL(USER_ID,WORKBENCH_ID,SORT,domain_id,self_ext,self_ext1) values(#{userId},#{workbenchId},#{sort},#{domainId},#{selfExt},#{selfExt1})
+	</insert>
+   
+   
+   
+   
+   
+  <delete id="delUserWorkBench" parameterType="long">
+		delete from STM_HOME_USER_WBH_REL where USER_ID=#{userId}
+	</delete>
+   
+   
+   
+   
+   
+  <delete id="delUsersWorkBench" parameterType="long">
+		delete from STM_HOME_USER_WBH_REL where USER_ID in
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach item="userId" index="index" collection="array" open="(" separator="," close=")">
+ 			#{userId}
+		</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </delete>
+   
+   
+   
+   
+   
+  <delete id="delSingleUserWorkBench" parameterType="com.mainsteam.stm.home.workbench.main.bo.WorkBench">
+		delete from STM_HOME_USER_WBH_REL where USER_ID=#{userId} and WORKBENCH_ID=#{workbenchId} and SORT=#{sort}
+	</delete>
+   
+   
+   
+   
+   
+  <update id="setExt" parameterType="com.mainsteam.stm.home.workbench.main.bo.WorkBench">
+		update STM_HOME_USER_WBH_REL set self_ext=#{selfExt}, self_ext1=#{selfExt1} where USER_ID=#{userId} AND WORKBENCH_ID=#{workbenchId} AND SORT=#{sort}
+	</update>
+   
+   
+   
+   
+   
+  <select id="getUserBenchIdByResourceId" resultType="com.mainsteam.stm.home.workbench.main.bo.WorkBench" parameterType="long" databaseId="mysql">
+		SELECT WORKBENCH_ID workbenchId,sort,self_ext selfExt,self_ext1 selfExt1,USER_ID userId FROM STM_HOME_USER_WBH_REL
+		WHERE WORKBENCH_ID IN(2,4,5,6) AND SELF_EXT LIKE CONCAT('%',#{id},'%')
+	</select>
+   
+   
+   
+   
+   
+  <select id="getUserBenchIdByResourceId" resultType="com.mainsteam.stm.home.workbench.main.bo.WorkBench" parameterType="long" databaseId="oracle">
+		SELECT WORKBENCH_ID workbenchId,sort,self_ext selfExt,self_ext1 selfExt1,USER_ID userId FROM STM_HOME_USER_WBH_REL
+		WHERE WORKBENCH_ID IN(2,4,5,6) AND SELF_EXT LIKE '%'||#{id}||'%'
+	</select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="getUserBenchIdByResourceId" resultType="com.mainsteam.stm.home.workbench.main.bo.WorkBench" parameterType="long" databaseId="dm">
+		SELECT WORKBENCH_ID workbenchId,sort,self_ext selfExt,self_ext1 selfExt1,USER_ID userId FROM STM_HOME_USER_WBH_REL
+		WHERE WORKBENCH_ID IN(2,4,5,6) AND SELF_EXT LIKE '%'||#{id}||'%'
+	</select>
+  <select id="getUserBenchIdByResourceId" resultType="com.mainsteam.stm.home.workbench.main.bo.WorkBench" parameterType="long" databaseId="oscar">
+		SELECT WORKBENCH_ID workbenchId,sort,self_ext selfExt,self_ext1 selfExt1,USER_ID userId FROM STM_HOME_USER_WBH_REL
+		WHERE WORKBENCH_ID IN(2,4,5,6) AND SELF_EXT LIKE '%'||#{id}||'%'
+	</select>
+   
+   
+   
+   
+   
+  <update id="setUserBenchResourceIdById">
+		UPDATE STM_HOME_USER_WBH_REL SET SELF_EXT = #{selfExt} ,SELF_EXT1 = #{selfExt1}
+		WHERE user_id = #{userId}
+		AND WORKBENCH_ID=#{workbenchId}
+		AND SORT=#{sort}
+	</update>
+   
+   
+   
+   
+   
+  <update id="setUserBenchDefaultIdById">
+		UPDATE STM_HOME_USER_WBH_REL SET INTERFACE_DEFAULT = #{defaultId}
+		WHERE user_id = #{userId}
+		AND WORKBENCH_ID=#{workbenchId}
+		AND SORT=#{sort}
+	</update>
+</mapper>

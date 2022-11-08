@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.knowledge.zip.dao.IKnowledgeZipDao">
+   
+   
+   
+   
+   
+  <insert id="saveKnowledgeBo" parameterType="com.mainsteam.stm.knowledge.bo.KnowledgeBo" databaseId="mysql">
+	insert into STM_KNG(ID,KNOWLEDGE_TYPE_CODE,TITLE,KEYWORDS,SOURCE_CONTENT,ISCLOUDY, CLOUDY_ID, CREATER_USER_ID, CREATED_TIME)
+	values
+	 
+		 
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="" separator="," close="">
+			(#{item.id},#{item.knowledgeTypeCode},#{item.title},#{item.keywords},#{item.sourceContent},
+			#{item.isCloudy}, #{item.cloudyId}, #{item.createUserId}, #{item.createTime})
+	</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </insert>
+   
+   
+   
+   
+   
+  <insert id="saveKnowledgeBo" parameterType="com.mainsteam.stm.knowledge.bo.KnowledgeBo" databaseId="oracle">
+	insert into STM_KNG(ID,KNOWLEDGE_TYPE_CODE,TITLE,KEYWORDS,SOURCE_CONTENT,ISCLOUDY, CLOUDY_ID, CREATER_USER_ID, CREATED_TIME)
+	 
+		 
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="" separator="UNION ALL" close="">
+			(select #{item.id},#{item.knowledgeTypeCode},#{item.title},#{item.keywords},#{item.sourceContent},
+			#{item.isCloudy}, #{item.cloudyId}, #{item.createUserId}, #{item.createTime} from dual)
+	</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </insert>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <insert id="saveKnowledgeBo" parameterType="com.mainsteam.stm.knowledge.bo.KnowledgeBo" databaseId="dm">
+	insert into STM_KNG(ID,KNOWLEDGE_TYPE_CODE,TITLE,KEYWORDS,SOURCE_CONTENT,ISCLOUDY, CLOUDY_ID, CREATER_USER_ID, CREATED_TIME)
+	 
+		 
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="" separator="UNION ALL" close="">
+			(select #{item.id},#{item.knowledgeTypeCode},#{item.title},#{item.keywords},#{item.sourceContent},
+			#{item.isCloudy}, #{item.cloudyId}, #{item.createUserId}, #{item.createTime} from dual)
+	</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </insert>
+  <insert id="saveKnowledgeBo" parameterType="com.mainsteam.stm.knowledge.bo.KnowledgeBo" databaseId="oscar">
+	insert into STM_KNG(ID,KNOWLEDGE_TYPE_CODE,TITLE,KEYWORDS,SOURCE_CONTENT,ISCLOUDY, CLOUDY_ID, CREATER_USER_ID, CREATED_TIME)
+	 
+		 
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="" separator="UNION ALL" close="">
+			(select #{item.id},#{item.knowledgeTypeCode},#{item.title},#{item.keywords},#{item.sourceContent},
+			#{item.isCloudy}, #{item.cloudyId}, #{item.createUserId}, #{item.createTime} from dual)
+	</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </insert>
+   
+   
+   
+   
+   
+  <insert id="saveLocalKnowledges" parameterType="com.mainsteam.stm.knowledge.bo.KnowledgeBo" databaseId="mysql">
+		insert into STM_KNG(ID,SOURCE_CONTENT,ISCLOUDY, CREATER_USER_ID, CREATED_TIME)
+	values
+	 
+		 
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="" separator="," close="">
+			(#{item.id},#{item.sourceContent},#{item.isCloudy}, #{item.createUserId}, #{item.createTime})
+	</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </insert>
+   
+   
+   
+   
+   
+  <insert id="saveLocalKnowledges" parameterType="com.mainsteam.stm.knowledge.bo.KnowledgeBo">
+		insert into STM_KNG(ID,SOURCE_CONTENT,ISCLOUDY, CREATER_USER_ID, CREATED_TIME)
+	 
+		 
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="" separator="UNION ALL" close="">
+			( select #{item.id},#{item.sourceContent},#{item.isCloudy}, #{item.createUserId}, #{item.createTime} from dual)
+	</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </insert>
+   
+   
+   
+   
+   
+  <select id="getKnowledgeByIds" resultType="com.mainsteam.stm.knowledge.bo.KnowledgeBo">
+		select ID,
+		KNOWLEDGE_TYPE_CODE as knowledgeTypeCode,
+		TITLE,
+		KEYWORDS,
+		SOURCE_CONTENT as sourceContent,
+		ISCLOUDY as isCloudy, 
+		CLOUDY_ID as cloudyId
+		from STM_KNG
+		where ID in
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <delete id="deleteLocalCloudyKnowledge">
+		delete from STM_KNG where ISCLOUDY = #{type}
+	</delete>
+   
+   
+   
+   
+   
+  <select id="selectLocalCloudyKnowledgeAttachmentFileIds" resultType="Long">
+		select KNGFILE.FILE_ID from STM_KNG KNOWLEDGE left join (
+			select RESOLVE.KNOWLEDGE_ID,ATTACHMENT.FILE_ID  from STM_KNG_SOURCE_RESOLVE_REL RESOLVE
+			left join STM_KNG_RESOLVE_ATMT_REL ATTACHMENT
+			on RESOLVE.RESOLVE_ID=ATTACHMENT.RESOLVE_ID
+		) KNGFILE on KNOWLEDGE.ID=KNGFILE.KNOWLEDGE_ID
+		where KNOWLEDGE.ISCLOUDY = #{type}
+	</select>
+   
+   
+   
+   
+   
+  <delete id="deleteLocalCloudyKnowledgeAttachment">
+		delete ATTACHMENT from STM_KNG_RESOLVE_ATMT_REL ATTACHMENT where
+		exists(
+		select 1 from STM_KNG KNOWLEDGE
+		left join STM_KNG_SOURCE_RESOLVE_REL RESOLVE
+		on KNOWLEDGE.ID=RESOLVE.KNOWLEDGE_ID
+		where KNOWLEDGE.ISCLOUDY = #{type} and RESOLVE.RESOLVE_ID=ATTACHMENT.RESOLVE_ID)
+	</delete>
+   
+   
+   
+   
+   
+  <select id="getKnowledgeBySourceContent" resultType="com.mainsteam.stm.knowledge.bo.KnowledgeBo">
+		select ID,
+		KNOWLEDGE_TYPE_CODE as knowledgeTypeCode,
+		TITLE,
+		KEYWORDS,
+		SOURCE_CONTENT as sourceContent,
+		ISCLOUDY as isCloudy, 
+		CLOUDY_ID as cloudyId
+		from STM_KNG
+		where SOURCE_CONTENT=#{sourceContent}
+	</select>
+   
+   
+   
+   
+   
+  <insert id="saveKnowledgeResolveBo" parameterType="com.mainsteam.stm.knowledge.bo.KnowledgeResolveBo" databaseId="mysql">
+		insert into STM_KNG_SOURCE_RESOLVE_REL(RESOLVE_ID, KNOWLEDGE_ID, RESOLVE_TITLE, RESOLVE_CONTENT, RESOLVE_TYPE)
+		values
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="" separator="," close="">
+			(#{item.id},#{item.knowledgeId},#{item.resolveTitle},#{item.resolveContent},#{item.isScript})
+		</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </insert>
+   
+   
+   
+   
+   
+  <insert id="saveKnowledgeResolveBo" parameterType="com.mainsteam.stm.knowledge.bo.KnowledgeResolveBo" databaseId="oracle">
+		insert into STM_KNG_SOURCE_RESOLVE_REL(RESOLVE_ID, KNOWLEDGE_ID, RESOLVE_TITLE, RESOLVE_CONTENT, RESOLVE_TYPE)
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="" separator="UNION ALL" close="">
+			(select #{item.id},#{item.knowledgeId},#{item.resolveTitle},#{item.resolveContent},#{item.isScript} from dual)
+		</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </insert>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <insert id="saveKnowledgeResolveBo" parameterType="com.mainsteam.stm.knowledge.bo.KnowledgeResolveBo" databaseId="dm">
+		insert into STM_KNG_SOURCE_RESOLVE_REL(RESOLVE_ID, KNOWLEDGE_ID, RESOLVE_TITLE, RESOLVE_CONTENT, RESOLVE_TYPE)
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="" separator="UNION ALL" close="">
+			(select #{item.id},#{item.knowledgeId},#{item.resolveTitle},#{item.resolveContent},#{item.isScript} from dual)
+		</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </insert>
+  <insert id="saveKnowledgeResolveBo" parameterType="com.mainsteam.stm.knowledge.bo.KnowledgeResolveBo" databaseId="oscar">
+		insert into STM_KNG_SOURCE_RESOLVE_REL(RESOLVE_ID, KNOWLEDGE_ID, RESOLVE_TITLE, RESOLVE_CONTENT, RESOLVE_TYPE)
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="" separator="UNION ALL" close="">
+			(select #{item.id},#{item.knowledgeId},#{item.resolveTitle},#{item.resolveContent},#{item.isScript} from dual)
+		</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </insert>
+   
+   
+   
+   
+   
+  <insert id="saveResolveAttachment" databaseId="mysql">
+		insert into STM_KNG_RESOLVE_ATMT_REL(FILE_ID, FILE_NAME, RESOLVE_ID, UPLOAD_TIME, SORT) values
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="" separator="," close="">
+			(#{item.fileId}, #{item.fileName}, #{item.resolveId}, #{item.uploadDate}, #{item.sort})
+		</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </insert>
+   
+   
+   
+   
+   
+  <insert id="saveResolveAttachment" databaseId="oracle">
+		insert into STM_KNG_RESOLVE_ATMT_REL(FILE_ID, FILE_NAME, RESOLVE_ID, UPLOAD_TIME, SORT)
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="" separator="UNION ALL" close="">
+			(select #{item.fileId}, #{item.fileName}, #{item.resolveId}, #{item.uploadDate}, #{item.sort} from dual)
+		</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </insert>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <insert id="saveResolveAttachment" databaseId="dm">
+		insert into STM_KNG_RESOLVE_ATMT_REL(FILE_ID, FILE_NAME, RESOLVE_ID, UPLOAD_TIME, SORT)
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="" separator="UNION ALL" close="">
+			(select #{item.fileId}, #{item.fileName}, #{item.resolveId}, #{item.uploadDate}, #{item.sort} from dual)
+		</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </insert>
+  <insert id="saveResolveAttachment" databaseId="oscar">
+		insert into STM_KNG_RESOLVE_ATMT_REL(FILE_ID, FILE_NAME, RESOLVE_ID, UPLOAD_TIME, SORT)
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="list" open="" separator="UNION ALL" close="">
+			(select #{item.fileId}, #{item.fileName}, #{item.resolveId}, #{item.uploadDate}, #{item.sort} from dual)
+		</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </insert>
+   
+   
+   
+   
+   
+  <select id="getResolveCountByContent" resultType="int">
+		select count(1) from STM_KNG_SOURCE_RESOLVE_REL where RESOLVE_CONTENT=#{content}
+	</select>
+   
+   
+   
+   
+   
+  <select id="getKnowledgeResolve" resultType="com.mainsteam.stm.knowledge.zip.bo.CloudyKnowledge">
+		select 
+		KNOWLEDGE.ID as cloudyId,
+		KNOWLEDGE.KNOWLEDGE_TYPE_CODE as knowledgeTypeCode,
+		KNOWLEDGE.SOURCE_CONTENT as sourceContent,
+		RESOLVE.RESOLVE_CONTENT as resolveContent,
+		RESOLVE.RESOLVE_TITLE as title,
+		RESOLVE.RESOLVE_ID as resolveId
+		from STM_KNG_SOURCE_RESOLVE_REL RESOLVE left join STM_KNG KNOWLEDGE
+		on RESOLVE.KNOWLEDGE_ID=KNOWLEDGE.ID
+		 where ISCLOUDY = #{type}
+	</select>
+   
+   
+   
+   
+   
+  <select id="getAllKnowledges" resultType="com.mainsteam.stm.knowledge.bo.KnowledgeBo">
+		select ID,
+		KNOWLEDGE_TYPE_CODE as knowledgeTypeCode,
+		TITLE,
+		KEYWORDS,
+		SOURCE_CONTENT as sourceContent,
+		ISCLOUDY as isCloudy, 
+		CLOUDY_ID as cloudyId
+		from STM_KNG
+	</select>
+   
+   
+   
+   
+   
+  <select id="getKnowledgeAttachment" resultType="com.mainsteam.stm.knowledge.local.bo.KnowledgeAttachmentBo">
+		select 
+		FILE_ID as fileId,
+		RESOLVE_ID as resolveId,
+		FILE_NAME as fileName
+		from STM_KNG_RESOLVE_ATMT_REL where RESOLVE_ID=#{resolveId} order by SORT
+	</select>
+   
+   
+   
+   
+   
+  <!-- 	<select id="checkIsInit" resultType="java.lang.Integer"> -->
+   
+   
+   
+   
+   
+  <!-- 		select count(ID) from STM_KNG where ID&lt;200000 and ID&gt;100465 -->
+   
+   
+   
+   
+   
+  <!-- 	</select> -->
+</mapper>

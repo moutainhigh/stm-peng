@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.instancelib.dao.CustomPropDefinitionDAO">
+	<resultMap id="customPropResult"
+		type="com.mainsteam.stm.instancelib.dao.pojo.CustomPropDefinitionDO">
+		<result column="PROPKEY" javaType="string" property="key"/>
+		<result column="NAME" javaType="string" property="name"/>
+		<result column="CATEGORY" javaType="string" property="category"
+			/>
+		<result column="UPDATETIME" javaType="long" property="updateTime"
+			/>
+	</resultMap>
+	<insert id="insertCustomPropDefinitionDO"
+		parameterType="com.mainsteam.stm.instancelib.dao.pojo.CustomPropDefinitionDO">
+			insert into STM_INSTANCELIB_CUSTOMPROP (PROPKEY,NAME,CATEGORY,UPDATETIME) values
+			(#{key},#{name},#{category},#{updateTime}) 
+	</insert>
+	<update id="updateCustomPropDefinitionDO"
+		parameterType="com.mainsteam.stm.instancelib.dao.pojo.CustomPropDefinitionDO">
+		update STM_INSTANCELIB_CUSTOMPROP set NAME=#{name},UPDATETIME=#{updateTime}
+		where PROPKEY=#{key} </update>
+	<select id="getCustomPropDefinitionDOByKey" parameterType="string"
+		resultMap="customPropResult"> select PROPKEY,NAME,CATEGORY,UPDATETIME from
+		STM_INSTANCELIB_CUSTOMPROP where PROPKEY=#{value} </select>
+	<select id="getCustomPropDefinitionDOsByCategory" parameterType="string"
+		resultMap="customPropResult"> select PROPKEY,NAME,CATEGORY,UPDATETIME from
+		STM_INSTANCELIB_CUSTOMPROP where CATEGORY=#{value} </select>
+	<select id="getCustomPropDefinitionDOsByKeys" resultMap="customPropResult">
+		select PROPKEY,NAME,CATEGORY,UPDATETIME from STM_INSTANCELIB_CUSTOMPROP where PROPKEY
+		in
+		<foreach collection="list" item="keyList" open="(" separator="," close=")">
+			#{keyList} </foreach> </select>
+	<select id="queryCustomPropDefinitionDOs"
+		parameterType="com.mainsteam.stm.instancelib.dao.pojo.CustomPropDefinitionQueryDO"
+		resultMap="customPropResult"> select PROPKEY,NAME,CATEGORY,UPDATETIME from
+		STM_INSTANCELIB_CUSTOMPROP
+		<trim prefix="where" prefixOverrides="and">
+			<if test="key != null">and PROPKEY=#{key} </if>
+			<if test="name != null">and NAME=#{name} </if>
+			<if test="category != null">and CATEGORY=#{category} </if>
+			<if test="startTime>0">and UPDATETIME&gt;=#{updateTime}</if>
+			<if test="endTime>0">and UPDATETIME&lt;=#{endTime}</if>
+		</trim> </select>
+	<delete id="removeCustomPropDefinitionDOByKey" parameterType="string">
+		delete from STM_INSTANCELIB_CUSTOMPROP where PROPKEY=#{key}
+	</delete>	
+</mapper>

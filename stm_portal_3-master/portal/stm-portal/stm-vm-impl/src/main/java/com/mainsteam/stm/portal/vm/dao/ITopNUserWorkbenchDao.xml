@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.portal.vm.dao.ITopNUserWorkbenchDao">
+   
+   
+   
+   
+   
+  <select id="getTopNUserWorkBenchs" parameterType="long" resultType="com.mainsteam.stm.portal.vm.bo.TopNWorkBench">
+		select workbench.id workbenchId,workbench.title,workbench.url,workbench.icon,mix.sort,mix.selfExt,mix.domainId,
+		 mix.name,mix.templateType,mix.sortMetric,mix.sortOrder,mix.showType,mix.topNum,mix.resourceIds,mix.templateTypeName,mix.sortMetricName
+		 from 
+			(select WORKBENCH_ID workbenchId,sort,self_ext selfExt,domain_id domainId,
+			NAME,TEMPLATE_TYPE templateType,SORT_METRIC sortMetric,SORT_ORDER sortOrder,SHOW_TYPE showType,TOP_NUM topNum,RESOURCE_IDS resourceIds ,TEMPLATE_TYPE_NAME TEMPLATETYPENAME,SORT_METRIC_NAME SORTMETRICNAME
+			from STM_VM_USER_WBH_REL
+			where USER_ID=#{userId} order by sort) mix
+		left join STM_VM_WORKBENCH workbench on mix.workbenchId=workbench.id
+	</select>
+   
+   
+   
+   
+   
+  <select id="getTopNUserWorkBenchById" parameterType="com.mainsteam.stm.portal.vm.bo.TopNWorkBench" resultType="com.mainsteam.stm.portal.vm.bo.TopNWorkBench">
+		select workbench.id,workbench.title,workbench.url,workbench.icon,mix.sort,mix.selfExt,mix.domainId,
+			mix.name,mix.templateType,mix.sortMetric,mix.sortOrder,mix.showType,mix.topNum,mix.resourceIds,mix.templateTypeName,mix.sortMetricName
+		 from 
+			(select WORKBENCH_ID workbenchId,sort,self_ext selfExt,domain_id domainId,
+				NAME,TEMPLATE_TYPE templateType,SORT_METRIC sortMetric,SORT_ORDER sortOrder,SHOW_TYPE showType,TOP_NUM topNum,RESOURCE_IDS resourceIds,TEMPLATE_TYPE_NAME TEMPLATETYPENAME,SORT_METRIC_NAME SORTMETRICNAME
+				from STM_VM_USER_WBH_REL
+			where USER_ID=#{userId} and WORKBENCH_ID=#{workbenchId} and SORT=#{sort} order by sort) mix
+		left join STM_VM_WORKBENCH workbench on mix.workbenchId=workbench.id
+	</select>
+   
+   
+   
+   
+   
+  <insert id="batchInsertWorkBenchs" parameterType="java.util.List" databaseId="mysql">
+		insert into STM_VM_USER_WBH_REL(USER_ID,WORKBENCH_ID,SORT,domain_id,self_ext,
+		NAME,TEMPLATE_TYPE,SORT_METRIC,SORT_ORDER,SHOW_TYPE,TOP_NUM,RESOURCE_IDS,TEMPLATE_TYPE_NAME,SORT_METRIC_NAME
+		) values
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach collection="list" item="item" index="index" separator=",">  
+			(#{item.userId},#{item.workbenchId},#{item.sort},#{item.domainId},#{item.selfExt},
+			#{item.name},#{item.templateType},#{item.sortMetric},#{item.sortOrder},#{item.showType},#{item.topNum},#{item.resourceIds},#{item.templateTypeName},#{item.sortMetricName}
+			)
+    	</foreach>  
+	
+	
+  
+  
+  
+  
+  
+  </insert>
+   
+   
+   
+   
+   
+  <insert id="batchInsertWorkBenchs" parameterType="java.util.List" databaseId="oracle">
+		insert into STM_VM_USER_WBH_REL(USER_ID,WORKBENCH_ID,SORT,domain_id,self_ext,
+			NAME,TEMPLATE_TYPE,SORT_METRIC,SORT_ORDER,SHOW_TYPE,TOP_NUM,RESOURCE_IDS,TEMPLATE_TYPE_NAME,SORT_METRIC_NAME
+		) 
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach collection="list" item="item" index="index" separator="union all">
+			( select #{item.userId,jdbcType=NUMERIC},
+			#{item.workbenchId,jdbcType=NUMERIC},
+			#{item.sort,jdbcType=NUMERIC},
+			#{item.domainId,jdbcType=NUMERIC},
+			#{item.selfExt,jdbcType=VARCHAR},
+			#{item.name,jdbcType=VARCHAR},
+			#{item.templateType,jdbcType=VARCHAR},
+			#{item.sortMetric,jdbcType=VARCHAR},
+			#{item.sortOrder,jdbcType=VARCHAR},
+			#{item.showType,jdbcType=NUMERIC},
+			#{item.topNum,jdbcType=NUMERIC},
+			#{item.resourceIds,jdbcType=VARCHAR},
+			#{item.templateTypeName,jdbcType=VARCHAR},
+			#{item.sortMetricName,jdbcType=VARCHAR}
+ 			from dual )
+		</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </insert>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <insert id="batchInsertWorkBenchs" parameterType="java.util.List" databaseId="dm">
+		insert into STM_VM_USER_WBH_REL(USER_ID,WORKBENCH_ID,SORT,domain_id,self_ext,
+			NAME,TEMPLATE_TYPE,SORT_METRIC,SORT_ORDER,SHOW_TYPE,TOP_NUM,RESOURCE_IDS,TEMPLATE_TYPE_NAME,SORT_METRIC_NAME
+		) 
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach collection="list" item="item" index="index" separator="union all">
+			( select #{item.userId,jdbcType=NUMERIC},
+			#{item.workbenchId,jdbcType=NUMERIC},
+			#{item.sort,jdbcType=NUMERIC},
+			#{item.domainId,jdbcType=NUMERIC},
+			#{item.selfExt,jdbcType=VARCHAR},
+			#{item.name,jdbcType=VARCHAR},
+			#{item.templateType,jdbcType=VARCHAR},
+			#{item.sortMetric,jdbcType=VARCHAR},
+			#{item.sortOrder,jdbcType=VARCHAR},
+			#{item.showType,jdbcType=NUMERIC},
+			#{item.topNum,jdbcType=NUMERIC},
+			#{item.resourceIds,jdbcType=VARCHAR},
+			#{item.templateTypeName,jdbcType=VARCHAR},
+			#{item.sortMetricName,jdbcType=VARCHAR}
+ 			from dual )
+		</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </insert>
+  <insert id="batchInsertWorkBenchs" parameterType="java.util.List" databaseId="oscar">
+		insert into STM_VM_USER_WBH_REL(USER_ID,WORKBENCH_ID,SORT,domain_id,self_ext,
+			NAME,TEMPLATE_TYPE,SORT_METRIC,SORT_ORDER,SHOW_TYPE,TOP_NUM,RESOURCE_IDS,TEMPLATE_TYPE_NAME,SORT_METRIC_NAME
+		) 
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach collection="list" item="item" index="index" separator="union all">
+			( select #{item.userId,jdbcType=NUMERIC},
+			#{item.workbenchId,jdbcType=NUMERIC},
+			#{item.sort,jdbcType=NUMERIC},
+			#{item.domainId,jdbcType=NUMERIC},
+			#{item.selfExt,jdbcType=VARCHAR},
+			#{item.name,jdbcType=VARCHAR},
+			#{item.templateType,jdbcType=VARCHAR},
+			#{item.sortMetric,jdbcType=VARCHAR},
+			#{item.sortOrder,jdbcType=VARCHAR},
+			#{item.showType,jdbcType=NUMERIC},
+			#{item.topNum,jdbcType=NUMERIC},
+			#{item.resourceIds,jdbcType=VARCHAR},
+			#{item.templateTypeName,jdbcType=VARCHAR},
+			#{item.sortMetricName,jdbcType=VARCHAR}
+ 			from dual )
+		</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </insert>
+   
+   
+   
+   
+   
+  <delete id="delTopNUserWorkBench" parameterType="long">
+		delete from STM_VM_USER_WBH_REL where USER_ID=#{userId}
+	</delete>
+   
+   
+   
+   
+   
+  <delete id="delTopNUsersWorkBench" parameterType="long">
+		delete from STM_VM_USER_WBH_REL where USER_ID in
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach item="userId" index="index" collection="array" open="(" separator="," close=")">
+ 			#{userId}
+		</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </delete>
+   
+   
+   
+   
+   
+  <delete id="delSingleUserWorkBench" parameterType="com.mainsteam.stm.portal.vm.bo.TopNWorkBench">
+		delete from STM_VM_USER_WBH_REL where USER_ID=#{userId} and WORKBENCH_ID=#{workbenchId} and SORT=#{sort}
+	</delete>
+   
+   
+   
+   
+   
+  <update id="setExt" parameterType="com.mainsteam.stm.portal.vm.bo.TopNWorkBench">
+		update STM_VM_USER_WBH_REL set self_ext=#{selfExt} where USER_ID=#{userId} AND WORKBENCH_ID=#{workbenchId} AND SORT=#{sort}
+	</update>
+   
+   
+   
+   
+   
+  <update id="updateTopNSetting" parameterType="com.mainsteam.stm.portal.vm.bo.TopNWorkBench">
+		update STM_VM_USER_WBH_REL
+			set SELF_EXT=#{selfExt},
+				DOMAIN_ID = #{domainId},
+				NAME = #{name},
+				TEMPLATE_TYPE = #{templateType},
+			 	SORT_METRIC = #{sortMetric},
+			 	SORT_ORDER = #{sortOrder},
+			 	SHOW_TYPE = #{showType},
+			 	TOP_NUM = #{topNum},
+			 	RESOURCE_IDS = #{resourceIds},
+			 	TEMPLATE_TYPE_NAME = #{templateTypeName},
+			 	SORT_METRIC_NAME = #{sortMetricName}
+		where USER_ID=#{userId} AND WORKBENCH_ID=#{workbenchId} AND SORT=#{sort}
+	</update>
+   
+   
+   
+   
+   
+  <select id="getUserBenchIdByResourceId" resultType="com.mainsteam.stm.portal.vm.bo.TopNWorkBench" parameterType="long" databaseId="mysql">
+		SELECT WORKBENCH_ID workbenchId,sort,self_ext selfExt,USER_ID userId FROM STM_VM_USER_WBH_REL
+		WHERE WORKBENCH_ID IN(2,4,5,6) AND SELF_EXT LIKE CONCAT('%',#{id},'%')
+	</select>
+   
+   
+   
+   
+   
+  <select id="getUserBenchIdByResourceId" resultType="com.mainsteam.stm.portal.vm.bo.TopNWorkBench" parameterType="long" databaseId="oracle">
+		SELECT WORKBENCH_ID workbenchId,sort,self_ext selfExt,USER_ID userId FROM STM_VM_USER_WBH_REL
+		WHERE WORKBENCH_ID IN(2,4,5,6) AND SELF_EXT LIKE '%'||#{id}||'%'
+	</select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="getUserBenchIdByResourceId" resultType="com.mainsteam.stm.portal.vm.bo.TopNWorkBench" parameterType="long" databaseId="dm">
+		SELECT WORKBENCH_ID workbenchId,sort,self_ext selfExt,USER_ID userId FROM STM_VM_USER_WBH_REL
+		WHERE WORKBENCH_ID IN(2,4,5,6) AND SELF_EXT LIKE '%'||#{id}||'%'
+	</select>
+  <select id="getUserBenchIdByResourceId" resultType="com.mainsteam.stm.portal.vm.bo.TopNWorkBench" parameterType="long" databaseId="oscar">
+		SELECT WORKBENCH_ID workbenchId,sort,self_ext selfExt,USER_ID userId FROM STM_VM_USER_WBH_REL
+		WHERE WORKBENCH_ID IN(2,4,5,6) AND SELF_EXT LIKE '%'||#{id}||'%'
+	</select>
+   
+   
+   
+   
+   
+  <update id="setUserBenchResourceIdById">
+		UPDATE STM_VM_USER_WBH_REL SET SELF_EXT = #{selfExt}
+		WHERE user_id = #{userId}
+		AND WORKBENCH_ID=#{workbenchId}
+		AND SORT=#{sort}
+	</update>
+   
+   
+   
+   
+   
+  <select id="getAllWorkBench" resultType="com.mainsteam.stm.portal.vm.bo.TopNWorkBench">
+		SELECT id,id as workbenchId,title,url,icon FROM STM_VM_WORKBENCH
+	</select>
+</mapper>

@@ -1,0 +1,649 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">
+    <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0">
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="hostType" parameterProperty="DefaultValue" propertyValue="Linux"/>
+        <ChangePluginInitParameter pluginid="IpmiPlugin" parameterId="IpmiIP" parameterProperty="isDisplay" propertyValue="true"/>
+        <ChangePluginInitParameter pluginid="IpmiPlugin" parameterId="impiusername" parameterProperty="isDisplay" propertyValue="true"/>
+        <ChangePluginInitParameter pluginid="IpmiPlugin" parameterId="ipmipassword" parameterProperty="isDisplay" propertyValue="true"/>
+        <ChangePluginInitParameter pluginid="IpmiPlugin" parameterId="ipmiport" parameterProperty="isDisplay" propertyValue="true"/>
+    </GlobalMetricSetting>
+    <PluginClassAliasList>
+        <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+        <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+        <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+        <PluginClassAlias id="columnPasteProcessor" class="com.mainsteam.stm.plugin.common.ColumnPasteProcessor"/>
+        <PluginClassAlias id="RegularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+        <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+        <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+        <PluginClassAlias id="tableConverter" class="com.mainsteam.stm.plugin.common.TableResultSetConverter"/>
+        <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+        <PluginClassAlias id="ChangeRateProcessor" class="com.mainsteam.stm.plugin.common.ChangeRateProcessor"/>
+        <PluginClassAlias id="processConverter" class="com.mainsteam.stm.plugin.common.ProcessResultSetConverter"/>
+        <PluginClassAlias id="SolarisNetStatProcessor" class="com.mainsteam.stm.plugin.common.SolarisNetStatProcessor"/>
+        <PluginClassAlias id="uptimeProcessor" class="com.mainsteam.stm.plugin.common.UptimeProcessor"/>
+        <PluginClassAlias id="columnSplitProcessor" class="com.mainsteam.stm.plugin.common.ColumnSplitProcessor"/>
+        <PluginClassAlias id="FormatProcessor" class="com.mainsteam.stm.plugin.common.FormatProcessor"/>
+        <PluginClassAlias id="rowFilterProcessor" class="com.mainsteam.stm.plugin.common.RowFilterProcessor"/>
+    </PluginClassAliasList>
+    <MetricPlugin metricid="PowerStatus" collectType="" pluginid="IpmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="tool" value="ipmitool"/>
+            <Parameter key="command" value="power status"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Chassis Power is (on)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="" value="on,1;0"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="availableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="raidSize" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="cd /opt/storcli;./storcli /c0 show"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d\/\d\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+(\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="raidSize" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="cd /opt/storcli;./storcli /c0	show"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d\/\d\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+(\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="raidType" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="cd /opt/storcli;./storcli /c0 show"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d\/\d\s+(\S+)\s+\S+\s+"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="raidType" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="cd /opt/storcli;./storcli /c0 show"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="\d\/\d\s+(\S+)\s+\S+\s+"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="productName" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="cd /opt/storcli;./storcli /c0 show"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Product Name =\s+(.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="productName" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="cd /opt/storcli;./storcli /c0 show"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Product Name =\s+(.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="serialNo" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="cd /opt/storcli;./storcli /c0 show"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Serial Number =\s+(.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="serialNo" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="cd /opt/storcli;./storcli /c0 show"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Serial Number =\s+(.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sasAdress" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="cd /opt/storcli;./storcli /c0 show"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="SAS Address =\s+(.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sasAdress" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="cd /opt/storcli;./storcli /c0 show"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="SAS Address =\s+(.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="pciAdress" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="cd /opt/storcli;./storcli /c0 show"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="PCI Address =\s+(.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="pciAdress" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="cd /opt/storcli;./storcli /c0 show"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="PCI Address =\s+(.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="PowerOverloadStatus" collectType="" pluginid="IpmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="tool" value="ipmitool"/>
+            <Parameter type="" key="command" value="chassis status"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Power Overload\s+:\s(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="" value="false,正常;异常"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="MainPowerFaultStatus" collectType="" pluginid="IpmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="tool" value="ipmitool"/>
+            <Parameter type="" key="command" value="chassis status"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Main Power Fault\s+:\s(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="" value="false,正常;异常"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="PoweControFaulStatu" collectType="" pluginid="IpmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="tool" value="ipmitool"/>
+            <Parameter type="" key="command" value="chassis status"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Power Control Fault\s+:\s(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="" value="false,正常;异常"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="DriveFaultStatus" collectType="" pluginid="IpmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="tool" value="ipmitool"/>
+            <Parameter type="" key="command" value="chassis status"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Drive Fault\s+:\s(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="" value="false,正常;异常"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="CoolinFaFaulStatu" collectType="" pluginid="IpmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="tool" value="ipmitool"/>
+            <Parameter type="" key="command" value="chassis status"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Cooling/Fan Fault\s+:\s(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="" value="false,正常;异常"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="HostName" collectType="" pluginid="IpmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="tool" value="ipmitool"/>
+            <Parameter type="" key="command" value="fru"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Product Name\s+:\s([^\r^\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ServiceTag" collectType="" pluginid="IpmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="tool" value="ipmitool"/>
+            <Parameter type="" key="command" value="fru"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Product Serial\s+:\s(.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="BoardMfg" collectType="" pluginid="IpmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="tool" value="ipmitool"/>
+            <Parameter type="" key="command" value="fru"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Board Mfg\s+:\s([^\r^\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="diskIndex" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="diskIndex"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="cd /opt/storcli;./storcli /c0 show"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="64:(\d+)\s+\d+\s+\S+\s+\d+"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="diskIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="diskIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="diskIndex" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="diskIndex"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="cd /opt/storcli;./storcli /c0 show"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="64:(\d+)\s+\d+\s+\S+\s+\d+"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="diskIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="diskIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="diskName" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="diskIndex"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="cd /opt/storcli;./storcli /c0 show"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="64:(\d+)\s+\d+\s+\S+\s+\d+"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="select diskIndex, ('HDD'+diskIndex) as diskName" key="SELECT"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="diskIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="diskName"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="diskIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="diskName" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="diskIndex"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="cd /opt/storcli;./storcli /c0 show"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="64:(\d+)\s+\d+\s+\S+\s+\d+"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="select diskIndex, ('HDD'+diskIndex) as diskName" key="SELECT"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="diskIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="diskName"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="diskIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="diskSize" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="diskIndex,diskSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="cd /opt/storcli;./storcli /c0 show"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="64:(\d+)\s+\d+\s+\S+\s+\d+\s+(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="diskIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="diskSize"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="diskIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="diskSize" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="diskIndex,diskSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="cd /opt/storcli;./storcli /c0 show"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="64:(\d+)\s+\d+\s+\S+\s+\d+\s+(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="diskIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="diskSize"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="diskIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="diskStatus" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="diskIndex,diskStatus"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="cd /opt/storcli;./storcli /c0 show"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="64:(\d+)\s+\d+\s+(\S+)\s+\d+"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="diskStatus" value="Onln,1;0"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="diskIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="diskStatus"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="diskIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="diskStatus" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="diskIndex,diskStatus"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="cd /opt/storcli;./storcli /c0 show"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="64:(\d+)\s+\d+\s+(\S+)\s+\d+"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="diskStatus" value="Onln,1;0"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="diskIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="diskStatus"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="diskIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="diskModel" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="diskIndex,diskModel"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="cd /opt/storcli;./storcli /c0 show"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="64:(\d+)\s+\d+\s+\S+\s+\d+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+(\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="diskIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="diskModel"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="diskIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="diskModel" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="diskIndex,diskModel"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="cd /opt/storcli;./storcli /c0 show"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="64:(\d+)\s+\d+\s+\S+\s+\d+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+(\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="diskIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="diskModel"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="diskIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <!-- Fan -->
+    <MetricPlugin metricid="fanIndex" collectType="" pluginid="IpmiPlugin">
+        <PluginResultMetaInfo columns="fanIndex"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="tool" value="ipmitool"/>
+            <Parameter type="" key="command" value="sdr type Fan"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="FAN(\d\-\d)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="fanIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="fanIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fanName" collectType="" pluginid="IpmiPlugin">
+        <PluginResultMetaInfo columns="fanName,fanIndex"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="tool" value="ipmitool"/>
+            <Parameter type="" key="command" value="sdr type Fan"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(FAN)(\d\-\d)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="SELECT (fanName+fanIndex) as fanName, fanIndex" key="SELECT"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="fanIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="fanName"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fanIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fanStatus" collectType="" pluginid="IpmiPlugin">
+        <PluginResultMetaInfo columns="fanIndex,fanStatus"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="tool" value="ipmitool"/>
+            <Parameter type="" key="command" value="sdr type Fan"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="FAN(\d\-\d)\s+\|\s\S+\s\|\s+(\S+)\s+"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="fanStatus" value="ok,1;0"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="fanIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="fanStatus"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fanIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fanTemperature" collectType="" pluginid="IpmiPlugin">
+        <PluginResultMetaInfo columns="fanIndex,fanTemperature"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="tool" value="ipmitool"/>
+            <Parameter type="" key="command" value="sdr type Fan"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="FAN(\d\-\d)\s+\|\s\S+\s\|\s+\S+\s+\|\s+(\S+)\s\|"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="fanIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="fanTemperature"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fanIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fanRevolution" collectType="" pluginid="IpmiPlugin">
+        <PluginResultMetaInfo columns="fanIndex,fanRevolution"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="tool" value="ipmitool"/>
+            <Parameter type="" key="command" value="sdr type Fan"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="FAN(\d\-\d)\s+\|\s\S+\s\|\s+\S+\s+\|\s+\S+\s\|\s+(\S+)\s+"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="fanIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="fanRevolution"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fanIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <!-- Processor -->
+    <MetricPlugin metricid="processorIndex" collectType="" pluginid="IpmiPlugin">
+        <PluginResultMetaInfo columns="processorIndex"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="tool" value="ipmitool"/>
+            <Parameter type="" key="command" value="sdr type processor"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="CPU(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="processorIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="processorIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="processorName" collectType="" pluginid="IpmiPlugin">
+        <PluginResultMetaInfo columns="processorIndex"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="tool" value="ipmitool"/>
+            <Parameter type="" key="command" value="sdr type processor"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="CPU(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="select processorIndex, ('CPU'+processorIndex) as processorName" key="SELECT"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="processorIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="processorName"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="processorIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="processorStatus" collectType="" pluginid="IpmiPlugin">
+        <PluginResultMetaInfo columns="processorIndex,processorStatus"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="tool" value="ipmitool"/>
+            <Parameter type="" key="command" value="sdr type processor"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="CPU(\d+)\s+\S+\s+\|\s+\S+\s+\S+\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="processorStatus" value="ok,1;0"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="processorIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="processorStatus"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="processorIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <!-- Power -->
+    <MetricPlugin metricid="powerIndex" collectType="" pluginid="IpmiPlugin">
+        <PluginResultMetaInfo columns="powerIndex"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="tool" value="ipmitool"/>
+            <Parameter type="" key="command" value="sdr type 'Power Supply'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="PSU(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="select ('PSU'+powerIndex) as powerIndex" key="SELECT"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="powerIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="powerIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="powerStatus" collectType="" pluginid="IpmiPlugin">
+        <PluginResultMetaInfo columns="powerIndex,powerStatus"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="tool" value="ipmitool"/>
+            <Parameter type="" key="command" value="sdr type 'Power Supply'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="PSU(\d+)\s+\S+\s+\|\s+\S+\s+\S+\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="powerStatus" value="ok,1;0"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="select ('PSU'+powerIndex) as powerIndex, powerStatus" key="SELECT"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="powerIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="powerStatus"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="powerIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+</MetricPlugins>

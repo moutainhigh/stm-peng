@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root> <import src="f5_network.xml" />
+	<!-- 
+	devicetype:			设备类型名称
+	ismulticoltype:		是否允许采集方式多选
+	majortype:			主要分类（可以理解为设备类型）
+	minortype:			次要分类
+	manufacturer:		厂商
+	devicetype_zh:		设备类型中文描述
+	 -->
+	<devicetypeinfo devicetype="F5_2" ismulticoltype="true" majortype="network" minortype="LoadBalancer" manufacturer="F5" 
+					devicetype_zh="F5负载均衡">
+		
+		<!-- 用于定位设备为该类设备的多个sysoid标识，如果snmp采集为sysoid，如果其他方式自行定义 -->
+		<devicetypes>
+			<devicetype sysoid="1.3.6.1.4.1.3375.2.1.3.4"/>
+		    <devicetype sysoid="1.3.6.1.4.1.3375.2.1.3.4.4"/>
+		</devicetypes>
+		
+		<!-- 该设备类型定义的命令，用于合并命令执行 -->
+		<commands>
+			<!-- coltype:采集方式，comid：命令ID，command：命令 -->
+			
+			<command coltype="SNMP" comid="sysStatTmTotalCycles"     command="1.3.6.1.4.1.3375.2.1.1.2.1.41"/><!-- sysStatTmTotalCycles -->
+			<command coltype="SNMP" comid="sysStatTmIdleCycles"     command="1.3.6.1.4.1.3375.2.1.1.2.1.42"/><!-- sysStatTmIdleCycles -->
+			<command coltype="SNMP" comid="sysStatTmSleepCycles"     command="1.3.6.1.4.1.3375.2.1.1.2.1.43"/><!-- sysStatTmSleepCycles -->
+			
+			<command coltype="SNMP" comid="memPoolUsed"  command="1.3.6.1.4.1.3375.2.1.1.2.1.45.0"/>   <!--内存池使用容量-->
+			<command coltype="SNMP" comid="memPoolTotal"  command="1.3.6.1.4.1.3375.2.1.1.2.1.44.0"/>   <!--内存池总容量-->
+			
+			<command coltype="SNMP" comid="cpuNum"  command="1.3.6.1.4.1.3375.2.1.1.2.1.38"/>   <!--CPU个数-->
+			
+			<command coltype="SNMP" comid="ifDesc" command="1.3.6.1.2.1.2.2.1.2"/>  <!--端口描述 -->	
+		</commands>
+		
+		<!-- 描述该类设备的所有指标采集,一行对应一个指标 -->
+		<resources>
+			<!-- CPU平均利用率 -->
+			<resource kpiid="N1cpuUsage" coltype="SNMP" value="(($d1-($d2+$d3))/$d1)*100" valuetype="Float" unit="%">		
+				<collects>				
+					<collect exeorder="10" comid="sysStatTmTotalCycles" select="" merge="" deal="round_chg"/>
+					<collect exeorder="20" comid="sysStatTmIdleCycles" select="" merge="" deal="round_chg"/>
+					<collect exeorder="30" comid="sysStatTmSleepCycles" select="" merge="" deal="round_chg"/>
+				</collects>
+			
+				
+				<kpipolicy table="res_d_N1cpuUsage" field="value" fieldtype="" willalert="y"
+					alertexp1="${value}&lt;85" alertdesc1="CPU平均利用率恢复正常，当前值为${value}%。" alertexp2="" alertdesc2="" alertexp3="${value}>=85"
+					alertdesc3="CPU平均利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp4="${value}>=95" alertdesc4="CPU平均利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp5="" alertdesc5=""
+					alertcontin="1"   circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 内存利用率 -->
+			<resource kpiid="N1memUsage" coltype="SNMP" value="($d1/$d2)*100" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="memPoolUsed" select="" merge="" deal=""/>
+					<collect exeorder="11" comid="memPoolTotal" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1memUsage" field="value" fieldtype="" willalert="y"
+					alertexp1="${value}&lt;85" alertdesc1="内存利用率恢复正常，当前值为${value}%。" alertexp2="" alertdesc2="" alertexp3="${value}>=85"
+					alertdesc3="内存利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp4="${value}>=95" alertdesc4="内存利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp5="" alertdesc5=""
+					alertcontin="1"   circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 内存池已用容量 -->
+			<resource kpiid="N1memPoolUsed" coltype="SNMP" value="" valuetype="Float" unit="Byte">
+				<collects>
+					<collect exeorder="10" comid="memPoolUsed" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1memPoolUsed" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 内存池可用容量 -->
+			<resource kpiid="N1memPoolFree" coltype="SNMP" value="$d2-$d1" valuetype="Float" unit="Byte">
+				<collects>
+					<collect exeorder="10" comid="memPoolUsed" select="" merge="" deal=""/>
+					<collect exeorder="20" comid="memPoolTotal" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1memPoolFree" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- CPU个数 -->
+			<resource kpiid="N1cpuNum" coltype="SNMP" value="" valuetype="Integer" unit="">
+				<collects>
+					<collect exeorder="10" comid="cpuNum" select="" merge="" deal=""/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1cpuNum" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+					
+			</resource>
+			
+			<!-- 端口名称 -->
+			<resource kpiid="N1ifName" coltype="SNMP" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="ifDesc" select="" merge="" deal=""/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifName" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="0"/>
+					
+			</resource>
+			
+		</resources>
+	</devicetypeinfo>
+</root>

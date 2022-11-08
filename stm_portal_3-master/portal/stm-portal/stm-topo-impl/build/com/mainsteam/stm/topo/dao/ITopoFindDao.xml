@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.topo.dao.ITopoFindDao">
+	<delete id="trunkLinkAll">
+		truncate table STM_TOPO_LINK
+	</delete>   
+	<delete id="trunkOtherNodeAll">
+		truncate table STM_TOPO_OTHERS
+	</delete>
+	<delete id="trunkNodeAll">
+		truncate table STM_TOPO_NODE
+	</delete>
+	<delete id="trunkSubTopoAll">
+		truncate table STM_TOPO_SUBTOPO
+	</delete>
+	<delete id="trunkUnInstanceLink">
+		delete from STM_TOPO_LINK where instance_id is null;
+	</delete>
+	<delete id="trunkNodeBySubtopoId" parameterType="map">
+		delete from STM_TOPO_NODE
+		<where>
+			<if test="id==null">
+				subTopoId is null
+			</if>
+			<if test="id!=null">
+				subTopoId=#{id}
+			</if>
+		</where>
+	</delete>
+	<delete id="trunkLinkBySubtopoId" parameterType="map">
+		delete from STM_TOPO_LINK where from_node_id in (
+			select id from STM_TOPO_NODE
+			<where>
+				<if test="id==null">
+					subTopoId is null
+				</if>
+				<if test="id!=null">
+					subTopoId=#{id}
+				</if>
+			</where>
+		) or to_node_id in(
+			select id from STM_TOPO_NODE
+			<where>
+				<if test="id==null">
+					subTopoId is null
+				</if>
+				<if test="id!=null">
+					subTopoId=#{id}
+				</if>
+			</where>
+		)
+	</delete>
+	<delete id="trunkOtherBySubtopoId" parameterType="map">
+		delete from STM_TOPO_OTHERS
+		<where>
+			<if test="id==null">
+				subTopoId is null
+			</if>
+			<if test="id!=null">
+				subTopoId=#{id}
+			</if>
+		</where>
+	</delete>
+	<delete id="deleteSubtopo" parameterType="map">
+		delete from STM_TOPO_SUBTOPO
+		<where>
+			id=#{id}
+		</where>
+	</delete>
+	<select id="findIp" resultType="com.mainsteam.stm.topo.bo.NodeBo">
+		select id,ip from STM_TOPO_NODE where id is not null and (subTopoId is null or subTopoId=0)
+	</select>
+	<delete id="deleteLinkByList" parameterType="list">
+		delete from STM_TOPO_LINK
+		<where>
+			from_node_id in 
+			<foreach collection="list" item="id" close=")" open="(" separator=",">
+				#{id}
+			</foreach>
+			or
+			to_node_id in 
+			<foreach collection="list" item="id" close=")" open="(" separator=",">
+				#{id}
+			</foreach>
+		</where>
+	</delete>
+	<delete id="deleteNodeByList" parameterType="list">
+		delete from STM_TOPO_NODE
+		<where>
+			id in 
+			<foreach collection="list" item="id" close=")" open="(" separator=",">
+				#{id}
+			</foreach>
+		</where>
+	</delete>
+	<delete id="deleteAllLink">
+		delete from STM_TOPO_LINK where type='link' or fromType='node' or toType='node'
+	</delete>
+	<delete id="trunkGroupAll">
+		truncate table STM_TOPO_GROUP
+	</delete>
+</mapper>

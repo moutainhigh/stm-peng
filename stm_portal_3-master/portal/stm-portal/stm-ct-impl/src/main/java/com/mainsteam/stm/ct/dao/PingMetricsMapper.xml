@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.ct.dao.PingMetricsMapper">
+
+    <select id="getList" resultType="com.mainsteam.stm.ct.bo.MsPingMetric" parameterType="com.mainsteam.stm.ct.bo.WebsiteMetricVo">
+       SELECT
+            *
+        FROM
+            ms_ping_metric
+        WHERE
+            1 = 1
+         	and resource_id like CONCAT('%',#{resourceId},'%')
+         	and create_time >#{startTime}
+            and #{endTime} > create_time
+        ORDER BY
+            create_time DESC
+            
+    </select>
+    <select id="getLatest" parameterType="com.mainsteam.stm.ct.bo.MsPingMetric" resultType="com.mainsteam.stm.ct.bo.MsPingMetric" >
+    	select * from ms_ping_metric where resource_id=#{resource_id} ORDER BY create_time DESC LIMIT 1;
+    </select>
+	<insert id="insert" parameterType="com.mainsteam.stm.ct.bo.MsPingMetric">
+		INSERT INTO `ms_ping_metric` 
+		( `id`,`ip`, `state`, `latency`, `packet_loss`, `jitter`, `create_time`, `resource_id`) 
+		VALUES 
+		(#{id},#{ip}, #{state}, #{latency}, #{packet_loss}, #{jitter}, #{create_time}, #{resource_id});
+	</insert>
+</mapper>

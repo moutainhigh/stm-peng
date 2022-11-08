@@ -1,0 +1,67 @@
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one
+   or more contributor license agreements.  See the NOTICE file
+   distributed with this work for additional information
+   regarding copyright ownership.  The ASF licenses this file
+   to you under the Apache License, Version 2.0 (the
+   "License"); you may not use this file except in compliance
+   with the License.  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing,
+   software distributed under the License is distributed on an
+   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+   KIND, either express or implied.  See the License for the
+   specific language governing permissions and limitations
+   under the License.    
+-->
+<project xmlns:ivy="antlib:org.apache.ivy.ant">
+
+	<property name="ivy.jar.dir" value="commonbuild/apache-ivy-2.4.0-rc1/lib" />
+	<property name="ivy.jar.file" value="commonbuild/apache-ivy-2.4.0-rc1//ivy-2.4.0-rc1.jar" />
+	<property name="ivy.cache" value="D:\.ivy2" />
+	
+	<property name="repository.dir" value="repository" />
+
+    <property name="build.dir" value="build" />
+    <property name="src.dir" value="src" />
+    
+  <target name="buildlist"> 
+    <ivy:buildlist reference="build-capacity-path">
+      <fileset dir="." includes="**/build.xml"/>
+	  </ivy:buildlist>
+  </target>
+
+  <target name="publish-all" depends="buildlist,clean" 
+  			description="compile, jar and publish all projects in the right order">
+    <subant target="publish-nexus" buildpathref="build-capacity-path">
+    	<property name="cleanivycache" value="false"/>
+    </subant>
+   </target>
+   
+     <target name="publish-local-all" depends="buildlist,clean" 
+  			description="compile, jar and publish all projects in the right order">
+    <subant target="publish-local" buildpathref="build-capacity-path">
+    	<property name="cleanivycache" value="false"/>
+    </subant>
+   </target>
+   
+     <target name="findbugs-all" depends="buildlist,clean" 
+  			description="compile, jar and publish all projects in the right order">
+    <subant target="findbugs" buildpathref="build-capacity-path">
+    	<property name="cleanivycache" value="false"/>
+    </subant>
+   </target>
+  
+  <target name="clean-all" depends="buildlist" description="clean all projects">
+    <subant target="clean" buildpathref="build-path" />
+  </target>
+  
+  <target name="clean"
+  			description="clean tutorial: delete repository, ivy cache, and all projects">
+  	<ivy:cleancache />
+  </target>
+  
+	
+</project>

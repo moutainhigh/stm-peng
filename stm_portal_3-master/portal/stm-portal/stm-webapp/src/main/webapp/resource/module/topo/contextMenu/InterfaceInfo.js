@@ -1,0 +1,60 @@
+function InterfaceInfo(){
+	var ctx = this;
+	oc.util.ajax({
+		url:oc.resource.getUrl("resource/module/topo/contextMenu/InterfaceInfo.html"),
+		type:"get",
+		success:function(html){
+			ctx.init(html);
+		},
+		dataType:"html"
+	});
+};
+InterfaceInfo.prototype={
+	init:function(html){
+		var ctx = this;
+		this.root=$(html);
+		this.fields={};
+		this.root.find("[data-field]").each(function(idx,dom){
+			var tmp = $(dom);
+			ctx.fields[tmp.attr("data-field")]=tmp;
+		});
+		//初始化表格
+		this.fields.grid.datagrid({
+			columns:[[
+			{
+				text:"资源名称",
+				name:"resourceName"
+			},{
+				text:"网卡可用性",
+				name:"resourceName"
+			},{
+				text:"资源名称",
+				name:"resourceName"
+			},{
+				text:"资源名称",
+				name:"resourceName"
+			},{
+				text:"资源名称",
+				name:"resourceName"
+			},{
+				text:"资源名称",
+				name:"resourceName"
+			},{
+				text:"资源名称",
+				name:"resourceName"
+			},{
+				text:"资源名称",
+				name:"resourceName"
+			},{
+				text:"资源名称",
+				name:"resourceName"
+			},{
+				text:"资源名称",
+				name:"resourceName"
+			},{
+				text:"资源名称",
+				name:"resourceName"
+			}]]
+		});
+	}
+};

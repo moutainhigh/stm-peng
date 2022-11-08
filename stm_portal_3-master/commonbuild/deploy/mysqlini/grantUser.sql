@@ -1,0 +1,1 @@
+grant select,alter,create,insert,update,delete,drop,index,execute on oc4_int.* to int@"%" identified by "int";

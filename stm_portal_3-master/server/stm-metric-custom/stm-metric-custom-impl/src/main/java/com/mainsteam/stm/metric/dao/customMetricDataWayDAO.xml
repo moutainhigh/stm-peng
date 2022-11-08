@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.metric.dao.CustomMetricDataWayDAO">
+
+	<sql id="customMetricDataWayColumn"> 
+		metricId,pluginId,dataWay
+	</sql>
+	<sql id="customMetricDataWayColumnValue">
+		#{metricId},#{pluginId},#{dataWay}
+	</sql>
+	<sql id="table">
+		STM_CUSTOM_METRIC_DATA_WAY
+	</sql>
+	<sql id="selectSql">
+		select <include refid="customMetricDataWayColumn"/>
+		from   <include refid="table"/>
+	</sql>
+	<insert id="insertMetricDataWay" 
+		parameterType="com.mainsteam.stm.metric.dao.pojo.CustomMetricDataWayDO">
+		insert into <include refid="table"/>
+		(<include refid="customMetricDataWayColumn"/>) 
+		values(<include refid="customMetricDataWayColumnValue"/>) 
+	</insert>
+	<delete id="removeMetricDataWaybyDO" parameterType="com.mainsteam.stm.metric.dao.pojo.CustomMetricDataWayDO">
+		delete from <include refid="table"/>
+	   <trim prefix="where" prefixOverrides="and">
+			<if test="metricId != null"> and metricId= #{metricId}</if>
+			<if test="pluginId != null"> and pluginId=#{pluginId} </if>
+	   </trim>
+	</delete>
+	<delete id="removeMetricDataWaybyMetricId" parameterType="string"> 
+		delete from <include refid="table"/> where metricId= #{metricId}
+	</delete>
+	<select id="getCustomMetricDataWayByMetric" 
+		resultType="com.mainsteam.stm.metric.dao.pojo.CustomMetricDataWayDO"
+		parameterType="string"> 
+		<include refid="selectSql"/> where metricId = #{metricId} 
+	</select>
+	<select id="getCustomMetricDataWayByMetrics" 
+		resultType="com.mainsteam.stm.metric.dao.pojo.CustomMetricDataWayDO"
+		parameterType="string"> 
+		<include refid="selectSql"/> where metricId in 
+		<foreach collection="list" index="index" item="item" open="(" separator="," close=")">#{item}</foreach>
+	</select>
+	<select id="getCustomMetricDataWayByMetricAndPluginId" 
+		resultType="com.mainsteam.stm.metric.dao.pojo.CustomMetricDataWayDO"
+		parameterType="com.mainsteam.stm.metric.dao.pojo.CustomMetricDataWayDO">
+		<include refid="selectSql"/> where metricId = #{metricId} and pluginId=#{pluginId}
+	</select>
+ </mapper>

@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.resourcelog.dao.SnmpTrapDao">
+	
+	 
+  <update id="updateSnmptrapType" parameterType="com.mainsteam.stm.resourcelog.strategy.bo.StrategyBo">
+		update STM_SYSLOG_STRATEGY_BASE set
+		SNMPTRAP_TYPE = #{commonType}
+		where id = #{id}
+	</update>
+	
+	 
+ <update id="updateTrapLogNum" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogResourceBo"
+		 databaseId="mysql">
+		update stm_syslog_resource_sta
+				set LAST_DATE = sysdate(),
+				CUR_DATE_COUNT = (select count(*) from stm_syslog_snmptrap_history where RESOURCE_ID = #{resourceId}
+				AND ALERT_TIME LIKE CONCAT(DATE_FORMAT(#{lastDate}, '%Y-%m-%d'),'%')),
+				ALL_COUNT = 	(select count(*) from stm_syslog_snmptrap_history where RESOURCE_ID = #{resourceId})
+		where RESOURCE_ID = #{resourceIdStr} and STRATEGY_TYPE = #{strategyType}
+	</update>
+	<update id="updateTrapLogNum" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogResourceBo"
+		 databaseId="oracle">
+		update stm_syslog_resource_sta
+				set LAST_DATE = sysdate,
+				CUR_DATE_COUNT = (select count(*) from stm_syslog_snmptrap_history where RESOURCE_ID = #{resourceId}
+				AND to_char(ALERT_TIME, 'yyyy-MM-dd') = to_char(#{lastDate},'yyyy-MM-dd')),
+				ALL_COUNT = 	(select count(*) from stm_syslog_snmptrap_history where RESOURCE_ID = #{resourceId})
+		where RESOURCE_ID = #{resourceIdStr} and STRATEGY_TYPE = #{strategyType}
+	</update>
+	 
+  <!-- mysql -->
+	 
+  <select id="getSnmptrapHistory" resultType="com.mainsteam.stm.resourcelog.strategy.bo.AlarmListBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="mysql">
+		select
+			history.ALERT_TIME as occurredTime,
+			history.MSG as msgContent,
+			history.SNMPTRAP_TYPE as snmptrapType
+		from stm_syslog_snmptrap_history history
+		 
+    <trim prefix="where" prefixOverrides="and | or">
+			 
+      <if test="condition != null">
+				 
+        <if test="condition.id != null">
+					AND history.RESOURCE_ID = #{condition.id}
+				</if>
+				 
+        <if test="condition.snmptrapType != null and condition.snmptrapType != ''">
+					AND history.SNMPTRAP_TYPE like CONCAT('%',#{condition.snmptrapType},'%')
+				</if>
+				 
+        <!-- 当日产生数量 -->
+				 
+        <if test="condition.occurredTime != null and condition.occurredTime != ''">
+					AND history.ALERT_TIME like CONCAT(DATE_FORMAT(#{condition.occurredTime},'%Y-%m-%d'),'%')
+				</if>
+				 
+        <if test="condition.startTime != null and condition.startTime != '' ">
+					 <![CDATA[ 
+						AND history.ALERT_TIME >= DATE_FORMAT(#{condition.startTime},'%Y-%m-%d %H:%i:%s')
+					]]>
+				</if>
+				 
+        <if test="condition.endTime != null and condition.endTime != '' ">
+					 <![CDATA[
+						AND history.ALERT_TIME <= DATE_FORMAT(#{condition.endTime},'%Y-%m-%d %H:%i:%s')
+					]]>
+				</if>
+			
+      </if>
+		
+    </trim>
+	
+  </select>
+	
+	 
+  <!-- oracle -->
+	 
+  <select id="getSnmptrapHistory" resultType="com.mainsteam.stm.resourcelog.strategy.bo.AlarmListBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oracle">
+		select
+			history.ALERT_TIME as occurredTime,
+			history.MSG as msgContent,
+			history.SNMPTRAP_TYPE as snmptrapType
+		from stm_syslog_snmptrap_history history
+		 
+    <trim prefix="where" prefixOverrides="and | or">
+			 
+      <if test="condition != null">
+				 
+        <if test="condition.id != null">
+					AND history.RESOURCE_ID = #{condition.id}
+				</if>
+				 
+        <if test="condition.snmptrapType != null and condition.snmptrapType != ''">
+					AND history.SNMPTRAP_TYPE like '%'||#{condition.snmptrapType}||'%'
+				</if>
+				 
+        <!-- 当日产生数量 -->
+				 
+        <if test="condition.occurredTime != null and condition.occurredTime != ''">
+					AND to_char(ALERT_TIME, 'yyyy-MM-dd') = to_char(#{condition.occurredTime},'yyyy-MM-dd')
+				</if>
+				 
+        <if test="condition.startTime != null and condition.startTime != '' ">
+					 <![CDATA[ 
+						AND to_char(ALERT_TIME, 'yyyy-MM-dd HH24:mi:ss') >= #{condition.startTime}
+					]]>
+				</if>
+				 
+        <if test="condition.endTime != null and condition.endTime != '' ">
+					 <![CDATA[
+						AND to_char(ALERT_TIME, 'yyyy-MM-dd HH24:mi:ss') <= #{condition.endTime}
+					]]>
+				</if>
+			
+      </if>
+		
+    </trim>
+	
+  </select>
+	
+	 
+  <select id="getSnmptrapHistory" resultType="com.mainsteam.stm.resourcelog.strategy.bo.AlarmListBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="dm">
+		select
+			history.ALERT_TIME as occurredTime,
+			history.MSG as msgContent,
+			history.SNMPTRAP_TYPE as snmptrapType
+		from stm_syslog_snmptrap_history history
+		 
+    <trim prefix="where" prefixOverrides="and | or">
+			 
+      <if test="condition != null">
+				 
+        <if test="condition.id != null">
+					AND history.RESOURCE_ID = #{condition.id}
+				</if>
+				 
+        <if test="condition.snmptrapType != null and condition.snmptrapType != ''">
+					AND history.SNMPTRAP_TYPE like '%'||#{condition.snmptrapType}||'%'
+				</if>
+				 
+        <!-- 当日产生数量 -->
+				 
+        <if test="condition.occurredTime != null and condition.occurredTime != ''">
+					AND to_char(ALERT_TIME, 'yyyy-MM-dd') = to_char(#{condition.occurredTime},'yyyy-MM-dd')
+				</if>
+				 
+        <if test="condition.startTime != null and condition.startTime != '' ">
+					 <![CDATA[ 
+						AND to_char(ALERT_TIME, 'yyyy-MM-dd HH24:mi:ss') >= #{condition.startTime}
+					]]>
+				</if>
+				 
+        <if test="condition.endTime != null and condition.endTime != '' ">
+					 <![CDATA[
+						AND to_char(ALERT_TIME, 'yyyy-MM-dd HH24:mi:ss') <= #{condition.endTime}
+					]]>
+				</if>
+			
+      </if>
+		
+    </trim>
+	
+  </select>
+  <insert id="saveIpAddress" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogResourceBo">
+		insert into
+			STM_SYSLOG_RESOURCE(ID,STRATEGY_ID, IP,STRATEGY_TYPE)
+		values
+		(#{id}, #{strategyId}, #{snmptrapIp}, #{strategyType})
+	</insert>
+	
+	 
+  <insert id="saveSnmpResourceSta" parameterType="com.mainsteam.stm.resourcelog.snmptrap.bo.SnmpResourceBo">
+		insert into stm_syslog_resource_sta(RESOURCE_ID,STRATEGY_TYPE,LAST_DATE)
+		values(#{resourceId},#{strategyType},#{lastDate})
+	</insert>
+	
+	 
+  <select id="countResourceIp" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogResourceBo" resultType="int">
+		select count(*) from stm_syslog_resource_sta
+		where RESOURCE_ID = #{snmptrapIp}
+	</select>
+	
+	 
+  <select id="countIp" parameterType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogResourceBo" resultType="int">
+		select count(*) from stm_syslog_resource
+		where IP = #{snmptrapIp}
+		and STRATEGY_TYPE = #{strategyType}
+	</select>
+	
+	 
+  <select id="saveSnmptrapHistroy" parameterType="com.mainsteam.stm.resourcelog.snmptrap.bo.SnmpLogBo">
+		insert into stm_syslog_snmptrap_history(RESOURCE_ID,ALERT_TIME,MSG,SNMPTRAP_TYPE)
+		values(#{resourceId},#{alertTime},#{msg},#{level})
+	</select>
+	
+	 
+  <!-- mysql -->
+	 
+  <select id="countSnmptrapHistory" parameterType="com.mainsteam.stm.resourcelog.snmptrap.bo.SnmpLogBo" resultType="int" databaseId="mysql">
+		select count(*) from stm_syslog_snmptrap_history
+		where RESOURCE_ID = #{resourceId}
+		 
+    <if test="alertTime != null and alertTime != ''">
+			AND ALERT_TIME LIKE CONCAT(DATE_FORMAT(#{alertTime}, '%Y-%m-%d'),'%')
+		</if>
+	
+  </select>
+	
+	 
+  <!-- oracle -->
+	 
+  <select id="countSnmptrapHistory" parameterType="com.mainsteam.stm.resourcelog.snmptrap.bo.SnmpLogBo" resultType="int" databaseId="oracle">
+		select count(*) from stm_syslog_snmptrap_history
+		where RESOURCE_ID = #{resourceId}
+		 
+    <if test="alertTime != null and alertTime != ''">
+			AND to_char(ALERT_TIME, 'yyyy-MM-dd') = to_char(#{alertTime},'yyyy-MM-dd')
+		</if>
+	
+  </select>
+	 
+  <select id="countSnmptrapHistory" parameterType="com.mainsteam.stm.resourcelog.snmptrap.bo.SnmpLogBo" resultType="int" databaseId="dm">
+		select count(*) from stm_syslog_snmptrap_history
+		where RESOURCE_ID = #{resourceId}
+		 
+    <if test="alertTime != null and alertTime != ''">
+			AND to_char(ALERT_TIME, 'yyyy-MM-dd') = to_char(#{alertTime},'yyyy-MM-dd')
+		</if>
+	
+  </select>
+  <select id="getTrapLog" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" resultType="com.mainsteam.stm.resourcelog.syslog.bo.SyslogResourceBo">
+		SELECT
+			res.ID AS id,
+			res.STRATEGY_ID AS strategyId,
+			res.RESOURCE_ID AS resourceId,
+			res.IS_MONITOR AS isMonitor,
+			res.IP AS resourceIp,
+			sta.CUR_DATE_COUNT AS curDateCount,
+			sta.ALL_COUNT AS allCount,
+			sta.LAST_DATE AS lastDate,
+			strategy.NAME AS strategyName,
+			strategy.DOMAIN_ID as domainId,
+			strategy.CREATOR_ID as userId
+		FROM
+			stm_syslog_resource res
+		LEFT JOIN stm_syslog_resource_sta sta ON res.RESOURCE_ID = sta.RESOURCE_ID OR res.IP = sta.RESOURCE_ID
+		LEFT JOIN stm_syslog_strategy_base strategy ON res.STRATEGY_ID = strategy.ID
+		 
+    <trim prefix="where" prefixOverrides="and | or">
+			 
+      <if test="condition != null">
+				AND res.STRATEGY_TYPE = #{condition.typeId} 
+				AND sta.STRATEGY_TYPE = #{condition.typeId}
+				 
+        <if test="condition.domainIds != null">
+					AND strategy.DOMAIN_ID IN
+					 
+          <foreach item="domainIds" index="index" collection="condition.domainIds" open="(" separator="," close=")">  
+			 			#{domainIds}
+					</foreach>
+				
+        </if>
+			
+      </if>
+		
+    </trim>
+	
+  </select>
+</mapper>

@@ -1,0 +1,494 @@
+<project xmlns:ivy="antlib:org.apache.ivy.ant" default="build" basedir=".">
+	<property file="${common.dir}/build-default.properties" />
+
+	<property name="build.lib" value="lib" />
+	<!-- JAVA源文件路径 -->
+	<property name="main.java" value="src/main/java" />
+	<property name="main.resources" value="src/main/resources" />
+
+	<!-- 测试源文件路径 -->
+	<property name="test.java" value="src/test/java" />
+	<property name="test.resources" value="src/test/resources" />
+	<property name="test.conf" value="src/test/resources" />
+
+	<!-- class文件存放位置 -->
+	<property name="classes.path" value="build" />
+
+	<!-- 发布文件夹 -->
+	<property name="build.dir" value="target" />
+
+	<!-- JSP目录 -->
+	<property name="build.server.webapp" value="webapp" />
+
+	<!-- jar包数字签名相关属性开始-->
+	<property name="jarName" value="${build.dir}/${project.name}-${version}.jar" />
+	<property name="jarSourceName" value="${build.dir}/${project.name}-${version}-sources.jar" />
+	<property name="keystorePath" value="${common.dir}/keystore" />
+	<!-- 数字签名用的密钥信息参数 -->
+	<property name="keystoreName" value="mainsteam.store" />
+	<property name="storepass" value="mainsteam" />
+	<property name="keystore" location="${keystorePath}/${keystoreName}" />
+	<property name="keypass" value="mainsteampwd" />
+	<property name="keysize" value="1024" />
+	<property name="alias" value="mst" />
+	<property name="validity" value="3650" />
+	<!-- jar包数字签名相关属性结束-->
+
+	<!--  编译相关属性 -->
+	<property name="debugon" value="true" />
+
+	<property name="cleanivycache" value="true" />
+
+	<property name="deploy-processer-dir" value="D:\CompileResults411\STM-deploy-${version}\server_processer" />
+	<!--<property name="deploy-trap-dir" value="D:\STM-deploy\trap" />-->
+	<property name="deploy-collector-dir" value="D:\CompileResults411\STM-deploy-${version}\server_collector" />
+	<property name="deploy-portal-dir" value="D:\CompileResults411\STM-deploy-${version}\portal" />
+
+	<!-- proguard 混淆工具 -->
+	<property name="proguard.home" value="${common.dir}/proguard5.3.1"/>	
+	
+
+	<!-- 编译工程所需的JAR包 -->
+	<path id="compile.classpath">
+		<pathelement location="${classes.path}" />
+		<fileset dir="${build.lib}">
+			<include name="*.jar" />
+			<include name="*.zip" />
+		</fileset>
+	</path>
+
+	<!-- 清除 -->
+	<target name="clean-all">
+		<echo>clean ${build.dir}</echo>
+		<delete dir="${build.dir}" />
+
+		<echo>clean ${classes.path}</echo>
+		<delete dir="${classes.path}" />
+	</target>
+
+	<!-- 准备工作 -->
+	<target name="prepare">
+		<echo>mkdir ${classes.path}</echo>
+		<mkdir dir="${classes.path}" />
+
+		<echo>mkdir ${build.lib}</echo>
+		<mkdir dir="${build.lib}" />
+
+		<echo>mkdir ${build.dir}</echo>
+		<mkdir dir="${build.dir}" />
+	</target>
+
+	<!-- 编译 -->
+	<target name="compile" depends="prepare,resolve">
+		<echo>compile ${main.java}</echo>
+		<javac srcdir="${main.java}" encoding="utf-8" destdir="${classes.path}" debug="${debugon}" target="1.7" source="1.7">
+			<classpath refid="compile.classpath" />
+		</javac>
+		<copy todir="${classes.path}" failonerror="true">
+			<fileset dir="${main.java}">
+				<include name="**" />
+				<exclude name="**/*.java">
+				</exclude>
+			</fileset>
+			<fileset dir="${main.resources}">
+				<include name="**" />
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- 构建临时工程 -->
+	<target name="build-deploy" depends="clean,prepare,compile">
+		<echo>build ${build.dir}/${project.name}-${jar.version}.jar</echo>
+		<concat destfile="${basedir}/MANIFEST.MF" encoding="utf-8" force="true">
+			<path>
+				<pathelement location="${common.dir}/MANIFEST.MF"/>
+				<pathelement location="${basedir}/project.manifest"/>
+			</path>
+		</concat>
+		<tstamp prefix="buildtime">
+			<format pattern="yyyy-MM-dd HH:mm:ss" property="TimeSign"/>
+		</tstamp>
+		<buildnumber file="${common.dir}/build.number"/>
+		<manifest file="${basedir}/MANIFEST.MF" mode="update">
+			<attribute name="Product-Version" value="${version}"/>
+			<attribute name="BuildTime" value="${buildtime.TimeSign}"/>
+			<attribute name="BuildNumber" value="${build.number}"/>
+		</manifest>		
+		<jar jarfile="${jarName}" basedir="${classes.path}" manifest="${basedir}/MANIFEST.MF" index="true">
+			<manifest>
+			</manifest>
+		</jar>
+	</target>
+	
+	<!-- 构建临时工程 -->
+	<target name="build" depends="clean,prepare,compile">
+		<echo>build ${build.dir}/${project.name}-${jar.version}111.jar</echo>
+		<concat destfile="${basedir}/MANIFEST.MF" encoding="utf-8" force="true">
+			<path>
+				<pathelement location="${common.dir}/MANIFEST.MF"/>
+				<pathelement location="${basedir}/project.manifest"/>
+			</path>
+		</concat>
+		<jar jarfile="${jarName}" basedir="${classes.path}" manifest="${basedir}/MANIFEST.MF" index="true">
+			<manifest>
+			</manifest>
+		</jar>
+		
+	</target>
+
+
+	<!-- 部署 -->
+	<target name="deploy" depends="build-deploy">
+		<echo>deploying</echo>
+		<condition property="deploy-processer-condition">
+			<contains string="${deploy.dist}" substring="processer" />
+		</condition>
+		<antcall target="copy-processer" />
+
+		<condition property="deploy-trap-condition">
+			<contains string="${deploy.dist}" substring="trap" />
+		</condition>
+		<antcall target="copy-trap" />
+
+		<condition property="deploy-collector-condition">
+			<contains string="${deploy.dist}" substring="collector" />
+		</condition>
+		<antcall target="copy-collector" />
+
+		<condition property="deploy-portal-condition">
+			<contains string="${deploy.dist}" substring="portal" />
+		</condition>
+		<antcall target="copy-portal" />
+
+	</target>
+
+	<!--部署处理器-->
+	<target name="copy-processer" if="deploy-processer-condition">
+
+		<copy todir="${deploy-processer-dir}/bin" flatten="true">
+			<fileset dir="${build.lib}">
+				<include name="**/commons-logging*.jar" />
+				<include name="**/log4j-1.2.17.jar" />
+			</fileset>
+			<fileset dir="${build.dir}">
+				<include name="**/mainsteam-stm-node-register-*.jar" />
+				<include name="**/mainsteam-stm-bootstrap-*.jar" />
+			</fileset>
+		</copy>
+		<copy todir="${deploy-processer-dir}/lib" flatten="true">
+			<fileset dir="${build.dir}">
+				<include name="**/mainsteam-stm-*.jar" />
+				<exclude name="**/mainsteam-stm-bootstrap-*.jar" />
+				<exclude name="**/mainsteam-stm-node-register-*.jar" />
+			</fileset>
+		</copy>
+		<copy todir="${deploy-processer-dir}/third_lib" flatten="true" overwrite="false">
+			<fileset dir="${build.lib}">
+				<include name="**/*.jar" />
+				<exclude name="**/mainsteam-stm-*.jar" />
+				<exclude name="**/commons-logging*.jar" />
+				<exclude name="**/log4j-1.2.17.jar" />
+			</fileset>
+		</copy>
+		<copy todir="${deploy-processer-dir}/webapp" flatten="false" failonerror="false">
+			<fileset dir="${build.server.webapp}" />
+		</copy>
+	</target>
+
+	<!--部署trap-->
+	<target name="copy-trap" if="deploy-trap-condition">
+		<copy todir="${deploy-trap-dir}/bin" flatten="true">
+			<fileset dir="${build.lib}">
+				<include name="**/commons-logging*.jar" />
+				<include name="**/log4j-1.2.17.jar" />
+			</fileset>
+			<fileset dir="${build.dir}">
+				<include name="**/mainsteam-stm-node-register-*.jar" />
+				<include name="**/mainsteam-stm-bootstrap-*.jar" />
+			</fileset>
+		</copy>
+		<copy todir="${deploy-trap-dir}/lib" flatten="true">
+			<fileset dir="${build.dir}">
+				<include name="**/mainsteam-stm-*.jar" />
+				<exclude name="**/mainsteam-stm-bootstrap-*.jar" />
+				<exclude name="**/mainsteam-stm-node-register-*.jar" />
+			</fileset>
+		</copy>
+		<copy todir="${deploy-trap-dir}/third_lib" flatten="true" overwrite="false">
+			<fileset dir="${build.lib}">
+				<include name="**/*.jar" />
+				<exclude name="**/mainsteam-stm-*.jar" />
+				<exclude name="**/commons-logging*.jar" />
+				<exclude name="**/log4j-1.2.17.jar" />
+			</fileset>
+		</copy>
+		<copy todir="${deploy-trap-dir}/webapp" flatten="false" failonerror="false">
+			<fileset dir="${build.server.webapp}" />
+		</copy>
+	</target>
+	<!-- 部署采集器-->
+	<target name="copy-collector" if="deploy-collector-condition">
+		<copy todir="${deploy-collector-dir}/bin" flatten="true" overwrite="false">
+			<fileset dir="${build.lib}">
+				<include name="**/commons-logging*.jar" />
+				<include name="**/log4j-1.2.17.jar" />
+			</fileset>
+			<fileset dir="${build.dir}">
+				<include name="**/mainsteam-stm-node-register-*.jar" />
+				<include name="**/mainsteam-stm-bootstrap-*.jar" />
+			</fileset>
+		</copy>
+		<copy todir="${deploy-collector-dir}/lib" flatten="true">
+			<fileset dir="${build.dir}">
+				<include name="**/mainsteam-stm-*.jar" />
+				<exclude name="**/mainsteam-stm-bootstrap-*.jar" />
+				<exclude name="**/mainsteam-stm-node-register-*.jar" />
+			</fileset>
+		</copy>
+		<copy todir="${deploy-collector-dir}/third_lib" flatten="true" overwrite="false">
+			<fileset dir="${build.lib}">
+				<include name="**/*.jar" />
+				<exclude name="**/mainsteam-stm-*.jar" />
+				<exclude name="**/commons-logging*.jar" />
+				<exclude name="**/log4j-1.2.17.jar" />
+			</fileset>
+		</copy>
+		<condition property="plugin_alone">
+			<equals arg1="${deploy.caplib.alone}" arg2="true" trim="on"/>
+		</condition>
+		<antcall target="aloneDeployModulePlugin"></antcall>
+		<copy todir="${deploy-collector-dir}/webapp" flatten="false" failonerror="false">
+			<fileset dir="${build.server.webapp}" />
+		</copy>
+	</target>
+	<!--部署有冲突的插件包-->
+	<target name="aloneDeployModulePlugin" if="plugin_alone">
+		<property name="pluginlib" value="${deploy-collector-dir}/plugin_lib/${deploy.caplib.alone.signature}"></property>
+		<mkdir dir="${deploy.caplib.alone.signature}"/>
+		<echo>select or create dir ${deploy.caplib.alone.signature}</echo>
+		<copy todir="${pluginlib}">
+			<fileset dir="${deploy-collector-dir}/third_lib/" includes="${deploy.caplib.alone.jars}" >
+			</fileset>
+			<fileset dir="${deploy-collector-dir}/lib/" includes="${project.name}-${version}.jar">
+			</fileset>
+		</copy>
+		<echo>copy ${deploy-collector-dir}/third_lib/${deploy.caplib.alone.jars} to ${pluginlib}</echo>
+		<echo>copy ${deploy-collector-dir}/lib/${project.name}-${version}.jar to ${pluginlib}</echo>
+		<delete>
+			<fileset dir="${deploy-collector-dir}/third_lib/" includes="${deploy.caplib.alone.jars}" >
+			</fileset>
+			<fileset dir="${deploy-collector-dir}/lib/" includes="${project.name}-${version}.jar">
+			</fileset>
+		</delete>
+		<echo>remove ${deploy-collector-dir}/third_lib/${deploy.caplib.alone.jars}</echo>
+		<echo>remove ${deploy-collector-dir}/lib/${project.name}-${version}.jar</echo>		
+	</target>
+
+	<!--部署portal-->
+	<target name="copy-portal" if="deploy-portal-condition">
+		<copy todir="${deploy-portal-dir}/register" flatten="true">
+			<fileset dir="${build.lib}">
+				<include name="**/commons-logging*.jar" />
+				<include name="**/log4j-1.2.17.jar" />
+			</fileset>
+			<fileset dir="${build.dir}">
+				<include name="**/mainsteam-stm-node-register-*.jar" />
+				<include name="**/mainsteam-stm-launch-*.jar" />
+				<include name="**/mainsteam-stm-bootstrap-*.jar" />
+			</fileset>
+		</copy>
+		<copy todir="${deploy-portal-dir}/webapps/ROOT/WEB-INF/lib" flatten="true">
+			<fileset dir="${build.dir}">
+				<include name="**/mainsteam-stm-*-web-*.jar" />
+			</fileset>
+		</copy>
+		<copy todir="${deploy-portal-dir}/common/lib" flatten="true">
+			<fileset dir="${build.dir}">
+				<include name="**/mainsteam-stm-*.jar" />
+				<exclude name="**/mainsteam-stm-*-web-*.jar" />
+				<exclude name="**/mainsteam-stm-node-register-*.jar" />
+				<exclude name="**/mainsteam-stm-launch-*.jar" />
+			</fileset>
+		</copy>
+		<copy todir="${deploy-portal-dir}/common/thirdlib" flatten="true" overwrite="false">
+			<fileset dir="${build.lib}">
+				<include name="**/*.jar" />
+				<exclude name="**/mainsteam-stm-*.jar" />
+			</fileset>
+		</copy>
+	</target>
+
+
+
+	<!--
+		下面为调用ivy的task和数据	
+	 -->
+	<!-- 解决ivy加载 -->
+	<property name="ivy.jar.dir" value="${ivy.home}/lib" />
+	<property name="ivy.jar.file" value="${ivy.home}/ivy-2.4.0-rc1.jar" />
+	<!-- setup ivy default configuration with some custom info -->
+	<property name="ivy.local.default.root" value="${repository.dir}/local" />
+	<!-- ================================= 
+	          target: load-ivy         
+	            this target is not necessary if you put ivy.jar in your ant lib directory
+	            if you already have ivy 2.0 in your ant lib, you can simply remove this
+	            target
+	         ================================= -->
+	<target name="load-ivy">
+		<echo>${ivy.jar.dir}</echo>
+		<echo>${ivy.jar.file}</echo>
+		<!-- try to load ivy here from home ivy dir, in case the user has not already dropped
+	    	      it into ant's lib dir (note that the latter copy will always take precedence).
+	    	      We will not fail as long as ivy home lib dir exists (it may be empty) and
+	    	      ivy is in at least one of ant's lib dir or the ivy home lib dir. -->
+		<path id="ivy.lib.path">
+			<fileset dir="${ivy.jar.dir}" includes="*.jar" />
+		</path>
+		<taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path" />
+	</target>
+	<!-- 定义ivy的配置信息 -->
+	<ivy:settings file="${common.dir}/ivysettings.xml" />
+	<!-- ================================= 
+	          target: resolve
+	         ================================= -->
+	<target name="resolve" depends="load-ivy" description="--> resolve and retrieve dependencies with ivy">
+		<!-- not usually necessary, ivy creates the directory IF there are dependencies -->
+
+		<!-- the call to resolve is not mandatory, retrieve makes an implicit call if we don't -->
+		<ivy:resolve file="${ivy.file}" />
+		<ivy:retrieve pattern="${lib.dir}/[artifact]-[revision].[ext]" />
+	</target>
+	<target name="ivy-new-version" depends="load-ivy" unless="ivy.new.revision">
+		<!-- default module version prefix value -->
+		<property name="module.version.prefix" value="${module.version.target}-dev-b" />
+
+		<!-- asks to ivy an available version number -->
+		<ivy:info file="${ivy.file}" />
+		<ivy:buildnumber organisation="${ivy.organisation}" module="${ivy.module}" revision="${module.version.prefix}" defaultBuildNumber="1" revSep="" />
+	</target>
+
+	<target name="local-version">
+		<tstamp>
+			<format property="now" pattern="yyyyMMddHHmmss" />
+		</tstamp>
+		<property name="ivy.new.revision" value="${module.version.target}-local-${now}" />
+	</target>
+
+	<target name="version" depends="ivy-new-version">
+	</target>
+	<!-- ================================= 
+	          target: publish-nexus              
+	         ================================= -->
+	<target name="publish-nexus" depends="clean-build,local-version,deploy" description="--> publish this project in the ivy repository">
+		<ivy:publish artifactspattern="${build.dir}/[artifact]-[revision](-[classifier]).[ext]" resolver="nexus-releases" pubrevision="${version}" status="release" overwrite="true" update="true" forcedeliver="true" />
+		<ivy:publish artifactspattern="${build.dir}/[artifact]-[revision].[ext]" resolver="local" pubrevision="${version}" pubdate="${now}" status="integration" forcedeliver="true" overwrite="true" />
+
+		<echo message="project ${ant.project.name} released with version ${version}" />
+	</target>
+
+	<!-- ================================= 
+	          target: publish-local              
+	         ================================= -->
+	<target name="publish-local" depends="local-version,deploy" description="--> publish this project in the local ivy repository">
+		<ivy:publish artifactspattern="${build.dir}/[artifact]-[revision].[ext]" resolver="local" pubrevision="${version}" pubdate="${now}" status="integration" forcedeliver="true" overwrite="true" />
+		<echo message="project ${ant.project.name} published locally with version ${version}" />
+	</target>
+
+	<!-- ================================= 
+	          target: clean-local              
+	         ================================= -->
+	<target name="clean-local" depends="load-ivy" description="--> cleans the local repository for the current module">
+		<ivy:info file="${ivy.file}" />
+		<delete dir="${ivy.local.default.root}/${ivy.organisation}/${ivy.module}" />
+	</target>
+
+	<!-- ================================= 
+	          target: clean-lib              
+	         ================================= -->
+	<target name="clean-lib" description="--> clean the project libraries directory (dependencies)">
+		<delete includeemptydirs="true" failonerror="false">
+			<fileset dir="${lib.dir}">
+				<include name="*" />
+			</fileset>
+		</delete>
+		<condition property="clsIvyCodition">
+			<istrue value="${cleanivycache}" />
+		</condition>
+		<antcall target="clean-ivy-cache-oc">
+		</antcall>
+	</target>
+
+	<target name="clean-ivy-cache-oc" if="clsIvyCodition">
+		<echo>cleanivycache is ${clsIvyCodition}</echo>
+		<delete includeemptydirs="true" failonerror="false">
+			<fileset dir="${ivy.cache}/STM">
+				<include name="mainsteam-stm-*/**" />
+			</fileset>
+		</delete>
+	</target>
+
+	<!-- ================================= 
+	          target: clean-build              
+	         ================================= -->
+	<target name="clean-build" description="--> clean the project built files">
+		<delete includeemptydirs="true" dir="${build.dir}" />
+	</target>
+
+	<!-- ================================= 
+	          target: clean              
+	         ================================= -->
+	<target name="clean" depends="clean-all, clean-lib" description="--> clean the project" />
+
+
+	<!-- 数字签名相关target -->
+	<!-- 创建证书 -->
+	<target name="genericKey">
+		<echo message="genkey..." />
+		<delete failonerror="false">
+			<fileset dir="${keystorePath}">
+				<include name="${keystoreName}" />
+			</fileset>
+		</delete>
+
+		<genkey keystore="${keystore}" storepass="${storepass}" alias="${alias}" keypass="${keypass}" keysize="${keysize}" validity="${validity}" dname="CN=MainSteam6.x, OU=MainSteam, O=MainSteam,L=HuBei,ST=WuHan,C=cn">
+		</genkey>
+		<echo message="genkey... done" />
+	</target>
+	<!-- 对JAR进行数字签名 -->
+	<target name="signJar" depends="genericKey">
+		<echo message="jarsigner..." />
+		<echo message="${keystore}" />
+		<signjar keystore="${keystore}" jar="${jarName}" storepass="${storepass}" keypass="${keypass}" alias="${alias}" preservelastmodified="true">
+		</signjar>
+		<echo message="jarsigner... done." />
+	</target>
+
+	<!-- 运行FindBugs -->
+	<!--<taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" />-->
+
+	<property name="findbugs.home" value="${common.dir}/FindBugs" />
+	<path id="findbugs.path">
+		<fileset dir="${common.dir}/FindBugs">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" classpathref="findbugs.path" />
+
+	<!--  定义findbugs的home，findbugs的task要使用  -->
+
+	<target name="findbugs">
+		<mkdir dir="target/findbugs" />
+		<findbugs home="${findbugs.home}" output="xml:withMessages" outputFile="target/findbugs/findbugs.xml" excludeFilter="${common.dir}/FindBugs/findbugs-exclude.xml">
+			<!--  以上定义findbugs查找的类路径  -->
+			<auxClasspath path="${findbugs.home}/lib/findbugs-ant.jar" />
+			<auxClasspath>
+				<fileset dir="lib" includes="*.jar" />
+			</auxClasspath>
+			<sourcePath path="src" />
+			<class location="target/*.jar" />
+		</findbugs>
+	</target>
+
+
+</project>

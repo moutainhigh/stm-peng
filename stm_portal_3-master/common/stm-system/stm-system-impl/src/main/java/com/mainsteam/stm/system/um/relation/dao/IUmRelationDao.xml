@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.system.um.relation.dao.IUmRelationDao">
+	 
+   
+   
+   
+  <insert id="batchInsert" parameterType="com.mainsteam.stm.system.um.relation.bo.UmRelation">
+	    insert into STM_SYS_USER_DOMAIN_ROLE_REL
+	    (USER_ID,
+		ROLE_ID,
+		DOMAIN_ID) 
+	    values 
+	    (#{userId},#{roleId}, #{domainId})
+	</insert>
+	 
+   
+   
+   
+  <delete id="batchDel" parameterType="com.mainsteam.stm.system.um.relation.bo.UmRelation">
+		DELETE FROM STM_SYS_USER_DOMAIN_ROLE_REL WHERE  1=1
+				 
+		 
+     
+     
+     
+    <if test="userId != null"> AND USER_ID = #{userId}</if>
+	             
+		 
+     
+     
+     
+    <if test="roleId != null"> AND	ROLE_ID = #{roleId}</if>
+	             
+		 
+     
+     
+     
+    <if test="domainId != null"> AND DOMAIN_ID = #{domainId}</if>
+	
+	
+  
+  
+  
+  </delete>
+	 
+   
+   
+   
+  <select id="pageSelect" resultType="com.mainsteam.stm.system.um.user.bo.User" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		SELECT ID,
+		NAME,
+		DESCRIPTION,
+		CREATOR_ID AS creatorId,
+		CREATED_TIME AS createdTime,
+		STATUS
+		FROM STM_SYS_DOMAIN
+		 
+		 
+     
+     
+     
+    <if test="condition!=null">
+			 
+			 
+       
+       
+       
+      <trim prefix="where" prefixOverrides="and |or ">
+	             
+				 
+         
+         
+         
+        <if test="condition.name != null"> AND NAME = #{condition.name}</if>
+	             
+				 
+         
+         
+         
+        <if test="condition.description != null"> AND DESCRIPTION = #{condition.description}</if>
+	             
+				 
+         
+         
+         
+        <if test="condition.creatorId != null"> AND CREATOR_ID = #{condition.creatorId}</if>
+	             
+				 
+         
+         
+         
+        <if test="condition.status != null"> AND STATUS = #{condition.status}</if>
+			
+			
+      
+      
+      
+      </trim>
+		
+		
+    
+    
+    
+    </if>
+	
+	
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+  <select id="get" resultType="com.mainsteam.stm.system.um.user.bo.User" parameterType="long">
+		SELECT ID,
+		NAME,
+		SEX,
+		ACCOUNT,
+		PASSWORD,
+		USER_TYPE AS userType,
+		MOBILE,
+		EMAIL,
+		STATUS,
+		CREATOR_ID AS creatorId,
+		CREATED_TIME AS createdTime
+		FROM STM_SYS_USER where ID=#{id}
+	</select>
+	 
+   
+   
+   
+  <!-- 查询所有用户角色关联信息for普通用户 -->
+	 
+   
+   
+   
+  <select id="getUserRole" resultType="com.mainsteam.stm.system.um.relation.bo.UserRole">
+		select role.id roleId,OCUSER.id userId from STM_SYS_USER OCUSER,STM_SYS_ROLE role where OCUSER.USER_TYPE=1
+	</select>
+	 
+   
+   
+   
+  <!-- 查询所有用户角色关联信息for域管理员 -->
+	 
+   
+   
+   
+  <select id="getUserRoleForAdmin" resultType="com.mainsteam.stm.system.um.relation.bo.UserRole">
+		select OCUSER.id userId from STM_SYS_USER OCUSER where OCUSER.USER_TYPE=2
+	</select>
+	 
+   
+   
+   
+  <!-- 查询所有域角色关联信息 for普通用户-->
+	 
+   
+   
+   
+  <select id="getDomainRole" resultType="com.mainsteam.stm.system.um.relation.bo.DomainRole">
+		select domain.id domainId,role.id roleId from STM_SYS_DOMAIN domain,STM_SYS_ROLE role
+	</select>
+	 
+   
+   
+   
+  <!-- 查询所有域角色关联信息 for域管理员-->
+	 
+   
+   
+   
+  <select id="getDomainRoleForAdmin" resultType="com.mainsteam.stm.system.um.relation.bo.DomainRole">
+		select domain.id domainId from STM_SYS_DOMAIN domain
+	</select>
+	 
+   
+   
+   
+  <!-- 查询所有域用户关联信息 for普通用户 -->
+	 
+   
+   
+   
+  <select id="getUserDomain" resultType="com.mainsteam.stm.system.um.relation.bo.UserDomain">
+		select domain.id domainId,OCUSER.ID userId from STM_SYS_DOMAIN domain,STM_SYS_USER OCUSER WHERE OCUSER.USER_TYPE=1
+	</select>
+	 
+   
+   
+   
+  <!-- 查询所有域用户关联信息 for域管理员 暂时不用-->
+	 
+   
+   
+   
+  <select id="getUserDomainForAdmin" resultType="com.mainsteam.stm.system.um.relation.bo.UserDomain">
+		select domain.id domainId,OCUSER.ID userId from STM_SYS_DOMAIN domain,STM_SYS_USER OCUSER
+	</select>
+	 
+   
+   
+   
+  <!-- 根据RoleId查询域用户关联信息 -->
+	 
+   
+   
+   
+  <select id="getUserDomainByRoleId" resultType="com.mainsteam.stm.system.um.relation.bo.UserDomain">
+		select 
+		RELATION.USER_ID as userId, 
+		RELATION.ROLE_ID as roleId,
+		RELATION.DOMAIN_ID as domainId,
+		OCUSER.NAME as userName,
+		OCUSER.ACCOUNT as userAccount,
+		OCUSER.STATUS as userStatus,
+		OCUSER.USER_TYPE as userType,
+		OCDOMAIN.NAME as domainName
+		FROM STM_SYS_USER_DOMAIN_ROLE_REL RELATION
+ 		LEFT JOIN STM_SYS_USER OCUSER ON RELATION.USER_ID=OCUSER.ID
+ 		LEFT JOIN STM_SYS_DOMAIN OCDOMAIN ON RELATION.DOMAIN_ID= OCDOMAIN.ID WHERE RELATION.ROLE_ID=#{roleId}
+	</select>
+	 
+   
+   
+   
+  <!-- 根据UserId域角色关联信息 -->
+	 
+   
+   
+   
+  <select id="getDomainRoleByUserId" resultType="com.mainsteam.stm.system.um.relation.bo.DomainRole">
+		select 
+		RELATION.USER_ID as userId, 
+		RELATION.ROLE_ID as roleId,
+		RELATION.DOMAIN_ID as domainId,
+		OCDOMAIN.NAME as domainName,
+		OCROLE.NAME as roleName
+		FROM STM_SYS_USER_DOMAIN_ROLE_REL RELATION
+		LEFT JOIN STM_SYS_DOMAIN OCDOMAIN ON RELATION.DOMAIN_ID=OCDOMAIN.ID
+		LEFT JOIN STM_SYS_ROLE OCROLE ON RELATION.ROLE_ID=OCROLE.ID
+		WHERE RELATION.USER_ID=#{userId}
+	</select>
+	 
+   
+   
+   
+  <!-- 根据DomainId查询用户角色信息 -->
+	 
+   
+   
+   
+  <select id="getUserRoleByDomainId" resultType="com.mainsteam.stm.system.um.relation.bo.UserRole" parameterType="com.mainsteam.stm.system.um.relation.bo.UserDomain" databaseId="mysql">
+		select 
+		RELATION.USER_ID as userId, 
+		RELATION.ROLE_ID as roleId,
+		RELATION.DOMAIN_ID as domainId,
+		OCUSER.NAME as userName,
+		OCUSER.ACCOUNT as userAccount,
+		OCUSER.STATUS as userStatus,
+		OCUSER.USER_TYPE as userType,
+		ROLE.NAME as roleName
+		FROM STM_SYS_USER_DOMAIN_ROLE_REL RELATION
+ 		LEFT JOIN STM_SYS_USER OCUSER ON RELATION.USER_ID=OCUSER.ID
+ 		LEFT JOIN STM_SYS_ROLE ROLE ON RELATION.ROLE_ID= ROLE.ID
+ 		WHERE RELATION.DOMAIN_ID=#{domainId} AND OCUSER.USER_TYPE=1 
+         
+		 
+     
+     
+     
+    <if test="userName != null"> AND (OCUSER.NAME LIKE CONCAT('%',#{userName},'%') OR OCUSER.ACCOUNT LIKE  CONCAT('%',#{userName},'%'))</if>
+	
+	
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+  <select id="getUserRoleByDomainId" resultType="com.mainsteam.stm.system.um.relation.bo.UserRole" parameterType="com.mainsteam.stm.system.um.relation.bo.UserDomain" databaseId="oracle">
+		select 
+		RELATION.USER_ID as userId, 
+		RELATION.ROLE_ID as roleId,
+		RELATION.DOMAIN_ID as domainId,
+		OCUSER.NAME as userName,
+		OCUSER.ACCOUNT as userAccount,
+		OCUSER.STATUS as userStatus,
+		OCUSER.USER_TYPE as userType,
+		ROLE.NAME as roleName
+		FROM STM_SYS_USER_DOMAIN_ROLE_REL RELATION
+ 		LEFT JOIN STM_SYS_USER OCUSER ON RELATION.USER_ID=OCUSER.ID
+ 		LEFT JOIN STM_SYS_ROLE ROLE ON RELATION.ROLE_ID= ROLE.ID
+ 		WHERE RELATION.DOMAIN_ID=#{domainId} AND OCUSER.USER_TYPE=1 
+         
+		 
+     
+     
+     
+    <if test="userName != null"> AND (OCUSER.NAME LIKE '%'||#{userName}||'%' OR OCUSER.ACCOUNT LIKE  '%'||#{userName}||'%')</if>
+	
+	
+  
+  
+  
+  </select>
+	 
+  
+   
+  
+   
+  
+   
+  <select id="getUserRoleByDomainId" resultType="com.mainsteam.stm.system.um.relation.bo.UserRole" parameterType="com.mainsteam.stm.system.um.relation.bo.UserDomain" databaseId="dm">
+		select 
+		RELATION.USER_ID as userId, 
+		RELATION.ROLE_ID as roleId,
+		RELATION.DOMAIN_ID as domainId,
+		OCUSER.NAME as userName,
+		OCUSER.ACCOUNT as userAccount,
+		OCUSER.STATUS as userStatus,
+		OCUSER.USER_TYPE as userType,
+		ROLE.NAME as roleName
+		FROM STM_SYS_USER_DOMAIN_ROLE_REL RELATION
+ 		LEFT JOIN STM_SYS_USER OCUSER ON RELATION.USER_ID=OCUSER.ID
+ 		LEFT JOIN STM_SYS_ROLE ROLE ON RELATION.ROLE_ID= ROLE.ID
+ 		WHERE RELATION.DOMAIN_ID=#{domainId} AND OCUSER.USER_TYPE=1 
+         
+		 
+     
+     
+     
+    <if test="userName != null"> AND (OCUSER.NAME LIKE '%'||#{userName}||'%' OR OCUSER.ACCOUNT LIKE  '%'||#{userName}||'%')</if>
+	
+	
+  
+  
+  
+  </select>
+  <select id="getUserRoleByDomainId" resultType="com.mainsteam.stm.system.um.relation.bo.UserRole" parameterType="com.mainsteam.stm.system.um.relation.bo.UserDomain" databaseId="oscar">
+		select 
+		RELATION.USER_ID as userId, 
+		RELATION.ROLE_ID as roleId,
+		RELATION.DOMAIN_ID as domainId,
+		OCUSER.NAME as userName,
+		OCUSER.ACCOUNT as userAccount,
+		OCUSER.STATUS as userStatus,
+		OCUSER.USER_TYPE as userType,
+		ROLE.NAME as roleName
+		FROM STM_SYS_USER_DOMAIN_ROLE_REL RELATION
+ 		LEFT JOIN STM_SYS_USER OCUSER ON RELATION.USER_ID=OCUSER.ID
+ 		LEFT JOIN STM_SYS_ROLE ROLE ON RELATION.ROLE_ID= ROLE.ID
+ 		WHERE RELATION.DOMAIN_ID=#{domainId} AND OCUSER.USER_TYPE=1 
+         
+		 
+     
+     
+     
+    <if test="userName != null"> AND (OCUSER.NAME LIKE '%'||#{userName}||'%' OR OCUSER.ACCOUNT LIKE  '%'||#{userName}||'%')</if>
+	
+	
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+  <select id="getAllUmRelations" parameterType="com.mainsteam.stm.system.um.relation.bo.UmRelation" resultType="com.mainsteam.stm.system.um.relation.bo.UmRelation">
+		select relation.USER_ID "userId",relation.ROLE_ID "roleId",relation.DOMAIN_ID "domainId" from STM_SYS_USER_DOMAIN_ROLE_REL relation
+		where 1=1 
+		 
+		 
+     
+     
+     
+    <if test="userId != null">AND  USER_ID = #{userId}</if>
+         
+		 
+     
+     
+     
+    <if test="roleId != null"> AND 	ROLE_ID = #{roleId}</if>
+         
+		 
+     
+     
+     
+    <if test="domainId != null"> AND DOMAIN_ID = #{domainId}</if>
+	
+	
+  
+  
+  
+  </select>
+</mapper>

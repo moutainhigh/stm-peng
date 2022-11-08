@@ -1,0 +1,1540 @@
+<script type="text/javascript" src="module/business-service/js/refresh.js"></script>
+
+<script>
+    function CanvasAll(){
+
+        var chooseRowData = oc.business.service.tabs.datas().chooseRowData;
+        var isLine = false, $myflow_tools = $("#myflow_tools"),$drawRect = $("#drawRect").attr("id",oc.util.generateId()),
+                $path = $("#path"), $saveBtn = $('#savesvg'),$tools_changer_center = $('#tools_changer_center'),$bt = $('#businessToolbar');;
+
+        //对于画布设定的变量
+        var clicklinecolor=null;
+        var bizSerIndexDiv = $('#business-service_index');
+        var	drawRectDiv = bizSerIndexDiv.find("#topology_tools_center");
+        var canvas = $drawRect.canvas();
+        var user = oc.index.getUser();
+        //权限控制start=========
+//     if(user.id!=new Number(chooseRowData.createrId)){    //域管理员或者系统管理员（编辑：谁创建的，谁编辑；）
+        if(user.systemUser==false){    //域管理员或者系统管理员（编辑：谁创建的，谁编辑；）
+            canvas.isEditable = false;
+            $bt.hide();
+        }else{
+            //是否可以编辑
+            canvas.isEditable = true;
+            $bt.show();
+        }
+        //编辑器
+        var fillEdit,scaleEdit,fillimgEdit,fillcircleclEdit,fillContainerEdit,ConTainerObjEdti;
+        var Container,contemp,businessUnitCON,businessServeCON,businessUseCON,supportCON,ConTainer;
+        var conUnit,conServer,conUse,conSup,Containersim;
+        canvas.isAuto=true;
+        Container= new swimming(canvas);
+        contemp=Container.containerJSON();
+        //业务单位    业务服务  业务应用  支撑层  四个泳道
+        businessUnitCON=Container.businessUnit;
+        businessServeCON=Container.businessServe;
+        businessUseCON=Container.businessUse;
+        supportCON=Container.support;
+        ConTainer=Container.ConTainer;
+
+
+        if(chooseRowData.topology!=null){
+            canvas.raphael.clear();
+            canvas.restore(eval("("+chooseRowData.topology+")"));
+            canvas.bg.hide();
+            resCon();
+            allEdit();
+            for(var i in canvas.lines){
+                if(canvas.mark==1){
+                    canvas.lines[i].baseArrow.hide();
+                }else if(canvas.mark==2){
+                    canvas.lines[i].baseArrow.show();
+                }
+                 canvas.lines[i].baseArrow.attr({"stroke":canvas.lines[i].path.attrs.stroke});
+            }
+            if(oc.business.service.canvas.update(chooseRowData.id,canvas,"#"+$drawRect.attr("id"))){ saveFun(); }
+            Viewdefin();
+            canvas.isAuto=false;
+        }else{
+            createdata();
+            allEdit();
+            ConTainer.drag=function(){};
+        }
+        //canvas.setSize($(window).width(),$drawRect.height()+100);
+        //Viewdefin();
+       // var bgsetting= new Tiny($("#drawTiny").width(0).height(0).css({opacity:0,display:'none'}),canvas);   //实例化缩略图
+        //新建数据的时候加载的背景
+        if(canvas.bg==null){
+            canvas.bgObj("themes/default/images/bizser/background/bg1.png",0,0,
+                    canvas.raphael.width*5,canvas.raphael.height*5);
+        }
+        canvas.isAuto=false;
+        function createdata(){
+            var con;
+            var statusImg;
+            var convasObjNew=canvas.container(0,0,65,80);
+            //             判断状态------致命状态
+            if (chooseRowData.status == "CRITICAL") {
+                statusImg = "themes/default/images/bizser/statusIMG/zhiming.png";
+            }
+            //                    严重状态
+            else if (chooseRowData.status == "SERIOUS") {
+                statusImg = "themes/default/images/bizser/statusIMG/yanzhong.png";
+            }
+            //                    警告状态
+            else if (chooseRowData.status == "WARN") {
+                statusImg = "themes/default/images/bizser/statusIMG/jingao.png";
+            }
+            //                    正常状态
+            else if (chooseRowData.status == "NORMAL") {
+                statusImg = "themes/default/images/bizser/statusIMG/zhengchang.png";
+            }
+            contemp.containers[0]={
+                texts : [ {text :chooseRowData.name,rx : 38.5,ry : 75,attr : {"fill" : "yellow"}} ],
+                imgs : [ {src :oc.resource.getUrl('platform/file/getFileInputStream.htm?fileId='+chooseRowData.fileId),rx:0,ry:0,w:70,h:65},
+                    {src:statusImg,rx:46,ry:46,w:26,h:26}],
+                rects:[{rx:-5,ry:-5,w:75,h:75,r:10,attr:{"stroke":"#fff","stroke-opacity":0}}],
+                data:{type:"bizMain",id :chooseRowData.id }
+            };
+
+            if(chooseRowData.topology!=null){
+                con=conUse;
+            }else{
+                con = businessUseCON;
+            }
+            var convasSet=convasObjNew.set(contemp.containers[0]);
+            convasSet.handler.attr({"stroke-opacity":0});
+            handlerHover(convasSet);
+            con.addContainer(convasSet,businessUseCON.w/3,25);
+        }
+//针对容器泳道的规则
+        function fillContainerObj(c){
+            var Mark=100;
+            var conObj=null;
+            var edit = new Edit(c);
+            //没使用的编辑点
+            var unuse = ["lt","tr","r","rb","bl","l","t"];
+            for(var i=0;i<unuse.length;i++){
+            	edit.P[unuse[i]].attr({"stroke-opacity":0,"fill-opacity":0}).toBack();
+            }
+            edit.edit = function(bbox){
+                var width = bbox.x2-bbox.x;
+                var height = bbox.y2-bbox.y;
+                //效率问题
+                var canvaswidth= c.raphael.width;
+                if(height<35){
+                    return;
+                }
+                 /*
+                if(width<1133){
+                    width = 1133;
+                    bbox.x2 = bbox.x+width;
+                }
+                if(width>1133){
+                    width = 1133;
+                    bbox.x2 = bbox.x+width;
+                }
+                if(height<150){
+                    height = 150;
+                    bbox.y2 = bbox.y+height;
+                }
+                if(height>230){
+                    height=230; //230
+                    bbox.y2 = bbox.y+height;
+                } */
+                this.con.handler.attr({width:width,height:height});
+                if(this.con.rects[0]){
+                    this.con.rects[0].attr({width: 150, height: height});
+                }
+                if(this.con.texts[0]){
+                	this.con.texts[0].ry = this.con.h/2;
+                }
+                this.con.setBBox(bbox);
+                ResEdit(this.con);
+            };
+            return edit;
+        }
+
+        function ResEdit(con){
+            if(chooseRowData.topology!=null){  //有数据的时候
+                if(con==conUnit){
+                    conServer.move(conUnit.x,conUnit.y+conUnit.h);
+                    conUse.move(conServer.x,conServer.y+conServer.h);
+                    conSup.move(conUse.x,conUse.y+conUse.h);
+                }else if(con==conServer){
+                	conUse.move(conServer.x,conServer.y+conServer.h);
+                    conSup.move(conUse.x,conUse.y+conUse.h);
+                }else if(con==conUse){
+                    conSup.move(conUse.x,conUse.y+conUse.h);
+                }
+            }else{
+                if(businessUnitCON){
+                    businessServeCON.move(businessUnitCON.x,businessUnitCON.y+businessUnitCON.h);
+                    businessUseCON.move(businessUnitCON.x,businessServeCON.y+businessServeCON.h);
+                    supportCON.move(businessUnitCON.x,businessUseCON.y+businessUseCON.h);
+                }else if(businessServeCON){
+                	businessUseCON.move(businessServeCON.x,businessServeCON.y+businessServeCON.h);
+                    supportCON.move(businessServeCON.x,businessUseCON.y+businessUseCON.h);
+                }  else if(businessUseCON){
+                    supportCON.move(businessUseCON.x,businessUseCON.y+businessUseCON.h);
+                }
+            }
+            if(canvas.edit)canvas.edit.drag(con);
+        }
+        //还原每个元素规则
+        function allEdit(){
+            fillEdit = new fillEditObj(canvas);
+            scaleEdit = new scaleEditObj(canvas);
+            fillimgEdit=new fillimgEditObj(canvas);
+            fillcircleclEdit=new fillcircleclEditObj(canvas);
+            fillContainerEdit=new fillContainerObj(canvas);
+            ConTainerObjEdti=new ConTainerObj(canvas);
+        }
+        //给元素上规则
+        function defined(node){
+            var conObj=null;
+//资源   编辑规则
+            if(canvas.edit)canvas.edit.drag(node);
+            if(node.data().type=="resource"){
+                canvas.edit = scaleEdit;
+            }else{
+                scaleEdit.hide();
+            }
+            //基本图形
+            if(node.data().type=="rect" || node.data().type=="rectcircle" || node.data().type=="circlr"){
+                canvas.edit = fillEdit;
+            }else{
+                fillEdit.hide();
+            }
+            //针对椭圆的编辑规则
+            if(node.data().type=="circlecl" ){
+                canvas.edit = fillcircleclEdit;
+            }else{
+                fillcircleclEdit.hide();
+            }
+            //业务服务，业务单位
+            if(node.data().type=="bizSer" || node.data().type=="bizDep" || node.data().type=="bizMain"){
+                canvas.edit = scaleEdit;
+            }else{
+                scaleEdit.hide();
+            }
+            //区域与节点
+            if(node.data().type=="quyupic"){
+                canvas.edit = fillimgEdit;
+            }else{
+                fillimgEdit.hide();
+            }
+            if(node.data().type=="ConTainer"){
+                canvas.edit=ConTainerObjEdti;
+            }else{
+                ConTainerObjEdti.hide();
+            }
+            //四块泳道加装四块泳道的大容器
+            if( node.data().type=="businessServe" || node.data().type=="businessUnit"
+                    || node.data().type=="businessUse" || node.data().type=="support"){
+                var temp;
+                if(node.data().type=="businessUnit"){
+                      temp=0;
+                    conUnit && conUnit.move(0,temp);
+                    businessUnitCON && businessUnitCON.move(0,temp);
+
+                }else if( node.data().type=="businessServe"){
+                    temp=150;
+                }else if( node.data().type=="businessUse"){
+                    temp=300;
+                } else if( node.data().type=="support"){
+                    temp=450;
+                }
+                canvas.edit = fillContainerEdit;
+
+                ResEdit(node);
+            }else{
+                fillContainerEdit.hide();
+                node.drag(0,0,node.x,node.y);
+                node.frame.attr({"stroke-width":0});
+            }
+        }
+
+        //初始化进入视图还原数据（泳道）
+        //对泳道的再次渲染  //还原
+        function resCon(){
+            var conallheight=150;
+            for(var i in canvas.containers){
+            	var ctype = (canvas.containers[i].data()&&canvas.containers[i].data().type)||"";
+                if(ctype=="businessUnit"){
+                    conUnit=canvas.containers[i];
+                } else if(ctype=="businessServe"){
+                    conServer=canvas.containers[i];
+                } else if(ctype=="businessUse"){
+                    conUse=canvas.containers[i];
+                } else if(ctype=="support"){
+                    conSup=canvas.containers[i];
+                } else if(ctype=="ConTainer"){
+                    Containersim=canvas.containers[i];
+                }
+                handlerHover(canvas.containers[i]);
+            }
+          // conUnit.h=conallheight;  conServer.h=conallheight; conUse.h=conallheight;  conSup.h=conallheight;
+/*
+            conUnit.rects[0].attr({height:conallheight});
+            conUnit.handler.attr({height:conallheight});
+            conServer.rects[0].attr({height:conallheight});
+            conServer.handler.attr({height:conallheight});
+            conUse.rects[0].attr({height:conallheight});
+            conUse.handler.attr({height:conallheight});
+            conSup.rects[0].attr({height:conallheight});
+            conSup.handler.attr({height:conallheight}); */
+            ResEdit(canvas.containers[i]);
+            Containersim.drag=function(){};
+            ConDblclick(conUnit);
+            ConDblclick(conServer);
+            ConDblclick(conSup);
+        }
+        //svg的保存比例
+        function SVGRate(){
+            var ts=this;
+            this.rate=1.4;
+            this.svgw=null;
+            this.svgh=null;
+            var canw=canvas.raphael.width,canh=canvas.raphael.height,ratio;
+            //以宽度为基准 宽度不变
+            // this.svgw=canh*this.rate;
+            this.svgh=canw/this.rate;
+            var matinfo=this.svgh/4;
+            for(var i in canvas.containers){
+            	if(!(canvas.containers[i]&&canvas.containers[i].data()&&canvas.containers[i].data().type)) return;
+                if(canvas.containers[i].data().type=="businessUnit"){
+                    conUnit=canvas.containers[i];
+                }else if(canvas.containers[i].data().type=="businessServe"){
+                    conServer=canvas.containers[i];
+                }else if(canvas.containers[i].data().type=="businessUse"){
+                    conUse=canvas.containers[i];
+                }else if(canvas.containers[i].data().type=="support"){
+                    conSup=canvas.containers[i];
+                }
+            }
+            conUnit.h=matinfo; conServer.h=matinfo; conUse.h=matinfo; conSup.h=matinfo;
+            conUnit.rects[0].attr({height:matinfo});
+            conUnit.handler.attr({height:matinfo});
+            conServer.rects[0].attr({height:matinfo});
+            conServer.handler.attr({height:matinfo});
+            conUse.rects[0].attr({height:matinfo});
+            conUse.handler.attr({height:matinfo});
+            conSup.rects[0].attr({height:matinfo});
+            conSup.handler.attr({height:matinfo});
+            ResEdit(canvas.containers[i]);
+            //拉伸比例
+            canvas.raphael.setViewBox(0,0,canvas.raphael.width-100,canvas.raphael.height);
+            ratio=this.svgh/canh;
+            canvas.raphael.setSize(canw,this.svgh);
+        }
+
+        //视图显示比例
+        function Viewdefin(){
+
+            var widthObj= canvas.bbox.x2-canvas.bbox.x;
+            var heightObj= canvas.bbox.y2-canvas.bbox.y;
+            var Xobj=canvas.bbox.x;
+            var Yobj=canvas.bbox.y;
+           canvas.setViewBox(0,0,widthObj+6,Yobj);
+        }
+
+
+        //元素分类的双击事件
+        function ConDblclick(ConNode){
+            for(var i in ConNode.containers){
+                resourceClick(ConNode.containers[i]);
+            }
+        }
+//    点击画布中的对象的时候
+        var mouseObj=null;
+        var canX=null;
+        var canY=null;
+        var tempTrue=true;
+        var EditShow;
+        var mark=1;
+        var markline=0;//线条的标记
+        //连线操作记录
+        var lineOpt ={};
+        canvas.click=function(node){
+            // if(!node)return;
+            var firfoxevent=new getMouseLocation(); //指向单个div
+            var eventFun=new getEvent(); //指向整个文档
+            var edge = {format:"M{0},{1}L{2},{3}"};
+            var canvasCoe=canvas.coe;
+            var x, y,biaoji= 0,line;
+            if($.browser.msie){   //IE
+                canX=firfoxevent.x;
+                canY=firfoxevent.y;
+            }else if($.browser.opera){
+//                alert("这是一个opera浏览器");
+            }else if($.browser.mozilla){   //火狐
+                canX=firfoxevent.x;
+                canY=firfoxevent.y;
+            }else if($.browser.safari){  //苹果+chromen
+                canX=event.offsetX;
+                canY=event.offsetY;
+            }else{
+                canX=event.offsetX;
+                canY=event.offsetY;
+            }
+            if(this.clickNode != null){
+                var fromcon,tocon;
+                if(isLine){
+                    if(mouseObj==null){
+                        mouseObj=  canvas.raphael.path(Raphael.format(edge.format,node.x,node.y,canX,canY));
+                        $drawRect.mousemove(function(e){
+//                format 前面两个参数是目标元素的绝对位置  后参数是width和height
+//                     相对于div的鼠标坐标
+                            if($.browser.mozilla){
+                                var ex=e || window.event;
+                                x=(ex.pageX + document.body.scrollLeft - document.body.clientLeft)-220;
+                                y=(ex.pageY + document.body.scrollTop  - document.body.clientTop)-80;
+                            }else{
+                                x=event.offsetX;
+                                y=event.offsetY;
+                            }
+                            if(mouseObj!=null){
+                                mouseObj.attr({path:Raphael.format(edge.format,canX*canvasCoe,canY*canvasCoe,x*canvasCoe-10,y*canvasCoe-20),
+                                    stroke:"green","stroke-width":2});
+                            }
+                        });
+                    }else{
+                        $drawRect.css({cursor:"auto"});
+                        mouseObj.remove();
+                        mouseObj=null;
+                    }
+                    if(node.data().type=="ConTainer" || node.data().type=="businessServe" || node.data().type=="businessUnit"
+                            || node.data().type=="businessUse" || node.data().type=="support"){
+                        return
+                    }
+
+                    //判断是连线的操作的时候
+                    if(lineOpt.from==null){
+                        lineOpt.from = node;
+                    }else{
+                        fromcon=lineOpt.from.parent.data().type;
+                        tocon=node.parent.data().type;
+                        /*
+
+                        if(fromcon==tocon){
+                            lineFalse();
+                        }
+                        else if(fromcon=="businessUnit"||tocon=="businessUnit"){
+                            if(tocon=="businessUse"||tocon=="support"){
+                                lineFalse();
+                            }
+                            if(fromcon=="businessUse"||fromcon=="support"){
+                                lineFalse();
+                            }
+                        }
+                        else if(fromcon=="businessServe"||tocon=="businessServe"){
+                            if(tocon=="support"||fromcon=="support"){
+                                lineFalse();
+                            }
+                        }
+                        else if(fromcon=="businessUse"||tocon=="businessUse"){
+                            if(tocon=="businessUnit"||fromcon=="businessUnit"){
+                                lineFalse();
+                            }
+                        }
+                        if(fromcon=="businessServe"){
+                            if(tocon=="businessUnit") lineFalse();
+                        }else if(fromcon=="businessUse"){
+                            if(tocon=="businessServe") lineFalse();
+                        }else if(fromcon=="support"){
+                            if(tocon=="businessUse") lineFalse();
+                        } */
+                        var lineto= this.onLine(lineOpt.from,node);
+                         lineOpt.from=null;
+                        isLine=true;
+                    }
+                }
+                defined(node);  //给元素上规则
+            }
+            //文本框的编辑框取消
+            $("textarea").hide();
+            lineClass();
+            this.clickNode = node;
+        };
+        function lineClass() {
+            for (var i in canvas.lines) {
+                if (canvas.lines[i].path.glowsobj) {
+                    canvas.lines[i].path.glowsobj.remove();
+                    var linecolor = canvas.lines[i].path.attrs.stroke;
+                    if (canvas.lines[i].path.attrs.stroke == "#fff") {
+                        canvas.lines[i].path.attr({stroke: "green"});
+                    }
+                    canvas.lines[i].path.attr({"stroke": canvas.lines[i].path.attrs.stroke});
+                    canvas.lines[i].baseArrow && canvas.lines[i].baseArrow.attr({"stroke": canvas.lines[i].path.attrs.stroke});
+                }
+            }
+        }
+        //插入文本框的点击
+        eve.on("oc_topo_chose",function(){
+            if(canvas.edit)canvas.edit.hide();
+            this.ipter.css({
+                left:this.x*canvas.coe*2.5,
+                top:this.y*canvas.coe*2.5,
+                width:200*canvas.coe,
+                height:100*canvas.coe
+            });
+            canvas.clickNode=this;
+        });
+//    保存拓扑数据和快照
+        $saveBtn.click(function(){
+            saveFun();
+           // Viewdefin();
+        });
+        $("#resourceBtn").unbind('click').click(function(){
+            if($myflow_tools.is(":hidden")){
+                $myflow_tools.show();
+                $(this).find("a").addClass("active");
+            }else{
+                $myflow_tools.hide();
+                $(this).parent().find("a").each(function(){ $(this).removeClass("active"); });
+                return;
+            }
+            $tools_changer_center.empty().append("<div id='resourceTreeData'></div>");
+            var $resourceTreeData = $("#resourceTreeData");
+            $resourceTreeData.append("<form class='oc-form col2' id='bizSerResForm'><table width=100%>" +
+            "<tbody><tr><td><div class='form-group'><div><select name='main_category'></select></div></div>" +
+            "</td></tr><tr><td><div class='form-group'><div><select name='second_category'></select></div></div></td></tr>" +
+            "<tr><td><div class='form-group'><div><input name='ipAddress' style='width:130px;' type='text' value='请输入IP'/>" +
+            "<a href='javascript:void(0);' id='searchByIpBtn' class='easyui-linkbutton'data-options=\"iconCls:'icon-search'\">" +
+            "</a></div></div></td></tr><tr><td>" +
+            "<div class='form-group'><div class='tree-scroll'><ul id='biz_service_resource'></ul></div></div></td></tr></tbody></table></form>");
+            var $main_category = $('[name=main_category]'),$second_category = $('[name=second_category]'),
+                    $biz_service_resource = $("#biz_service_resource"),$biz_ser_form = $("#bizSerResForm"),
+                    $second_categoryData = null,$resourceData = null, $ipAddress = $('[name=ipAddress]'),
+                    $searchByIpBtn = $("#searchByIpBtn").linkbutton();
+            var bizSerForm = oc.ui.form({
+                selector:$biz_ser_form,
+                combobox:[{
+                    selector:$main_category,
+                    multiple:false,
+                    filter:function(data){
+                        return data.data;
+                    },
+                    onChange:function(newValue, oldValue, newJson, oldJson){
+                        bizSerForm.ocui[1].reLoad(oc.resource.getUrl('portal/business/service/getCategory.htm?type=category&level=2&categoryId='+newValue));
+                    },
+                    url:oc.resource.getUrl('portal/business/service/getCategory.htm?type=category&level=1')
+                },{
+                    selector:$second_category,
+                    multiple:false,
+                    filter:function(data){
+                        $second_categoryData = data.data;
+                        return $second_categoryData;
+                    },
+                    onChange:function(newValue, oldValue, newJson, oldJson){
+                    }
+                }]
+            });
+//		资源
+            $ipAddress.on('focus',function(){if($(this).val()=="") $(this).val("请输入IP"); else $(this).val("");})
+                    .on('blur',function(){if($(this).val()=="") $(this).val("请输入IP");});
+            $searchByIpBtn.on('click',function(){
+                oc.util.ajax({
+                    url: oc.resource.getUrl('portal/business/service/getResources.htm?type=resource&level=3&categoryId='
+                    +$main_category.combobox('getValue')+'&resourceId='
+                    +$second_category.combobox('getValue')+'&ipAddress='+(($ipAddress.val()=="请输入IP")?"":$ipAddress.val())),
+                    data:null,
+                    successMsg:null,
+                    timeout:300000,
+                    success: function(data){
+                        $biz_service_resource.tree({
+                            data:eval(data).data,
+                            onLoadSuccess:function(node, data){
+                                for(var i=0;i<data.length;i++){
+                                    var children = data[i].children;
+                                    for(var m=0;m<children.length;m++){
+                                        $biz_service_resource.find("#"+children[m].domId).find('.tree-title')
+                                                .attr({"type":"resource","id":children[m].id,
+                                                    "status":children[m].attributes.status,
+                                                    "resourceId":children[m].attributes.resourceId,
+                                                    "parentCategoryId":data[i].attributes.parentCategoryId,
+                                                    "pid":data[i].attributes.pid})
+                                                .addClass('state')
+                                                .draggable({
+                                                    proxy: "clone",
+                                                    revert:true
+                                                });
+                                    }
+                                }
+                                toolsDroppable();
+                            }
+                        });
+                    }
+                });
+            })
+        });
+        //业务单位/业务服务
+        $("#bizDepBtn,#bizSerBtn").unbind('click').click(function(){
+            if($myflow_tools.is(":hidden")){
+                $myflow_tools.show();
+                $(this).find("a").addClass("active");
+            }else{
+                $myflow_tools.hide();
+                $(this).parent().find("a").each(function(){ $(this).removeClass("active"); });
+                return;
+            }
+            var btnId = $(this).attr("id")=="bizDepBtn"?"bizDep":"bizSer";
+            $tools_changer_center.empty().append("<div id='"+btnId+"Data'></div>");
+            var $bizDepOrBizSerData = $("#"+btnId+"Data");
+            if(user.systemUser==true){
+                $bizDepOrBizSerData.append(oc.module.biz.service.draw.addBtn(btnId,$bizDepOrBizSerData,null));
+            }
+            oc.util.ajax({
+                url: oc.resource.getUrl('portal/business/service/dep/getList.htm'),
+                data:{type:btnId=="bizDep"?0:1},
+                successMsg:null,
+                success: function(data){
+                    var bidDepOrBizSerDatas = eval(data.data);
+                    if(bidDepOrBizSerDatas.length>0){
+                        for(var i=0;i<bidDepOrBizSerDatas.length;i++){
+                            var src = oc.resource.getUrl('platform/file/getFileInputStream.htm?fileId='+bidDepOrBizSerDatas[i].fileId);
+                            $bizDepOrBizSerData.append(oc.module.biz.service.draw.addPicDiv(btnId,src,bidDepOrBizSerDatas[i].name,bidDepOrBizSerDatas[i].id,true,null,bidDepOrBizSerDatas[i].entryId));
+                        }
+                        toolsDroppable();
+                    }
+                }
+            });
+        });
+        //    添加自定义元素内的所有内容
+        $("#selfDocBtn").unbind('click').click(function(){
+            if($myflow_tools.is(":hidden")){
+                $myflow_tools.show();
+                $(this).find("a").addClass("active");
+            }else{
+                $myflow_tools.hide();
+                $(this).parent().find("a").each(function(){ $(this).removeClass("active"); });
+                return;
+            }
+            $tools_changer_center.empty().append("<div id='selfDocData'></div>");
+            var $selfDocData = $("#selfDocData");
+            $selfDocData.append('<div id="selfDocAccordion" title="" class="easyui-accordion" style="width:200px;height:440px!important;">');
+            var selfDocAccordion = $("#selfDocAccordion").accordion({
+                animate:false,
+                fit:true
+            });
+            //基本形状的所有图形------------
+            var jibenDiv = $("<div class=' hide-overflow padding5' id='jibenDiv'></div>");
+            var jibenpicArr = [["rect","rectcircle","circlr","circlecl"],["rect.png","rectcircle.png","circle.png","circlecl.png"],
+                ["矩形","圆角矩形","圆","椭圆"]];
+
+            for(var i = 0 ; i < jibenpicArr[0].length ; i++){
+                var src = "themes/"+Highcharts.theme.currentSkin+"/images/bizser/jibenxingzhuang/"+jibenpicArr[1][i];
+                jibenDiv.append(oc.module.biz.service.draw.addPicDiv(jibenpicArr[0][i],src,jibenpicArr[2][i],null,false,null));
+            }
+            toolsDroppable();
+            selfDocAccordion.accordion('add', {
+                title: '基本形状',
+                content: jibenDiv,
+                selected: true
+            });
+            //区域与节点的图片-----------------
+            var quyunodeDiv = $("<div  class=' hide-overflow padding5' id='quyunodeDiv'></div>");
+            if(user.systemUser==true){
+                quyunodeDiv.append(oc.module.biz.service.draw.addBtn("quyunode",quyunodeDiv,canvas));
+            }
+            var quyunodeArr = [["untitled.png","untitled1.png","untitled2.png","untitled3.png","untitled4.png","untitled5.png","untitled6.png"],
+                ["区域","internet","房屋","合作伙伴","办公楼","大楼","机房"]];
+            for(var i = 0 ; i < quyunodeArr[0].length ; i++){
+                var src = "themes/default/images/bizser/AreaandnodeMAX/"+quyunodeArr[0][i];
+                quyunodeDiv.append(oc.module.biz.service.draw.addPicDiv("quyupic",src,quyunodeArr[1][i],null,false,null));
+            }
+            toolsDroppable();
+            selfDocAccordion.accordion('add',{
+                title: '区域与节点',
+                content: quyunodeDiv,
+                selected: false
+            });
+            //背景加载-----------------
+            var backgroundDiv = $("<div  class=' hide-overflow padding5' id='backgroundDiv'></div>");
+            if(user.systemUser==true){
+                backgroundDiv.append(oc.module.biz.service.draw.addBtn("background",backgroundDiv,canvas));
+            }
+            var backgroundArr = [["bg1.png","bg2.png","bg3.png","bg4.png","bg5.png","bg6.png","bg7.png","bg8.png",
+                "bg9.png","bg10.png","bg11.png","bg12.png","bg13.png","bg14.png","bgpng.png"],
+                ["系统默认","背景1","背景2","背景3","背景4","背景5","背景6","背景7","背景8",
+                    "背景9","背景10","背景11","背景12","背景13","背景14"]];
+            var bg;
+            for(var i = 0 ; i < backgroundArr[0].length ; i++){
+                var src = "themes/default/images/bizser/background/"+backgroundArr[0][i];
+                backgroundDiv.append(oc.module.biz.service.draw.addPicDiv("backgroundpic",src,backgroundArr[1][i],null,false,canvas));
+            }
+            toolsDroppable();
+            selfDocAccordion.accordion('add', {
+                title: '背景',
+                content: backgroundDiv,
+                selected: false
+            });
+            oc.util.ajax({
+                url: oc.resource.getUrl('portal/business/service/self/getList.htm'),
+                data:null,
+                successMsg:null,
+                success: function(data){
+                    var rows = eval(data).data;
+                    for(var i in rows){
+                        var src = oc.resource.getUrl('platform/file/getFileInputStream.htm?fileId='+rows[i].fileId);
+                        if(rows[i].type == 1){
+                            quyunodeDiv.append(oc.module.biz.service.draw.addPicDiv("quyupic",src,rows[i].imgName,rows[i].id,true,null));
+                        }
+                        else if(rows[i].type == 3){
+                            backgroundDiv.append(oc.module.biz.service.draw.addPicDiv("backgroundpic",src,rows[i].imgName,rows[i].id,true,canvas));
+                        }
+                    }
+                }
+            })
+        });
+
+        //                移上对象的hover效果
+        function handlerHover(canvashandler){
+            var mark=10;
+            clicklinecolor="#fff";
+            if(canvashandler&&canvashandler.data()&&canvashandler.data().type &&
+            		(canvashandler.data().type=="businessServe" || canvashandler.data().type=="businessUnit"
+                    || canvashandler.data().type=="businessUse" || canvashandler.data().type=="support"
+                    || canvashandler.data().type=="ConTainer")){
+                return
+            }
+            canvashandler.handler.hover(function(){
+                var thisheight= this.attr("height");
+                var thiswidth= this.attr("width");
+                //            这是移上类型为矩形、圆角、圆的时候
+                if(canvashandler.imgs[0]==null || canvashandler.texts[0]==null){
+                }else{
+                    canvashandler.rects[0].attr({r:5,"fill":"#fff","fill-opacity":0.3,width:thiswidth+mark,height:thisheight+mark});
+                }
+                this.attr({"stroke":"white","stroke-opacity":0,"cursor":"pointer"}); //鼠标样式
+            },function(){
+                var thisheight= this.attr("height");
+                var thiswidth= this.attr("width");
+                if(canvashandler.imgs[0]==null || canvashandler.texts[0]==null){
+                }else{
+                    canvashandler.rects[0].attr({r:5,"fill":"#fff","fill-opacity":0,width:thiswidth-mark,height:thisheight-mark});
+                }
+            });
+        }
+        //工具放如视图中的效果
+        function toolsDroppable(){
+
+            $drawRect .droppable({
+                accept : ".state",
+                onDrop : function(c, i){
+                    if($(i).draggable('proxy').offset().left>=$myflow_tools.offset().left) return;
+                    var tx = ($(i).draggable('proxy').offset().left - $( this).offset().left) * canvas.coe + canvas.raphael._viewBox[0],
+                            ty = ($( i).draggable('proxy').offset().top - $(this) .offset().top) * canvas.coe + canvas.raphael._viewBox[1];
+                    contemp.containers[0].x =tx;
+                    contemp.containers[0].y =ty;
+                    var textClass={"fill" : "#fff","font-family":'微软雅黑',"font-size":12};
+                    var rectClass={"stroke":"#fff","stroke-opacity":0};
+                    var textsinfo={text : $(i).text(),rx : 40,ry : 75,attr :textClass};
+                    var rectsinfo={rx:-5,ry:-5,w:90,h:90,r:tx*2,attr:rectClass};
+                    var imgObjw=65,imgObjh=65,imgObjrx=5;
+                    var CON;
+
+                    if ($(i).attr("type") == "resource" || $(i).attr("type") == "bizSer") {
+                        var statusImg;
+                        var time = null;
+                        var statusColor = null;
+                        var imgSrc;
+                        if ($(i).find('img').get(0)) {
+                            imgSrc = $(i).find('img').attr('src');
+                        }
+                        //             判断状态-------------------
+                        //                    致命状态
+                        if ($(i).attr("status") == "CRITICAL") {
+                            time = 200;
+                            statusColor = "red";
+                            statusImg = "themes/default/images/bizser/statusIMG/zhiming.png";
+                        }
+                        //                    严重状态
+                        else if ($(i).attr("status") == "SERIOUS") {
+                            time = 400;
+                            statusColor = "#E66602";
+                            statusImg = "themes/default/images/bizser/statusIMG/yanzhong.png";
+                        }
+                        //                    警告状态
+                        else if ($(i).attr("status") == "WARN") {
+                            time = 600;
+                            statusColor = "yellow";
+                            statusImg = "themes/default/images/bizser/statusIMG/jingao.png";
+                        }
+                        //                    正常状态
+                        else if ($(i).attr("status") == "NORMAL") {
+                            time = 1000;
+                            statusColor = "#12F14E";
+                            statusImg = "themes/default/images/bizser/statusIMG/zhengchang.png";
+                        }
+                        //	var canvasobj=canvas.container(tx,ty,65,80);
+                        //                    资源
+                        if($(i).attr("type")=="resource"){
+                            var imgObj,resourceImg,resourceimgHD;
+                            resourceImg="themes/default/images/bizser/resourceImg/";
+                            resourceimgHD="themes/default/images/bizser/resourceimgHD/";
+                            //主机
+                            if($(i).attr("parentcategoryid")=="Host"){
+                                imgObj=resourceimgHD+"Host"+".png";
+                            }else
+                            //网络设备
+                            if($(i).attr("parentcategoryid")=="NetworkDevice"){
+                                imgObj=resourceimgHD+"NetworkDevice.png";
+                            }
+                            //链路
+                            else if($(i).attr("parentcategoryid")=="Link"){
+                                imgObj=resourceimgHD+"Link.png";
+                            }
+                            //存储
+                            else if($(i).attr("parentcategoryid")=="Storage"){
+                                imgObj=resourceimgHD+"Storage.png";
+                            }
+                            //数据库
+                            else if($(i).attr("parentcategoryid")=="Database"){
+                                imgObj=resourceimgHD+"Database.png";
+                            }
+                            //中间件
+                            else if($(i).attr("parentcategoryid")=="Middleware"){
+                                imgObj=resourceimgHD+"Middleware.png";
+                            }
+                            //J2EE应用服务器
+                            else if($(i).attr("parentcategoryid")=="J2EEAppServer"){
+                                imgObj=resourceimgHD+"J2EEAppServer.png";
+                            }
+                            //WEB服务器
+                            else if($(i).attr("parentcategoryid")=="WebServer"){
+                                imgObj=resourceimgHD+"WebServer.png";
+                            }
+                            //标准服务
+                            else if($(i).attr("parentcategoryid")=="StandardService"){
+                                imgObj=resourceimgHD+"StandardService.png";
+                            }
+                            //虚拟化资源
+                            else if($(i).attr("parentcategoryid")=="VM"){
+                                imgObj=resourceimgHD+"VM.png";
+                            }
+                            //邮件服务器
+                            else if($(i).attr("parentcategoryid")=="MailServer"){
+                                imgObj=resourceimgHD+"MailServer.png";
+                            }
+                            //目录服务器
+                            else if($(i).attr("parentcategoryid")=="Directory"){
+                                imgObj=resourceimgHD+"Directory.png";
+                            }
+                            //LotusDomino
+                            else if($(i).attr("parentcategoryid")=="LotusDomino"){
+                                imgObj=resourceimgHD+"LotusDomino.png";
+                            }
+                            //其它Snmp设备
+                            else if($(i).attr("parentcategoryid")=="SnmpOthers"){
+                                imgObj=resourceimgHD+"SnmpOthers.png";
+                            }
+                            else{
+                                imgObj=resourceImg+"10_linux.png";
+                            }
+                            contemp.containers[0]={
+                                rects:[rectsinfo],
+//                                            ,{rx:50,ry:50,w:18,h:18,attr:{"stroke":"#fff",r:tx*2}}
+                                //     img[0] 是状态图标  img[1] 是设备图标
+                                imgs:[{src:imgObj,rx:2.5,ry:0,w:imgObjw,h:imgObjh},{src:statusImg,rx:50,ry:50,w:26,h:26}],
+                                texts : [ textsinfo ],
+                                data:{type:$(i).attr("type"),id:$(i).attr("id")}
+                            };
+                            if(chooseRowData.topology!=null){
+                                CON=conSup;
+                            }else{
+                                CON = supportCON;
+                            }
+                        }
+                        //                    业务服务
+                        if($(i).attr("type")=="bizSer"){
+                            contemp.containers[0]={
+                                rects:[rectsinfo],
+                                imgs:[{src:imgSrc,rx : imgObjrx,ry : 0,w : imgObjw,h : imgObjh}],
+                                texts : [ textsinfo],
+                                data:{type:$(i).attr("type"),id:$(i).attr("id")}
+                            };
+                            if(chooseRowData.topology!=null){
+                                CON=conServer;
+                            }else{
+                                CON = businessServeCON;
+                            }
+                        }
+                    }
+                    //               矩形
+                    if ($(i).attr("type") == "rect"){
+                        var canvasNew= canvas.container(tx, ty, 65, 80);
+                        canvasNew.set({
+                            rects : [ { rx : 0, ry : 0, 	w : 65, h : 80, 	attr : { 	"stroke" : "#fff" 	} } ],
+                            data : { type : $(i).attr("type"), 	id : $(i).attr("id") } 	}).handler.attr({"stroke-opacity":0});
+                        canvasNew.rects[0].attr({"fill":"#fff","fill-opacity":0.3});
+                    }
+                    //                圆角矩形
+                    if ($(i).attr("type") == "rectcircle"){
+                        var canvasobj=canvas.container(tx, ty, 65, 80);
+                        canvasobj.set({
+                            rects : [ { rx : 0, ry : 0, 	w : 65, 	h : 80,attr : {"stroke" : "#fff", 	r : 20 	} 	} ],
+                            data : { type : $(i).attr("type"), 	id : $(i).attr("id")}}).handler.attr({"stroke-opacity":0});
+                        canvasobj.rects[0].attr({ "fill":"#fff","fill-opacity":0.3});
+                    }
+                    //                圆
+                    if ($(i).attr("type") == "circlr") {
+                        var canvasobj=canvas.container(tx, ty, 80, 80);
+                        canvasobj.set({
+                            rects : [ {rx : 0,	ry : 0,w : 80,	h : 80,attr : {"stroke" : "#fff",	r : 40}	} ],
+                            data : {type : $(i).attr("type"),id : $(i).attr("id")	}	}).handler.attr({"stroke-opacity":0});
+                        canvasobj.rects[0].attr({ "fill":"#fff","fill-opacity":0.3});
+                    }
+                    //                椭圆
+                    if ($(i).attr("type") == "circlecl") {
+                        var canvasobj=canvas.container(tx, ty, 80, 50);
+                        canvasobj.set({
+                            rects : [ {rx : 0,ry : 0,	w : 80,h : 50,attr : {	"stroke" : "#fff",	r : 40	}	} ],
+                            data : {	type : $(i).attr("type"),id : $(i).attr("id")	}	}).handler.attr({"stroke-opacity":0});
+                        canvasobj.rects[0].attr({ "fill":"#fff","fill-opacity":0.3});
+                    }
+                    //                流程
+                    if ($(i).attr("type") == "liuchengpic"){
+                        imgSrc = $(i).find("img").attr('src');
+                        var  canvasobjliuc=canvas.container(tx, ty, 65, 80);canvasobjliuc.set({
+                            imgs : [ {src : imgSrc,rx : 5,	ry : 5,	w : 55,	h : 70	} ],
+                            data : {	type : $(i).attr("type"),id : $(i).attr("id")} }).handler.attr({"stroke-opacity":0});
+                        handlerHover(canvasobjliuc);
+                    }
+                    //                判断区域与节点
+                    if ($(i).attr("type") == "quyupic") {
+                        imgSrc = $(i).find("img").attr('src');
+                        var   canvasobjquyu=canvas.container(tx, ty, 100, 100);
+                        canvasobjquyu.set({
+                            imgs : [ {src : imgSrc,rx : 5,ry : 5,w : 85,h : 85} ],
+                            rects:[rectsinfo],
+                            data : {type : $(i).attr("type"),id : $(i).attr("id")}
+                        }).handler.attr({"stroke-opacity":0});
+                        handlerHover(canvasobjquyu);
+                    }
+                    //                 业务单位
+                    if ($(i).attr("type") == "bizDep"){
+                        var imgSrc;
+                        if ($(i).find('img').get(0)){
+                            imgSrc = $(i).find('img').attr('src');
+                        }else{
+                            imgSrc = "third/canvas/img/top/switch.png";
+                        }
+                        contemp.containers[0]={
+                            texts : [textsinfo],
+                            imgs : [ {src : imgSrc,rx :imgObjrx,ry : 0,w : imgObjw,h : imgObjh} ],
+                            rects:[rectsinfo],
+                            data:{type:$(i).attr("type"),id : $(i).attr("id")}
+                        };
+                        if(chooseRowData.topology!=null){
+                            CON=conUnit;
+                        }else{
+                            CON = businessUnitCON;
+                        }
+
+                    }
+
+
+                    if($(i).attr("type") == "rect" || $(i).attr("type") == "rectcircle"
+                            || $(i).attr("type") == "circlr" || $(i).attr("type") == "circlecl"
+                            ||$(i).attr("type") == "liuchengpic" || $(i).attr("type") == "quyupic" ) return;
+                    //对添加的容器指定添加泳道
+                    var convasObj,convasSet;
+                    //当前泳道不能存在重复元素
+                    for(var n in CON.containers){
+                    	if(!(CON.containers[n]&&CON.containers[n].data()&&CON.containers[n].data().id)) continue;
+                        if($(i).attr("id")==CON.containers[n].data().id){
+                            return;
+                        }
+                    }
+                    if($(i).attr("type") == "quyupic"){
+                        convasObj=canvas.container(tx,ty,100,100);
+                    }else{
+                        convasObj=canvas.container(tx,ty,75,85);
+                    }
+                    convasObj.handler.attr({"stroke-opacity":0});
+                    convasSet=convasObj.set(contemp.containers[0]);
+                    handlerHover(convasSet);
+                    resourceClick(convasSet);
+                    Container.ConTainer.handler.attr({"stroke-opacity":0.5});
+                    CON.addContainer(convasSet,tx-CON.x,CON.h/5);
+                    if(canvas.edit)canvas.edit.hide();
+                }
+            });
+        }
+        function saveFun(){
+            for(var i in canvas.lines){
+                if(canvas.lines[i].path.attrs.stroke=="#fff"){
+                    canvas.lines[i].path.attr({"stroke":"green"});
+                }
+            }
+            var tempw=canvas.raphael.width,reate=1.4;
+            canvas.bg.attr({width:tempw,height:tempw/reate}).show();
+            $(".mouseSuoFang").hide();
+            if(canvas.edit){canvas.edit.hide();canvas.edit=null;canvas.edit &&canvas.edit.remove();}
+            if(canvas.raphael.width>1365 ){
+                canvas.setViewBox(0,0,canvas.raphael.width /.9,canvas.raphael.height);
+            }
+            var data = canvas.getData();
+            //new SVGRate();
+            oc.util.ajax({
+                url: oc.resource.getUrl('portal/business/service/updateTopologyAndSnapshoot.htm'),
+                data:{data:{id:chooseRowData.id,topology:data}},
+                successMsg:null,
+                async:false,
+                success: function(data){
+                    if(data.code&&data.code==200){
+                        if(data.data.status!=null && data.data.status!=undefined && data.data.status!=""){
+                            var statusObj = $("#business-service_index").find("span[value="+chooseRowData.id+"]").find(".light-ico").removeClass();
+                        }
+                        if(data.data.status =="CRITICAL"){
+                            statusObj.addClass('light-ico redlight');
+                        }else if(data.data.status =="SERIOUS"){
+                            statusObj.addClass('light-ico orangelight');
+                        }else if(data.data.status =="WARN"){
+                            statusObj.addClass('light-ico yellowlight');
+                        }else if(data.data.status =="NORMAL"){
+                            statusObj.addClass('light-ico greenlight');
+                        }
+                     // resCon();  //泳道还原高度
+                        if(canvas.bg)canvas.bg.hide();
+                        alert("操作成功");
+                    }
+                }
+            });
+
+        }
+
+        oc.ns('oc.module.biz.service.draw');
+        oc.module.biz.service.draw={
+            delData:function(domObj){
+                $(domObj).parent().draggable('disable');
+                var url,id = $(domObj).parent().attr("id"),type = $(domObj).parent().attr("type");
+                if(type=="bizDep") url = oc.resource.getUrl('portal/business/service/dep/del.htm?id='+id+'&type=0');
+                else if(type=="bizSer") url = oc.resource.getUrl('portal/business/service/dep/del.htm?id='+id+'&type=1');
+                else url = oc.resource.getUrl('portal/business/service/self/remove.htm?id='+id);
+                $.messager.confirm('提示','确认要删除该记录？',function(r){
+                    if(r){
+                        oc.util.ajax({
+                            url: url,
+                            data:null,
+                            successMsg:null,
+                            success: function(data){
+                                if(data.code&&data.code==200){
+                                    $(domObj).parent().remove();
+                                    if(type=="bizDep"||type=="bizSer")
+                                        oc.business.service.west.removeBizDepOrBizSerAccordionCfg(id);
+                                    alert("删除成功");
+                                }else if(data.code==299){alert(data.data);}
+                            }
+                        });
+                    }
+                })
+            },
+            addBtn:function(type,sourceDiv,canvas){
+                return $('<div class="difine-pic-box" type="'+type+'"><div class="define-pic"><span class="m-show oc-drawpic-add"/></div></div>')
+                        .on('click',function(e){
+                            oc.resource.loadScript('resource/module/business-service/js/business_service_dep_detail.js',function(){
+                                if(type=="bizDep") oc.module.biz.service.dep.open({  type:'add',  id:undefined,  div:sourceDiv,bizType:"bizDep"  });
+                                else if(type=="bizSer") oc.module.biz.service.dep.open({  type:'add',  id:undefined,  div:sourceDiv,bizType:"bizSer"  });
+                                else oc.resource.loadScript('resource/module/business-service/js/business_service_self_detail.js',
+                                            function(){ oc.module.biz.service.self.open({  type:'add', id:undefined, div:sourceDiv,canvas:canvas,dragType:type=="quyunode"?"quyupic":(type+"pic") });
+                                            });
+                            });
+                        });
+            },
+            addPicDiv:function(type,src,text,id,delFalg,canvas,entryId){
+                var picDom;
+                if(delFalg && (user.systemUser==true || entryId==user.id)){
+                    picDom =  $('<div class="state difine-pic-box" type='+type+' id='+id+'>' +
+                    '<span id="delBtn" class="l-btn-icon icon-del oc-draw-del" onclick="oc.module.biz.service.draw.delData(this);"/></span>' +
+                    '<div class="define-pic oc-pic-move">'+'<img src="'+src+'"/><span title="'+text+'">'+(text.length>6?(text.substring(0,6)+'...'):text)+'</span></div></div>');
+                }else{
+                    picDom =  $('<div class="state difine-pic-box" type='+type+'>'+
+                    '<div class="define-pic">'+'<img src="'+src+'"/><span title="'+text+'">'+(text.length>6?(text.substring(0,6)+'...'):text)+'</span></div></div>');
+                }
+                if(type!="backgroundpic"){
+                    picDom.draggable({ proxy: "clone", revert:true });
+                }else{
+                    picDom.click(function(){
+                        var bgsrc=$(this).find("img").attr("src");
+                        var styleBg=bgsrc;
+                        var style={
+                            backgroundImage:'url('+bgsrc+')',
+                            backgroundRepeat:'no-repeat'
+                        };
+                        for(var i in style){
+                            document.getElementById($drawRect.attr("id")).style[i]=style[i];
+                        }
+                        if(!canvas.bg){
+                            var attr="";
+                            canvas.bgObj(bgsrc,0,0,canvas.raphael.width,canvas.raphael.height,attr);
+                        }else{
+                            canvas.bg.attr({src:bgsrc,w:canvas.raphael.width,h:canvas.raphael.height});
+                        }
+                    });
+                }
+                return picDom;
+            },
+            toolsDroppable:function(){toolsDroppable();}
+        };
+        /**
+         **业务单位\业务服务(跳转页面)，资源双击事件资源详情页面
+         */
+        function resourceClick(con){
+			if(con.texts.length<1) return;
+            con.handler.attr({href:"javascript:void(0)",title:"双击查看\""+con.texts[0].attrs.text+"\"详情"}).dblclick(function(){
+                if(con&&con.parent&&con.parent.data()&&con.parent.data().type &&
+                		(con.parent.data().type=="businessUnit" || con.parent.data().type=="businessServe")){   //业务单位//业务服务
+                    if(user.systemUser==true){
+                        $.messager.confirm('提示','业务数据未保存，是否保存后离开？',function(r){
+                            if(r){
+                                saveFun();
+                                setTimeout(function(){
+                                    oc.resource.loadScript('resource/module/business-service/js/graph.js?t'+new Date(),function(){
+                                        oc.module.biz.ser.graph.portal($('#business-service_index').layout('panel','center'),
+                                                {type:con.data().type == "bizDep"?0:1,id:con.data().id});
+                                    });
+                                },2000);
+                            }
+                        })
+                    }else{
+                        oc.resource.loadScript('resource/module/business-service/js/graph.js?t'+new Date(),function(){
+                            oc.module.biz.ser.graph.portal($('#business-service_index').layout('panel','center'),
+                                    {type:con.data().type == "bizDep"?0:1,id:con.data().id});
+                        });
+                    }
+                }
+                if(con.parent.data().type=="support"){   //支撑
+                	oc.resource.loadScript('resource/module/resource-management/resourceDetailInfo/js/detailnewInfo.js', function(){
+                        oc.module.resmanagement.resdeatilinfonew.open({instanceId:con.data().id});
+                    });
+                }
+            });
+        }
+        var toolbar= $(".toolbar-bg");
+        $myflow_tools.draggable({handle: "#myflow_tools_handle"}).css({top:"2px"});
+        //    填充色
+        $bt.find('.fontcolor').colorpicker({
+            success : function(obj,color){
+                if(!$(this))return;
+                for(var i in canvas.containers){
+                    if(canvas.containers[i].imgs[0] == null || canvas.containers[i].texts[0] == null){
+                        var rectObj= canvas.containers[i].rects[0];
+                        if(canvas.clickNode !=null){
+                            canvas.clickNode.rects[0].attr({fill:color});
+                        }
+                    }
+                }
+                if(canvas.clickNode instanceof TextArea){
+                    if(canvas.clickNode.imgs[0] == null || canvas.clickNode.texts[0] == null){
+                        canvas.clickNode.fp=color;
+                        canvas.clickNode.refresh(canvas.clickNode.getPos());
+                    }
+                }
+            },
+            reset:function(o){
+                $("#color").val('');
+            }
+        });
+//    字体颜色
+        $bt.find('.wordart').colorpicker({
+            success : function(obj, color){
+                //对当前选择的元素修改颜色
+                if(canvas.clickNode!=null){
+                    canvas.clickNode.texts[0].attr({"stroke":color});
+                    if(canvas.clickNode instanceof TextArea){
+                        canvas.clickNode.fontColor=color;
+                        canvas.clickNode.refresh(canvas.clickNode.getPos());
+                    }
+                }
+            }
+        });
+//    字体大小设置
+        $bt.find('#fontSize').combobox({
+            width : 50,
+            onSelect:function(rec){
+                if(!$(this))return;
+                var textsize=rec.text;
+                //对当前选择的元素修改字体
+                if(canvas.clickNode!=null){
+                    canvas.clickNode.texts[0].attr({"font-size":textsize});
+                    if(canvas.clickNode instanceof TextArea){
+                        canvas.clickNode.fontSize=parseInt(textsize);
+                        canvas.clickNode.refresh(canvas.clickNode.getPos());
+                    }
+                }
+            }
+        });
+//    加粗
+        var weight=0;
+        $bt.find(".bold").click(function(){
+            if(weight%2==0){
+                weight++;
+                //对当前选择的元素修改字体
+                if(canvas.clickNode!=null){
+                    canvas.clickNode.texts[0].attr({"font-weight":"bold"});
+                    if(canvas.clickNode instanceof TextArea){
+                        canvas.clickNode.fontWeight="bold";
+                        canvas.clickNode.refresh(canvas.clickNode.getPos());
+                    }
+                }
+            }else{
+                weight--;
+                if(canvas.clickNode!=null){
+                    canvas.clickNode.texts[0].attr({"font-weight":"normal"});
+                    if(canvas.clickNode instanceof TextArea){
+                        canvas.clickNode.fontWeight="normal";
+                        canvas.clickNode.refresh(canvas.clickNode.getPos());
+                    }
+                }
+            }
+        });
+//   插入文本框
+        $bt.find(".insertextbox").click(function(e){
+            canvas.TextAreaObj(0,0,200,100,"双击可编辑文本!");
+        });
+//    插入线条line
+        //链接线条的取消方法
+        function lineFalse(){
+            if(mouseObj){
+                mouseObj.remove();
+                mouseObj=null;
+            }
+            isLine=false;
+            lineOpt.from=null;
+            $bt.find(".line").removeClass("lineselected");
+            $drawRect.css({cursor:"auto"});
+            markline=0;
+        }
+        function lineTrue(){
+            isLine=true;
+            $bt.find(".line").addClass("lineselected");
+            $drawRect.css({cursor:"crosshair"});
+            markline++;
+        }
+        $bt.find(".line").click(function(){
+            $(this).toggleClass("selected");
+            if(markline%2==0){
+                lineTrue();
+            }else{
+                lineFalse();
+            }
+
+        });
+//    线条类型
+        $bt.find('#linetype').combobox({
+            width : 130,
+            valueField : 'id',
+            textField : 'text',
+            onSelect : function(rec) {
+                var value = $bt.find('.linestyle .textbox-text').val();
+                $bt.find('#insertBg').html($(value));
+                var sizeObj=null;
+                if(rec.id==1){
+                    sizeObj={"stroke-dasharray":""};
+                } else if(rec.id==2){
+                    sizeObj={"stroke-dasharray":"."};
+                } else if(rec.id==3){
+                    sizeObj={"stroke-dasharray":"-"};
+                } else if(rec.id==4){
+                    sizeObj={"stroke-dasharray":"--","stroke-dashoffset":0};
+                }
+                if(canvas.clickNode){
+                    if(canvas.clickNode.path){
+                        canvas.clickNode.path.attr(sizeObj);
+//                     }else{
+//                         alert("未选择")
+                    }
+                }
+            },
+            data : [ {"id" : 1,"text" : "<div class='linetype lt1'></div>"},
+                {"id" : 2,"text" : "<div class='linetype lt2'></div>"},
+                {"id" : 3,"text" : "<div class='linetype lt3'></div>"
+                    //"selected":true
+                }, {"id" : 4,"text" : "<div class='linetype lt4'></div>"} ]
+        });
+//    线条粗细
+        $bt.find('#lineweight').combobox({
+            width : 130,
+            valueField : 'id',
+            textField : 'text',
+            onSelect : function(rec) {
+                var value = $bt.find('.lineweight .textbox-text').val();
+                $bt.find('#insertBg2').html($(value));
+                var sizeObj=null;
+                if(rec.id==1){
+                    sizeObj=0.5;
+                } else if(rec.id==2){
+                    sizeObj=1.5;
+                } else if(rec.id==3){
+                    sizeObj=2.5;
+                } else if(rec.id==4){
+                    sizeObj=3.5;
+                }
+                if(canvas.clickNode){
+                    if(canvas.clickNode.path){
+                        canvas.clickNode.path.attr({"stroke-width":sizeObj});
+                    }else{
+                        alert("未选择")
+                    }
+                }
+            },
+            data : [ {"id" : 1,"text" : "<div class='lineweight lw1'></div>"},
+                {"id" : 2,"text" : "<div class='lineweight lw2'></div>"},
+                {"id" : 3,"text" : "<div class='lineweight lw3'></div>"
+                    //"selected":true
+                }, {"id" : 4,"text" : "<div class='lineweight lw4'></div>"} ]
+        });
+//    线条颜色
+        $bt.find('.fontColor').colorpicker({
+            success : function(obj, color) {
+                clicklinecolor=color;
+                if(canvas.clickNode){
+                    if(canvas.clickNode.path){
+                        canvas.clickNode.path.attr({"stroke":clicklinecolor});
+                    }else{
+                        alert("未选择")
+                    }
+                }
+                canvas.clickNode.baseArrow&& canvas.clickNode.baseArrow.attr({"stroke":canvas.clickNode.path.attrs.stroke});
+            }
+        });
+        //取色器
+        $("#colorpanel").hover(function(){
+            $(this).show();
+        },function(){
+            $(this).hide();
+        });
+//    箭头样式
+        $bt.find('#arrowStyle').combobox({
+            width : 130,
+            valueField : 'id',
+            textField : 'text',
+            onSelect : function(rec){
+                var value = $bt.find('.arrowStyle .textbox-text').val();
+
+                 canvas.mark=rec.id;
+                $('#insertBg3').html($(value));
+                for(var i in canvas.lines){
+                    canvas.lines[i].drag(rec.id);
+                }
+            },
+            data : [ {"id" : 1,"text" : "<div class='arrow as1'></div>"},
+                {"id" : 2,"text" : "<div class='arrow as2'></div>"}]
+        });
+        $('<div id="insertBg"><div style="padding:1px;">线条类型设置</div></div>').insertAfter($('.linestyle .textbox-text'));
+        $('<div id="insertBg2"><div style="padding:1px;">线条粗细设置</div></div>').insertAfter($('.lineweight .textbox-text'));
+        $('<div id="insertBg3"><div style="padding:1px;">箭头样式</div></div>').insertAfter($('.arrowStyle .textbox-text'));
+        function sizeof(a){
+            var s = 0;
+            for(var i in a)s++;
+            return s;
+        }
+//    撤销
+        $bt.find(".undo").click(function(e){
+            if(!canvas.memento.prev)return;
+            if(chooseRowData.topology!=null){
+                    canvas.raphael.clear();
+                    canvas.restore(canvas.memento.prev);
+                    canvas.memento = canvas.memento.history;
+                    resCon();
+                    allEdit();
+            }else{
+                alert("不支持")
+            }
+        });
+        $("#do1").click(function(){
+            var index =  $(this).data("index");
+            index  = index  ? index + 1  : 0; //记录次数
+            $(this).data("index",index);
+            var table = $("#div1").children("talbe");  //查找子元素
+            $(this).data("table"+index,table[0].clone(true)); //缓存拷贝对象
+            table .append("<tr><td></td></tr>");
+        });
+//回退
+        $("#undo1").click(function(){
+            var index =  $("#do1").data("index");
+            if (!index){
+                return;
+            }
+            $("#div1").empty().append($("#do1").data("table"+index)); //重新加载缓存的对象
+            $("#do1").data("table"+index,"").data("index",index - 1); //把已经回退的对象清空，计数减一，
+        });
+        //重做
+        $bt.find(".redo").click(function(e){
+            $bt.find(".refrash").trigger("click");
+        });
+//    删除
+        $bt.find(".delete").click(function(e){
+            if(canvas.edit) canvas.edit.hide(e);
+            if(canvas.clickNode==canvas.TextObjs||canvas.clickNode==conUnit||
+                    canvas.clickNode==conServer||canvas.clickNode==conUse||
+                    canvas.clickNode==conSup|| canvas.clickNode==Containersim)return;
+            if(canvas.clickNode==businessUnitCON||
+                    canvas.clickNode==businessServeCON||canvas.clickNode==businessUseCON||
+                    canvas.clickNode==supportCON|| canvas.clickNode==ConTainer)return;
+            for(var i in conUse.containers||businessUseCON.containers){
+                if(canvas.clickNode==conUse.containers[i]||businessUseCON.containers[i])return;
+            }
+            if(canvas.clickNode){
+                if(canvas.clickNode.path){
+                    canvas.clickNode.path.glows && canvas.clickNode.path.glows.remove();
+                    canvas.clickNode.path.glowsobj && canvas.clickNode.path.glowsobj.remove();
+                }
+            }
+            if(canvas.clickNode){
+                if(canvas.clickNode.path){
+                    canvas.clickNode.path.glows && canvas.clickNode.path.glows.remove();
+                }
+            }
+            if(canvas.clickNode)canvas.clickNode.remove(e);
+            if(canvas.clickNode.ipter)canvas.clickNode.ipter.hide();
+        });
+//    正常尺寸
+        $bt.find(".normal").click(function(){
+            Viewdefin();
+        });
+//    适合窗口
+        $bt.find(".fitWindow").click(function(){
+            var svgw=$("svg").width(),svgh=$("svg").height();
+            canvas.setViewBox(0,0,svgw,svgh);
+           });
+
+//    刷新
+        $bt.find(".refrash").click(function(e){
+            drawRectDiv.empty().load(oc.resource.getUrl('resource/module/business-service/business_list_tabs.html'),
+                    function(){
+                        oc.resource.loadScript('resource/module/business-service/js/tabs.js',function(){
+                            oc.business.service.tabs.open(chooseRowData.id);
+                        });
+                    });
+        });
+        var draggableTool=$("#draggableTool");
+        var marktemp=1;
+        draggableTool.click(function(){
+            toolbar.hasClass("selected")?toolbar.addClass("backimg-none"):toolbar.removeClass("backimg-none");
+            toolbar.toggleClass("selected");
+            if(marktemp%2==0){
+                toolbar.find("li").hide();
+                toolbar.find("li").eq(0).show();
+                marktemp++;
+            }else{
+                toolbar.find("li").show();
+                marktemp--;
+            }
+        });
+        $bt.draggable({
+            handle : '#draggableTool',
+            cursor : 'move',
+            onDrag : function(e) {
+                var d = e.data;
+                if (d.left < 0) {
+                    d.left = 0
+                }else if(d.left>150){
+                    d.left = 150;
+                }
+                if (d.top < 0) {
+                    d.top = 0
+                }else if(d.top > $drawRect.height()-20){
+                    d.top=$drawRect.height()-20;
+                }
+                if (d.left + 30 > $(d.parent).width()) {
+                    d.left = $(d.parent).width() - 30;
+                }
+                if (d.top > $(d.parent).height()) {
+                    d.top = $(d.parent).height();
+                }
+            }
+        });
+
+
+        //点击delete按钮
+        $(document).keydown(function(e) {
+            if (e.keyCode == 46){
+                $bt.find(".delete").trigger("click");
+            }
+            if (e.keyCode == 90 && e.ctrlKey){
+                $bt.find(".undo").trigger("click");
+            }
+        });
+        /**
+         **定时刷新
+         */
+        oc.business.service.canvas.refresh(chooseRowData.id,canvas,"#"+$drawRect.attr("id"));
+
+    }
+    CanvasAll();
+    (function(_$){
+        _$.fn.Canvasall = function(){
+            return new CanvasAll(_$(this)[0]);
+        }
+    })(jQuery);
+
+
+</script>
+<div class="raphael-toolbar" id="businessToolbar" style="top: 0px;left: 0px">
+     <!--style="width: 940px"-->
+    <div class="toolbar-bg backimg-none" >
+        <ul class="oc-list-inline resource">
+            <li title="拖动"><div id="draggableTool"></div></li>
+            <li class="tpbar undo" title="撤销"></li>
+            <li class="splitline"></li>
+            <li class="tpbar redo" title="重做"></li>
+            <li class="splitline"></li>
+            <li class="tpbar normal" title="正常尺寸"></li>
+            <li class="splitline"></li>
+            <li class="tpbar fitWindow" title="适合窗口"></li>
+            <li class="splitline"></li>
+            <li class="tpbar textbox insertextbox" title="插入文本框"></li>
+            <li class="splitline"></li>
+            <li class="tpbar line" title="插入线条"></li>
+            <li class="splitline"></li>
+            <li class="tpbar fontcolor" title="填充色"></li>
+            <li class="splitline"></li>
+            <li class="tpbar wordart" title="字体颜色"></li>
+            <li class="splitline"></li>
+            <li class="tpbar bold" title="粗体"></li>
+            <li class="splitline"></li>
+            <li class=" font-size" title="字体大小">
+                <select id="fontSize">
+                    <option >10</option>
+                    <option >11</option>
+                    <option >12</option>
+                    <option>14</option>
+                    <option>15</option>
+                    <option >16</option>
+                    <option >17</option>
+                    <option>18</option>
+                    <option >19</option>
+                    <option>20</option>
+                </select>
+            </li>
+            <li class="splitline"></li>
+            <li class="tpbar fontColor" title="线条颜色"></li>
+            <li class="splitline"></li>
+            <li class=" linestyle" title="对选定的线条设置类型">
+                <input id="linetype" class="easyui-combobox" /></li>
+            <li class="splitline"></li>
+            <li class=" lineweight" title="对选定的线条设置粗细">
+                <input id="lineweight" class="easyui-combobox" /></li>
+
+            <li class="splitline"></li>
+            <li class=" arrowStyle" title="箭头样式"><input id="arrowStyle" class="easyui-combobox" /></li>
+            <li class="splitline"></li>
+            <li class="tpbar delete" title="删除"></li>
+            <li class="splitline"></li>
+            <li class="tpbar refrash" title="刷新"></li>
+            <li class="splitline"></li>
+            <li class="tpbar save" title="保存" id="savesvg"></li>
+        </ul>
+    </div>
+</div>
+<div id="drawRect" style="height: 100%;"></div>
+<div id="drawTiny" class="tiny"></div>
+<div id="myflow_tools" class="my-draw-tools"style="display:none; position: absolute; width: 180px;
+ height: 455px!important; cursor: default; overflow-y: auto !important;">
+	<div id="tools_changer_center" class="draw-con"style="padding: 0px; margin-top: -5px;"></div>
+</div>
+

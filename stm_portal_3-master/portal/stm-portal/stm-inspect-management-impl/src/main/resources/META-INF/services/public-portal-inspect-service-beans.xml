@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="InspectPlanDao"
+		class="com.mainsteam.stm.portal.inspect.dao.impl.InspectPlanDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+	</bean>
+
+
+
+	<bean id="InspectPlanApi"
+		class="com.mainsteam.stm.portal.inspect.service.impl.InspectPlanImpl">
+		<property name="inspectPlanDao" ref="InspectPlanDao" />
+		<property name="sequence" ref="stm_plan_seq" />
+		<property name="userApi" ref="stm_system_userApi" />
+		<property name="scheduleManager" ref="scheduleManager" />
+		<property name="domainApi" ref="stm_system_DomainApi" />
+		<property name="bizMainApi" ref="bizMainApi" />
+		<property name="inspectReportApi" ref="InspectReportApi" />
+		<property name="metricDataService" ref="metricDataService" />
+		<property name="reportTemplateApi" ref="ReportTemplateApi"/>
+	</bean>
+
+
+
+	<bean id="InspectReportDao"
+		class="com.mainsteam.stm.portal.inspect.dao.impl.InspectReportDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+	</bean>
+
+
+
+	<bean id="InspectReportApi"
+		class="com.mainsteam.stm.portal.inspect.service.impl.InspectReportImpl">
+		<property name="inspectReportDao" ref="InspectReportDao" />
+		<property name="sequence" ref="stm_report_seq" />
+		<property name="searchApi" ref="searchImpl" />
+	</bean>
+
+	<bean id="stm_plan_seq" factory-bean="platformSeqFactory"
+		factory-method="getSeq">
+		<constructor-arg value="stm_plan"></constructor-arg>
+	</bean>
+
+	<bean id="stm_report_seq" factory-bean="platformSeqFactory"
+		factory-method="getSeq">
+		<constructor-arg value="stm_report"></constructor-arg>
+	</bean>
+	
+	<bean id="stm_inspect_inspectXMLHandlerApi" class="com.mainsteam.stm.portal.inspect.service.impl.InspectXMLHandlerImpl">
+		<property name="fileClient" ref="fileClient" />
+	</bean>
+	
+	<bean id="stm_inspect_inspectReportFileDao" class="com.mainsteam.stm.portal.inspect.dao.impl.InspectReportFileDaoImpl">
+		<constructor-arg ref="sqlSession" />
+	</bean>
+	
+	<bean id="stm_inspect_inspectReportFileApi" class="com.mainsteam.stm.portal.inspect.service.impl.InspectReportFileImpl" />
+</beans>

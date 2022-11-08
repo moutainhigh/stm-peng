@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.mainsteam.stm.portal.config.dao.IConfigCustomGroupDao">
+	
+	<select id="pageSelect" resultType="com.mainsteam.stm.portal.config.bo.ConfigCustomGroupBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		SELECT ID AS ID, NAME AS NAME FROM STM_CONFIG_CUSTOM_GROUP
+		<if test="condition!=null">
+			<if test="condition.entryId!=null"> WHERE ENTRY_ID = #{condition.entryId}</if>
+		</if>
+	</select>
+	
+	<insert id="insertConfigCustomGroup" parameterType="com.mainsteam.stm.portal.config.bo.ConfigCustomGroupBo" >
+		INSERT INTO STM_CONFIG_CUSTOM_GROUP
+		(ID,NAME,ENTRY_ID,ENTRY_DATETIME)
+		VALUES(
+			#{id},
+			#{name},
+			#{entryId},
+			#{entryDateTime}
+		)
+	</insert>
+	
+	<insert id="batchInsertConfigCustomResource" parameterType="com.mainsteam.stm.portal.config.bo.ConfigCustomGroupResourceBo">
+		INSERT INTO STM_CONFIG_GROUP_RES
+		(GROUP_ID,RESOURCE_ID)
+		VALUES(
+			#{groupId},
+			#{resourceID}
+		)
+	</insert>
+	
+	<select id="getList" resultType="com.mainsteam.stm.portal.config.bo.ConfigCustomGroupBo" parameterType="Long">
+		SELECT ID AS ID,
+	       NAME AS NAME,
+	       ENTRY_ID AS ENTRYID,
+	       ENTRY_DATETIME AS ENTRYDATETIME 
+	  	FROM STM_CONFIG_CUSTOM_GROUP
+	  	<if test="_parameter!=0">
+	  		WHERE ENTRY_ID = #{_parameter}
+	  	</if>
+	</select>
+	
+	<select id="getCustomGroup" resultType="com.mainsteam.stm.portal.config.bo.ConfigCustomGroupBo" parameterType="Long">
+		SELECT ID AS ID,NAME AS NAME,ENTRY_ID AS ENTRYID,ENTRY_DATETIME AS ENTRYDATETIME
+		FROM STM_CONFIG_CUSTOM_GROUP WHERE ID=#{id}
+	</select>
+	
+	<select id="getGroupResourceIdsByGroup" resultType="String" parameterType="Long">
+		SELECT RESOURCE_ID
+		  FROM STM_CONFIG_GROUP_RES
+		  WHERE GROUP_ID=#{id}
+	</select>
+	
+	<select id="checkGroupNameIsExsit"  resultType="com.mainsteam.stm.portal.config.bo.ConfigCustomGroupBo" parameterType="String">
+		SELECT ID AS ID, NAME AS NAME, ENTRY_ID AS ENTRYID, ENTRY_DATETIME AS ENTRYDATETIME 
+		FROM STM_CONFIG_CUSTOM_GROUP WHERE NAME = #{groupName}
+	</select>
+	
+	<update id="updateConfigCustomGroup" parameterType="com.mainsteam.stm.portal.config.bo.ConfigCustomGroupBo">
+		UPDATE STM_CONFIG_CUSTOM_GROUP SET
+			NAME=#{name}
+		WHERE ID=#{id}
+	</update>
+	
+	<delete id="deleteResourceIDsByGroup" parameterType="Long">
+		DELETE FROM STM_CONFIG_GROUP_RES WHERE GROUP_ID=#{id}
+	</delete>
+	
+	<delete id="deleteGroupByGroup" parameterType="Long">
+		DELETE FROM STM_CONFIG_CUSTOM_GROUP WHERE ID=#{id}
+	</delete>
+	
+	<delete id="deleteResourceFromCustomGroupByIds" parameterType="com.mainsteam.stm.portal.config.bo.ConfigCustomGroupBo">
+		DELETE FROM STM_CONFIG_GROUP_RES WHERE GROUP_ID=#{id} AND RESOURCE_ID IN
+		 <foreach item="item" index="index" collection="resourceInstanceIds" open="(" separator="," close=")">  
+  			#{item}  
+ 		 </foreach>  
+	</delete>
+	
+	<select id="selectResourceNumberIsZeroGroup" resultType="Long">
+		SELECT ID FROM STM_CONFIG_CUSTOM_GROUP WHERE ID NOT IN
+			(SELECT DISTINCT GROUP_ID FROM STM_CONFIG_GROUP_RES)
+	</select>
+
+	<delete id="deleteGroupAndResourceRelationById">
+		DELETE FROM STM_CONFIG_GROUP_RES WHERE RESOURCE_ID IN
+		 <foreach item="ids" index="index" collection="array" open="(" separator="," close=")">  
+  			#{ids}
+ 		 </foreach> 
+	</delete>
+</mapper>

@@ -1,0 +1,466 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.common.metric.dao.MetricSummaryDAO">
+	 
+  <update id="createMetricSummaryTable" databaseId="mysql">
+		CREATE TABLE ${tableName}(
+			ID BIGINT(20) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+			INSTANCE_ID 	BIGINT(20) NOT NULL,
+			METRIC_DATA 	DECIMAL(20,2) DEFAULT NULL,
+			METRIC_DATA_MAX DECIMAL(20,2) DEFAULT NULL,
+			METRIC_DATA_MIN DECIMAL(20,2) DEFAULT NULL,
+			START_TIME 		TIMESTAMP NULL,
+			END_TIME 		TIMESTAMP NULL,
+		  	UPDATE_TIME 	TIMESTAMP DEFAULT NOW(),
+		  	KEY(INSTANCE_ID,END_TIME)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8
+	</update>
+	 
+  <update id="createMetricSummaryTable" databaseId="oracle">
+		CREATE TABLE ${tableName}(
+			INSTANCE_ID 	NUMBER(20,0) NOT NULL,
+			METRIC_DATA 	NUMBER(20,2) NULL,
+			METRIC_DATA_MAX NUMBER(20,2) NULL,
+			METRIC_DATA_MIN NUMBER(20,2) NULL,
+			START_TIME 		TIMESTAMP NOT NULL,
+			END_TIME 		TIMESTAMP NOT NULL,
+		  	UPDATE_TIME 	TIMESTAMP DEFAULT SYSDATE,
+		    PRIMARY KEY(INSTANCE_ID,END_TIME)
+		)
+	</update>
+	 
+  <update id="createMetricSummaryTable" databaseId="dm">
+		CREATE TABLE ${tableName}(
+			INSTANCE_ID 	NUMBER(20,0) NOT NULL,
+			METRIC_DATA 	NUMBER(20,2) NULL,
+			METRIC_DATA_MAX NUMBER(20,2) NULL,
+			METRIC_DATA_MIN NUMBER(20,2) NULL,
+			START_TIME 		TIMESTAMP NOT NULL,
+			END_TIME 		TIMESTAMP NOT NULL,
+		  	UPDATE_TIME 	TIMESTAMP DEFAULT SYSDATE,
+		    PRIMARY KEY(INSTANCE_ID,END_TIME)
+		)
+	</update>
+	<update id="createMetricSummaryTable" databaseId="kingbase">
+		CREATE TABLE ${tableName}(
+			INSTANCE_ID 	NUMBER(20,0) NOT NULL,
+			METRIC_DATA 	NUMBER(20,2) NULL,
+			METRIC_DATA_MAX NUMBER(20,2) NULL,
+			METRIC_DATA_MIN NUMBER(20,2) NULL,
+			START_TIME 		TIMESTAMP NOT NULL,
+			END_TIME 		TIMESTAMP NOT NULL,
+		  	UPDATE_TIME 	TIMESTAMP DEFAULT SYSDATE,
+		    PRIMARY KEY(INSTANCE_ID,END_TIME)
+		)
+	</update>
+  <update id="createMetricSummaryTable" databaseId="oscar">
+		CREATE TABLE ${tableName}(
+			INSTANCE_ID 	NUMBER(20,0) NOT NULL,
+			METRIC_DATA 	NUMBER(20,2) NULL,
+			METRIC_DATA_MAX NUMBER(20,2) NULL,
+			METRIC_DATA_MIN NUMBER(20,2) NULL,
+			START_TIME 		TIMESTAMP NOT NULL,
+			END_TIME 		TIMESTAMP NOT NULL,
+		  	UPDATE_TIME 	TIMESTAMP DEFAULT SYSDATE,
+		    PRIMARY KEY(INSTANCE_ID,END_TIME)
+		)
+	</update>
+	 
+  <insert id="addMetricSummary" parameterType="map">
+	    insert into ${tableName}
+	           (INSTANCE_ID,METRIC_DATA,METRIC_DATA_MAX,METRIC_DATA_MIN,START_TIME,END_TIME,UPDATE_TIME) 
+	    VALUES (#{DATA.INSTANCE_ID},#{data.METRIC_DATA},#{data.maxMETRIC_DATA},#{data.minMETRIC_DATA},#{data.startTime},#{data.endTime},#{data.updateTime})
+	</insert>
+	 
+  <insert id="summaryMetricData" parameterType="Map">
+		 INSERT INTO STM_MS_${summaryType}_${metricID}
+		 	(INSTANCE_ID,METRIC_DATA,METRIC_DATA_MAX,METRIC_DATA_MIN,START_TIME,END_TIME,UPDATE_TIME) 
+		 SELECT
+			INSTANCE_ID as instanceId, 			
+			avg(METRIC_DATA) as metricData,
+			max(METRIC_DATA) as maxMetricData,
+			min(METRIC_DATA) as minMetricData,
+			#{startTime,jdbcType=TIMESTAMP} as startTime,
+			#{endTime,jdbcType=TIMESTAMP} as endTime,
+			#{updateTime,jdbcType=TIMESTAMP} as UPDATE_TIME
+		FROM STM_M_H_${metricID} PARTITION(p${startParttion})
+		WHERE 
+			COLLECT_TIME &gt;= #{startTime,jdbcType=TIMESTAMP} AND COLLECT_TIME &lt; #{endTime,jdbcType=TIMESTAMP}
+			GROUP BY INSTANCE_ID
+	</insert>
+	 
+  <insert id="addCustomMetricSummary" parameterType="map">
+		INSERT INTO STM_METRIC_CUSTOM_SUMMARY
+			(INSTANCE_ID,METRIC_ID,SUMMARY_TYPE,METRIC_DATA,METRIC_DATA_MAX,METRIC_DATA_MIN,START_TIME,END_TIME,UPDATE_TIME) 
+		SELECT 
+			INSTANCE_ID as instanceid, 
+			METRIC_ID as metricid,
+			#{summaryType} as SUMMARY_TYPE,
+			avg(METRIC_DATA) as MetricData,
+			max(METRIC_DATA) as MetricDataMax,
+			min(METRIC_DATA) as MetricDataMin,
+			#{startTime,jdbcType=TIMESTAMP} as START_TIME,
+			#{endTime,jdbcType=TIMESTAMP} as END_TIME,
+			#{updateTime,jdbcType=TIMESTAMP} as UPDATE_TIME
+		FROM STM_METRIC_CUSTOM_HISTORY
+		WHERE 
+			METRIC_TYPE='PerformanceMetric'
+			AND COLLECT_TIME &gt;= #{startTime,jdbcType=TIMESTAMP} AND COLLECT_TIME &lt; #{endTime,jdbcType=TIMESTAMP}
+			GROUP BY INSTANCE_ID,METRIC_ID
+	</insert>
+	 
+  <insert id="insertMetricTimeline" parameterType="map">
+	  insert into stm_metric_timeline(tmp_id,time_point,instanceid)
+	    VALUES (#{tmpID},#{timePoint},#{instanceID})
+	</insert>
+	 
+  <delete id="deleteMetricTimeline">
+		DELETE FROM stm_metric_timeline WHERE tmp_id=#{tmpID}
+	</delete>
+	 
+  <select id="queryMetricSummary" resultType="com.mainsteam.stm.common.metric.obj.MetricSummaryData" parameterType="com.mainsteam.stm.common.metric.query.MetricSummaryQuery">
+		SELECT INSTANCE_ID as instanceId,
+		METRIC_DATA as metricData,METRIC_DATA_MAX as maxMetricData,METRIC_DATA_MIN as minMetricData,
+		START_TIME as startTime,END_TIME as endTime,UPDATE_TIME,'${metricID}' as metricId
+		FROM STM_MS_${summaryType}_${metricID}
+		WHERE
+			INSTANCE_ID =#{instanceID}
+			AND END_TIME &gt; #{startTime,jdbcType=TIMESTAMP} AND START_TIME &lt; #{endTime,jdbcType=TIMESTAMP}
+			ORDER BY START_TIME DESC
+	</select>
+	 
+  <select id="queryCustomMetricSummary" resultType="com.mainsteam.stm.common.metric.obj.MetricSummaryData" parameterType="com.mainsteam.stm.common.metric.query.MetricSummaryQuery">
+		SELECT 
+			INSTANCE_ID as instanceId,METRIC_DATA as MetricData,METRIC_ID as metricID,SUMMARY_TYPE as summaryType,
+			METRIC_DATA_MAX as maxMetricData,METRIC_DATA_MIN as minMetricData,
+			START_TIME as startTime,END_TIME as endTime,UPDATE_TIME as updateTime
+		FROM STM_METRIC_CUSTOM_SUMMARY
+		WHERE INSTANCE_ID = #{instanceID}
+			AND METRIC_ID = #{metricID}
+			AND SUMMARY_TYPE = #{summaryType}
+			AND END_TIME &gt; #{startTime,jdbcType=TIMESTAMP} AND START_TIME &lt; #{endTime,jdbcType=TIMESTAMP}
+			ORDER BY START_TIME DESC
+	</select>
+	 
+  <select id="queryMetricSummaries" resultType="com.mainsteam.stm.common.metric.obj.MetricSummaryData" parameterType="java.util.List">
+		 
+		 
+    <foreach collection="queries" separator="union">
+			SELECT INSTANCE_ID as instanceId, METRIC_DATA as MetricData,
+			METRIC_DATA_MAX as maxMetricData,METRIC_DATA_MIN as minMetricData,
+			START_TIME as startTime,END_TIME as endTime,UPDATE_TIME,
+			'${metricID}' as metricId,INSTANCE_ID as instanceId
+			FROM STM_MS_${summaryType}_${metricID}
+			WHERE
+				INSTANCE_ID =#{instanceID}
+				AND END_TIME &gt; #{startTime,jdbcType=TIMESTAMP} AND START_TIME &lt; #{endTime,jdbcType=TIMESTAMP}
+		</foreach>
+	
+	
+  </select>
+	 
+  <select id="getMetricSummaryTableList" parameterType="map" resultType="String" databaseId="mysql">
+		SELECT TABLE_NAME as tableName
+			FROM INFORMATION_SCHEMA.TABLES 
+		WHERE 
+			TABLE_SCHEMA=#{dbName} AND TABLE_NAME LIKE #{tablePrefix}
+	</select>
+	 
+  <select id="getMetricSummaryTableList" parameterType="map" resultType="String" databaseId="oracle">
+		SELECT TABLE_NAME as tableName
+			FROM USER_TABLES
+		WHERE 
+			TABLE_NAME LIKE #{tablePrefix}
+	</select>
+	 
+  <select id="getMetricSummaryTableList" parameterType="map" resultType="String" databaseId="dm">
+		SELECT TABLE_NAME as tableName
+			FROM USER_TABLES
+		WHERE 
+			TABLE_NAME LIKE #{tablePrefix}
+	</select>
+	<select id="getMetricSummaryTableList" parameterType="map" resultType="String" databaseId="kingbase">
+		SELECT TABLE_NAME as tableName
+			FROM USER_TABLES
+		WHERE
+			TABLE_NAME LIKE #{tablePrefix}
+	</select>
+  <select id="getMetricSummaryTableList" parameterType="map" resultType="String" databaseId="oscar">
+		SELECT TABLE_NAME as tableName
+			FROM USER_TABLES
+		WHERE 
+			TABLE_NAME LIKE UPPER(#{tablePrefix})
+	</select>
+	 
+  <select id="findHistorySummaryDataForReport" resultType="com.mainsteam.stm.common.metric.report.MetricSummeryReportData">
+		 
+		 
+    <foreach item="metricID" separator=") UNION (" open="(" close=")" collection="metricIDes">
+			SELECT  max(METRIC_DATA_MAX) as max,CAST(avg(METRIC_DATA) AS DECIMAL(20,2)) as avg,min(METRIC_DATA_MIN) as min, 
+			#{metricID} as metricID,INSTANCE_ID as instanceId
+			FROM  STM_MS_${summaryType}_${metricID}
+			WHERE
+			INSTANCE_ID IN
+				 
+			 
+      <foreach item="item" index="index" collection="instanceIDes" open="(" close=")" separator=",">
+					#{item}
+				 
+        <if test="index%900&gt;898">) OR INSTANCE_ID IN ('-1'</if>
+				
+			
+      </foreach>
+				 
+			 
+      <if test="timePeriods!=null">
+					AND
+					 
+				 
+        <foreach open="(" close=")" item="period" collection="timePeriods" separator=" OR ">
+						(START_TIME &gt;= #{period.startTime} and  END_TIME &lt;= #{period.endTime})
+					</foreach>
+				
+			
+      </if>
+			GROUP BY INSTANCE_ID
+		
+		
+    </foreach>
+	
+	
+  </select>
+	 
+  <select id="findInstanceHistorySummaryData" resultType="com.mainsteam.stm.common.metric.report.MetricSummeryReportData">
+		 
+		 
+    <foreach item="metricID" separator=") UNION (" open="(" close=")" collection="metricIDes">
+			SELECT TL.time_point AS endTime,SUM.startTime,TL.instanceid AS instanceID,SUM.max,SUM.min,SUM.avg, #{metricID} as metricID 
+			FROM stm_metric_timeline TL LEFT JOIN(
+				SELECT METRIC_DATA_MAX as max,METRIC_DATA as avg,METRIC_DATA_MIN as min,START_TIME as startTime,END_TIME as endTime,INSTANCE_ID
+				FROM  STM_MS_${summaryType}_${metricID}
+				WHERE START_TIME &gt;= #{startTime} 
+					AND END_TIME &lt;= #{endTime}
+			)SUM ON TL.time_point= SUM.startTime AND TL.instanceid=SUM.INSTANCE_ID
+			WHERE TL.tmp_id=#{tmpID}
+		</foreach>
+	
+	
+  </select>
+	 
+  <select id="findTopSummaryData" resultType="com.mainsteam.stm.common.metric.report.MetricSummeryReportData" databaseId="mysql">
+			SELECT DATA.avg,DATA.INSTANCE_ID as instanceID,DATA.metricID FROM (
+				SELECT CAST(avg(METRIC_DATA) AS DECIMAL(20,2)) as avg,INSTANCE_ID,#{metricID} as metricID
+				FROM  STM_MS_${summaryType}_${metricID}
+				WHERE
+					1 = 1
+					 
+		 
+    <if test="timePeriods!=null">
+						AND 
+						 
+			 
+      <foreach open="(" close=")" item="period" collection="timePeriods" separator=" OR ">
+							(START_TIME &gt;= #{period.startTime} and  END_TIME &lt;= #{period.endTime})
+						</foreach>
+					
+		
+    </if>
+					AND INSTANCE_ID IN
+						 
+		 
+    <foreach item="item" index="index" collection="instanceIDes" open="(" close=")" separator=",">
+							#{item}
+			 
+      <if test="index%900&gt;898">) OR INSTANCE_ID IN ('-1'</if>
+						
+		
+    </foreach>
+				group by INSTANCE_ID
+			) DATA
+			ORDER BY DATA.avg  
+		 
+    <if test="orderByMax">DESC</if>
+		 
+    <if test="!orderByMax">asc</if>
+			 
+		 
+    <if test="null!=limit">limit 0,${limit}</if>
+	
+	
+  </select>
+	 
+  <select id="findTopSummaryData" resultType="com.mainsteam.stm.common.metric.report.MetricSummeryReportData" databaseId="oracle">
+		SELECT A.* FROM (
+			SELECT DATA.avg,DATA.INSTANCE_ID as instanceID,DATA.metricID FROM (
+				SELECT CAST(avg(METRIC_DATA) AS DECIMAL(20,2)) as avg,INSTANCE_ID,#{metricID} as metricID
+				FROM  STM_MS_${summaryType}_${metricID}
+				WHERE
+					1 = 1
+					 
+		 
+    <if test="timePeriods!=null">
+						AND 
+						 
+			 
+      <foreach open="(" close=")" item="period" collection="timePeriods" separator=" OR ">
+							(START_TIME &gt;= #{period.startTime} and  END_TIME &lt;= #{period.endTime})
+						</foreach>
+					
+		
+    </if>
+					AND INSTANCE_ID IN
+						 
+		 
+    <foreach item="item" index="index" collection="instanceIDes" open="(" close=")" separator=",">
+							#{item}
+			 
+      <if test="index%900&gt;898">) OR INSTANCE_ID IN ('-1'</if>
+						
+		
+    </foreach>
+				group by INSTANCE_ID
+			) DATA
+			ORDER BY DATA.avg  
+		 
+    <if test="orderByMax">DESC</if>
+		 
+    <if test="!orderByMax">asc</if>
+		) A 
+		 
+		 
+    <if test="null!=limit"> WHERE ROWNUM &lt;=#{limit}</if>
+	
+	
+  </select>
+	 
+  <select id="findTopSummaryData" resultType="com.mainsteam.stm.common.metric.report.MetricSummeryReportData" databaseId="dm">
+		SELECT A.* FROM (
+			SELECT DATA.avg,DATA.INSTANCE_ID as instanceID,DATA.metricID FROM (
+				SELECT CAST(avg(METRIC_DATA) AS DECIMAL(20,2)) as avg,INSTANCE_ID,#{metricID} as metricID
+				FROM  STM_MS_${summaryType}_${metricID}
+				WHERE
+					1 = 1
+					 
+		 
+    <if test="timePeriods!=null">
+						AND 
+						 
+			 
+      <foreach open="(" close=")" item="period" collection="timePeriods" separator=" OR ">
+							(START_TIME &gt;= #{period.startTime} and  END_TIME &lt;= #{period.endTime})
+						</foreach>
+					
+		
+    </if>
+					AND INSTANCE_ID IN
+						 
+		 
+    <foreach item="item" index="index" collection="instanceIDes" open="(" close=")" separator=",">
+							#{item}
+			 
+      <if test="index%900&gt;898">) OR INSTANCE_ID IN ('-1'</if>
+						
+		
+    </foreach>
+				group by INSTANCE_ID
+			) DATA
+			ORDER BY DATA.avg  
+		 
+    <if test="orderByMax">DESC</if>
+		 
+    <if test="!orderByMax">asc</if>
+		) A 
+		 
+		 
+    <if test="null!=limit"> WHERE ROWNUM &lt;=#{limit}</if>
+	
+	
+  </select>
+	<select id="findTopSummaryData" resultType="com.mainsteam.stm.common.metric.report.MetricSummeryReportData" databaseId="kingbase">
+		SELECT A.* FROM (
+		SELECT DATA.avg,DATA.INSTANCE_ID as instanceID,DATA.metricID FROM (
+		SELECT CAST(avg(METRIC_DATA) AS DECIMAL(20,2)) as avg,INSTANCE_ID,#{metricID} as metricID
+		FROM  STM_MS_${summaryType}_${metricID}
+		WHERE
+		1 = 1
+
+
+		<if test="timePeriods!=null">
+			AND
+
+
+			<foreach open="(" close=")" item="period" collection="timePeriods" separator=" OR ">
+				(START_TIME &gt;= #{period.startTime} and  END_TIME &lt;= #{period.endTime})
+			</foreach>
+
+
+		</if>
+		AND INSTANCE_ID IN
+
+
+		<foreach item="item" index="index" collection="instanceIDes" open="(" close=")" separator=",">
+			#{item}
+
+			<if test="index%900&gt;898">) OR INSTANCE_ID IN ('-1'</if>
+
+
+		</foreach>
+		group by INSTANCE_ID
+		) DATA
+		ORDER BY DATA.avg
+
+		<if test="orderByMax">DESC</if>
+
+		<if test="!orderByMax">asc</if>
+		) A
+
+
+		<if test="null!=limit"> WHERE ROWNUM &lt;=#{limit}</if>
+
+
+	</select>
+  <select id="findTopSummaryData" resultType="com.mainsteam.stm.common.metric.report.MetricSummeryReportData" databaseId="oscar">
+		SELECT A.* FROM (
+			SELECT DATA.avg,DATA.INSTANCE_ID as instanceID,DATA.metricID FROM (
+				SELECT CAST(avg(METRIC_DATA) AS DECIMAL(20,2)) as avg,INSTANCE_ID,#{metricID} as metricID
+				FROM  STM_MS_${summaryType}_${metricID}
+				WHERE
+					1 = 1
+					 
+		 
+    <if test="timePeriods!=null">
+						AND 
+						 
+			 
+      <foreach open="(" close=")" item="period" collection="timePeriods" separator=" OR ">
+							(START_TIME &gt;= #{period.startTime} and  END_TIME &lt;= #{period.endTime})
+						</foreach>
+					
+		
+    </if>
+					AND INSTANCE_ID IN
+						 
+		 
+    <foreach item="item" index="index" collection="instanceIDes" open="(" close=")" separator=",">
+							#{item}
+			 
+      <if test="index%900&gt;898">) OR INSTANCE_ID IN ('-1'</if>
+						
+		
+    </foreach>
+				group by INSTANCE_ID
+			) DATA
+			ORDER BY DATA.avg  
+		 
+    <if test="orderByMax">DESC</if>
+		 
+    <if test="!orderByMax">asc</if>
+		) A 
+		 
+		 
+    <if test="null!=limit"> WHERE ROWNUM &lt;=#{limit}</if>
+	
+	
+  </select>
+</mapper>

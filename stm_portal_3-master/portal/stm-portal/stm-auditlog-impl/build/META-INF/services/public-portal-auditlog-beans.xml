@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-3.2.xsd
+	">
+	<context:component-scan base-package="com.mainsteam.stm"></context:component-scan>
+	<!-- Audit模块 -->
+	<bean id="stm_system_AuditlogSeq" factory-bean="platformSeqFactory"
+		factory-method="getSeq">
+		<constructor-arg value="STM_SYSTEM_AUDITLOG"></constructor-arg>
+	</bean>
+
+	<bean id="stm_system_AuditlogApi" class="com.mainsteam.stm.auditlog.service.impl.AuditlogImpl">
+		<property name="seq" ref="stm_system_AuditlogSeq" />
+		<property name="auditlogDao" ref="IAuditlogDao" />
+	</bean>
+
+	<bean id="AuditlogEngine" class="com.mainsteam.stm.auditlog.engine.AuditlogEngine">
+		<property name="scheduleManager" ref="scheduleManager"></property>
+	</bean>
+	<bean id="IAuditlogDao" class="com.mainsteam.stm.auditlog.dao.impl.AuditlogDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+	</bean>
+</beans>

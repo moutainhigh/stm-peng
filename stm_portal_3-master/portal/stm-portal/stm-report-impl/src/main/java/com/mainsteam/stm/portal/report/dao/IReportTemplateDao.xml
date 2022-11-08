@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.portal.report.dao.IReportTemplateDao">
+	
+	<insert id="insert" parameterType="com.mainsteam.stm.portal.report.po.ReportTemplatePo">
+	    insert into STM_REP_TEMP_MAIN(
+	    		 REP_TEMP_ID
+		    	,REP_TEMP_CREATE_USER_ID
+		    	,REP_TEMP_CREATE_TIME
+		    	,REP_TEMP_NAME
+		    	,REP_TEMP_TYPE
+		    	,REP_TEMP_CYCLE
+		    	,REP_TEMP_BEGIN_TIME
+		    	,REP_TEMP_END_TIME
+		    	,REP_TEMP_FIRST_TIME
+		    	,REP_TEMP_SECOND_TIME
+		    	,REP_TEMP_THIRD_TIME
+		    	,REP_TEMP_STATUS
+		    	,REP_TEMP_EMAIL_STATUS
+		    	,REP_TEMP_EMAIL_ADDRESS
+		    	,REP_TEMP_EMAIL_FORMAT
+		    	,REP_TEMP_MODEL_NAME
+		    	,REP_TEMP_DOMAIN_ID
+	    	) values (
+	    		#{reportTemplateId}
+	    		,#{reportTemplateCreateUserId}
+	    		,#{reportTemplateCreateTime}
+	    		,#{reportTemplateName}
+	    		,#{reportTemplateType}
+	    		,#{reportTemplateCycle}
+	    		,#{reportTemplateBeginTime}
+	    		,#{reportTemplateEndTime}
+	    		,#{reportTemplateFirstGenerateTime}
+	    		,#{reportTemplateSecondGenerateTime}
+	    		,#{reportTemplateThirdGenerateTime}
+	    		,#{reportTemplateStatus}
+	    		,#{reportTemplateEmailStatus}
+	    		,#{reportTemplateEmailAddress}
+	    		,#{reportTemplateEmailFormat}
+	    		,#{reportTemplateModelName}
+	    		,#{reportTemplateDomainId}
+			)
+	</insert>
+	
+	<delete id="del">
+		delete from STM_REP_TEMP_MAIN where REP_TEMP_ID = #{reportTemplateId}
+	</delete>
+	
+	<select id="get" resultMap="ReportTemplateMap" parameterType="long">
+		select REP_TEMP_ID
+		    	,REP_TEMP_CREATE_USER_ID
+		    	,REP_TEMP_CREATE_TIME
+		    	,REP_TEMP_NAME
+		    	,REP_TEMP_TYPE
+		    	,REP_TEMP_CYCLE
+		    	,REP_TEMP_BEGIN_TIME
+		    	,REP_TEMP_END_TIME
+		    	,REP_TEMP_FIRST_TIME
+		    	,REP_TEMP_SECOND_TIME
+		    	,REP_TEMP_THIRD_TIME
+		    	,REP_TEMP_STATUS
+		    	,REP_TEMP_EMAIL_STATUS
+		    	,REP_TEMP_EMAIL_ADDRESS
+		    	,REP_TEMP_EMAIL_FORMAT
+		    	,REP_TEMP_MODEL_NAME
+		    	,REP_TEMP_DOMAIN_ID
+		     from STM_REP_TEMP_MAIN where REP_TEMP_ID=#{reportTemplateId}
+	</select>
+	
+	<select id="getReportTemplateListByType" resultMap="ReportTemplateMap" parameterType="int">
+		select REP_TEMP_ID
+		    	,REP_TEMP_CREATE_USER_ID
+		    	,REP_TEMP_CREATE_TIME
+		    	,REP_TEMP_NAME
+		    	,REP_TEMP_TYPE
+		    	,REP_TEMP_CYCLE
+		    	,REP_TEMP_BEGIN_TIME
+		    	,REP_TEMP_END_TIME
+		    	,REP_TEMP_FIRST_TIME
+		    	,REP_TEMP_SECOND_TIME
+		    	,REP_TEMP_THIRD_TIME
+		    	,REP_TEMP_STATUS
+		    	,REP_TEMP_EMAIL_STATUS
+		    	,REP_TEMP_EMAIL_ADDRESS
+		    	,REP_TEMP_EMAIL_FORMAT
+		    	,REP_TEMP_MODEL_NAME
+		    	,REP_TEMP_DOMAIN_ID
+		     from STM_REP_TEMP_MAIN where REP_TEMP_TYPE=#{type}
+	</select>
+	
+	<select id="select" resultMap="ReportTemplateMap" parameterType="com.mainsteam.stm.portal.report.po.ReportTemplatePo">
+		select REP_TEMP_ID
+		    	,REP_TEMP_CREATE_USER_ID
+		    	,REP_TEMP_CREATE_TIME
+		    	,REP_TEMP_NAME
+		    	,REP_TEMP_TYPE
+		    	,REP_TEMP_CYCLE
+		    	,REP_TEMP_STATUS
+		    	,REP_TEMP_MODEL_NAME
+		    	,REP_TEMP_DOMAIN_ID
+			from STM_REP_TEMP_MAIN where REP_TEMP_IS_DELETE=0
+	</select>
+	
+	<select id="update" parameterType="com.mainsteam.stm.portal.report.po.ReportTemplatePo">
+		update  STM_REP_TEMP_MAIN set
+		    	REP_TEMP_NAME = #{reportTemplateName}
+		    	,REP_TEMP_TYPE = #{reportTemplateType}
+		    	,REP_TEMP_CYCLE = #{reportTemplateCycle}
+		    	,REP_TEMP_BEGIN_TIME = #{reportTemplateBeginTime}
+		    	,REP_TEMP_END_TIME = #{reportTemplateEndTime}
+		    	,REP_TEMP_FIRST_TIME = #{reportTemplateFirstGenerateTime}
+		    	,REP_TEMP_SECOND_TIME = #{reportTemplateSecondGenerateTime}
+		    	,REP_TEMP_THIRD_TIME = #{reportTemplateThirdGenerateTime}
+		    	,REP_TEMP_STATUS = #{reportTemplateStatus}
+		    	,REP_TEMP_EMAIL_STATUS = #{reportTemplateEmailStatus}
+		    	,REP_TEMP_EMAIL_ADDRESS = #{reportTemplateEmailAddress}
+		    	,REP_TEMP_EMAIL_FORMAT = #{reportTemplateEmailFormat}
+		    	,REP_TEMP_MODEL_NAME = #{reportTemplateModelName}
+		    	,REP_TEMP_DOMAIN_ID = #{reportTemplateDomainId}
+		    	,REP_TEMP_IS_DELETE = #{reportTemplateIsDelete}
+			 where REP_TEMP_ID = #{reportTemplateId}
+	</select>
+	
+	<!-- report template's logic delete -->
+	<update id="logicDelete" parameterType="long">
+		update STM_REP_TEMP_MAIN set REP_TEMP_IS_DELETE = 1
+			where REP_TEMP_ID = #{reportTemplateId}
+	</update>
+	
+	<resultMap type="com.mainsteam.stm.portal.report.po.ReportTemplatePo" id="ReportTemplateMap">
+		<id property="reportTemplateId" column="REP_TEMP_ID" />
+		<result property="reportTemplateCreateUserId" column="REP_TEMP_CREATE_USER_ID" />
+		<result property="reportTemplateCreateTime" column="REP_TEMP_CREATE_TIME" />
+		<result property="reportTemplateName" column="REP_TEMP_NAME" />
+		<result property="reportTemplateType" column="REP_TEMP_TYPE" />
+		<result property="reportTemplateCycle" column="REP_TEMP_CYCLE" />
+		<result property="reportTemplateBeginTime" column="REP_TEMP_BEGIN_TIME" />
+		<result property="reportTemplateEndTime" column="REP_TEMP_END_TIME" />
+		<result property="reportTemplateFirstGenerateTime" column="REP_TEMP_FIRST_TIME" />
+		<result property="reportTemplateSecondGenerateTime" column="REP_TEMP_SECOND_TIME" />
+		<result property="reportTemplateThirdGenerateTime" column="REP_TEMP_THIRD_TIME" />
+		<result property="reportTemplateStatus" column="REP_TEMP_STATUS" />
+		<result property="reportTemplateEmailStatus" column="REP_TEMP_EMAIL_STATUS" />
+		<result property="reportTemplateEmailAddress" column="REP_TEMP_EMAIL_ADDRESS" />
+		<result property="reportTemplateEmailFormat" column="REP_TEMP_EMAIL_FORMAT" />
+		<result property="reportTemplateModelName" column="REP_TEMP_MODEL_NAME" />
+		<result property="reportTemplateDomainId" column="REP_TEMP_DOMAIN_ID" />
+	</resultMap>
+	
+</mapper>

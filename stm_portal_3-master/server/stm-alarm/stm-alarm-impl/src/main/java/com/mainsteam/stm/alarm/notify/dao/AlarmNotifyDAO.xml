@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.alarm.notify.dao.AlarmNotifyDAO">
+	 
+  <insert id="addNotify" parameterType="com.mainsteam.stm.alarm.obj.AlarmNotify">
+	INSERT INTO STM_ALARM_NOTIFY(NOTIFY_ID,SOURCE_TYEP,ALARM_ID,RULE_ID,STATE,NOTIFY_USER_ID,NOTIFY_TYPE,NOTIFY_TIME,NOTIFY_ADDR,NOTIFY_CONTENT,CONTINUE_NUM)
+	VALUES
+	(#{notifyID},#{sourceType},#{alarmID},#{alarmRuleID},#{state},#{notifyUserID},#{notifyType},#{notifyTime},#{notifyAddr},#{notifyContent},#{continusNum})
+  </insert>
+
+	<insert id="addNotifyBatch" parameterType="java.util.List">
+		INSERT INTO STM_ALARM_NOTIFY(NOTIFY_ID,SOURCE_TYEP,ALARM_ID,RULE_ID,STATE,NOTIFY_USER_ID,NOTIFY_TYPE,NOTIFY_TIME,NOTIFY_ADDR,NOTIFY_CONTENT,CONTINUE_NUM)
+		VALUES
+		<foreach collection="list" item="notify" separator=",">
+			(#{notify.notifyID},#{notify.sourceType},#{notify.alarmID},#{notify.alarmRuleID},#{notify.state},#{notify.notifyUserID},
+			#{notify.notifyType},#{notify.notifyTime},#{notify.notifyAddr},#{notify.notifyContent},#{notify.continusNum})
+		</foreach>
+   </insert>
+	 
+  <insert id="replaceNotifyWait" parameterType="com.mainsteam.stm.alarm.obj.AlarmEventWait" databaseId="mysql">
+	    REPLACE INTO STM_ALARM_NOTIFY_WAIT(ID,EVENT_ID,RULE_ID,CONTENT,RECOVER_KEY,EXEC_TIME)
+	    VALUES (#{id},#{eventID},#{ruleID},#{content},#{recoverKey},#{execTime})
+	</insert>
+
+	<insert id="replaceNotifyWaitBatch" parameterType="java.util.List" databaseId="mysql">
+		REPLACE INTO STM_ALARM_NOTIFY_WAIT(ID,EVENT_ID,RULE_ID,CONTENT,RECOVER_KEY,EXEC_TIME)
+		VALUES
+		<foreach collection="list" item="wait" separator=",">
+			(#{wait.id},#{wait.eventID},#{wait.ruleID},#{wait.content},#{wait.recoverKey},#{wait.execTime})
+		</foreach>
+	</insert>
+	 
+  <insert id="replaceNotifyWait" parameterType="com.mainsteam.stm.alarm.obj.AlarmEventWait" databaseId="oracle">
+	    MERGE INTO STM_ALARM_NOTIFY_WAIT TB
+	    USING (SELECT #{id} as ID,#{content} as CONTENT,#{eventID} as EVENT_ID,#{ruleID} as RULE_ID,#{recoverKey} as RECOVER_KEY,#{execTime} as EXEC_TIME FROM DUAL) TB2
+	    ON (TB.ID=#{id})
+	    WHEN MATCHED THEN
+	    	UPDATE SET TB.CONTENT=#{content,jdbcType=VARCHAR},TB.RULE_ID = #{ruleID},  	
+	    	TB.EXEC_TIME=#{execTime,jdbcType=TIMESTAMP}
+	    	WHERE TB.ID=#{id} 
+	    WHEN NOT MATCHED THEN
+	    	INSERT (TB.ID,TB.EVENT_ID,TB.RULE_ID,TB.CONTENT,TB.RECOVER_KEY,TB.EXEC_TIME)
+	    	VALUES (STM_ALARM_NOTIFY_WAIT_SEQ.Nextval,TB2.EVENT_ID,TB2.RULE_ID,TB2.CONTENT,TB2.RECOVER_KEY,TB2.EXEC_TIME)
+	</insert>
+	 
+  <insert id="replaceNotifyWait" parameterType="com.mainsteam.stm.alarm.obj.AlarmEventWait" databaseId="dm">
+	    MERGE INTO STM_ALARM_NOTIFY_WAIT TB
+	    USING (SELECT #{id} as ID,#{content} as CONTENT,#{eventID} as EVENT_ID,#{ruleID} as RULE_ID,#{recoverKey} as RECOVER_KEY,#{execTime} as EXEC_TIME FROM DUAL) TB2
+	    ON (TB.ID=#{id})
+	    WHEN MATCHED THEN
+	    	UPDATE SET TB.CONTENT=#{content,jdbcType=VARCHAR},TB.RULE_ID = #{ruleID},  	
+	    	TB.EXEC_TIME=#{execTime,jdbcType=TIMESTAMP}
+	    	WHERE TB.ID=#{id} 
+	    WHEN NOT MATCHED THEN
+	    	INSERT (TB.ID,TB.EVENT_ID,TB.RULE_ID,TB.CONTENT,TB.RECOVER_KEY,TB.EXEC_TIME)
+	    	VALUES (STM_ALARM_NOTIFY_WAIT_SEQ.Nextval,TB2.EVENT_ID,TB2.RULE_ID,TB2.CONTENT,TB2.RECOVER_KEY,TB2.EXEC_TIME)
+	</insert>
+  <insert id="replaceNotifyWait" parameterType="com.mainsteam.stm.alarm.obj.AlarmEventWait" databaseId="oscar">
+	    MERGE INTO STM_ALARM_NOTIFY_WAIT TB
+	    USING (SELECT #{id} as ID,#{content} as CONTENT,#{eventID} as EVENT_ID,#{ruleID} as RULE_ID,#{recoverKey} as RECOVER_KEY,#{execTime} as EXEC_TIME FROM DUAL) TB2
+	    ON (TB.ID=#{id})
+	    WHEN MATCHED THEN
+	    	UPDATE SET TB.CONTENT=#{content,jdbcType=VARCHAR},TB.RULE_ID = #{ruleID},  	
+	    	TB.EXEC_TIME=#{execTime,jdbcType=TIMESTAMP}
+	    	WHERE TB.ID=#{id} 
+	    WHEN NOT MATCHED THEN
+	    	INSERT (TB.ID,TB.EVENT_ID,TB.RULE_ID,TB.CONTENT,TB.RECOVER_KEY,TB.EXEC_TIME)
+	    	VALUES (STM_ALARM_NOTIFY_WAIT_SEQ.Nextval,TB2.EVENT_ID,TB2.RULE_ID,TB2.CONTENT,TB2.RECOVER_KEY,TB2.EXEC_TIME)
+	</insert>
+	 
+  <sql id="AlarmNotifyAlias">
+		NOTIFY_ID as notifyID,
+		SOURCE_TYEP as sourceType,
+		ALARM_ID as alarmID,
+		RULE_ID as alarmRuleID,
+		STATE as state,
+		CONTINUE_NUM as continusNum,
+		NOTIFY_USER_ID as notifyUserID,
+		NOTIFY_TYPE as notifyType,
+		NOTIFY_TIME as notifyTime,
+		NOTIFY_ADDR as notifyAddr,
+		EXT_INFO as extInfo,
+		NOTIFY_CONTENT as notifyContent
+	</sql>
+	
+	 
+  <update id="updateNotify" parameterType="com.mainsteam.stm.alarm.obj.AlarmNotify">
+		UPDATE STM_ALARM_NOTIFY SET NOTIFY_TIME=#{notifyTime}, STATE=#{state},NOTIFY_ADDR= #{notifyAddr,jdbcType=VARCHAR},EXT_INFO=#{extInfo,jdbcType=VARCHAR}
+		WHERE NOTIFY_ID=#{notifyID,jdbcType=BIGINT}
+	</update>
+	
+	 
+  <update id="updateNotifyState" parameterType="map">
+		UPDATE STM_ALARM_NOTIFY SET STATE=#{state}
+		WHERE
+			NOTIFY_ID=#{notifyID}
+	</update>
+	
+	 
+  <update id="updateNotifyWait" parameterType="com.mainsteam.stm.alarm.obj.AlarmEventWait">
+		UPDATE STM_ALARM_NOTIFY_WAIT SET CONTENT=#{content},EXEC_TIME=#{execTime}
+		WHERE ID=#{id}
+	</update>
+	
+	 
+  <delete id="deleteNotifyWait">
+		DELETE FROM STM_ALARM_NOTIFY_WAIT WHERE ID=#{id}
+	</delete>
+
+	
+	 
+  <delete id="deleteNotifyWaitByRecoverKey">
+		DELETE FROM STM_ALARM_NOTIFY_WAIT WHERE RECOVER_KEY=#{recoverKey} and EVENT_ID!=#{alarmEventID}
+	</delete>
+
+	 
+  <delete id="deleteNotifyWaitByRule">
+		DELETE FROM STM_ALARM_NOTIFY_WAIT WHERE RECOVER_KEY=#{recoverKey} and RULE_ID=#{ruleID}
+	</delete>
+
+	 
+  <delete id="deleteNotifyWaitByRecovery">
+		DELETE FROM STM_ALARM_NOTIFY_WAIT WHERE RECOVER_KEY like CONCAT(CONCAT('%',#{recoverKey}),'%')
+	</delete>
+	
+	 
+  <delete id="deleteNotifyWaitByEventID">
+		DELETE FROM STM_ALARM_NOTIFY_WAIT WHERE EVENT_ID=#{eventId}
+  </delete>
+
+	<delete id="deleteNotifyWaitByInsts" databaseId="oracle">
+		DELETE FROM STM_ALARM_NOTIFY_WAIT a WHERE EXISTS (SELECT EVENT_ID FROM STM_ALARM_EVENT e WHERE
+		a.EVENT_ID=e.EVENT_ID
+		<if test="sourceId !=null">
+			AND e.SOURCE_ID=#{sourceId}
+		</if>
+		<if test="ext8 !=null">
+			AND e.EXT8=#{ext8}
+		</if>
+		)
+	</delete>
+
+	<delete id="deleteNotifyWaitByInsts" databaseId="oscar">
+		DELETE FROM STM_ALARM_NOTIFY_WAIT a WHERE EXISTS (SELECT EVENT_ID FROM STM_ALARM_EVENT e WHERE
+		a.EVENT_ID=e.EVENT_ID
+		<if test="sourceId !=null">
+			AND e.SOURCE_ID=#{sourceId}
+		</if>
+		<if test="ext8 !=null">
+			AND e.EXT8=#{ext8}
+		</if>
+		)
+	</delete>
+
+	<delete id="deleteNotifyWaitByInsts" databaseId="mysql">
+		DELETE a FROM STM_ALARM_NOTIFY_WAIT a, STM_ALARM_EVENT e WHERE a.EVENT_ID=e.EVENT_ID
+		<if test="sourceId !=null">
+			AND e.SOURCE_ID=#{sourceId}
+		</if>
+		<if test="ext8 !=null">
+			AND e.EXT8=#{ext8}
+		</if>
+
+	</delete>
+	
+	 
+  <select id="findNotifyWait" resultType="com.mainsteam.stm.alarm.obj.AlarmEventWait">
+		SELECT ID as id,EVENT_ID as eventID,RULE_ID as ruleID, CONTENT as content,RECOVER_KEY as recoverKey,EXEC_TIME as execTime
+		FROM STM_ALARM_NOTIFY_WAIT
+		WHERE 
+			 EXEC_TIME &lt;=#{startTime} 
+	</select>
+
+	 
+  <select id="findByAlarmID" resultType="com.mainsteam.stm.alarm.obj.AlarmNotify">
+		SELECT  
+    <include refid="AlarmNotifyAlias"/>
+		FROM STM_ALARM_NOTIFY
+		WHERE 
+			ALARM_ID=#{alarmID}
+	
+  </select>
+	
+	 
+  <select id="findByState" resultType="com.mainsteam.stm.alarm.obj.AlarmNotify">
+		SELECT  
+    <include refid="AlarmNotifyAlias"/>
+		FROM STM_ALARM_NOTIFY
+		WHERE STATE=#{state} AND NOTIFY_TYPE=#{sendWay}
+	
+  </select>
+	
+	 
+  <select id="getNotifyByID" resultType="com.mainsteam.stm.alarm.obj.AlarmNotify">
+		SELECT  
+    <include refid="AlarmNotifyAlias"/>
+		FROM STM_ALARM_NOTIFY
+		WHERE 
+			NOTIFY_ID=#{notifyID} 
+	
+  </select>
+	
+	 
+  <select id="findByTime" parameterType="map" resultType="com.mainsteam.stm.alarm.obj.AlarmNotify">
+		SELECT  
+    <include refid="AlarmNotifyAlias"/>
+		FROM STM_ALARM_NOTIFY
+		WHERE 
+			NOTIFY_TYPE=#{type} 
+			 
+    <if test="userID!=null">
+				AND NOTIFY_USER_ID =#{userID} 
+			</if>
+			 
+    <if test="start!=null">
+				AND NOTIFY_TIME &gt;#{start} 
+			</if>
+			 
+    <if test="end!=null">
+				AND NOTIFY_TIME &lt;#{end}
+			</if>
+	
+  </select>
+
+	 
+  <select id="findNotifyWaitByCondition" parameterType="com.mainsteam.stm.alarm.obj.AlarmEventWait" resultType="com.mainsteam.stm.alarm.obj.AlarmEventWait">
+		SELECT ID,EVENT_ID,RULE_ID,CONTENT,RECOVER_KEY,EXEC_TIME FROM STM_ALARM_NOTIFY_WAIT
+		 
+    <where>
+			 
+      <if test="id !=0">
+				ID=#{id}
+			</if>
+			 
+      <if test="eventID !=0">
+				AND EVENT_ID=#{eventID}
+			</if>
+			 
+      <if test="recoverKey !=null">
+				AND RECOVER_KEY=#{recoverKey}
+			</if>
+		
+    </where>
+	
+  </select>
+
+</mapper>

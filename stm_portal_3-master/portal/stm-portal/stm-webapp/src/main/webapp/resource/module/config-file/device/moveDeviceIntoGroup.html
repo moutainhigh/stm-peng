@@ -1,0 +1,34 @@
+<div id="oc_module_config_device_move_group">
+	<div style="height: 100%;">
+		<div class="oc_module_config_device_move_group_datagrid"></div>
+	</div>
+</div>
+<script type="text/javascript">
+$(function(){
+	var mainId=oc.util.generateId(),
+	//模块文档元素根节点，所有模块内的文档元素都必须通过该变量去查找,以提高性能和避免选择冲突
+	mainDiv=$('#oc_module_config_device_move_group').attr('id',mainId).panel({
+		fit:true
+	}),
+	//表格文档对象
+	datagridDiv=mainDiv.find('.oc_module_config_device_move_group_datagrid'),
+	//表格实例
+	datagrid=null;
+	
+	var datagrid = oc.ui.datagrid({
+		selector:datagridDiv,
+		url:oc.resource.getUrl('portal/config/file/getConfigGroupPage.htm'),
+		height:50,
+		columns:[[
+	         {field:'id',title:'-',checkbox:true,width:20},
+	         {field:'name',title:'配置组名称',sortable:true,align:'center',width:100}
+	     ]]
+	});
+	oc.ns('oc.module.config.device.group');
+	oc.module.config.device.group = {
+		getSelectIds:function(){
+			return datagrid.getSelectIds();
+		}
+	}
+});
+</script>

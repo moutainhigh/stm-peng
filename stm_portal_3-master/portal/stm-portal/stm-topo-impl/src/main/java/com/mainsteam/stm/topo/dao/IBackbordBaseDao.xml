@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.topo.dao.IBackbordBaseDao">
+   
+   
+   
+   
+   
+  <resultMap type="com.mainsteam.stm.topo.bo.BackbordBo" id="backbordBaseMap">
+     
+     
+     
+     
+     
+    <id column="id" property="id"/>
+     
+     
+     
+     
+     
+    <result column="vendor" property="vendor"/>
+     
+     
+     
+     
+     
+    <result column="type" property="type"/>
+     
+     
+     
+     
+     
+    <result column="info" property="info"/>
+  
+  
+  
+  
+  
+  </resultMap>
+   
+   
+   
+   
+   
+  <select id="selectByVendor" resultMap="backbordBaseMap">
+       SELECT * FROM STM_TOPO_BACKBORD_BASE WHERE LOWER(vendor) = LOWER(#{vendor})
+    </select>
+   
+   
+   
+   
+   
+  <delete id="truncateAll">
+		truncate table STM_TOPO_BACKBORD_BASE
+	</delete>
+   
+   
+   
+   
+   
+  <delete id="delAll">
+		delete from STM_TOPO_BACKBORD_BASE
+	</delete>
+   
+   
+   
+   
+   
+  <insert id="save" parameterType="com.mainsteam.stm.topo.bo.BackbordBo">
+		insert into STM_TOPO_BACKBORD_BASE(id,vendor,type,info)
+		values(#{id},#{vendor},#{type},#{info})
+	</insert>
+   
+   
+   
+   
+   
+  <select id="selectByVentorType" parameterType="java.util.Map" resultMap="backbordBaseMap" databaseId="mysql">  
+       SELECT * FROM STM_TOPO_BACKBORD_BASE
+	   WHERE LOWER(vendor) LIKE LOWER(CONCAT('%', #{vendor}, '%'))
+	   AND LOWER(TYPE) LIKE LOWER(CONCAT('%', #{type}, '%'))
+    </select>
+   
+   
+   
+   
+   
+  <select id="selectByVentorType" parameterType="java.util.Map" resultMap="backbordBaseMap" databaseId="oracle">  
+       SELECT * FROM STM_TOPO_BACKBORD_BASE
+	   WHERE LOWER(vendor) LIKE LOWER('%'||#{vendor}||'%')
+	   AND LOWER(TYPE) LIKE LOWER('%'||#{type}||'%')
+    </select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="selectByVentorType" parameterType="java.util.Map" resultMap="backbordBaseMap" databaseId="dm">  
+       SELECT * FROM STM_TOPO_BACKBORD_BASE
+	   WHERE LOWER(vendor) LIKE LOWER('%'||#{vendor}||'%')
+	   AND LOWER(TYPE) LIKE LOWER('%'||#{type}||'%')
+    </select>
+  <select id="selectByVentorType" parameterType="java.util.Map" resultMap="backbordBaseMap" databaseId="oscar">  
+       SELECT * FROM STM_TOPO_BACKBORD_BASE
+	   WHERE LOWER(vendor) LIKE LOWER('%'||#{vendor}||'%')
+	   AND LOWER(TYPE) LIKE LOWER('%'||#{type}||'%')
+    </select>
+</mapper>

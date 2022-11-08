@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mainsteam.stm.home.layout.dao.IHomeLayoutSlideDao" >
+
+    <resultMap id="ResultMap" type="com.mainsteam.stm.home.layout.bo.HomeLayoutSlideBo" >
+        <id column="ID" property="id" jdbcType="BIGINT" />
+        <result column="USER_ID" property="userId" jdbcType="BIGINT" />
+        <result column="LAYOUT_ID" property="layoutId" jdbcType="BIGINT" />
+        <result column="SORT_NUM" property="sortNum" jdbcType="INTEGER" />
+        <result column="SLIDE_TIME" property="slideTime" jdbcType="INTEGER" />
+        <result column="ANIMATION" property="animation" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <sql id="Column_List" >
+        ID, USER_ID, LAYOUT_ID, SORT_NUM, SLIDE_TIME, ANIMATION
+    </sql>
+
+    <select id="getByUserId" resultMap="ResultMap" parameterType="java.lang.Long" >
+        SELECT <include refid="Column_List" />
+        FROM STM_HOME_LAYOUT_SLIDE
+        WHERE USER_ID = #{userId,jdbcType=BIGINT}
+        ORDER BY SORT_NUM ASC
+    </select>
+
+    <insert id="insert" parameterType="com.mainsteam.stm.home.layout.bo.HomeLayoutSlideBo" >
+        INSERT INTO STM_HOME_LAYOUT_SLIDE (<include refid="Column_List" />)
+        VALUES (
+        	#{id,jdbcType=BIGINT}, 
+        	#{userId,jdbcType=BIGINT}, 
+        	#{layoutId,jdbcType=BIGINT}, 
+            #{sortNum,jdbcType=INTEGER}, 
+            #{slideTime,jdbcType=INTEGER}, 
+            #{animation,jdbcType=VARCHAR})
+    </insert>
+
+    <delete id="deleteByUserId" parameterType="java.lang.Long" >
+    	DELETE FROM STM_HOME_LAYOUT_SLIDE
+    	WHERE USER_ID = #{userId,jdbcType=BIGINT}
+    </delete>
+ <delete id="deleteByLyoutId" parameterType="java.lang.Long" >
+    	DELETE FROM STM_HOME_LAYOUT_SLIDE
+    	WHERE LAYOUT_ID = #{id,jdbcType=BIGINT}
+    </delete>
+
+</mapper>

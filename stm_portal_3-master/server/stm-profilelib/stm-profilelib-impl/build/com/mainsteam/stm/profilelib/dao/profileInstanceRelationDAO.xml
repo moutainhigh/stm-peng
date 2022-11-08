@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.profilelib.dao.ProfileInstanceRelationDAO">
+	
+	<sql id="profileInstanceColumn"> 
+		profile_Id as profileId,instance_id as instanceId,parent_instance_id as parentInstanceId
+	</sql>
+	<sql id="profileInsertInstanceColumn"> 
+		profile_Id,instance_id,parent_instance_id
+	</sql>
+	<sql id="profileInstanceColumnValue">
+		#{profileId},#{instanceId},#{parentInstanceId}
+	</sql>
+	<sql id="table">
+		 STM_PROFILELIB_INSTANCE
+	</sql>
+	<sql id="selectSql">
+		select <include refid="profileInstanceColumn"/>
+		from   <include refid="table"/>
+	</sql>
+	
+	<select id="getAllInstRelation" resultType="com.mainsteam.stm.profilelib.po.ProfileInstRelationPO" >
+		<include refid="selectSql"/>
+	</select>
+	<insert id="insertInstRel" 
+		parameterType="com.mainsteam.stm.profilelib.po.ProfileInstRelationPO">
+		insert into <include refid="table"/> 
+		(<include refid="profileInsertInstanceColumn"/>) 
+		VALUES
+		(<include refid="profileInstanceColumnValue"/>) 
+	</insert>
+	
+	<delete id="removeInstRelByProfileIds" parameterType="java.util.List"> 
+		delete from <include refid="table"/>
+	    where profile_id in <foreach 
+		item="item" index="index" collection="list" open="(" 
+		separator="," close=")"> #{item} </foreach> 
+	</delete>
+	
+	<delete id="removeInstRelByProfileId" parameterType="long"> 
+		delete from <include refid="table"/> 
+		where profile_id = #{profileId} 
+	</delete>
+		
+	<delete id="removeInstRelByInstId" parameterType="long"> 
+		delete from <include refid="table"/>  
+		where instance_id = #{instanceId} 
+	</delete>
+	
+	<delete id="removeInstRelByparentInstIds" parameterType="java.util.List"> 
+		delete from <include refid="table"/> 
+		where parent_instance_id in 
+		<foreach item="item" index="index" collection="list" open="(" separator="," close=")"> 
+		#{item} <if test="index%900&gt;898">) OR parent_instance_id IN('-1'</if>
+		</foreach>
+		or instance_id in
+		<foreach item="item" index="index" collection="list" open="(" separator="," close=")"> 
+		#{item} <if test="index%900&gt;898">) OR instance_id IN('-1'</if>
+		</foreach>
+    </delete>
+	
+	<delete id="removeInstRelByparentInstId" parameterType="long"> 
+		delete from <include refid="table"/> 
+		where parent_instance_id = #{parentInstanceId}  or instance_id = #{parentInstanceId}
+	</delete>
+	 
+	<select id="getInstRelationsByProfileId" 
+		resultType="com.mainsteam.stm.profilelib.po.ProfileInstRelationPO"
+		parameterType="long"> 
+		<include refid="selectSql"/> where profile_id =#{profileId} </select>
+	
+	<select id="getInstRelationsByProfileIdAndDCSGroup" 
+		resultType="com.mainsteam.stm.profilelib.po.ProfileInstRelationPO" >
+		select <include refid="profileInstanceColumn"/>
+	    from STM_PROFILELIB_INSTANCE p,STM_INSTANCELIB_RESOURCE_MAIN i where i.INSTANCEID = p.INSTANCE_ID and i.DISCOVERNODE=#{nodeGroupId}
+		and profile_id =#{profileId} </select>
+	
+	
+	<select id="getInstRelationByInstIds" 
+		resultType="com.mainsteam.stm.profilelib.po.ProfileInstRelationPO"
+		parameterType="long"> 
+		<include refid="selectSql"/> 
+		where instance_id in 
+		<foreach item="item" index="index" collection="list" open="(" separator="," close=")"> 
+		#{item} <if test="index%900&gt;898">) OR instance_id IN('-1'</if>
+		</foreach> 
+	</select>
+	
+	<select id="getInstRelationByInstId" 
+		resultType="com.mainsteam.stm.profilelib.po.ProfileInstRelationPO"
+		parameterType="long">
+		<include refid="selectSql"/> where instance_id =#{instanceId} 
+	</select>	
+	<select id="getInstRelationByParentInstId" 
+		resultType="com.mainsteam.stm.profilelib.po.ProfileInstRelationPO"
+		parameterType="long"> 
+		<include refid="selectSql"/> where parent_instance_id = #{parentInstanceId} or instance_id = #{parentInstanceId}
+	</select> 
+	
+	<select id="getInstRelationByParentInstIds" 
+		resultType="com.mainsteam.stm.profilelib.po.ProfileInstRelationPO"
+			parameterType="java.util.List"> 
+		<include refid="selectSql"/> where parent_instance_id in
+		
+		<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+		 #{item}  <if test="index%900&gt;898">) OR parent_instance_id IN('-1'</if>
+		 </foreach> 
+		 or instance_id in
+	    <foreach item="item" index="index" collection="list" open="(" separator="," close=")"> 
+	    #{item} <if test="index%900&gt;898">) OR instance_id IN('-1'</if>
+	    </foreach>
+	</select> 
+		
+	<select id="getInstRelationsByProfileIds" 
+		resultType="com.mainsteam.stm.profilelib.po.ProfileInstRelationPO"
+		parameterType="java.util.List">
+	    <include refid="selectSql"/>
+		where profile_id in <foreach item="item" 
+		index="index" collection="list" open="(" separator="," close=")"> 
+		#{item} </foreach> 
+	</select>
+	<select id="getInstRelationsByProfileIdsAndDCSGroup" 
+		resultType="com.mainsteam.stm.profilelib.po.ProfileInstRelationPO">
+	    select <include refid="profileInstanceColumn"/>
+	    from STM_PROFILELIB_INSTANCE p,STM_INSTANCELIB_RESOURCE_MAIN i where i.INSTANCEID = p.INSTANCE_ID and i.DISCOVERNODE=#{nodeGroupId}
+		and profile_id in <foreach item="item" 
+		index="index" collection="profileIds" open="(" separator="," close=")"> 
+		#{item} </foreach> 
+	</select>
+</mapper>

@@ -1,0 +1,299 @@
+<!-- 硬件故障资源统计 -->
+<div  id="main" style="width: 100%;height:100%;"></div>
+
+
+<style type="text/css">
+	body{margin: 0px;overflow:hidden;width: 100%;height: 100%}
+	.topo_tip {width:410px;}
+	.topo_tip tr td{white-space:nowrap; padding:2px; }
+	.topo_tip tr td:first-child{ text-align:right;}
+
+</style>
+
+<script type="text/javascript" src="/resource/third/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="/resource/third/echarts/echarts-all.gzjs"></script>
+<script type="text/javascript" src="/resource/module/home/widgets/js/map/geoMap.js"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+    	$("body").attr("bgcolor","transparent");//ie兼容性处理
+    	var href = window.location.href;
+    	var id=href.split('?')[1];
+        
+    	window.tree = {};
+    	window.ge = new geoMap();
+    	ge.regMarkPointToolTip(function(p,ticket,callback){
+    		var id = p.data.instanceid;
+    		if(id){
+	    		$.post("/topo/resource/homeMapTooltip.htm",{
+	    			dataType:'json',
+	    			instanceId:id
+	    		},function(d){
+	    			d = eval('(' + d + ')');
+	    			if(!d.vendor)
+	    				d.vendor = '--';
+	    			if(!d.series)
+	    				d.series = '--';
+	    			if(!d.alarmInfo)
+	    				d.alarmInfo = '--';
+	    			var msg ='';
+	    			msg += '设备名称:'+d.name + '<br/>';
+	    			msg += '管理IP:'+d.ip + '<br/>';
+
+	    			msg += '设备厂商:'+d.vendor + '<br/>';
+	    			msg += '设备型号:'+d.series + '<br/>';
+
+	    			msg += '<div style="word-wrap:break-word;width:300px;white-space: normal;">告警内容: '+ d.alarmInfo + '</div>';
+	    			
+
+	    			callback(ticket,msg);
+	    		});
+	    		return '数据加载中...';
+    		}else if(p.data.linkId){
+    			$.post("/topo/link/tip.htm",{dataType:'json',instanceId:p.data.linkId},function(result){
+    						result = eval('(' + result + ')');
+    						if(result.src.portName && result.src.portName.length > 14){
+    							result.src.portName = result.src.portName.substring(0,14) + "...";
+    						}
+    						if(result.des.portName && result.des.portName.length > 14){
+    							result.des.portName = result.des.portName.substring(0,14) + "...";
+    						}
+		    				var msg = 	'<div class="topo_tip">' + 
+		    				'<div data-root="link" class="link">' + 
+			    			'<table style="color:white;font-size:7px">' + 
+			    			'<tr>' + 
+			    				'<td><span data-field="stitle" style="margin:0;"></span><span data-field="sshot" style="color:#EC7B00;"></span></td>' + 
+			    				'<td><span data-field="stitle" style="margin:0;">源端</span><span data-field="sshot" style="color:#EC7B00;"></span></td>' + 
+			    				'<td><span data-field="dtitle" style="margin:0;">目的端</span><span data-field="dshot" style="color:#EC7B00;"></span></td>' + 
+			    			'</tr>' + 
+			    			'<tr>' + 
+			    				'<td>设备名称：</td>' + 
+			    				'<td><span data-field="sname">' + result.src.name + '</span></td>' + 
+			    				'<td><span data-field="dname">' + result.des.name + '</span></td>' + 
+			    			'</tr>' + 
+			    			'<tr>' + 
+			    				'<td>设备IP地址：</td>' + 
+			    				'<td><span data-field="sip">' + result.src.ip + '</span></td>' + 
+			    				'<td><span data-field="dip">' + result.des.ip + '</span></td>' + 
+			    			'</tr>' + 
+			    			'<tr>' + 
+			    				'<td>索引：' + 
+			    				'<td><span data-field="sindex">' + result.src.index + '</span></td>' + 
+			    				'<td><span data-field="dindex">' + result.des.index + '</span></td>' + 
+			    			'</tr>' + 
+			    			'<tr>' + 
+			    				'<td>端口名称：</td>' + 
+			    				'<td><span data-field="sportName">' + result.src.portName + '</span></td>' + 
+			    				'<td><span data-field="dportName">' + result.des.portName + '</span></td>' + 
+			    			'</tr>' + 
+			    			'<tr>' + 
+			    				'<td>端口类型：</td>' + 
+			    				'<td><span data-field="sportType">' + result.src.portType + '</span></td>' + 
+			    				'<td><span data-field="dportType">' + result.des.portType + '</span></td>' + 
+			    			'</tr>' + 
+			    			'<tr>' + 
+			    				'<td>端口带宽：</td>' + 
+			    				'<td><span data-field="sportBandWidth">' + result.src.portBandWidth + '</span></td>' + 
+			    				'<td><span data-field="dportBandWidth">' + result.des.portBandWidth + '</span></td>' + 
+			    			'</tr>' + 
+			    			'<tr>' + 
+			    				'<td>MAC地址：</td>' + 
+			    				'<td><span data-field="smac">' + result.src.mac + '</span></td>' + 
+			    				'<td><span data-field="dmac">' + result.des.mac + '</span></td>' + 
+			    			'</tr>' + 
+			    			'<tr>' + 
+			    				'<td>管理/操作状态：</td>' + 
+			    				'<td><span data-field="smanageState">' + result.src.manageState + '/' + result.src.operateState + '</span></td>' + 
+			    				'<td><span data-field="dmanageState">' + result.des.manageState + '/' + result.des.operateState + '</span></td>' + 
+			    			'</tr>' + 
+			    			'<tr>' + 
+			    				'<td>带宽利用率：</td>' + 
+			    				'<td><span data-field="sbandRatio">' + result.src.bandRatio + '</span></td>' + 
+			    				'<td><span data-field="dbandRatio">' + result.des.bandRatio + '</span></td>' + 
+			    			'</tr>' + 
+			    			'<tr>' + 
+			    				'<td>接收/发送速率：</td>' + 
+			    				'<td><span data-field="sreceiveSpeed">' + result.src.receiveSpeed + '/' + result.src.sendSpeed + '</span></td>' + 
+			    				'<td><span data-field="dreceiveSpeed">' + result.des.receiveSpeed + '/' + result.des.sendSpeed + '</span></td>' + 
+			    			'</tr>' + 
+			    			'<tr>' + 
+			    				'<td>接收/发送带宽利用率：</td>' + 
+			    				'<td><span data-field="sreceiveBandWidthRatio">' + result.src.receiveBandWidthRatio + '/' + result.src.sendBandWidthRatio + '</span></td>' +
+                                '<td><span data-field="dreceiveBandWidthRatio">' + result.des.receiveBandWidthRatio + '/' + result.des.sendBandWidthRatio + '</span></td>' +
+			    			'</tr>' + 
+			    			'<tr>' + 
+			    				'<td>端口状态：</td>' + 
+			    				'<td><span data-field="sportState">' + result.src.portState + '</span></td>' + 
+			    				'<td><span data-field="dportState">' + result.des.portState + '</span></td>' + 
+			    			'</tr>' + 
+							
+							'<tr>' + 
+			    				'<td style="width:100%;">最新告警：</td>' + 
+			    				'<td colspan="2" ><span data-field="sportState">' + result.alarmInfo+ '</span></td>' + 
+			    			'</tr>' + 
+			    		 
+			    		'</table>' + 
+			    	'</div></div>';
+    				
+    				callback(ticket,msg);
+    			});
+    			return '数据加载中...';
+    		}else{
+    			return p.name;
+    		}
+    	});
+    	
+    	$.getJSON("/resource/module/map/json/chinaTree.json",function(d){
+    		//console.log(d);
+    		genTree(null,d);
+    		var t= tree[id];
+    		if(!t.children || t.children.length ==0){
+    			t = tree[t.parentId];
+    		}
+    	
+    		var n = t.text;
+    		if(t.id == 0){
+    			n = 'china';
+    		}
+
+    		ge.jumpByName(n);
+
+    		/*var data = {
+    			geoCoord:{
+    				'石家庄': [114.4995,38.1006],
+    				'保定': [115.0488,39.0948],
+    			},
+    			lines:[
+					[{name:'石家庄'}, {name:'保定',value:100}],
+	            ],
+	            mapData:[
+        			{name:'保定',value:100},
+                    {name:'石家庄',value:20}
+	            ]
+    		}
+    		ge.plot(data);
+    		//*/
+
+    		plotData(ge,id);
+    	});
+
+    	
+    	function plotData(ge,id){
+    		$.post("/topo/map/graph/getTopoMapLineInfo.htm",{
+    			dataType:'json',
+    			id:id
+    		},function(d){
+    			d = eval('(' + d + ')');
+    			if(d.status == 200){
+    				var data = {
+    					geoCoord:{},
+    					lines:[],
+    					mapData:[]
+    				}
+    				var list = d.data.line;
+    				if(list && list.length > 0){
+	    				for(var i=0;i<list.length;i++){
+	    					var line = list[i];
+	    					var obj = data.geoCoord;
+	    					if(!line.from.name){
+	    						line.from.name = line.from.lon + "_" + line.from.lat;
+	    					}
+	    					if(!line.to.name){
+	    						line.to.name = line.to.lon + "_" + line.to.lat;
+	    					}
+	    					obj[line.from.name] =[line.from.lon,line.from.lat];
+	    					obj[line.to.name] =[line.to.lon,line.to.lat];
+	    					
+	    					var fv = getAlarmValue(line.from.state);
+	    					var tv = getAlarmValue(line.to.state);
+	    					var lines = data.lines;
+	    					lines.push([{name:line.from.name,value:getAlarmLineValue(line.state),linkId:line.linkid},
+	    								{name:line.to.name,value:getAlarmLineValue(line.state),linkId:line.linkid}]);
+	    					var mapData = data.mapData;
+	    					mapData.push({name:line.from.name,value:fv,instanceid:line.from.instanceid});
+	    					mapData.push({name:line.to.name,value:tv,instanceid:line.to.instanceid});
+	    				}
+    				}
+    				if(d.data.node && d.data.node.length > 0){
+    					
+	    				for(var i=0;i<d.data.node.length;i++){
+	    					var node = d.data.node[i];
+	    					
+	    					var obj = data.geoCoord;
+	    					if(!node.name){
+	    						node.name = node.lon + "_" + node.lat;
+	    					}
+	    					obj[node.name] =[node.lon,node.lat];
+	    					
+	    					var mapData = data.mapData;
+                            /*IE9 非开发者模式下无法运行*/
+//	    					console.debug(node.name);
+	    					mapData.push({name:node.name,value:getAlarmValue(node.state),instanceid:node.instanceid});
+	    				}
+    				}
+    				
+    				//console.log(data);
+    				ge.plot(data);
+
+    			}
+    			
+    		});
+    	}
+
+    	function getAlarmValue(status){
+    		switch(status){
+    			case 'NORMAL_CRITICAL':
+    			case 'NORMAL':{
+    				return 10;
+    			}
+    			case 'WARN':
+    			case 'SERIOUS':{
+    				return 70;
+    			} 
+    			case 'CRITICAL':{
+    				return 100;
+    			}
+    			case 'not_monitored':
+                case 'NOT_MONITORED':{
+                    return -15;
+                }
+    			default:{
+    				return -1;
+    			}
+
+    		}
+    	}
+    	
+    	function getAlarmLineValue(status){
+    		switch(status){
+    			case 'NORMAL_CRITICAL':
+    			case 'NORMAL':{
+    				return 10;
+    			}
+    			case 'WARN':
+    			case 'SERIOUS':{
+    				return 70;
+    			} 
+    			case 'CRITICAL':{
+    				return 100;
+    			}
+    			default:{
+    				return -1;
+    			}
+
+    		}
+    	}
+
+    	function genTree(parentId,children){
+    		for(var i=0; i<children.length;i++){
+    			var tc = children[i];
+    			tc.parentId = parentId;
+    			tree[tc.id] = tc;
+    			if(tc.children && tc.children.length>0){
+    				genTree(tc.id,tc.children);
+    			}
+    		}
+    	}
+    	
+
+    });
+</script>

@@ -1,0 +1,454 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">
+    <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0"/>
+    <PluginClassAliasList>
+        <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+        <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+        <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+        <PluginClassAlias id="columnPasteProcessor" class="com.mainsteam.stm.plugin.common.ColumnPasteProcessor"/>
+        <PluginClassAlias id="RegularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+        <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+        <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+        <PluginClassAlias id="tableConverter" class="com.mainsteam.stm.plugin.common.TableResultSetConverter"/>
+        <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+        <PluginClassAlias id="ChangeRateProcessor" class="com.mainsteam.stm.plugin.common.ChangeRateProcessor"/>
+        <PluginClassAlias id="processConverter" class="com.mainsteam.stm.plugin.common.ProcessResultSetConverter"/>
+        <PluginClassAlias id="FormatProcessor" class="com.mainsteam.stm.plugin.common.FormatProcessor"/>
+        <PluginClassAlias id="columnAddProcessor" class="com.mainsteam.stm.plugin.common.ColumnAddProcessor"/>
+    </PluginClassAliasList>
+    <MetricPlugin metricid="icmpDelayTime" collectType="" pluginid="IcmpPlugin">
+        <PluginResultMetaInfo columns="ip,isAlive,ResponseTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ResponseTime"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="Version" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="FQDN"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root/MicrosoftExchangeV2::select ExchangeVersion from Exchange_server where ExchangeVersion !=null"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="columnAddProcessor">
+                <Parameter type="" key="ColumnName" value="Version"/>
+                <Parameter type="" key="ColumnValue" value="ExchangeStandard"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ExchangeStandard as Version"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="CPU"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfOS_Processor  where name = '_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT SUM(CPU) AS cpuRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="Memory,totalMemSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select FreePhysicalMemory,TotalVisibleMEMorySize from Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (totalMemSize - Memory)/totalMemSize*100 AS memRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sysUpTime" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select systemuptime from Win32_PerfFormattedData_PerfOS_System"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ConnCount" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select connectioncount from Win32_PerfRawData_MSExchangeIS_MSExchangeIS"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="SendQueueLength" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select MessagesQueuedForSubmission from Win32_PerfRawData_MSExchangeIS_MSExchangeISMailbox where name='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="OutputQueueLength" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select SubmissionQueueLength from Win32_PerfRawData_MSExchangeTransportQueues_MSExchangeTransportQueues where Name='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="UserCount" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select UserCount from Win32_PerfRawData_MSExchangeIS_MSExchangeIS"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="RPCAverageLatency" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select RPCLatencyaveragemsec from Win32_PerfRawData_MSExchangeStoreInterface_MSExchangeStoreInterface where name='_Total'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="OutConRefuseCount" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select DisconnectionsByAgents from Win32_PerfRawData_MSExchangeTransportSmtpReceive_MSExchangeTransportSmtpReceive where name='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="RecQueueLength" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select ReceiveQueueSize from Win32_PerfRawData_MSExchangeIS_MSExchangeISMailbox where name='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ActiveUserCount" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select ActiveUserCount from Win32_PerfRawData_MSExchangeIS_MSExchangeIS"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="availability" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="avail"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select State FROM Win32_Service WHERE Name='IISADMIN'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="Running,1;0" key="avail"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="availableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="POP3CPURate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="exchange_POP3CPURate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Process where Name = 'Microsoft.Exchange.Pop3'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(exchange_POP3CPURate)) as POP3CPURate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="SMTPRecMessPerSec" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select MessagesReceivedPersec from Win32_PerfRawData_MSExchangeTransportSmtpReceive_MSExchangeTransportSmtpReceive where name='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="OutConnCount" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select ConnectionsCurrent from Win32_PerfRawData_MSExchangeTransportSmtpReceive_MSExchangeTransportSmtpReceive  where name='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="MesByteSentPerSec" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select MessageBytesSentPersec from Win32_PerfRawData_MSExchangeTransportSmtpSend_MSExchangeTransportSmtpSend where name='_Total'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="InfoStorAvail" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="avail"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select State FROM Win32_Service WHERE Name='MSExchangeIS'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="Running,1;0" key="avail"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="availableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="appCpuRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="chk_appcpurate,cpuCore"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Thread where Name like '%Exchange%'"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select name from Win32_PerfFormattedData_PerfOS_Processor where name !='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(chk_appcpurate))/count(cpuCore) as appCpuRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="PhyDiskQueueLeth" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select CurrentDiskQueueLength  from Win32_PerfRawData_PerfDisk_PhysicalDisk where name='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="SMTPByteRecPerSec" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select BytesReceivedPersec from Win32_PerfRawData_MSExchangeTransportSmtpReceive_MSExchangeTransportSmtpReceive where name='_Total'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalMemSize" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="chk_pmemcap"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select TotalVisibleMemorySize from Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (chk_pmemcap/1024/1024) as totalMemSize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="OperatingSystem" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select Caption from Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\s\S]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="SMTPBytSentPerSec" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select BytesSentPersec from Win32_PerfRawData_MSExchangeTransportSmtpSend_MSExchangeTransportSmtpSend where name='_Total'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="LogWritePerSecond" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select LogWritesPersec from Win32_PerfRawData_ESE_Database where Name='Information Store'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHG"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="hostName" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select Name from Win32_ComputerSystem"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ActUserConnCount" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select ActiveClientLogons from Win32_PerfRawData_MSExchangeIS_MSExchangeISMailbox where name='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="BoxInQueueLength" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select ItemsQueuedForDeliveryTotal from Win32_PerfRawData_MSExchangeTransportQueues_MSExchangeTransportQueues"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="DatabaseCacheSize" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="exchange_DatabaseCacheSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select DatabaseCachesizeMB from Win32_PerfRawData_ESE_Database where Name='Information Store'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (exchange_DatabaseCacheSize/1024/1024) as DatabaseCacheSize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="MessOpenedPerSec" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select messageopenspersec from Win32_PerfRawData_MSExchangeIS_MSExchangeISMailbox where name='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="SMTPCPURate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="exchange_SMTPCPURate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Process where Name = 'MSExchangeTransport'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(exchange_SMTPCPURate)) as SMTPCPURate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="FolderOpenPerSec" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select FolderopensPersec from Win32_PerfRawData_MSExchangeIS_MSExchangeISMailbox where name='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="MessByteRecPerSec" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select MessageBytesReceivedPersec from Win32_PerfRawData_MSExchangeTransportSmtpReceive_MSExchangeTransportSmtpReceive where name='_Total'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ActConnCount" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select ActiveConnectionCount from Win32_PerfRawData_MSExchangeIS_MSExchangeIS"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="SMTPSentMesPerSec" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select MessagesSentPersec from Win32_PerfRawData_MSExchangeTransportSmtpSend_MSExchangeTransportSmtpSend where name='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="appMemRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="chk_memrate,chk_pmemcap"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name='_Total'"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select TotalVisibleMemorySize from Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(chk_memrate)/chk_pmemcap/1024*100) as appMemRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="LogDelayPerSec" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select LogRecordStallsPersec from Win32_PerfRawData_ESE_Database where Name='Information Store'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="TotalBytePerSec" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="exchange_SMTPBytesReceivedPerSecond,exchange_SMTPBytesSentPerSecond"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select BytesReceivedPersec from Win32_PerfRawData_MSExchangeTransportSmtpReceive_MSExchangeTransportSmtpReceive where name='_Total'"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select BytesSentPersec from Win32_PerfRawData_MSExchangeTransportSmtpSend_MSExchangeTransportSmtpSend where name='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (exchange_SMTPBytesReceivedPerSecond+exchange_SMTPBytesSentPerSecond) as TotalBytePerSec"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="TotMessBytePerSec" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="exchange_MessageBytesReceivedPerSecond,exchange_MessageBytesSentPerSecond"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select MessageBytesReceivedPersec from Win32_PerfRawData_MSExchangeTransportSmtpReceive_MSExchangeTransportSmtpReceive where name='_Total'"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select MessageBytesSentPersec from Win32_PerfRawData_MSExchangeTransportSmtpSend_MSExchangeTransportSmtpSend where name='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (exchange_MessageBytesReceivedPerSecond+exchange_MessageBytesSentPerSecond) as TotMessBytePerSec"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="instanceName" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select Name from Win32_PerfFormattedData_MSExchangeADAccess_MSExchangeADAccessDomainControllers"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="([\s\S]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+</MetricPlugins>

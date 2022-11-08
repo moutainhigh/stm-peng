@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.system.um.right.dao.IRightDao">
+	<select id="getAll" resultType="com.mainsteam.stm.system.um.right.bo.Right">
+		SELECT id,name,FILE_ID AS fileId,url,description,type,sort,pid,is_Role_Used as isRoleUsed,IS_NEW_TAG as isNewTag,ICON as icon from STM_SYS_RIGHT where STATUS=1 order by sort asc
+	</select>
+	
+	<select id="getAll4Skin" resultType="com.mainsteam.stm.system.um.right.bo.Right">
+		SELECT id,name,FILE_ID AS fileId,url,description,type,sort,pid,is_Role_Used as isRoleUsed,ICON as icon from STM_SYS_RIGHT order by sort asc
+	</select>
+	
+	<select id="get" resultType="com.mainsteam.stm.system.um.right.bo.Right" parameterType="long">
+		SELECT id,name,FILE_ID AS fileId,url,description,type,sort,pid,is_Role_Used as isRoleUsed,ICON as icon FROM STM_SYS_RIGHT where ID=#{id}
+	</select>
+	
+	<select id="getRightByType" resultType="com.mainsteam.stm.system.um.right.bo.Right" parameterType="int">
+		SELECT id,name,FILE_ID AS fileId,url,description,type,sort,pid,is_Role_Used as isRoleUsed,ICON as icon FROM STM_SYS_RIGHT where type=#{type} and STATUS=1
+	</select>
+	
+	<insert id="insert" parameterType="com.mainsteam.stm.system.um.right.bo.Right">
+	    insert into STM_SYS_RIGHT(id,name,FILE_ID,url,description,type,sort,pid,IS_NEW_TAG)
+	    values (#{id},#{name}, #{fileId},#{url}, #{description}, #{type}, #{sort}, #{pid},#{isNewTag})
+	</insert>
+	<update id="update" parameterType="com.mainsteam.stm.system.um.right.bo.Right">
+		update STM_SYS_RIGHT
+		<set>
+			<if test="name != null"> NAME = #{name}, </if>
+			<if test="fileId != null"> FILE_ID = #{fileId}, </if>
+			<if test="url != null"> url = #{url}, </if>
+			<if test="description != null"> description = #{description}, </if>
+			<if test="isNewTag != null"> IS_NEW_TAG = #{isNewTag},</if>
+		</set>
+		where ID=#{id}
+	</update>
+	
+	<update id="updateSort" parameterType="com.mainsteam.stm.system.um.right.bo.Right">
+		update STM_SYS_RIGHT set SORT = #{sort} where ID=#{id}
+	</update>
+	
+	<update id="updateStatus" parameterType="com.mainsteam.stm.system.um.right.bo.Right">
+		update STM_SYS_RIGHT set STATUS = #{status} where ID=#{id}
+	</update>
+	
+	<delete id="del">
+		delete from STM_SYS_RIGHT where  ID = #{id}
+	</delete>
+	
+	<update id="updateDelStatus" parameterType="long">
+		update STM_SYS_RIGHT set STATUS = 0 where ID=#{id}
+	</update>
+	 
+	<select id="getRights" resultType="com.mainsteam.stm.system.um.right.bo.Right"  parameterType="long">
+		SELECT id,name,FILE_ID AS fileId,url,description,type,sort,pid,is_Role_Used as isRoleUsed,IS_NEW_TAG as isNewTag,ICON as icon FROM
+			(SELECT RIGHT_ID FROM STM_SYS_ROLE_right_rel WHERE ROLE_ID=#{roleId}) mix
+		JOIN STM_SYS_RIGHT right_ ON mix.RIGHT_ID=right_.ID ORDER BY sort asc
+	</select>
+	
+	<select id="getCount" resultType="int">
+		SELECT count(*) FROM STM_SYS_RIGHT
+	</select>
+	
+	<update id="updateSSOForThirdStartState" parameterType="com.mainsteam.stm.system.um.right.bo.SSOForRight">
+		update STM_SSOFORTHIRD_BASIC set
+			IS_OPEN = #{isOpen}
+		where id = #{id}
+	</update>
+	
+	<update id="updateSSOForThird" parameterType="com.mainsteam.stm.system.um.right.bo.SSOForRight">
+		update STM_SSOFORTHIRD_BASIC set
+			NAME = #{name},
+			WSDL_URL = #{wsdlURL},
+			DESCRIBLE = #{describle}
+		where id = #{id}
+	</update>
+	
+	<update id="updateSortForInsert">
+		UPDATE STM_SYS_RIGHT SET SORT=SORT+1
+	</update>
+	<select id="findIdByPid" resultType="long" parameterType="long">
+		select id from STM_SYS_RIGHT where pId= #{pId}
+	</select>
+</mapper>

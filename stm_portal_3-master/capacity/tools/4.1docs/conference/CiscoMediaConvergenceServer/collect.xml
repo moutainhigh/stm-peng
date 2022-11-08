@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">
+    <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0">
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="hostType" parameterProperty="DefaultValue" propertyValue="Linux"/>
+    </GlobalMetricSetting>
+    <PluginClassAliasList>
+        <PluginClassAlias id="uptimeProcessor" class="com.mainsteam.stm.plugin.common.UptimeProcessor"/>
+        <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+        <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+        <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+        <PluginClassAlias id="columnPasteProcessor" class="com.mainsteam.stm.plugin.common.ColumnPasteProcessor"/>
+        <PluginClassAlias id="regularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+        <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+        <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+        <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+        <PluginClassAlias id="rowFilterProcessor" class="com.mainsteam.stm.plugin.common.RowFilterProcessor"/>
+    </PluginClassAliasList>
+
+    <MetricPlugin metricid="availability" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="status"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show status"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT count(status) as availability"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="availability" value="0,16;1"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="hostname" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show status"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="Host Name\s*: (.*)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="date" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show status"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="Date\s*: (.*)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="timezone" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show status"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="Time Zone\s*: (.*)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="locale" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show status"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="Locale\s*: (.*)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="productVersion" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show status"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="Product Ver\s*: (.*)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <!--<MetricPlugin metricid="platformVersion" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show status"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="Platform Ver\s*: (.*)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>-->
+
+    <MetricPlugin metricid="licenseMAC" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show status"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="License MAC\s*: (.*)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="uptime" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show status"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="up\s*([^,]+[,]*[^,]*),\s*\d+\s*user"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="uptimeProcessor"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="cpuRate" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="idle"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show status"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="CPU Idle\s*:\s*(\d+\.\d+)%"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (100-idle) as cpuRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="memRate" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="total,free"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show status"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="Memory Total\s*:\s*(\d+)K\s+Free\s*:\s*(\d+)K"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (total-free)/total*100 as memRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="diskName" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="diskName,diskTotal,diskFree,diskUsed,diskUsage"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show status"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="(Disk/\S+)\s+(\d+)K\s+(\d+)K\s+(\d+)K\s+\((\d+)%\)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="diskName"/>
+            <Parameter type="" key="ValueColumnTitle" value="diskName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="diskTotal" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="diskName,diskTotal,diskFree,diskUsed,diskUsage"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show status"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="(Disk/\S+)\s+(\d+)K\s+(\d+)K\s+(\d+)K\s+\((\d+)%\)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="diskName"/>
+            <Parameter type="" key="ValueColumnTitle" value="diskTotal"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="diskName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="diskUsage" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="diskName,diskTotal,diskFree,diskUsed,diskUsage"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show status"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="(Disk/\S+)\s+(\d+)K\s+(\d+)K\s+(\d+)K\s+\((\d+)%\)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="diskName"/>
+            <Parameter type="" key="ValueColumnTitle" value="diskUsage"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="diskName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="diskFree" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="diskName,diskTotal,diskFree,diskUsed,diskUsage"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show status"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="(Disk/\S+)\s+(\d+)K\s+(\d+)K\s+(\d+)K\s+\((\d+)%\)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="diskName"/>
+            <Parameter type="" key="ValueColumnTitle" value="diskFree"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="diskName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="diskUsed" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="diskName,diskTotal,diskFree,diskUsed,diskUsage"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="show status"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="(Disk/\S+)\s+(\d+)K\s+(\d+)K\s+(\d+)K\s+\((\d+)%\)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="diskName"/>
+            <Parameter type="" key="ValueColumnTitle" value="diskUsed"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="diskName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+
+</MetricPlugins>

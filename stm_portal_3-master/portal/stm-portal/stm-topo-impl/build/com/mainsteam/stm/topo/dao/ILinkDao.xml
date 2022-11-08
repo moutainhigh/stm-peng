@@ -1,0 +1,934 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.topo.dao.ILinkDao">
+	 
+   
+   
+   
+   
+  <resultMap type="com.mainsteam.stm.topo.bo.LinkBo" id="LinkBo">
+		 
+     
+     
+     
+     
+    <id column="id" property="id"/>
+		 
+     
+     
+     
+     
+    <result column="note" property="note"/>
+		 
+     
+     
+     
+     
+    <result column="type" property="type"/>
+		 
+     
+     
+     
+     
+    <result column="instance_id" property="instanceId"/>
+		 
+     
+     
+     
+     
+    <result column="from_node_id" property="from"/>
+		 
+     
+     
+     
+     
+    <result column="to_node_id" property="to"/>
+		 
+     
+     
+     
+     
+    <result column="fromType" property="fromType"/>
+		 
+     
+     
+     
+     
+    <result column="toType" property="toType"/>
+		 
+     
+     
+     
+     
+    <result column="direction" property="direction"/>
+	
+  
+  
+  
+  
+  </resultMap>
+	
+		 
+   
+   
+   
+   
+  <select id="getDelLinkInstancdeIdsByNodeIds" parameterType="list" resultType="long">
+		select distinct(instance_id) from STM_TOPO_LINK
+		 
+     
+     
+     
+     
+    <where>
+			(
+				 
+       
+       
+       
+       
+      <foreach collection="list" item="id" open="from_node_id in (" close=")" separator=",">
+					#{id}
+				</foreach>
+				or
+				 
+       
+       
+       
+       
+      <foreach collection="list" item="id" open="to_node_id in (" close=")" separator=",">
+					#{id}
+				</foreach>
+			)
+			and
+			instance_id is not null and parentId is null
+		
+    
+    
+    
+    
+    </where>
+	
+  
+  
+  
+  
+  </select>
+	
+	 
+   
+   
+   
+   
+  <select id="selectByLinkIds" resultMap="LinkBo">  
+       SELECT * FROM STM_TOPO_LINK WHERE id IN
+       
+		 
+     
+     
+     
+     
+    <foreach collection="ids" item="item" index="index" open="(" separator="," close=")">  
+         #{item}  
+      </foreach>  
+    
+	
+  
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+   
+  <select id="selectMultiByInstanceId" parameterType="java.util.Map" resultMap="LinkBo">  
+       SELECT * FROM STM_TOPO_LINK where instance_id = #{instanceId} and parentId is null or parentId=0
+    </select>
+	 
+   
+   
+   
+   
+  <select id="selectByFromToId" parameterType="java.util.Map" resultMap="LinkBo">  
+       SELECT * FROM STM_TOPO_LINK
+       WHERE (FROM_NODE_ID = #{fromNodeId} AND TO_NODE_ID=#{toNodeId}) OR(FROM_NODE_ID = #{toNodeId} AND TO_NODE_ID=#{fromNodeId})
+    </select>
+	 
+   
+   
+   
+   
+  <select id="selectByInstanceIds" resultMap="LinkBo">  
+       SELECT * FROM STM_TOPO_LINK WHERE instance_id IN
+       
+		 
+     
+     
+     
+     
+    <foreach collection="instanceIds" item="item" index="index" open="(" separator="," close=")">  
+         #{item}  
+      </foreach>  
+    
+	
+  
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+   
+  <select id="mutilLinkPageSelect" resultMap="LinkBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		SELECT * FROM STM_TOPO_LINK
+		WHERE (FROM_NODE_ID = #{condition.from} AND TO_NODE_ID=#{condition.to}) OR (FROM_NODE_ID = #{condition.to} AND TO_NODE_ID=#{condition.from})
+		ORDER BY ID DESC
+	</select>
+	 
+   
+   
+   
+   
+  <select id="pageSelect" resultMap="LinkBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="mysql">
+		SELECT *, COUNT(DISTINCT(instance_id)) FROM STM_TOPO_LINK
+		WHERE instance_id IS NOT NULL AND PARENTID IS NULL and deleteFlag=0
+		GROUP BY instance_id ORDER BY instance_id DESC
+	</select>
+	 
+   
+   
+   
+   
+  <select id="pageSelect" resultMap="LinkBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oracle">
+		SELECT * FROM STM_TOPO_LINK WHERE (ID,INSTANCE_ID) IN(
+			SELECT MAX(ID),INSTANCE_ID FROM STM_TOPO_LINK WHERE INSTANCE_ID IS NOT NULL AND PARENTID IS NULL and deleteFlag=0
+			GROUP BY INSTANCE_ID) 
+		ORDER BY INSTANCE_ID DESC
+	</select>
+	 
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="pageSelect" resultMap="LinkBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="dm">
+		SELECT * FROM STM_TOPO_LINK WHERE (ID,INSTANCE_ID) IN(
+			SELECT MAX(ID),INSTANCE_ID FROM STM_TOPO_LINK WHERE INSTANCE_ID IS NOT NULL AND PARENTID IS NULL and deleteFlag=0
+			GROUP BY INSTANCE_ID) 
+		ORDER BY INSTANCE_ID DESC
+	</select>
+  <select id="pageSelect" resultMap="LinkBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oscar">
+		SELECT * FROM STM_TOPO_LINK WHERE (ID,INSTANCE_ID) IN(
+			SELECT MAX(ID),INSTANCE_ID FROM STM_TOPO_LINK WHERE INSTANCE_ID IS NOT NULL AND PARENTID IS NULL and deleteFlag=0
+			GROUP BY INSTANCE_ID) 
+		ORDER BY INSTANCE_ID DESC
+	</select>
+	 
+   
+   
+   
+   
+  <select id="getAllLinkInstances" resultMap="LinkBo" databaseId="mysql">
+		SELECT *, COUNT(DISTINCT(instance_id)) FROM STM_TOPO_LINK
+		WHERE instance_id IS NOT NULL AND PARENTID IS NULL and deleteFlag=0
+		GROUP BY instance_id ORDER BY instance_id DESC
+	</select>
+	 
+   
+   
+   
+   
+  <select id="getAllLinkInstances" resultMap="LinkBo" databaseId="oracle">
+		SELECT * FROM STM_TOPO_LINK WHERE (ID,INSTANCE_ID) IN(
+			SELECT MAX(ID),INSTANCE_ID FROM STM_TOPO_LINK WHERE INSTANCE_ID IS NOT NULL AND PARENTID IS NULL and deleteFlag=0
+			GROUP BY INSTANCE_ID) 
+		ORDER BY INSTANCE_ID DESC
+	</select>
+	 
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="getAllLinkInstances" resultMap="LinkBo" databaseId="dm">
+		SELECT * FROM STM_TOPO_LINK WHERE (ID,INSTANCE_ID) IN(
+			SELECT MAX(ID),INSTANCE_ID FROM STM_TOPO_LINK WHERE INSTANCE_ID IS NOT NULL AND PARENTID IS NULL and deleteFlag=0
+			GROUP BY INSTANCE_ID) 
+		ORDER BY INSTANCE_ID DESC
+	</select>
+  <select id="getAllLinkInstances" resultMap="LinkBo" databaseId="oscar">
+		SELECT * FROM STM_TOPO_LINK WHERE (ID,INSTANCE_ID) IN(
+			SELECT MAX(ID),INSTANCE_ID FROM STM_TOPO_LINK WHERE INSTANCE_ID IS NOT NULL AND PARENTID IS NULL and deleteFlag=0
+			GROUP BY INSTANCE_ID) 
+		ORDER BY INSTANCE_ID DESC
+	</select>
+	 
+   
+   
+   
+   
+  <select id="getAll" resultType="com.mainsteam.stm.topo.bo.LinkBo" resultMap="LinkBo">
+		select 
+			* 
+		from 
+			STM_TOPO_LINK
+	</select>
+	 
+   
+   
+   
+   
+  <select id="getLinksIdByNode" parameterType="com.mainsteam.stm.topo.bo.NodeBo" resultType="long">
+		select id from STM_TOPO_LINK
+		where
+			from_node_id=#{id}
+			or
+			to_node_id=#{id}
+	</select>
+	 
+   
+   
+   
+   
+  <select id="getById" resultType="com.mainsteam.stm.topo.bo.LinkBo" resultMap="LinkBo" parameterType="long">
+		select * from STM_TOPO_LINK where id=#{id}
+	</select>
+	 
+   
+   
+   
+   
+  <select id="getLinksByNode" parameterType="com.mainsteam.stm.topo.bo.NodeBo" resultMap="LinkBo" resultType="com.mainsteam.stm.topo.bo.LinkBo">
+		select 
+			distinct(id),fromType,toType,to_node_id,from_node_id,instance_id,type,note,parentId,fromIfIndex,toIfIndex,attr,direction
+		from 
+			STM_TOPO_LINK
+		 
+		 
+     
+     
+     
+     
+    <where>
+			fromType='node' 
+			and toType='node'
+			and
+			from_node_id in
+			 
+			 
+       
+       
+       
+       
+      <foreach collection="list" item="nodeBo" open="(" close=")" separator=",">
+				#{nodeBo.id}
+			</foreach>
+			or
+			to_node_id in
+			 
+			 
+       
+       
+       
+       
+      <foreach collection="list" item="nodeBo" open="(" close=")" separator=",">
+				#{nodeBo.id}
+			</foreach>
+		
+		
+    
+    
+    
+    
+    </where>
+	
+	
+  
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+   
+  <select id="getLinkInstancesIdByNodeIds" parameterType="list" resultType="long">
+		select distinct(instance_id) from STM_TOPO_LINK
+		 
+		 
+     
+     
+     
+     
+    <where>
+			(
+				 
+			 
+       
+       
+       
+       
+      <foreach collection="list" item="id" open="from_node_id in (" close=")" separator=",">
+					#{id}
+				</foreach>
+				or
+				 
+			 
+       
+       
+       
+       
+      <foreach collection="list" item="id" open="to_node_id in (" close=")" separator=",">
+					#{id}
+				</foreach>
+			)
+			and
+			instance_id is not null
+		
+		
+    
+    
+    
+    
+    </where>
+	
+	
+  
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+   
+  <delete id="physicalDeleteByNodeIds" parameterType="list">
+		delete from
+		STM_TOPO_LINK
+		 
+		 
+     
+     
+     
+     
+    <where>
+			 
+			 
+       
+       
+       
+       
+      <foreach collection="list" item="id" open="from_node_id in (" close=")" separator=",">
+				#{id}
+			</foreach>
+			or
+			 
+			 
+       
+       
+       
+       
+      <foreach collection="list" item="id" open="to_node_id in (" close=")" separator=",">
+				#{id}
+			</foreach>
+		
+		
+    
+    
+    
+    
+    </where>
+	
+	
+  
+  
+  
+  
+  </delete>
+	 
+   
+   
+   
+   
+  <update id="logicalDeleteByNodeIds" parameterType="list">
+		update
+			STM_TOPO_LINK
+			set
+				deleteFlag=1
+			 
+		 
+     
+     
+     
+     
+    <where>
+				 
+			 
+       
+       
+       
+       
+      <foreach collection="list" item="id" open="from_node_id in (" close=")" separator=",">
+					#{id}
+				</foreach>
+				or
+				 
+			 
+       
+       
+       
+       
+      <foreach collection="list" item="id" open="to_node_id in (" close=")" separator=",">
+					#{id}
+				</foreach>
+			
+		
+    
+    
+    
+    
+    </where>
+	
+	
+  
+  
+  
+  
+  </update>
+	 
+   
+   
+   
+   
+  <select id="getLinksByOthersNode" parameterType="com.mainsteam.stm.topo.bo.OtherNodeBo" resultMap="LinkBo" resultType="com.mainsteam.stm.topo.bo.LinkBo">
+		select 
+			distinct(id),fromType,toType,to_node_id,from_node_id,instance_id,type,note,parentId,fromIfIndex,toIfIndex,attr,direction
+		from
+			STM_TOPO_LINK
+		 
+		 
+     
+     
+     
+     
+    <where>
+			(
+				fromType='other'
+				and
+				from_node_id in
+				 
+			 
+       
+       
+       
+       
+      <foreach collection="list" item="otherBo" open="(" close=")" separator=",">
+					#{otherBo.id}
+				</foreach>
+			)
+			or
+			(
+				toType='other'
+				and
+				to_node_id in
+				 
+			 
+       
+       
+       
+       
+      <foreach collection="list" item="otherBo" open="(" close=")" separator=",">
+					#{otherBo.id}
+				</foreach>
+			)
+		
+		
+    
+    
+    
+    
+    </where>
+	
+	
+  
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+   
+  <select id="getLinksByGroups" parameterType="com.mainsteam.stm.topo.bo.GroupBo" resultType="com.mainsteam.stm.topo.bo.LinkBo" resultMap="LinkBo">
+		select * from STM_TOPO_LINK
+		 
+		 
+     
+     
+     
+     
+    <where>
+			(
+				fromType='group'
+				and
+				from_node_id in
+				 
+			 
+       
+       
+       
+       
+      <foreach collection="list" item="groupBo" open="(" close=")" separator=",">
+					#{groupBo.id}
+				</foreach>
+			)
+			or
+			(
+				toType='group'
+				and
+				to_node_id in
+				 
+			 
+       
+       
+       
+       
+      <foreach collection="list" item="groupBo" open="(" close=")" separator=",">
+					#{groupBo.id}
+				</foreach>
+			)
+		
+		
+    
+    
+    
+    
+    </where>
+	
+	
+  
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+   
+  <insert id="insert" parameterType="com.mainsteam.stm.topo.bo.LinkBo">
+		insert into STM_TOPO_LINK
+			(id,note,type,instance_id,from_node_id,to_node_id,fromType,toType,fromIfIndex,toIfIndex,parentId,attr,direction)
+		values
+			(#{id},#{note},#{type},#{instanceId},#{from},#{to},#{fromType},#{toType},#{fromIfIndex},#{toIfIndex},#{parentId},#{attr},#{direction})
+	</insert>
+	 
+   
+   
+   
+   
+  <update id="updateForGraph" parameterType="com.mainsteam.stm.topo.bo.LinkBo">
+		update STM_TOPO_LINK
+			set from_node_id=#{from},to_node_id=#{to},instance_id=#{instanceId},fromType=#{fromType},toType=#{toType},fromIfIndex=#{fromIfIndex},toIfIndex=#{toIfIndex},direction=#{direction}
+		where
+			id=#{id}
+			or
+			parentId=#{id}
+	</update>
+	 
+   
+   
+   
+   
+  <delete id="deleteById" parameterType="long">
+		delete 
+		from 
+			STM_TOPO_LINK
+		where 
+			id=#{id}
+	</delete>
+	 
+   
+   
+   
+   
+  <delete id="deleteByIds" parameterType="java.util.List">
+		delete 
+		from STM_TOPO_LINK
+		where
+			id in
+			 
+		 
+     
+     
+     
+     
+    <foreach collection="list" item="id" open="(" close=")" separator=",">
+				#{id}
+			</foreach>
+	
+	
+  
+  
+  
+  
+  </delete>
+	 
+   
+   
+   
+   
+  <update id="updateInstanceId" parameterType="com.mainsteam.stm.topo.bo.LinkBo">
+		update STM_TOPO_LINK
+			set instance_id=#{instanceId},fromIfIndex=#{fromIfIndex},toIfIndex=#{toIfIndex},type=#{type}
+		where
+				id=#{id}
+			or
+				parentId=#{id}
+	</update>
+	 
+   
+   
+   
+   
+  <!-- 删除资源后，解除相应资源实例的链路关系 -->
+	 
+   
+   
+   
+   
+  <update id="updateLinkRelationOnResourceDelete" parameterType="java.util.Map">
+		update STM_TOPO_LINK
+		set
+			instance_id=null
+		where
+			instance_id in
+		 
+		 
+     
+     
+     
+     
+    <foreach collection="ids" open="(" close=")" separator="," item="id">
+			#{id}
+		</foreach>
+	
+	
+  
+  
+  
+  
+  </update>
+	 
+   
+   
+   
+   
+  <select id="findLink" parameterType="map" resultMap="LinkBo" resultType="com.mainsteam.stm.topo.bo.LinkBo">
+		select
+			*
+		from
+			STM_TOPO_LINK
+		where
+			(from_node_id=#{from} and to_node_id=#{to})
+			or
+			(from_node_id=#{to} and to_node_id=#{from})
+	</select>
+	 
+   
+   
+   
+   
+  <select id="findLinkByLinkBo" resultType="com.mainsteam.stm.topo.bo.LinkBo" parameterType="com.mainsteam.stm.topo.bo.LinkBo" resultMap="LinkBo">
+		select
+			*
+		from
+			STM_TOPO_LINK
+		where
+				from_node_id=#{from} 
+			and 
+				to_node_id=#{to} 
+			 
+		 
+     
+     
+     
+     
+    <if test="fromIfIndex!=null">
+				and fromIfIndex=#{fromIfIndex} 
+			</if>
+			 
+		 
+     
+     
+     
+     
+    <if test="fromIfIndex==null">
+				and fromIfIndex is null
+			</if>
+			 
+		 
+     
+     
+     
+     
+    <if test="toIfIndex!=null">
+				and toIfIndex=#{toIfIndex}
+			</if>
+			 
+		 
+     
+     
+     
+     
+    <if test="toIfIndex==null">
+				and toIfIndex is null
+			</if>
+	
+	
+  
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+   
+  <update id="updateAttr" parameterType="com.mainsteam.stm.topo.bo.LinkBo">
+		update
+			STM_TOPO_LINK
+		set
+			attr=#{attr}
+		where
+			id=#{id}
+	</update>
+	 
+   
+   
+   
+   
+  <select id="getByIds" parameterType="map" resultMap="LinkBo" resultType="com.mainsteam.stm.topo.bo.LinkBo">
+		select
+			*
+		from
+			STM_TOPO_LINK
+		 
+		 
+     
+     
+     
+     
+    <where>
+			 
+			 
+       
+       
+       
+       
+      <foreach collection="ids" item="id" open="id in (" separator="," close=")">
+				#{id}
+			</foreach>
+		
+		
+    
+    
+    
+    
+    </where>
+	
+	
+  
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+   
+  <select id="findLinkByParentId" parameterType="map" resultMap="LinkBo" resultType="com.mainsteam.stm.topo.bo.LinkBo">
+		select
+			*
+		from
+			STM_TOPO_LINK
+		 
+		 
+     
+     
+     
+     
+    <where>
+			parentId=#{parentId}
+		</where>
+	
+	
+  
+  
+  
+  
+  </select>
+	<update id="transformLinkToLineById" parameterType="long">
+		update STM_TOPO_LINK
+		set type='line',instance_id=NULL
+		where
+		id=#{id}
+	</update>
+	<select id="getSingleInterfaceLinkInstances" resultMap="LinkBo">
+		SELECT
+			*
+		FROM
+			STM_TOPO_LINK
+		WHERE
+			instance_id IS NOT NULL
+		AND PARENTID IS NULL
+		AND deleteFlag = 0
+		AND (
+			(
+				fromifindex IS NULL
+				AND toifindex IS NOT NULL
+			)
+			OR (
+				fromifindex IS NOT NULL
+				AND toifindex IS NULL
+			)
+		)
+	</select>
+	<select id="getSingleInterfaceLine" resultMap="LinkBo">
+		SELECT
+			*
+		FROM
+			STM_TOPO_LINK
+		WHERE
+			instance_id IS NULL
+		AND PARENTID IS NULL
+		AND deleteFlag = 0
+		AND type = 'line'
+		AND (
+			(
+				fromifindex IS NULL
+				AND toifindex IS NOT NULL
+			)
+			OR (
+				fromifindex IS NOT NULL
+				AND toifindex IS NULL
+			)
+		)
+	</select>
+</mapper>

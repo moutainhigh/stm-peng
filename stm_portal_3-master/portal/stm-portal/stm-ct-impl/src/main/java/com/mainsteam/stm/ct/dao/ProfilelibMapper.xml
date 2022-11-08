@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.ct.dao.ProfilelibMapper">
+
+    <sql id="whereIfSql">
+        <if test="condition.profilelib_code != null and condition.profilelib_code != ''">
+            AND profilelib_code = #{condition.profilelib_code}
+        </if>
+        <if test="condition.test_way != null and condition.test_way != ''">
+            AND test_way = #{condition.test_way}
+        </if>
+        <if test="condition.status != null and condition.status != ''">
+            AND status = #{condition.status}
+        </if>
+        <if test="condition.compar_type != null and condition.compar_type != ''">
+            AND compar_type like CONCAT('%',#{condition.compar_type},'%')
+        </if>
+        <if test="condition.is_default != null and condition.is_default != ''">
+            AND is_default like CONCAT('%',#{condition.is_default},'%')
+        </if>
+        <if test="condition.profile_name != null and condition.profile_name != ''">
+            AND profile_name like CONCAT('%',#{condition.profile_name},'%')
+        </if>
+    </sql>
+
+    <select id="getProfilelibList" resultType="com.mainsteam.stm.ct.bo.MsProfilelibMain">
+        SELECT
+            *
+        FROM
+            ms_profilelib_main
+        WHERE
+            1 = 1
+            <include refid="whereIfSql"/>
+        ORDER BY
+            id ASC
+    </select>
+    <select id="get" parameterType="java.lang.String" resultType="com.mainsteam.stm.ct.bo.MsProfilelibMain">
+    	SELECT
+            *
+        FROM
+            ms_profilelib_main
+        WHERE `id`=#{id}
+    </select>
+    <insert id="insert" parameterType="com.mainsteam.stm.ct.bo.MsProfilelibMain">
+    	INSERT INTO `ms_profilelib_main` 
+    	(`id`, `profile_name`, `profilelib_code`, `test_way`, `status`, `test_value`, `compar_type`, `is_default`, `remark`, `create_time`, `update_time`) 
+    	VALUES 
+    	(#{id}, #{profile_name}, #{profilelib_code}, #{test_way},#{status},#{test_value}, #{compar_type}, #{is_default}, #{remark}, #{create_time}, #{update_time});
+    	
+    </insert>
+	<update id="update" parameterType="com.mainsteam.stm.ct.bo.MsProfilelibMain">
+		UPDATE `ms_profilelib_main` SET 
+		`profile_name`=#{profile_name}, 
+		`profilelib_code`=#{profilelib_code}, 
+		`test_way`=#{test_way}, 
+		`status`=#{status}, 
+		`test_value`=#{test_value}, 
+		`compar_type`=#{compar_type}, 
+		`is_default`=#{is_default}, 
+		`remark`=#{remark}, 
+		`create_time`=#{create_time}, 
+		`update_time`=#{update_time} 
+		WHERE (`id`=#{id});
+	</update>
+	<delete id="del" parameterType="java.lang.String">
+		delete from ms_profilelib_main where id=#{id}
+	</delete>
+	
+</mapper>

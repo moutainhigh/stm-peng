@@ -1,0 +1,183 @@
+<form id="config-backplan-form" class="oc-form col1">
+	<div class="form-group">
+		<label>任务名称：</label>
+		<div>
+			<input autocomplete="off" name="name" type="text" required validtype="maxLength[20]" ></input>
+		</div>
+	</div>
+	<div class="form-group">
+		<label>任务时间：</label>
+		<div>
+			<input id="beginDate" name="beginDate" vaildType="dateBegin['input[name=endDate]:first']"></input> - <input id="endDate" name="endDate" vaildType="dateEnd['input[name=beginDate]:first']"></input>
+		</div>
+	</div>
+	<div class="form-group">
+		<label>备份类型：</label>
+		<div>
+			<select name="type"></select>
+		</div>
+	</div>
+	<div class="form-group">
+		<label></label>
+		<div>
+			<span><select name="month"></select>月</span>
+			<span>&nbsp;周<select name="week"></select></span>
+			<span><select name="day"></select>日</span>
+			<span><select name="hour"></select>时</span>
+			<span><select name="minute"></select>分</span>
+		</div>
+	</div>
+	<div class="form-group">
+		<label>描述：</label>
+		<div>
+			<textarea name="desc" validtype="maxLength[200]" style="resize:none"></textarea>
+		</div>
+	</div>
+</form>
+<div style="height:290px;">
+	<div id="resource_select_pickGrid" style="height:290px;"></div>
+</div>
+<script>
+	var weekData = [{id:1,name:'一'},{id:2,name:'二'},{id:3,name:'三'},{id:4,name:'四'},
+	            {id:5,name:'五'},{id:6,name:'六'},{id:7,name:'日'}];
+	var typeData =  [{id:'1',name:'每日'},{id:'2',name:'每周'},{id:'3',name:'每月'}, 
+	                 {id:'4',name:'每年'}];
+	var hourData = [];
+	var dayData = [];
+	var monthData = [];
+	var minuteData = [];
+	for(var i=0;i<60;i++){
+		var data = {id:i,name:i};
+		if(i<24) hourData.push(data);
+		if(i>0 && i<32) dayData.push(data);
+		if(i>0 && i<13) monthData.push(data);
+		minuteData.push(data);
+	}
+	//渲染form表单
+	var form = oc.ui.form({
+		selector : $("#config-backplan-form"),
+		datebox : [ {
+			selector : '[name=beginDate],[name=endDate]',
+			editable:false
+		} ],
+		combobox : [{
+			selector:'[name=week]',
+			width:70,
+			data:weekData,
+			placeholder:null
+		},{
+			selector:'[name=hour]',
+			width:70,
+			data:hourData,
+			placeholder:null
+		},{
+			selector:'[name=day]',
+			width:70,
+			data:dayData,
+			placeholder:null
+		},{
+			selector:'[name=month]',
+			width:70,
+			data:monthData,
+			placeholder:null
+		},{
+			selector : '[name=minute]',
+			width:70,
+			data:minuteData,
+			placeholder:null
+		},{
+			selector : '[name=type]',
+			data :typeData,
+			onSelect:function(record){
+				typeSelect(record.id);
+			},
+			placeholder:null
+		}]
+	})
+	//控制默认的备份计划
+	function checkDefault(id){
+		//自定义计划则跳过，默认计划id为1-4
+		if(id>4) return;
+		$("[name=name]").attr("disabled","disabled");
+	 	form.ocui[5].disable();
+	}
+	//备份类型选择事件
+	function typeSelect(id){
+		switch(id+''){
+			case '4'://每年
+				$("[name=week]").parent().parent().hide();
+				$("[name=month],[name=day],[name=hour],[name=minute]").parent().parent().show();
+				break;
+			case '3'://每月
+				$("[name=week],[name=month]").parent().parent().hide();
+				$("[name=day],[name=hour],[name=minute]").parent().parent().show();
+				break;
+			case '2'://每周
+				$("[name=day],[name=month]").parent().parent().hide();
+				$("[name=week],[name=hour],[name=minute]").parent().parent().show();
+				break;
+			case '1'://每日
+				$("[name=day],[name=month],[name=week]").parent().parent().hide();
+				$("[name=hour],[name=minute]").parent().parent().show();
+				break;
+			default:
+				break;
+		}
+	}
+	var pickGrid = null;
+	var leftColumns = [[
+	                    {field:'id',title:'资源ID',checkbox:true,sortable:true},
+	                    {field:'intanceName',title:'资源名称',width:50},
+	                    {field:'ipAddress',title:'IP地址',width:40},
+	                    {field:'deviceType',title:'设备类型',width:40},
+	                    {field:'backupId',title:'计划ID',width:40,hidden:true}	                    
+	                  ]];
+	var rightColumns = [[
+	                     {field:'id',title:'资源ID',checkbox:true,sortable:true},
+	                     {field:'intanceName',title:'资源名称',width:50},
+	                     {field:'ipAddress',title:'IP地址',width:50},
+	                     {field:'deviceType',title:'设备类型',width:40},
+		                 {field:'backupId',title:'计划ID',width:40,hidden:true}
+	                   ]];
+	var cfg = {
+			selector:"#resource_select_pickGrid",
+			leftColumns:leftColumns,
+			rightColumns:rightColumns,
+			isInteractive:true,
+			moveBeforeEvent:function(data,direction){
+				if(direction == 'left'){
+					//向左移动
+					for(var i = 0 ; i < data.length ; i ++){
+						
+					}
+				}else if(direction == 'right'){
+					//向右移动
+					for(var i = 0 ; i < data.length ; i ++){
+						
+					}
+				}
+				return data;
+			}
+	}
+	pickGrid = oc.ui.pickgrid(cfg);
+	oc.util.ajax({
+		  url: oc.resource.getUrl('portal/config/plan/getNotPlanDevice.htm'),
+		  data:{planId:oc.module.config.plan.planId},
+		  success:function(data){
+				for(var i = 0 ; i < data.data.rows.length; i ++){
+					data.data.rows[i].name = '<span class="light-ico redlight">' + data.data.rows[i].name + '</span>';					
+				}
+				pickGrid.loadData("left",data);
+		  }
+	});
+	oc.util.ajax({
+		  url: oc.resource.getUrl('portal/config/plan/getPlanDevice.htm'),
+		  data:{planId:oc.module.config.plan.planId},
+		  success:function(data){
+				for(var i = 0 ; i < data.data.rows.length; i ++){
+					data.data.rows[i].name = '<span class="light-ico redlight">' + data.data.rows[i].name + '</span>';					
+				}
+				pickGrid.loadData("right",data);
+		  }
+	});	
+</script>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.profilelib.dao.ProfileThresholdDAO">
+	<insert id="insertThreshold" 
+		parameterType="com.mainsteam.stm.profilelib.po.ProfileThresholdPO">
+		insert into STM_PROFILELIB_THRESHOLD(MK_ID,PROFILE_ID,METRIC_ID,
+		DICT_METRIC_STATE,EXPRESSION_OPERATOR,EXPRESSION_DESC,THRESHOLD_VALUE,TIMELINE_ID,ALARM_TEMPLATE) 
+		values(#{mkId},#{profileId},#{metricId},#{dictMetricState},#{expressionOperator}
+		,#{expressionDesc},#{thresholdValue},#{timelineId},#{alarmTemplate}) 
+		</insert>
+	<delete id="removeThresholdByProfileId" parameterType="long"> 
+		delete from STM_PROFILELIB_THRESHOLD where PROFILE_ID = #{profileId} and (timeline_id != 0 and timeline_id is not null)
+		</delete>
+	<delete id="removeThresholdByProfileIds" parameterType="java.util.List"> 
+		delete from STM_PROFILELIB_THRESHOLD where PROFILE_ID in <foreach
+		item="item" index="index" collection="list" open="(" 
+		separator="," close=")"> #{item} </foreach> and (timeline_id != 0 and timeline_id is not null) </delete>
+	<delete id="removeThresholdByTimelineId" parameterType="long"> 
+		delete from STM_PROFILELIB_THRESHOLD where TIMELINE_ID = #{timelineId}
+	</delete>
+	<delete id="removeThresholdByTimelineIds" parameterType="java.util.List"> 
+		delete from STM_PROFILELIB_THRESHOLD where TIMELINE_ID in <foreach
+		item="item" index="index" collection="list" open="(" 
+		separator="," close=")"> #{item} </foreach>
+	</delete>
+	<delete id="removeThresholdByProfileIdAndMetricId"> 
+		delete from STM_PROFILELIB_THRESHOLD where PROFILE_ID in <foreach
+		item="item" index="index" collection="profileIds" open="(" 
+		separator="," close=")"> #{item} </foreach> and METRIC_ID = #{metricId}
+	</delete>
+	<update id="updateThreshold" 
+		parameterType="com.mainsteam.stm.profilelib.po.ProfileThresholdPO">
+		update STM_PROFILELIB_THRESHOLD
+		<set>
+			<if test="dictMetricState != null">  DICT_METRIC_STATE =#{dictMetricState},</if>
+			<if test="expressionOperator != null">  EXPRESSION_OPERATOR= #{expressionOperator},</if>
+			<if test="expressionDesc != null"> EXPRESSION_DESC=#{expressionDesc}, </if>
+			<if test="timelineId > 0"> TIMELINE_ID = #{timelineId},</if>
+			<if test="thresholdValue != null"> THRESHOLD_VALUE=#{thresholdValue},</if>
+			<if test="alarmTemplate != null"> ALARM_TEMPLATE=#{alarmTemplate},</if>
+		</set>	
+		 where MK_ID = #{mkId} </update>
+	<select id="getThresholdByProfileId" 
+		resultType="com.mainsteam.stm.profilelib.po.ProfileThresholdPO"
+		parameterType="long"> select MK_ID as mkId,PROFILE_ID as 
+		profileId,METRIC_ID as metricId,DICT_METRIC_STATE as 
+		dictMetricState,EXPRESSION_OPERATOR as expressionOperator, EXPRESSION_DESC as 
+		expressionDesc,THRESHOLD_VALUE as thresholdValue,TIMELINE_ID as timelineId, ALARM_TEMPLATE as alarmTemplate from 
+		STM_PROFILELIB_THRESHOLD where PROFILE_ID = #{profileId} and (TIMELINE_ID is null or TIMELINE_ID=0)</select>
+		
+	<select id="getAllThresholds" resultType="com.mainsteam.stm.profilelib.po.ProfileThresholdPO">
+		select MK_ID as mkId,PROFILE_ID as 
+		profileId,METRIC_ID as metricId,DICT_METRIC_STATE as 
+		dictMetricState,EXPRESSION_OPERATOR as expressionOperator, EXPRESSION_DESC as 
+		expressionDesc,THRESHOLD_VALUE as thresholdValue,TIMELINE_ID as timelineId, ALARM_TEMPLATE as alarmTemplate from 
+		STM_PROFILELIB_THRESHOLD
+	</select>
+	<select id="getThresholdByProfileIdAndMetricId" 
+		resultType="com.mainsteam.stm.profilelib.po.ProfileThresholdPO"
+		parameterType="java.util.Map"> select MK_ID as mkId,PROFILE_ID as 
+		profileId,METRIC_ID as metricId,DICT_METRIC_STATE as 
+		dictMetricState,EXPRESSION_OPERATOR as expressionOperator, EXPRESSION_DESC as 
+		expressionDesc,THRESHOLD_VALUE as thresholdValue,TIMELINE_ID as timelineId, ALARM_TEMPLATE as alarmTemplate from 
+		STM_PROFILELIB_THRESHOLD where PROFILE_ID = #{profileId}
+		and (TIMELINE_ID is null or TIMELINE_ID=0)
+		and METRIC_ID = #{metricId}
+		</select>
+			
+		<select id="getThresholdByTimelineId" 
+		resultType="com.mainsteam.stm.profilelib.po.ProfileThresholdPO"
+		parameterType="long"> select MK_ID as mkId,PROFILE_ID as 
+		profileId,METRIC_ID as metricId,DICT_METRIC_STATE as 
+		dictMetricState,EXPRESSION_OPERATOR as expressionOperator, EXPRESSION_DESC as 
+		expressionDesc,THRESHOLD_VALUE as thresholdValue,TIMELINE_ID as timelineId, ALARM_TEMPLATE as alarmTemplate from 
+		STM_PROFILELIB_THRESHOLD where TIMELINE_ID = #{timelineId} </select>
+</mapper>

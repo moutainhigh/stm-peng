@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.simple.search.dao.ISearchDao">
+   
+   
+   
+   
+   
+  <insert id="saveResourceBizRel" parameterType="com.mainsteam.stm.simple.search.bo.ResourceBizRel">
+		insert into STM_SPL_RESOURCE_BIZ_REL(RESOURCE_ID, TYPE, BIZ_ID, NAV) values(#{resourceId}, #{type}, #{bizId}, #{nav})
+	</insert>
+   
+   
+   
+   
+   
+  <delete id="delResourceBizRel" parameterType="com.mainsteam.stm.simple.search.bo.ResourceBizRel">
+		delete from STM_SPL_RESOURCE_BIZ_REL where RESOURCE_ID=#{resourceId} and TYPE=#{type} and BIZ_ID=#{bizId}
+	</delete>
+   
+   
+   
+   
+   
+  <delete id="delResourcesBizRel" parameterType="com.mainsteam.stm.simple.search.bo.ResourceBizRel">
+		delete from STM_SPL_RESOURCE_BIZ_REL where   TYPE=#{type} and BIZ_ID=#{bizId}
+		 
+		 
+     
+     
+     
+     
+     
+    <if test="resourceIds.size()!=0">
+			and RESOURCE_ID in 
+			 
+			 
+       
+       
+       
+       
+       
+      <foreach collection="resourceIds" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		
+		
+    
+    
+    
+    
+    
+    </if>
+	
+	
+  
+  
+  
+  
+  
+  </delete>
+   
+   
+   
+   
+   
+  <delete id="delAllByResource" parameterType="long">
+		delete from STM_SPL_RESOURCE_BIZ_REL where RESOURCE_ID=#{resourceId}
+	</delete>
+   
+   
+   
+   
+   
+  <select id="search" resultType="com.mainsteam.stm.simple.search.bo.ResourceBizRel" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		select 
+		RESOURCE_ID as  resourceId, 
+		TYPE,
+		BIZ_ID as bizId, 
+		NAV 
+		from STM_SPL_RESOURCE_BIZ_REL where 1=1
+		 
+		 
+     
+     
+     
+     
+     
+    <if test="condition.type!=null">
+			and TYPE=#{condition.type}
+		</if>
+		 
+		 
+     
+     
+     
+     
+     
+    <if test="condition.resourceIds.size()!=0">
+			and RESOURCE_ID in 
+			 
+			 
+       
+       
+       
+       
+       
+      <foreach collection="condition.resourceIds" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		
+		
+    
+    
+    
+    
+    
+    </if>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <insert id="saveResourceBizRels" parameterType="list" databaseId="mysql">
+		insert into STM_SPL_RESOURCE_BIZ_REL(RESOURCE_ID, TYPE, BIZ_ID, NAV) values
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach collection="list" item="item" open="" separator="," close="">
+			(#{item.resourceId}, #{item.type}, #{item.bizId}, #{item.nav})
+		</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </insert>
+   
+   
+   
+   
+   
+  <insert id="saveResourceBizRels" parameterType="list" databaseId="oracle">
+		insert into STM_SPL_RESOURCE_BIZ_REL(RESOURCE_ID, TYPE, BIZ_ID, NAV)
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach collection="list" item="item" open="" separator="UNION ALL" close="">
+			(select #{item.resourceId}, #{item.type}, #{item.bizId}, #{item.nav} from dual)
+		</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </insert>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <insert id="saveResourceBizRels" parameterType="list" databaseId="dm">
+		insert into STM_SPL_RESOURCE_BIZ_REL(RESOURCE_ID, TYPE, BIZ_ID, NAV)
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach collection="list" item="item" open="" separator="UNION ALL" close="">
+			(select #{item.resourceId}, #{item.type}, #{item.bizId}, #{item.nav} from dual)
+		</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </insert>
+  <insert id="saveResourceBizRels" parameterType="list" databaseId="oscar">
+		insert into STM_SPL_RESOURCE_BIZ_REL(RESOURCE_ID, TYPE, BIZ_ID, NAV)
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach collection="list" item="item" open="" separator="UNION ALL" close="">
+			(select #{item.resourceId}, #{item.type}, #{item.bizId}, #{item.nav} from dual)
+		</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </insert>
+   
+   
+   
+   
+   
+  <delete id="delResourceBizRels">
+		delete from STM_SPL_RESOURCE_BIZ_REL where TYPE=#{type} and BIZ_ID=#{bizId}
+		and RESOURCE_ID in
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach collection="resourceIds" item="item" open="(" separator="," close=")">
+				#{item}
+		</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </delete>
+   
+   
+   
+   
+   
+  <delete id="delReportResourceBizRel" parameterType="com.mainsteam.stm.simple.search.bo.ResourceBizRel">
+		delete from STM_SPL_RESOURCE_BIZ_REL where TYPE=#{type} and BIZ_ID=#{bizId}
+	</delete>
+   
+   
+   
+   
+   
+  <select id="checkResourceBizRelIsExist" parameterType="com.mainsteam.stm.simple.search.bo.ResourceBizRel" resultType="int">
+		select count(1) from STM_SPL_RESOURCE_BIZ_REL where RESOURCE_ID = #{resourceId} and TYPE = #{type} and BIZ_ID = #{bizId}
+	</select>
+</mapper>

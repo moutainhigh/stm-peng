@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">
+    <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0"/>
+    <PluginClassAliasList>
+        <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+        <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+        <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+        <PluginClassAlias id="columnPasteProcessor" class="com.mainsteam.stm.plugin.common.ColumnPasteProcessor"/>
+        <PluginClassAlias id="RegularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+        <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+        <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+        <PluginClassAlias id="tableConverter" class="com.mainsteam.stm.plugin.common.TableResultSetConverter"/>
+        <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+        <PluginClassAlias id="ChangeRateProcessor" class="com.mainsteam.stm.plugin.common.ChangeRateProcessor"/>
+        <PluginClassAlias id="rowFilterProcessor" class="com.mainsteam.stm.plugin.common.RowFilterProcessor"/>
+        <PluginClassAlias id="FormatProcessor" class="com.mainsteam.stm.plugin.common.FormatProcessor"/>
+        <PluginClassAlias id="RowFilterByInstPropertyProcessor" class="com.mainsteam.stm.plugin.common.RowFilterByInstPropertyProcessor"/>
+        <PluginClassAlias id="rangeCheckProcessor" class="com.mainsteam.stm.plugin.common.RangeCheckProcessor"/>
+    </PluginClassAliasList>
+    <MetricPlugin metricid="snmpAvailability" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="sysoid"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.1.2.0"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (count(sysoid)) as availability"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="availability" value="0,16;1"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="Name" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.1.5.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="availability" collectType="" pluginid="IcmpPlugin">
+        <PluginResultMetaInfo columns="ip,isAlive,ResponseTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT isAlive"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="icmpDelayTime" collectType="" pluginid="IcmpPlugin">
+        <PluginResultMetaInfo columns="ip,isAlive,ResponseTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ResponseTime"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sysObjectID" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.1.2.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="sysUpTime" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="sysUpTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.1.3.0"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT sysUpTime/100 as sysUpTime"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sysDescr" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.1.1.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="Version" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.789.1.1.2.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ip" collectType="" pluginid="IcmpPlugin">
+        <PluginResultMetaInfo columns="ip,isAlive,ResponseTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ip"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="SerialNumber" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.789.1.1.9.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <!-- Volume -->
+    <MetricPlugin metricid="VolumeIndex" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="index,name"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.789.1.4.4.1.2"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="index"/>
+            <Parameter type="" key="ValueColumnTitle" value="index"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="VolumeName" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="index,name"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.789.1.4.4.1.2"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="index"/>
+            <Parameter type="" key="ValueColumnTitle" value="name"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="VolumeIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="VolumeType" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="index,type"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.789.1.4.4.1.5"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="index"/>
+            <Parameter type="" key="ValueColumnTitle" value="type"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="VolumeIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="VolumeState" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="index,state"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.789.1.4.4.1.3"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="index"/>
+            <Parameter type="" key="ValueColumnTitle" value="state"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="VolumeIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <!-- Disk -->
+    <MetricPlugin metricid="RAIDIndex" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="index,name"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.789.1.6.2.1.2"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="index"/>
+            <Parameter type="" key="ValueColumnTitle" value="index"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="RAIDName" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="index,name"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.789.1.6.2.1.2"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="index"/>
+            <Parameter type="" key="ValueColumnTitle" value="name"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="RAIDIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="RAIDGroup" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="index,raidVVol,raidVGroup,raidVIndex"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.789.1.6.2.1.12"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.789.1.6.2.1.13"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.789.1.6.2.1.1"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+        	<PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT index,(raidVVol+'-'+raidVGroup+'-'+raidVIndex) AS RAIDGroup"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="index"/>
+            <Parameter type="" key="ValueColumnTitle" value="RAIDGroup"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="RAIDIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="RAIDType" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="index,type"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.789.1.6.2.1.31"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="index"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="RAIDIndex"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="index"/>
+            <Parameter type="" key="ValueColumnTitle" value="type"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="RAIDIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="RAIDModel" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="index,model"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.789.1.6.2.1.28"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="index"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="RAIDIndex"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="index"/>
+            <Parameter type="" key="ValueColumnTitle" value="model"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="RAIDIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="RAIDPhySpace" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="index,PhySpace"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.789.1.6.2.1.9"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="index"/>
+            <Parameter type="" key="ValueColumnTitle" value="PhySpace"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="RAIDIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="RAIDRealSpace" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="index,RealSpace"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.789.1.6.2.1.7"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="index"/>
+            <Parameter type="" key="ValueColumnTitle" value="RealSpace"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="RAIDIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <!-- Aggregate -->
+    <MetricPlugin metricid="AggrIndex" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="index,index2"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.789.1.5.11.1.1"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="index"/>
+            <Parameter type="" key="ValueColumnTitle" value="index"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="AggrName" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="index,name"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.789.1.5.11.1.2"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="index"/>
+            <Parameter type="" key="ValueColumnTitle" value="name"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="AggrIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="AggrState" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="index,state"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.789.1.5.11.1.5"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="index"/>
+            <Parameter type="" key="ValueColumnTitle" value="state"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="AggrIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+</MetricPlugins>

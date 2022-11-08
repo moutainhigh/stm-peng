@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.state.thirdparty.dao.ThirdPartyMetricStateDAO">
+
+	<sql id="tableColumns">
+		INSTANCE_ID as instanceID,
+		METRIC_ID as metricID,
+		METRIC_STATE as state,
+		UPDATE_TIME as updateTime
+	</sql>
+
+	<sql id="findConditions">
+		<where>
+			<if test="instanceID !=0">
+				INSTANCE_ID=#{instanceID}
+			</if>
+			<if test="metricID !=null">
+				AND METRIC_ID=#{metricID}
+			</if>
+			<if test="state !=null">
+				AND METRIC_STATE=#{state}
+			</if>
+		</where>
+	</sql>
+
+	<insert id="saveStateData"  parameterType="com.mainsteam.stm.state.thirdparty.obj.ThirdPartyMetricStateData">
+	    INSERT INTO STM_THIRDPARTY_METRIC_STATE(INSTANCE_ID,METRIC_ID,METRIC_STATE,UPDATE_TIME)
+	    VALUES 
+	 	(#{instanceID},#{metricID},#{state},#{updateTime})
+	</insert>
+
+	<insert id="updateIfExistsOrAdd" databaseId="mysql" parameterType="com.mainsteam.stm.state.thirdparty.obj.ThirdPartyMetricStateData">
+		REPLACE INTO STM_THIRDPARTY_METRIC_STATE
+		VALUES
+		(#{instanceID},#{metricID},#{state},#{updateTime})
+	</insert>
+
+	<insert id="updateIfExistsOrAdd" databaseId="oracle" parameterType="com.mainsteam.stm.state.thirdparty.obj.ThirdPartyMetricStateData">
+		MERGE INTO STM_THIRDPARTY_METRIC_STATE metricState
+		USING (SELECT #{instanceID} AS  INSTANCE_ID, #{metricID} AS METRIC_ID, #{state} AS METRIC_STATE, #{updateTime} AS UPDATE_TIME FROM DUAL) tmp
+		ON (metricState.INSTANCE_ID=tmp.INSTANCE_ID AND metricState.METRIC_ID=tmp.METRIC_ID)
+			WHEN MATCHED THEN
+				UPDATE SET metricState.METRIC_STATE=#{state},metricState.UPDATE_TIME=#{updateTime}
+			WHEN NOT MATCHED THEN
+				INSERT (metricState.INSTANCE_ID,metricState.METRIC_ID,metricState.METRIC_STATE,metricState.UPDATE_TIME)
+				VALUES (#{instanceID},#{metricID},#{state},#{updateTime})
+	</insert>
+	
+	<insert id="updateIfExistsOrAdd" databaseId="oscar" parameterType="com.mainsteam.stm.state.thirdparty.obj.ThirdPartyMetricStateData">
+		MERGE INTO STM_THIRDPARTY_METRIC_STATE metricState
+		USING (SELECT #{instanceID} AS  INSTANCE_ID, #{metricID} AS METRIC_ID, #{state} AS METRIC_STATE, #{updateTime} AS UPDATE_TIME FROM DUAL) tmp
+		ON (metricState.INSTANCE_ID=tmp.INSTANCE_ID AND metricState.METRIC_ID=tmp.METRIC_ID)
+			WHEN MATCHED THEN
+				UPDATE SET metricState.METRIC_STATE=#{state},metricState.UPDATE_TIME=#{updateTime}
+			WHEN NOT MATCHED THEN
+				INSERT (metricState.INSTANCE_ID,metricState.METRIC_ID,metricState.METRIC_STATE,metricState.UPDATE_TIME)
+				VALUES (#{instanceID},#{metricID},#{state},#{updateTime})
+	</insert>
+	
+	<insert id="updateIfExistsOrAdd" databaseId="dm" parameterType="com.mainsteam.stm.state.thirdparty.obj.ThirdPartyMetricStateData">
+		MERGE INTO STM_THIRDPARTY_METRIC_STATE metricState
+		USING (SELECT #{instanceID} AS  INSTANCE_ID, #{metricID} AS METRIC_ID, #{state} AS METRIC_STATE, #{updateTime} AS UPDATE_TIME FROM DUAL) tmp
+		ON (metricState.INSTANCE_ID=tmp.INSTANCE_ID AND metricState.METRIC_ID=tmp.METRIC_ID)
+			WHEN MATCHED THEN
+				UPDATE SET metricState.METRIC_STATE=#{state},metricState.UPDATE_TIME=#{updateTime}
+			WHEN NOT MATCHED THEN
+				INSERT (metricState.INSTANCE_ID,metricState.METRIC_ID,metricState.METRIC_STATE,metricState.UPDATE_TIME)
+				VALUES (#{instanceID},#{metricID},#{state},#{updateTime})
+	</insert>
+
+	<select id="findRecord" parameterType="com.mainsteam.stm.state.thirdparty.obj.ThirdPartyMetricStateData"
+			resultType="com.mainsteam.stm.state.thirdparty.obj.ThirdPartyMetricStateData">
+		SELECT <include refid="tableColumns"></include>
+		from STM_THIRDPARTY_METRIC_STATE
+		<include refid="findConditions"></include>
+	</select>
+
+	<delete id="deleteStateData" parameterType="com.mainsteam.stm.state.thirdparty.obj.ThirdPartyMetricStateData">
+		DELETE FROM STM_THIRDPARTY_METRIC_STATE
+		<include refid="findConditions"></include>
+	</delete>
+
+</mapper>

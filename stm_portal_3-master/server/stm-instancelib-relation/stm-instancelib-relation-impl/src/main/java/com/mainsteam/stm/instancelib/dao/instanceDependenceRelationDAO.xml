@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.instancelib.dao.InstanceDependenceRelationDAO">
+	
+	<sql id="relationColumn"> 
+		RELATIONID,SOURCERESOURCE,sourceChildResource,TARGETRESOURCE,targetChildResource,
+		SOURCERESOURCETYPE,TARGETRESOURCETYPE,RELATIONTYPE,ISUSE,DATASOURCE,compositeId
+	</sql>
+	<sql id="relationColumnValue">
+		#{relationId}, #{sourceResource},#{sourceChildResource}, #{targetResource},#{targetChildResource},
+		#{sourceResourceType},#{targetResourceType},#{relationType},#{isUse},#{linkDataSource},#{compositeId}
+	</sql>
+	<sql id="relationTable">
+		 STM_INSTANCELIB_DEPEND
+	</sql>
+	<sql id="selectSql">
+		select <include refid="relationColumn"/>
+		from   <include refid="relationTable"/>
+	</sql>
+	
+	<insert id="insertDependence"  parameterType="com.mainsteam.stm.instancelib.dao.pojo.InstanceDependencePO">
+	  insert into 
+		<include refid="relationTable"/> 
+		(<include refid="relationColumn"/>)
+		VALUES
+		(<include refid="relationColumnValue"/>) 
+	</insert>
+	
+	<delete id="removeDependence">
+		delete from
+		<include refid="relationTable"/>
+		where RELATIONID=#{relationId}
+	</delete>
+	<delete id="removeBusinessRelationByCompositeId">
+		delete from
+		<include refid="relationTable"/>
+		where relationType='DEPENDENCE' and compositeId=#{compositeId}
+	</delete>
+	
+	<delete id="removeTopoLinkDependences">
+		delete from
+		<include refid="relationTable"/>
+		where dataSource='TOPO' and relationType='CONNECTION'
+	</delete>
+	<select id="getAllDependence" resultType="com.mainsteam.stm.instancelib.dao.pojo.InstanceDependencePO">
+		<include refid="selectSql"/> 
+	</select>
+	<select id="getPreviousDependence" resultType="com.mainsteam.stm.instancelib.dao.pojo.InstanceDependencePO">
+		<include refid="selectSql"/>
+		 where targetResource = #{targetResource}
+	</select>
+	<select id="getPreviousChildDependence" resultType="com.mainsteam.stm.instancelib.dao.pojo.InstanceDependencePO">
+		<include refid="selectSql"/>
+		 where targetChildResource = #{targetResource}
+	</select>
+	<select id="getNextDependence" resultType="com.mainsteam.stm.instancelib.dao.pojo.InstanceDependencePO">
+		<include refid="selectSql"/>
+		 where sourceResource = #{sourceResource} and relationType!='CONTAIN'
+	</select>
+	<select id="getNextChildDependence" resultType="com.mainsteam.stm.instancelib.dao.pojo.InstanceDependencePO">
+		<include refid="selectSql"/>
+		 where sourceChildResource = #{sourceResource} and relationType!='CONTAIN'
+	</select>
+</mapper>

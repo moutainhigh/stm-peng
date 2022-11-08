@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.topo.dao.ISubTopoDao">
+
+	<select id="getSubTopoId" resultType="Long">
+		select id from STM_TOPO_SUBTOPO where name = #{name}
+	</select>
+
+	<delete id="deleteSubTopoByName" parameterType="string">
+		delete from STM_TOPO_SUBTOPO where name=#{name}
+	</delete>
+   
+  <update id="updateSort" parameterType="com.mainsteam.stm.topo.bo.SubTopoBo">
+		UPDATE STM_TOPO_SUBTOPO SET PARENTID= #{parentId},SORT = #{sort} WHERE ID = #{id}
+	</update>
+   
+   
+   
+   
+   
+  <insert id="add" parameterType="com.mainsteam.stm.topo.bo.SubTopoBo">
+		insert into STM_TOPO_SUBTOPO
+			(id,name,parentId,attr,bgsrc)
+		values
+			(#{id},#{name},#{parentId},#{attr},#{bgsrc})
+	</insert>
+   
+   
+   
+   
+   
+  <update id="updateAttr" parameterType="com.mainsteam.stm.topo.bo.SubTopoBo">
+		update STM_TOPO_SUBTOPO
+		 
+		 
+     
+     
+     
+     
+     
+    <set>
+			 
+			 
+       
+       
+       
+       
+       
+      <if test="name!=null">
+				name=#{name},
+			</if>
+			 
+			 
+       
+       
+       
+       
+       
+      <if test="bgsrc!=null">
+				bgsrc=#{bgsrc},
+			</if>
+			 
+			 
+       
+       
+       
+       
+       
+      <if test="attr!=null">
+				attr=#{attr},
+			</if>
+			 
+			 
+       
+       
+       
+       
+       
+      <if test="parentId!=null">
+				parentId=#{parentId}
+			</if>
+		
+		
+    
+    
+    
+    
+    
+    </set>
+		where
+			id=#{id}
+	
+	
+  
+  
+  
+  
+  
+  </update>
+   
+   
+   
+   
+   
+  <select id="getSimpleAttr" parameterType="long" resultType="com.mainsteam.stm.topo.bo.SubTopoBo">
+		select
+			id,name,parentId,bgsrc
+		from
+			STM_TOPO_SUBTOPO
+		 
+		 
+     
+     
+     
+     
+     
+    <where>
+			 
+			 
+       
+       
+       
+       
+       
+      <foreach collection="list" open="id in (" close=")" item="id" separator=",">
+				 
+				 
+         
+         
+         
+         
+         
+        <if test="id!=null">
+					#{id}
+				</if>
+			
+			
+      
+      
+      
+      
+      
+      </foreach>
+		
+		
+    
+    
+    
+    
+    
+    </where>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="all" resultType="com.mainsteam.stm.topo.bo.SubTopoBo">
+		select id,name,parentId from STM_TOPO_SUBTOPO
+	</select>
+   
+   
+   
+   
+   
+  <select id="getAll" resultType="com.mainsteam.stm.topo.bo.SubTopoBo">
+		select * from STM_TOPO_SUBTOPO
+	</select>
+   
+   
+   
+   
+   
+  <select id="getByParentId" parameterType="map" resultType="com.mainsteam.stm.topo.bo.SubTopoBo">
+		select * from STM_TOPO_SUBTOPO
+		 
+		 
+     
+     
+     
+     
+     
+    <where>
+			 
+			 
+       
+       
+       
+       
+       
+      <if test="id==0">
+				parentId is null or parentId=0
+			</if>
+			 
+			 
+       
+       
+       
+       
+       
+      <if test="id!=0">
+				parentId=#{id}
+			</if>
+		order by sort
+		
+    
+    
+    
+    
+    
+    </where>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+
+    <select id="countByParentId" parameterType="long" resultType="java.lang.Long">
+        select count(id) from STM_TOPO_SUBTOPO WHERE parentId=#{id}
+    </select>
+   
+   
+  <select id="getSubToposByIds" parameterType="long" resultType="com.mainsteam.stm.topo.bo.SubTopoBo">
+		select * from
+		STM_TOPO_SUBTOPO
+		 
+		 
+     
+     
+     
+     
+     
+    <where>
+			 
+			 
+       
+       
+       
+       
+       
+      <foreach collection="list" open="id in (" close=")" item="id" separator=",">
+				#{id}
+			</foreach>
+		
+		
+    
+    
+    
+    
+    
+    </where>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="getSubToposByIp" resultType="com.mainsteam.stm.topo.bo.SubTopoBo" parameterType="map" databaseId="mysql">
+		select id,parentId,name from STM_TOPO_SUBTOPO
+		 
+		 
+     
+     
+     
+     
+     
+    <where>
+			id in
+			(
+				select distinct subTopoId from STM_TOPO_NODE
+				 
+			 
+       
+       
+       
+       
+       
+      <where>
+					ip like CONCAT('%',#{ip},'%')
+				</where>
+			)
+			or 
+			id=0
+		
+		
+    
+    
+    
+    
+    
+    </where>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="getSubToposByIp" resultType="com.mainsteam.stm.topo.bo.SubTopoBo" parameterType="map" databaseId="oracle">
+		select id,parentId,name from STM_TOPO_SUBTOPO
+		 
+		 
+     
+     
+     
+     
+     
+    <where>
+			id in
+			(
+				select distinct subTopoId from STM_TOPO_NODE
+				 
+			 
+       
+       
+       
+       
+       
+      <where>
+					ip like '%'||#{ip}||'%'
+				</where>
+			)
+			or 
+			id=0
+		
+		
+    
+    
+    
+    
+    
+    </where>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="getSubToposByIp" resultType="com.mainsteam.stm.topo.bo.SubTopoBo" parameterType="map" databaseId="dm">
+		select id,parentId,name from STM_TOPO_SUBTOPO
+		 
+		 
+     
+     
+     
+     
+     
+    <where>
+			id in
+			(
+				select distinct subTopoId from STM_TOPO_NODE
+				 
+			 
+       
+       
+       
+       
+       
+      <where>
+					ip like '%'||#{ip}||'%'
+				</where>
+			)
+			or 
+			id=0
+		
+		
+    
+    
+    
+    
+    
+    </where>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+  <select id="getSubToposByIp" resultType="com.mainsteam.stm.topo.bo.SubTopoBo" parameterType="map" databaseId="oscar">
+		select id,parentId,name from STM_TOPO_SUBTOPO
+		 
+		 
+     
+     
+     
+     
+     
+    <where>
+			id in
+			(
+				select distinct subTopoId from STM_TOPO_NODE
+				 
+			 
+       
+       
+       
+       
+       
+      <where>
+					ip like '%'||#{ip}||'%'
+				</where>
+			)
+			or 
+			id=0
+		
+		
+    
+    
+    
+    
+    
+    </where>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="getById" parameterType="map" resultType="com.mainsteam.stm.topo.bo.SubTopoBo">
+		select * from STM_TOPO_SUBTOPO
+		where
+			 
+		 
+     
+     
+     
+     
+     
+    <if test="id == null">
+				id is null or id=0
+			</if>
+			 
+		 
+     
+     
+     
+     
+     
+    <if test="id != null">
+				id=#{id}
+			</if>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="subTopoNameValidation" parameterType="map" resultType="java.lang.Integer">
+		select 
+			count(id) 
+		from 
+			STM_TOPO_SUBTOPO
+		where 
+			name=#{subTopoName}
+	</select>
+   
+   
+   
+   
+   
+  <select id="getAllTopoIds" resultType="long">
+		select 
+			id 
+		from 
+			STM_TOPO_SUBTOPO
+	</select>
+   
+   
+   
+   
+   
+  <select id="getByName" parameterType="map" resultType="com.mainsteam.stm.topo.bo.SubTopoBo">
+		select 
+			* 
+		from 
+			STM_TOPO_SUBTOPO
+		where
+			name=#{name}
+	</select>
+   
+   
+   
+   
+   
+  <select id="roomCount" resultType="int">
+		select count(id) from STM_TOPO_SUBTOPO where attr like '%"type":"room"%'
+	</select>
+   
+   
+   
+   
+   
+  <delete id="removeById" parameterType="map">
+		delete from STM_TOPO_SUBTOPO where id=#{id}
+	</delete>
+</mapper>

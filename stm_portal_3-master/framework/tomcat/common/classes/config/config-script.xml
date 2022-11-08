@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+	|:命令终结符
+	${}:待替换占位符
+	${enableUserName}:enable用户名
+	${enablePassword}:enable密码
+	${tftpIp}:tftpServer地址
+	${fileName}:保存的文件名
+-->
+<Scripts>
+	<Model oid="1.3.6.1.4.1.9.1.1238" name="CISCO">
+    	<Script type="tftp" cmd="enable|${enablePassword}|copy startup-config tftp://${tftpIp}/${fileName}||" fileName="startup-config"/>
+		<Script type="tftp" cmd="enable|${enablePassword}|copy running-config tftp://${tftpIp}/${fileName}||" fileName="running-config"/>
+    </Model>
+	<Model oid="1.3.6.1.4.1.25506.1.462" name="HUAWEI">	
+		<Script type="tftp" cmd="enable|${enableUserName}|${enablePassword}|tftp ${tftpIp} put h3c.cfg ${fileName}||" fileName="h3c.cfg"/>
+    </Model>
+	<Model oid="1.3.6.1.4.1.5651.1.102.37" name="MAIPU">	
+		<Script type="tftp" cmd="enable|${enablePassword}|filesystem|copy startup-config tftp ${tftpIp} ${fileName}" fileName="startup-config"/>
+		<Script type="tftp" cmd="enable|${enablePassword}|filesystem|copy running-config tftp ${tftpIp} ${fileName}" fileName="running-config"/>
+    </Model>
+    <Model oid="1.3.6.1.4.1.5651.1.102.109" name="MAIPU-S4100">     
+           <Script type="tftp" cmd="enable|${enablePassword}|filesystem|copy startup-config tftp ${tftpIp} ${fileName}||" fileName="startup-config"/>
+           <Script type="tftp" cmd="enable|${enablePassword}|filesystem|copy running-config tftp ${tftpIp} ${fileName}||" fileName="running-config"/>
+    </Model>
+    <Model oid="1.3.6.1.4.1.5651.1.102.77" name="MAIPU-SM3100">
+           <Script type="tftp" cmd="||enable|copy running-config tftp://${tftpIp}/${fileName}|y" fileName="running-config"/>
+           <Script type="tftp" cmd="||enable|copy startup-config tftp://${tftpIp}/${fileName}|y" fileName="startup-config"/>
+    </Model>
+</Scripts>

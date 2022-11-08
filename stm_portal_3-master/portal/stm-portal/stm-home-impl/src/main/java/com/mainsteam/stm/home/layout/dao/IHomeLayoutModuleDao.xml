@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mainsteam.stm.home.layout.dao.IHomeLayoutModuleDao" >
+
+    <resultMap id="ResultMap" type="com.mainsteam.stm.home.layout.bo.HomeLayoutModuleBo" >
+        <id column="ID" property="id" jdbcType="BIGINT" />
+        <result column="NAME" property="name" jdbcType="VARCHAR" />
+        <result column="MODULE_CODE" property="moduleCode" jdbcType="VARCHAR" />
+        <result column="DEFAULT_WIDTH" property="defaultWidth" jdbcType="INTEGER" />
+        <result column="DEFAULT_HEIGHT" property="defaultHeight" jdbcType="INTEGER" />
+        <result column="URL" property="url" jdbcType="VARCHAR" />
+        <result column="SORT_NUM" property="sortNum" jdbcType="INTEGER" />
+    </resultMap>
+
+    <sql id="Column_List" >
+        ID, NAME, MODULE_CODE, DEFAULT_WIDTH, DEFAULT_HEIGHT, URL, SORT_NUM
+    </sql>
+
+    <select id="get" resultMap="ResultMap" >
+        SELECT <include refid="Column_List" />
+        FROM STM_HOME_LAYOUT_MODULE
+        ORDER BY SORT_NUM ASC
+    </select>
+    
+    <select id="getById" resultMap="ResultMap" parameterType="java.lang.Long" >
+        SELECT <include refid="Column_List" />
+        FROM STM_HOME_LAYOUT_MODULE
+        WHERE ID = #{id,jdbcType=BIGINT}
+    </select>
+
+    <insert id="insert" parameterType="com.mainsteam.stm.home.layout.bo.HomeLayoutModuleBo" >
+        INSERT INTO STM_HOME_LAYOUT_MODULE (<include refid="Column_List" />)
+        VALUES (
+        	#{id,jdbcType=BIGINT},
+        	#{name,jdbcType=VARCHAR},
+        	#{moduleCode,jdbcType=VARCHAR},
+            #{defaultWidth,jdbcType=INTEGER},
+            #{defaultHeight,jdbcType=INTEGER},
+            #{url,jdbcType=VARCHAR},
+            #{sortNum,jdbcType=INTEGER})
+    </insert>
+
+    <update id="update" parameterType="com.mainsteam.stm.home.layout.bo.HomeLayoutModuleBo" >
+        UPDATE STM_HOME_LAYOUT_MODULE
+        SET NAME = #{name,jdbcType=VARCHAR},
+            MODULE_CODE = #{moduleCode,jdbcType=VARCHAR},
+            DEFAULT_WIDTH = #{defaultWidth,jdbcType=INTEGER},
+            DEFAULT_HEIGHT = #{defaultHeight,jdbcType=INTEGER},
+            URL = #{url,jdbcType=VARCHAR},
+            SORT_NUM = #{sortNum,jdbcType=INTEGER}
+        WHERE ID = #{id,jdbcType=BIGINT}
+    </update>
+    
+    <delete id="delete" parameterType="java.lang.Long" >
+    	DELETE FROM STM_HOME_LAYOUT_MODULE
+    	WHERE ID = #{id,jdbcType=BIGINT}
+    </delete>
+
+</mapper>

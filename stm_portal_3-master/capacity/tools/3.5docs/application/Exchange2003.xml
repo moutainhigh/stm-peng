@@ -1,0 +1,740 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<!-- 
+	devicetype:			设备类型名称
+	ismulticoltype:		是否允许采集方式多选
+	majortype:			主要分类（可以理解为设备类型）
+	minortype:			次要分类
+	manufacturer:		厂商
+	devicetype_zh:		设备类型中文描述
+	 -->
+	<devicetypeinfo devicetype="MAIL_EXCHANGE2003" ismulticoltype="false" majortype="application" minortype="MSExchangeMail" manufacturer="Microsoft" devicetype_zh="Exchange2003">
+		<!-- 该设备类型定义的命令，用于合并命令执行 -->
+		<commands>
+			<!-- coltype:采集方式，comid：命令ID，command：命令 -->
+			<!--MAC地址 -->
+			<command coltype="WMI" comid="macAddress" command="root\cimv2::select macaddress from Win32_NetworkAdapter WHERE macaddress!=null"/>
+			<!--主机名称 -->
+			<command coltype="WMI" comid="chk_hostname" command="root\cimv2::select Name from Win32_ComputerSystem"/>
+			<!-- 操作系统 -->
+			<command coltype="WMI" comid="chk_os" command="root\cimv2::select Caption from Win32_OperatingSystem"/>
+			<!--主机说明-->
+			<command coltype="WMI" comid="systemInfo" command="root\cimv2::select description from Win32_OperatingSystem"/>
+			<!--操作系统版本-->
+			<command coltype="WMI" comid="osVersion" command="root\cimv2::select version from Win32_OperatingSystem"/>
+			<!-- MS Exchange CPU利用率 -->
+			<command coltype="WMI" comid="chk_appcpurate" command="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Process where Name like '%exmgmt%'"/>
+			<!--系统CPU利用率-->
+			<command coltype="WMI" comid="chk_cpurate" command="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Process where Name='_Total'"/>
+			<!-- MS Exchange内存利用率 -->
+			<command coltype="WMI" comid="chk_appmemrate" command="root\cimv2::select WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name like '%exmgmt%'"/>
+			<!--系统内存利用率-->
+			<command coltype="WMI" comid="chk_memrate" command="root\cimv2::select WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name='_Total'"/>
+			<!-- 系统可管理内存 -->
+			<command coltype="WMI" comid="chk_pmemcap" command="root\cimv2::select TotalVisibleMemorySize from Win32_OperatingSystem"/>
+			<!-- 物理磁盘当前列队长度 -->
+			<command coltype="WMI" comid="exchange_PhysicalDiskQueueLength" command="root\cimv2::select CurrentDiskQueueLength from Win32_PerfRawData_PerfDisk_PhysicalDisk where name='_Total'"/>
+			<!-- IP地址
+			<command coltype="WMI" comid="get_by_conninfo" command="root\cimv2::select IPaddress from Win32_NetworkAdapterConfiguration where IPEnabled='true'"/>
+			 -->
+			<!-- 每秒日志写入 -->
+			<command coltype="WMI" comid="exchange_LogWritesPerSecond" command="root\cimv2::select LogWritesPersec from Win32_PerfRawData_ESE_Database where Name='Information Store'"/>
+			<!-- 每秒日志延迟 -->
+			<command coltype="WMI" comid="exchange_LogDelayPerSecond" command="root\cimv2::select LogRecordStallsPersec from Win32_PerfRawData_ESE_Database where Name='Information Store'"/>
+			<!-- 数据库缓存大小-->
+			<command coltype="WMI" comid="exchange_DatabaseCacheSize" command="root\cimv2::select DatabaseCacheSize from Win32_PerfRawData_ESE_Database where Name='Information Store'"/>
+			<!-- 数据库当前活动连接数-->
+			<command coltype="WMI" comid="exchange_ActiveConnCount" command="root\cimv2::select ActiveConnectionCount from Win32_PerfRawData_MSExchangeIS_MSExchangeIS"/>
+			<!-- 数据库当前活动用户数-->
+			<command coltype="WMI" comid="exchange_ActiveUserCount" command="root\cimv2::select ActiveUserCount from Win32_PerfRawData_MSExchangeIS_MSExchangeIS"/>
+			<!-- 数据库连接总数-->
+			<command coltype="WMI" comid="exchange_ConnCount" command="root\cimv2::select connectioncount from Win32_PerfRawData_MSExchangeIS_MSExchangeIS"/>
+			<!-- 数据库用户总数-->
+			<command coltype="WMI" comid="exchange_UserCount" command="root\cimv2::select UserCount from Win32_PerfRawData_MSExchangeIS_MSExchangeIS"/>
+			<!-- 数据库当前活动用户连接数-->
+			<command coltype="WMI" comid="exchange_ActiveUserConnCount" command="root\cimv2::select ActiveClientLogons from Win32_PerfRawData_MSExchangeIS_MSExchangeISMailbox where name='_Total'"/>
+			<!-- 每秒打开消息数-->
+			<command coltype="WMI" comid="exchange_MessageOpenedPerSecond" command="root\cimv2::select messageopenspersec from Win32_PerfRawData_MSExchangeIS_MSExchangeISMailbox where name='_Total'"/>
+			<!-- 每秒打开文件夹数-->
+			<command coltype="WMI" comid="exchange_FolderOpenedPerSecond" command="root\cimv2::select FolderopensPersec from Win32_PerfRawData_MSExchangeIS_MSExchangeISMailbox where name='_Total'"/>
+			<!-- 收信队列大小-->
+			<command coltype="WMI" comid="exchange_ReceiveQueueLength" command="root\cimv2::select ReceiveQueueSize from Win32_PerfRawData_MSExchangeIS_MSExchangeISMailbox where name='_Total'"/>
+			<!-- 发信队列大小-->
+			<command coltype="WMI" comid="exchange_SendQueueLength" command="root\cimv2::select SendQueueSize from Win32_PerfRawData_MSExchangeIS_MSExchangeISMailbox where name='_Total'"/>
+			<!-- SMTP每秒发送的消息数-->
+			<command coltype="WMI" comid="exchange_SMTPSentMessagePerSecond" command="root\cimv2::select MessagesSentPersec from Win32_PerfRawData_SMTPSVC_SMTPServer where name='_Total'"/>
+			<!-- SMTP每秒接收的消息数-->
+			<command coltype="WMI" comid="exchange_SMTPReceivedMessagePerSecond" command="root\cimv2::select MessagesReceivedPersec from Win32_PerfRawData_SMTPSVC_SMTPServer where name='_Total'"/>
+			<!-- 拒绝的外部连接数-->
+			<command coltype="WMI" comid="exchange_OutConnRefusedCount" command="root\cimv2::select OutboundConnectionsRefused from Win32_PerfRawData_SMTPSVC_SMTPServer where name='_Total'"/>
+			<!-- 当前外部连接数-->
+			<command coltype="WMI" comid="exchange_OutConnCount" command="root\cimv2::select OutboundConnectionsCurrent from Win32_PerfRawData_SMTPSVC_SMTPServer  where name='_Total'"/>
+			<!-- SMTP 每秒接收的字节数	-->
+			<command coltype="WMI" comid="exchange_SMTPBytesReceivedPerSecond" command="root\cimv2::select BytesReceivedPersec from Win32_PerfRawData_SMTPSVC_SMTPServer where name='_Total'"/>
+			<!-- SMTP 每秒发送的字节数	-->
+			<command coltype="WMI" comid="exchange_SMTPBytesSentPerSecond" command="root\cimv2::select BytesSentPersec from Win32_PerfRawData_SMTPSVC_SMTPServer where name='_Total'"/>
+			<!-- 每秒接收的消息字节数	-->
+			<command coltype="WMI" comid="exchange_MessageBytesReceivedPerSecond" command="root\cimv2::select MessageBytesReceivedPersec from Win32_PerfRawData_SMTPSVC_SMTPServer where name='_Total'"/>
+			<!-- 每秒发送的消息字节数	-->
+			<command coltype="WMI" comid="exchange_MessageBytesSentPerSecond" command="root\cimv2::select MessageBytesSentPersec from Win32_PerfRawData_SMTPSVC_SMTPServer where name='_Total'"/>
+			<!-- 每秒总字节数-->
+			<command coltype="WMI" comid="exchange_TotalBytesPerSecond" command="root\cimv2::select BytesTotalPersec from Win32_PerfRawData_SMTPSVC_SMTPServer where name='_Total'"/>
+			
+			<!-- 每秒总消息字节数	-->
+			<command coltype="WMI" comid="exchange_TotalMessageBytesPerSecond" command="root\cimv2::select MessageBytesTotalPersec from Win32_PerfRawData_SMTPSVC_SMTPServer where name='_Total'"/>
+			
+			<!-- RPC平均响应时间	-->
+			<command coltype="WMI" comid="exchange_RPCAverageLatency" command="root\cimv2::select RPCAveragedLatency from Win32_PerfRawData_MSExchangeIS_MSExchangeIS"/>
+			<!-- 等待传送的邮件数	 尚有问题-->
+			<command coltype="WMI" comid="exchange_BoxInQueueLength" command="root\cimv2::select MessageRecipientsDelivered from Win32_PerfRawData_MSExchangeIS_MSExchangeISMailbox where name='_Total'"/>
+			<!-- 输出队列大小	-->
+			<command coltype="WMI" comid="exchange_OutputQueueLength" command="root\cimv2::select outputQueueLength from Win32_PerfRawData_Tcpip_NetworkInterface"/>
+			<!-- SMTP队列长度 -->
+			<command coltype="WMI" comid="exchange_SMTPQueueLength" command="root\cimv2::select CategorizerQueueLength from Win32_PerfRawData_SMTPSVC_SMTPServer where name='_Total'"/>
+			<!-- 错误连接总数 -->
+			<command coltype="WMI" comid="exchange_TotalErrorConnCount" command="root\cimv2::select TotalConnectionErrors from Win32_PerfRawData_SMTPSVC_SMTPServer where name='_Total'"/>
+			<!-- 信息存储服务可用性	-->
+			<command coltype="WMI" comid="exchange_InfoStorAvailability" command="root\cimv2::select State FROM Win32_Service WHERE Name='MSExchangeIS'"/>
+			<!-- IIS服务可用性	-->
+			<command coltype="WMI" comid="exchange_IISAdminAvailability" command="root\cimv2::select State FROM Win32_Service WHERE Name='IISADMIN'"/>
+			<!-- 系统助理服务可用性	-->
+			<command coltype="WMI" comid="exchange_SystemAssistantAvailability" command="root\cimv2::select State FROM Win32_Service WHERE Name='MSExchangeSA'"/>
+			<!-- POP3 CPU利用率	-->
+			<command coltype="WMI" comid="exchange_POP3CPURate" command="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Process where Name = 'inetinfo'"/>
+			
+			<!-- SMTP CPU利用率	-->
+			<command coltype="WMI" comid="exchange_SMTPCPURate" command="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Process where Name = 'inetinfo'"/>
+			
+			<!-- 资源显示名称	-->
+			<command coltype="WMI" comid="exchange_ResDisplayName" command="root\cimv2::select Name from Win32_PerfRawData_MSExchangeDSAccess_MSExchangeDSAccessDomainControllers"/>
+			<!-- 实例名称	-->
+			<command coltype="WMI" comid="exchange_InstanceName" command="root\cimv2::select Name from Win32_PerfRawData_MSExchangeDSAccess_MSExchangeDSAccessDomainControllers"/>
+		</commands>
+		
+		<!-- 描述该类设备的所有指标采集,一行对应一个指标 -->
+		<resources>
+			
+			<!-- 一个resource值一个特定的kpi指标,如CPU利用率，kpiid：指标id，coltype：采集方式，value：结果计算表达式（默认为$d1） ，valuetype(Integer/Float/String)：采集值类型，unit：单位 -->
+			<!-- 连接总数 -->
+			<resource kpiid="A2ConnCount" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<!-- exeorder：执行序号数字越小，执行越前，comid：命令id，select：select函数，deal：函数 -->
+					<collect exeorder="10" comid="exchange_ConnCount" select="" merge="" deal=""/>
+				</collects>
+			
+				<!-- 定义存储和告警策略 -->
+				<!-- 
+				table:数据库表，指标采集数据保存的地方
+				field:数据库字段名，保存的字段名
+				fieldtype:数据库字段属性String、Integer、Float
+				willalert:是否告警
+				alertexp1:告警条件1
+				alertdesc1:告警描述1
+				alertexp2:告警条件2
+				alertdesc2:告警描述2
+				alertexp3:告警条件3
+				alertdesc3:告警描述3
+				alertexp4:告警条件4
+				alertdesc4:告警描述4
+				alertexp5:告警条件5
+				alertdesc5:告警描述5
+				alertcontin:连续若干次告警
+				alertype:事件类型
+				storefactor:存盘倍数（默认值）（采集周期的倍数，0表示不存）
+				circle:采集周期(默认值)
+				 -->
+				<kpipolicy table="res_a2_conncount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;10000"
+					alertdesc3="连接总数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;20000" alertdesc4="连接总数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- macAddress -->
+			<resource kpiid="A2macAddress" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="macAddress" select="" merge="join" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_macAddress" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 发信队列大小 -->
+			<resource kpiid="A2SendQueueLength" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_SendQueueLength" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_sendQueuelen" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 输出队列长度 -->
+			<resource kpiid="A2OutputQueueLength" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_OutputQueueLength" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_outqueuelen" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;3"
+					alertdesc3="输出队列长度超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;5" alertdesc4="输出队列长度超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1" />
+			</resource>
+
+			<!-- 用户总数 -->
+			<resource kpiid="A2UserCount" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_UserCount" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_usercount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;10000"
+					alertdesc3="用户总数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;20000" alertdesc4="用户总数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+
+			<!-- RPC平均响应时间 -->
+			<resource kpiid="A2RPCAverageLatency" coltype="WMI" value="" valuetype="Integer" unit="毫秒">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_RPCAverageLatency" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_rpcavgtime" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;60"
+					alertdesc3="RPC平均响应时间超过${trigervalue1}ms,当前值为${value}ms" alertexp4="${value}&gt;120" alertdesc4="RPC平均响应时间超过${trigervalue1}ms,当前值为${value}ms" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+
+			<!-- 拒绝的外部连接数 -->
+			<resource kpiid="A2OutRefusedCount" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_OutConnRefusedCount" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_outrefuse" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;10000"
+					alertdesc3="拒绝的外部连接数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;20000" alertdesc4="拒绝的外部连接数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+
+			<!-- 收信队列大小 -->
+			<resource kpiid="A2RecQueueLength" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_ReceiveQueueLength" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_recqueuelen" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+
+			<!-- 当前用户数-->
+			<resource kpiid="A2ActiveUserCount" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_ActiveUserCount" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_actusercount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;10000"
+					alertdesc3="当前用户数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;10000" alertdesc4="当前用户数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+
+			<!-- IIS Admin服务可用性 -->
+			<resource kpiid="A2Availability" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_IISAdminAvailability" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_iisavail" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.contains(&quot;Running&quot;)" alertdesc5="IIS服务不可用"
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+				<translations>
+					<translation source="Running" dest="1"/>
+					<translation source="Stopped" dest="0"/>
+				</translations>
+				
+			</resource>
+			
+			<!-- POP3 CPU利用率 -->
+			<resource kpiid="A2POP3CPURate" coltype="WMI" value="" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="exchange_POP3CPURate" select="" merge="sum" deal=""/>
+				</collects>
+				<kpipolicy table="res_a2_pop3cpurate" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;20"
+					alertdesc3="POP3 CPU利用率超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;30" alertdesc4="POP3 CPU利用率超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			<!-- SMTP每秒接收的消息数 -->
+			<resource kpiid="A2SMTPRecMessPerSec" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_SMTPReceivedMessagePerSecond" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_smtprmesps" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;10000"
+					alertdesc3="SMTP每秒接收的消息数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;20000" alertdesc4="SMTP每秒接收的消息数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+
+			<!-- 当前的外部连接数 -->
+			<resource kpiid="A2OutConnCount" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_OutConnCount" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_outconncount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;10000"
+					alertdesc3="当前的外部连接数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;20000" alertdesc4="当前的外部连接数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- 每秒发送的消息字节数 -->
+			<resource kpiid="A2MBytesSentPerSec" coltype="WMI" value="" valuetype="Integer" unit="B">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_MessageBytesSentPerSecond" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_mbsendpersec" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;10000"
+					alertdesc3="每秒发送的消息字节数超过${trigervalue1}B,当前值为${value}B" alertexp4="${value}&gt;20000" alertdesc4="每秒发送的消息字节数超过${trigervalue1}B,当前值为${value}B" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- 信息存储服务可用性 -->
+			<resource kpiid="A2InfoSAvailability" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_InfoStorAvailability" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_infostoravail" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.contains(&quot;Running&quot;)" alertdesc5="信息存储服务不可用"
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+				<translations>
+					<translation source="Running" dest="可用"/>
+					<translation source="Stopped" dest="不可用"/>
+				</translations>
+				
+			</resource>
+			
+			<!-- MS Exchange CPU利用率 -->
+			<resource kpiid="A2appCpuRate" coltype="WMI" value="" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_appcpurate" select="" merge="sum" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_cpurate" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;50"
+					alertdesc3="Exchange CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;80" alertdesc4="Exchange CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			<!--系统CPU利用率-->
+			<resource kpiid="A2cpuRate" coltype="WMI" value="" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_cpurate" select="" merge="sum" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_cpurate" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;50"
+					alertdesc3="Exchange CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;80" alertdesc4="Exchange CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- 物理磁盘当前列队长度 -->
+			<resource kpiid="A2PhyDiskQueueLe" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_PhysicalDiskQueueLength" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_diskqueuelen" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- SMTP每秒接收的字节数-->
+			<resource kpiid="A2SMTPByteRecPerSec" coltype="WMI" value="" valuetype="Integer" unit="B">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_SMTPBytesReceivedPerSecond" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_smtpbyterecps" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;10000"
+					alertdesc3="SMTP每秒接收的字节数超过${trigervalue1}B,当前值为${value}B" alertexp4="${value}&gt;20000" alertdesc4="SMTP每秒接收的字节数超过${trigervalue1}B,当前值为${value}B" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- 系统可管理内存-->
+			<resource kpiid="A2TotalMemSize" coltype="WMI" value="$d1/1024/1024" valuetype="Integer" unit="GB">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_pmemcap" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_totalmemory" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 主机操作系统-->
+			<resource kpiid="A2OperationSystem" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_os" select="([\s\S]*)" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_os" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- SMTP每秒发送的字节数-->
+			<resource kpiid="A2SMTPBySentPerSec" coltype="WMI" value="" valuetype="Integer" unit="B">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_SMTPBytesSentPerSecond" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_smtpbytesenps" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;10000"
+					alertdesc3="SMTP每秒发送的字节数超过${trigervalue1}B,当前值为${value}B" alertexp4="${value}&gt;20000" alertdesc4="SMTP每秒发送的字节数超过${trigervalue1}B,当前值为${value}B" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- 每秒日志写入-->
+			<resource kpiid="A2LogWritePerSecond" coltype="WMI" value="" valuetype="Integer" unit="次">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_LogWritesPerSecond" select="" merge="" deal="chg" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_logwriteps" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;10000"
+					alertdesc3="每秒日志写入超过${trigervalue1}次,当前值为${value}次" alertexp4="${value}&gt;20000" alertdesc4="每秒日志写入超过${trigervalue1}次,当前值为${value}次" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- 主机名-->
+			<resource kpiid="A2hostName" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_hostname" select="([\s\S]*)" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_hostname" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 当前活动用户连接数-->
+			<resource kpiid="A2ActUserConnCount" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_ActiveUserConnCount" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_actuserconn" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;10000"
+					alertdesc3="当前活动用户连接数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;20000" alertdesc4="当前活动用户连接数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- 等待传送的邮件数-->
+			<resource kpiid="A2BoxInQueueLength" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_BoxInQueueLength" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_boxqueuelen" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;1000"
+					alertdesc3="等待传送的邮件数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;2000" alertdesc4="等待传送的邮件数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- 数据库缓存大小-->
+			<resource kpiid="A2DatabaseCacheSize" coltype="WMI" value="$d1/1024/1024" valuetype="Integer" unit="MB">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_DatabaseCacheSize" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_dbcache" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 系统助理服务可用性-->
+			<resource kpiid="A2SysAssAvail" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_SystemAssistantAvailability" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_sysassavail" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.contains(&quot;Running&quot;)" alertdesc5="系统助理服务不可用"
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+				<translations>
+					<translation source="Running" dest="可用"/>
+					<translation source="Stopped" dest="不可用"/>
+				</translations>
+				
+			</resource>
+			
+			<!-- 每秒打开消息数-->
+			<resource kpiid="A2MessageOpPerSec" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_MessageOpenedPerSecond" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_messopendps" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;10000"
+					alertdesc3="每秒打开消息数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;20000" alertdesc4="每秒打开消息数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- SMTP CPU利用率-->
+			<resource kpiid="A2SMTPCPURate" coltype="WMI" value="" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="exchange_SMTPCPURate" select="" merge="sum" deal="" />
+				</collects>
+				<kpipolicy table="res_a2_smtpcpurate" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;20"
+					alertdesc3="SMTP CPU利用率超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;30" alertdesc4="SMTP CPU利用率超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- 每秒打开文件夹数-->
+			<resource kpiid="A2FolderOpenPerSec" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_FolderOpenedPerSecond" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_folderopenps" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;10000"
+					alertdesc3="每秒打开文件夹数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;20000" alertdesc4="每秒打开文件夹数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- 每秒接收的消息字节数-->
+			<resource kpiid="A2MessByteRecPerSec" coltype="WMI" value="" valuetype="Integer" unit="B">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_MessageBytesReceivedPerSecond" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_mesbyterecps" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;10000"
+					alertdesc3="每秒接收的消息字节数超过${trigervalue1}B,当前值为${value}B" alertexp4="${value}&gt;20000" alertdesc4="每秒接收的消息字节数超过${trigervalue1}B,当前值为${value}B" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- 当前活动连接数-->
+			<resource kpiid="A2ActiveConnCount" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_ActiveConnCount" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_activeconn" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;10000"
+					alertdesc3="当前活动连接数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;20000" alertdesc4="当前活动连接数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- SMTP每秒发送的消息数-->
+			<resource kpiid="A2SMTPSMessPerSec" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_SMTPSentMessagePerSecond" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_smtpsendmesps" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;10000"
+					alertdesc3="SMTP每秒发送的消息数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;20000" alertdesc4="SMTP每秒发送的消息数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- 资源显示名称
+			<resource kpiid="A2ResDisplayName" coltype="WMI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="exchange_ResDisplayName" select="([\s\S]*)" merge="" deal="" />
+				</collects>
+				
+				<kpipolicy table="res_a2_displayname" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			-->
+			<!-- 系统内存利用率-->
+			<resource kpiid="A2memRate" coltype="WMI" value="$d1/$d2/1024*100" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_memrate" select="" merge="sum" deal="" />
+					<collect exeorder="20" comid="chk_pmemcap" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_memrate" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;75"
+					alertdesc3="Exchange内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;90" alertdesc4="Exchange内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			<!--Exchange内存利用率-->
+			<resource kpiid="A2appMemRate" coltype="WMI" value="$d1/$d2/1024*100" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_appmemrate" select="" merge="sum" deal="" />
+					<collect exeorder="20" comid="chk_pmemcap" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_memrate" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;75"
+					alertdesc3="Exchange内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;90" alertdesc4="Exchange内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- 每秒日志延迟-->
+			<resource kpiid="A2LogDelayPerSecond" coltype="WMI" value="" valuetype="Integer" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_LogDelayPerSecond" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_logdelayps" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;10000"
+					alertdesc3="每秒日志延迟超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;20000" alertdesc4="每秒日志延迟超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- 每秒总的字节数-->
+			<resource kpiid="A2TotalBytesPerSec" coltype="WMI" value="" valuetype="Integer" unit="B">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_TotalBytesPerSecond" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_totalbytesps" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;10000"
+					alertdesc3="每秒总字节数超过${trigervalue1}B,当前值为${value}B" alertexp4="${value}&gt;20000" alertdesc4="每秒总字节数超过${trigervalue1}B,当前值为${value}B" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- 每秒总的消息字节数-->
+			<resource kpiid="A2TotalMessBPerSec" coltype="WMI" value="" valuetype="Integer" unit="B">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_TotalMessageBytesPerSecond" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_totlmesbyteps" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;10000"
+					alertdesc3="每秒总消息字节数超过${trigervalue1}B,当前值为${value}B" alertexp4="${value}&gt;20000" alertdesc4="每秒总消息字节数超过${trigervalue1}B,当前值为${value}B" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- SMTP队列长度-->
+			<resource kpiid="A2SMTPQueueLength" coltype="WMI" value="" valuetype="Integer" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_SMTPQueueLength" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_smtpqueuelen" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;10000"
+					alertdesc3="SMTP队列长度超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;20000" alertdesc4="SMTP队列长度超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- 错误连接总数-->
+			<resource kpiid="A2TotalErrConnCount" coltype="WMI" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_TotalErrorConnCount" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_totalerrconn" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;10000"
+					alertdesc3="错误连接总数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;20000" alertdesc4="错误连接总数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			<!-- 实例名称 -->
+			<resource kpiid="A2instanceName" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="exchange_InstanceName" select="([\s\S]*)" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_instance" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<!-- 主机说明-->
+			<resource kpiid="A2SystemInfo" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="systemInfo" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_sysInfo_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<!--操作系统版本-->
+			<resource kpiid="A2OsVersion" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="osVersion" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_osVersion_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+		</resources>
+	</devicetypeinfo>
+</root>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.lock.dao.LockDAO">
+	 
+  <insert id="insertLock" parameterType="com.mainsteam.stm.lock.dao.LockDO">
+		insert into STM_LOCK(NAME,NODE,GREED) values (#{name},#{node},#{greed})
+	</insert>  
+	 
+  <insert id="insertLockRequest" parameterType="com.mainsteam.stm.lock.dao.LockRequestDO">
+		insert into STM_LOCK_REQUEST(NAME,NODE,GREED) values (#{name},#{node},#{greed})
+	</insert>
+	 
+  <delete id="removeLock" parameterType="string">
+		delete from STM_LOCK where NAME = '${value}'
+	</delete>
+	 
+  <delete id="removeLockRequest" parameterType="com.mainsteam.stm.lock.dao.LockRequestDO">
+		delete from STM_LOCK_REQUEST where NAME = #{name} and NODE = #{node}
+	</delete>
+	
+	 
+  <update id="updateLockHeartbeatTime" databaseId="mysql" parameterType="com.mainsteam.stm.lock.dao.LockRequestDO">
+		update STM_LOCK set HEARBEAT_TIME = current_timestamp() where NAME = #{name}
+	</update>
+	 
+  <update id="updateLockRequestHeartbeatTime" databaseId="mysql" parameterType="com.mainsteam.stm.lock.dao.LockRequestDO">
+		update STM_LOCK_REQUEST set HEARBEAT_TIME = current_timestamp() where  NAME = '#{name}' and NODE = '#{node}'
+	</update>
+	 
+  <update id="updateLockHeartbeatTime" databaseId="oracle" parameterType="com.mainsteam.stm.lock.dao.LockRequestDO">
+		update STM_LOCK set HEARBEAT_TIME = current_timestamp where NAME = '${name}'
+	</update>
+	 
+  <update id="updateLockHeartbeatTime" databaseId="dm" parameterType="com.mainsteam.stm.lock.dao.LockRequestDO">
+		update STM_LOCK set HEARBEAT_TIME = current_timestamp where NAME = '${name}'
+	</update>
+
+	<update id="updateLockHeartbeatTime" databaseId="kingbase" parameterType="com.mainsteam.stm.lock.dao.LockRequestDO">
+		update STM_LOCK set HEARBEAT_TIME = current_timestamp where NAME = '${name}'
+	</update>
+
+  <update id="updateLockRequestHeartbeatTime" databaseId="oracle" parameterType="com.mainsteam.stm.lock.dao.LockRequestDO">
+		update STM_LOCK_REQUEST set HEARBEAT_TIME = current_timestamp where NAME = '${name}' and NODE = '${node}'
+	</update>
+	 
+  <update id="updateLockRequestHeartbeatTime" databaseId="dm" parameterType="com.mainsteam.stm.lock.dao.LockRequestDO">
+		update STM_LOCK_REQUEST set HEARBEAT_TIME = current_timestamp where NAME = '${name}' and NODE = '${node}'
+	</update>
+
+	<update id="updateLockRequestHeartbeatTime" databaseId="kingbase" parameterType="com.mainsteam.stm.lock.dao.LockRequestDO">
+		update STM_LOCK_REQUEST set HEARBEAT_TIME = current_timestamp where NAME = '${name}' and NODE = '${node}'
+	</update>
+
+  <update id="updateLockHeartbeatTime" databaseId="oscar" parameterType="com.mainsteam.stm.lock.dao.LockRequestDO">
+		update STM_LOCK set HEARBEAT_TIME = curtimestamp() where NAME = #{name}
+	</update>
+	 
+  <update id="updateLockRequestHeartbeatTime" databaseId="oscar" parameterType="com.mainsteam.stm.lock.dao.LockRequestDO">
+		update STM_LOCK_REQUEST set HEARBEAT_TIME = curtimestamp() where  NAME = '#{name}' and NODE = '#{node}'
+	</update>
+	 
+  <select id="selectLockRequests" resultType="com.mainsteam.stm.lock.dao.LockRequestDO">
+		select NAME,NODE,REQUEST_TIME,HEARBEAT_TIME,GREED from STM_LOCK_REQUEST
+	</select>
+	 
+  <select id="selectLocks" resultType="com.mainsteam.stm.lock.dao.LockRequestDO">
+		select NAME,NODE,REQUEST_TIME,HEARBEAT_TIME as currentTime,GREED from STM_LOCK
+	</select>
+	 
+  <select id="selectLock" resultType="com.mainsteam.stm.lock.dao.LockRequestDO">
+		select NAME,NODE,REQUEST_TIME,HEARBEAT_TIME,GREED from STM_LOCK where NAME = #{name}
+	</select>
+	 
+  <select id="deleteTimeoutLockRequest" parameterType="int" resultType="com.mainsteam.stm.lock.dao.LockRequestDO" databaseId="oracle">
+		select NAME,NODE,REQUEST_TIME,HEARBEAT_TIME,GREED from STM_LOCK_REQUEST where floor(to_number(sysdate - cast(HEARBEAT_TIME as date))*24*60*60) &gt; #{offsetTime}
+	</select>
+	 
+  <select id="deleteTimeoutLockRequest" parameterType="int" resultType="com.mainsteam.stm.lock.dao.LockRequestDO" databaseId="dm">
+		select NAME,NODE,REQUEST_TIME,HEARBEAT_TIME,GREED from STM_LOCK_REQUEST where floor(to_number(sysdate - cast(HEARBEAT_TIME as date))*24*60*60) &gt; #{offsetTime}
+	</select>
+	<select id="deleteTimeoutLockRequest" parameterType="int" resultType="com.mainsteam.stm.lock.dao.LockRequestDO" databaseId="kingbase">
+		select NAME,NODE,REQUEST_TIME,HEARBEAT_TIME,GREED from STM_LOCK_REQUEST where floor(to_number(sysdate - cast(HEARBEAT_TIME as date))*24*60*60) &gt; #{offsetTime}
+	</select>
+  <select id="deleteTimeoutLock" parameterType="int" resultType="com.mainsteam.stm.lock.dao.LockRequestDO" databaseId="oracle">
+		select NAME,NODE,REQUEST_TIME,HEARBEAT_TIME as currentTime,GREED from STM_LOCK where floor(to_number(sysdate - cast(HEARBEAT_TIME as date))*24*60*60) &gt; #{offsetTime}
+	</select>
+	 
+  <select id="deleteTimeoutLock" parameterType="int" resultType="com.mainsteam.stm.lock.dao.LockRequestDO" databaseId="dm">
+		select NAME,NODE,REQUEST_TIME,HEARBEAT_TIME as currentTime,GREED from STM_LOCK where floor(to_number(sysdate - cast(HEARBEAT_TIME as date))*24*60*60) &gt; #{offsetTime}
+	</select>
+	<select id="deleteTimeoutLock" parameterType="int" resultType="com.mainsteam.stm.lock.dao.LockRequestDO" databaseId="kingbase">
+		select NAME,NODE,REQUEST_TIME,HEARBEAT_TIME as currentTime,GREED from STM_LOCK where floor(to_number(sysdate - cast(HEARBEAT_TIME as date))*24*60*60) &gt; #{offsetTime}
+	</select>
+  <select id="deleteTimeoutLockRequest" parameterType="int" resultType="com.mainsteam.stm.lock.dao.LockRequestDO" databaseId="oscar">
+		select NAME,NODE,REQUEST_TIME,HEARBEAT_TIME,GREED from STM_LOCK_REQUEST where timestampdiff(1,HEARBEAT_TIME,curtimestamp()) &gt; #{offsetTime}
+	</select>
+	 
+  <select id="deleteTimeoutLock" parameterType="int" resultType="com.mainsteam.stm.lock.dao.LockRequestDO" databaseId="oscar">
+		select NAME,NODE,REQUEST_TIME,HEARBEAT_TIME as currentTime,GREED from STM_LOCK where timestampdiff(1,HEARBEAT_TIME,curtimestamp()) &gt; #{offsetTime}
+	</select>
+	 
+  <select id="deleteTimeoutLockRequest" parameterType="int" resultType="com.mainsteam.stm.lock.dao.LockRequestDO" databaseId="mysql">
+		select NAME,NODE,REQUEST_TIME,HEARBEAT_TIME,GREED from STM_LOCK_REQUEST where UNIX_TIMESTAMP(CURRENT_TIMESTAMP())-UNIX_TIMESTAMP(HEARBEAT_TIME) &gt; #{offsetTime}
+	</select>
+	 
+  <select id="deleteTimeoutLock" parameterType="int" resultType="com.mainsteam.stm.lock.dao.LockRequestDO" databaseId="mysql">
+		select NAME,NODE,REQUEST_TIME,HEARBEAT_TIME as currentTime,GREED from STM_LOCK where UNIX_TIMESTAMP(CURRENT_TIMESTAMP())-UNIX_TIMESTAMP(HEARBEAT_TIME) &gt; #{offsetTime}
+	</select>
+</mapper>

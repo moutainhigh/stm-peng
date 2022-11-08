@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivysettings>
+	<settings defaultResolver="${nexus}"/>
+	<credentials host="81.68.224.200"
+				 realm="Sonatype Nexus Repository Manager"
+				 username="deployment" passwd="deployment123"/>
+	<property name="nexus-public"
+			  value="http://81.68.224.200:8081/nexus/content/groups/public"/>
+	<property name="nexus-releases"
+			  value="http://81.68.224.200:8081/nexus/content/repositories/releases"/>
+	<property name="nexus-snapshots"
+			  value="http://81.68.224.200:8081/nexus/content/repositories/snapshots"/>
+
+	<settings defaultResolver="defaultChain" defaultConflictManager="latest-revision"/>
+	<caches defaultCacheDir="${ivy.cache}" useOrigin="true"/>
+	<resolvers>
+		<filesystem name="local" checkmodified="true">
+			<artifact pattern="${ivy.local.default.root}/[module]/[artifact]-[revision](-[classifier]).jar"/>
+			<ivy pattern="${ivy.local.default.root}/[module]/[module]-dependencies.xml"/>
+		</filesystem>
+		<chain name="defaultChain" dual="true">
+			<filesystem name="local_res" checkmodified="true" >
+				<artifact pattern="${ivy.local.default.root}/[module]/[artifact]-[revision](-[classifier]).jar"/>
+			</filesystem>
+			<ibiblio name="nexus" checkmodified="true" m2compatible="false" root="${nexus-public}"
+					 pattern="[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]"/>
+			<ibiblio name="nexus-releases"  checkmodified="true" m2compatible="false" root="${nexus-releases}"
+					 pattern="[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]"/>
+			<ibiblio name="nexus_thirdparty"  checkmodified="true" m2compatible="false" root="${nexus-public}"
+					 pattern="[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]"/>
+		</chain>
+	</resolvers>
+</ivysettings>

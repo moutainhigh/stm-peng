@@ -1,0 +1,794 @@
+<div id="oc_vm_index" class="easyui-layout oc_vm_index" style="width:100%;height:100%;">
+    <div data-options="region:'west',title:'虚拟化资源'" style="width: 200px;">
+    	<div id="vmTreeMenu"></div>
+    	<div class="vmTopologyContent"></div>
+    	<div class="vmReportsContent"></div>
+    	<div class="vm_strategy"></div>
+    </div>
+    <div data-options="region:'center'" style="overflow: hidden;"></div>
+</div>
+<script>
+$(function() {
+	oc.ns('oc.vm.indexpage');
+	var global = {};
+	var user = oc.index.getUser();
+    var id = oc.util.generateId(), indexDiv = $('#oc_vm_index').attr('id', id);
+    
+	indexDiv.layout({
+		fit:true
+	});
+    var highlight = $('#sidebar').find('#mainMenu').find('li.module-href.highlight').find('li.highlight:first');
+	if(highlight.hasClass('open')){
+		treeMenuTitleName = highlight.find('li.highlight:first').find('a:first').attr('rightmarkname');
+	}else{
+		treeMenuTitleName = highlight.find('a:first').attr('rightmarkname');
+	}
+	var westPanel = indexDiv.layout('panel','west');
+	var addVmReportBtnDom = '<span id="addVmReportTemplate" class="fa fa-plus locate-right openbesinesswin"></span>';
+	$(westPanel).panel('setTitle',treeMenuTitleName == '虚拟化报表' ? (treeMenuTitleName+addVmReportBtnDom) : treeMenuTitleName);
+	var menuDiv = westPanel.find('#vmTreeMenu');
+    var centerDiv = indexDiv.layout('panel', 'center');
+
+    function _click(href, data, e) {
+        centerDiv.children().remove();
+        $('<div style="width:100%;height:100%;"></div>').appendTo(centerDiv).panel('RenderP', {
+            title: data.hideTitle ? undefined : data.name,
+            href: href
+        });
+    }
+    switch(treeMenuTitleName){
+	    case '虚拟化资源':
+	    	vmResource();
+	    	break;
+	    case '基础架构拓扑':
+	    	vmTopo();
+	    	break;
+	    case 'TOPN':
+	    	
+	    	break;
+	    case '虚拟化报表':
+	    	vmReport();
+	    	break;
+	    case '自动发现':
+	    	
+	    	break;
+	    case '发现资源列表':
+	    	
+	    	break;
+	    case '策略':
+	    	vmStrategy();
+	    	break;
+    }
+    
+    function vmResource(){
+//    	$('#vmTreeMenu').remove();
+    	$('.vmTopologyContent').remove();
+    	$('.vmReportsContent').remove();
+    	$('.vm_strategy').remove();
+    	
+    	//菜单树json
+        var treeJson = [];
+        var resourceListUrl = oc.resource.getUrl('resource/module/vm/resource/resourcelist.html');
+        var arr_vmResourcesPages_VMware = {
+        		id:'VMware',
+        		text:'VMware',
+        		state:'closed',
+        		children:[{
+        			id:'VirtualCluster',
+        			text:'Cluster<span class="s-digit" value="VirtualCluster">0</span>',
+        			state:'open',
+        			href:resourceListUrl
+        		},{
+        			id:'VirtualHost',
+        			text:'Esxi主机<span class="s-digit" value="VirtualHost">0</span>',
+        			state:'open',
+        			href:resourceListUrl
+        		},{
+        			id:'ResourcePool',
+        			text:'资源池<span class="s-digit" value="ResourcePool">0</span>',
+        			state:'open',
+        			href:resourceListUrl
+        		},{
+        			id:'VirtualStorage',
+        			text:'数据存储<span class="s-digit" value="VirtualStorage">0</span>',
+        			state:'open',
+        			href:resourceListUrl
+        		},{
+        			id:'VirtualVM',
+        			text:'虚拟主机<span class="s-digit" value="VirtualVM">0</span>',
+        			state:'open',
+        			href:resourceListUrl
+        		}]
+        };
+        var arr_vmResourcesPages_Xen = {
+        		id:'Xen',
+        		text:'Xen',
+        		state:'closed',
+        		children:[{
+        			id:'XenHosts',
+        			text:'Xen服务器<span class="s-digit" value="XenHosts">0</span>',
+        			state:'open',
+        			href:resourceListUrl
+        		},{
+        			id:'XenVMs',
+        			text:'XenVM<span class="s-digit" value="XenVMs">0</span>',
+        			state:'open',
+        			href:resourceListUrl
+        		},{
+        			id:'XenSRs',
+        			text:'Xen存储库<span class="s-digit" value="XenSRs">0</span>',
+        			state:'open',
+        			href:resourceListUrl
+        		}]
+        };
+        var arr_vmResourcesPages_Kvm = {
+        		id:'Kvm',
+        		text:'Kvm',
+        		state:'closed',
+        		children:[{
+        			id:'KvmHosts',
+        			text:'kvm服务器<span class="s-digit" value="KvmHosts">0</span>',
+        			state:'open',
+        			href:resourceListUrl
+        		},{
+        			id:'KvmVMs',
+        			text:'kvmVM<span class="s-digit" value="KvmVMs">0</span>',
+        			state:'open',
+        			href:resourceListUrl
+        		},{
+        			id:'KvmDataStores',
+        			text:'kvm存储库<span class="s-digit" value="KvmDataStores">0</span>',
+        			state:'open',
+        			href:resourceListUrl
+        		}]
+        };
+        var arr_vmResourcesPages_Fusion = {
+        		id:'Fusion',
+        		text:'FusionCompute',
+        		state:'closed',
+        		children:[{
+        			id:'FusionComputeClusters',
+        			text:'FC集群<span class="s-digit" value="FusionComputeClusters">0</span>',
+        			state:'open',
+        			href:resourceListUrl
+        		},{
+        			id:'FusionComputeHosts',
+        			text:'FC主机<span class="s-digit" value="FusionComputeHosts">0</span>',
+        			state:'open',
+        			href:resourceListUrl
+        		},{
+        			id:'FusionComputeVMs',
+        			text:'FC虚拟机<span class="s-digit" value="FusionComputeVMs">0</span>',
+        			state:'open',
+        			href:resourceListUrl
+        		},{
+        			id:'FusionComputeDataStores',
+        			text:'FC存储<span class="s-digit" value="FusionComputeDataStores">0</span>',
+        			state:'open',
+        			href:resourceListUrl
+        		}]
+        };
+        var arr_vmResourcesPages_DTCenter = {
+        		id:'DTCenter',
+        		text:'阿里云平台',
+        		state:'closed',
+        		children:[{
+        			id:'DTCenterECSs',
+        			text:'DTCenter虚拟机<span class="s-digit" value="DTCenterECSs">0</span>',
+        			state:'open',
+        			href:resourceListUrl
+        		}]
+        };
+        var arr_vmResourcesPages_Kylin = {
+        		id:'Kylin',
+        		text:'Kylin',
+        		state:'closed',
+        		children:[{
+        			id:'KyLinVms',
+        			text:'银河麒麟虚拟机<span class="s-digit" value="KyLinVms">0</span>',
+        			state:'open',
+        			href:resourceListUrl
+        		}]
+        };
+        treeJson.push(arr_vmResourcesPages_VMware);
+        treeJson.push(arr_vmResourcesPages_Xen);
+        treeJson.push(arr_vmResourcesPages_Kvm);
+        treeJson.push(arr_vmResourcesPages_Fusion);
+        treeJson.push(arr_vmResourcesPages_DTCenter);
+        treeJson.push(arr_vmResourcesPages_Kylin);
+        var vmMenuTree = $('#vmTreeMenu').tree({
+        	fit: true,
+    		animate: true,
+    		lines: true,
+    		loader: function(param,success,error){
+    			if(!param.id){
+    				success(treeJson);
+    			}
+    		},
+    		onLoadSuccess: function(node,data){
+    			var firstNode = $('#vmTreeMenu').tree('find',data[0].id);
+    			$(firstNode.target).click();
+    		},
+    		onClick: function(node){
+    			if(node.children){
+    				$('#vmTreeMenu').tree('expand',node.target);
+    				var clickNode = $('#vmTreeMenu').tree('find',node.children[0].id);
+    				$(clickNode.target).click();
+    			}else{
+    				openResourceList(node.href, 'vmModule', node.id);
+    			}
+    		}
+        });
+    }
+    
+    function openResourceList(href, module, vmType){
+    	centerDiv.children().remove();
+    	centerDiv.panel({
+			href : href,
+			onLoad : function(){
+				oc.resource.loadScript('resource/module/vm/resource/js/resourcelist.js',function(){
+					oc.vm.resource.resourcelist.open({module:module,vmType:vmType,accordion:indexDiv.find('#vmTreeMenu')});
+				});
+			}
+		});
+    }
+    
+    //虚拟化配置-策略
+    function vmStrategy(){
+    	$('#vmTreeMenu').remove();
+    	$('.vmTopologyContent').remove();
+    	$('.vmReportsContent').remove();
+    	
+    	var arr_vm_strategy = [{
+        	id: 'default',
+        	text: '系统默认',
+        	href: oc.resource.getUrl('resource/module/vm/strategy/system_default.html')
+        },{
+        	id: 'custom',
+        	text: '用户自定义',
+        	href: oc.resource.getUrl('resource/module/vm/strategy/custom_strategy.html')
+        }]
+        
+        var vmStrategyTree = $('.vm_strategy').tree({
+        	fit: true,
+    		animate: true,
+    		lines: true,
+    		loader: function(param,success,error){
+    			if(!param.id){
+    				success(arr_vm_strategy);
+    			}
+    		},
+    		onLoadSuccess: function(node,data){
+    			var firstNode = $('.vm_strategy').tree('find',data[0].id);
+    			$(firstNode.target).click();
+    		},
+    		onClick: function(node){
+    			_click(node.href, {name:node.text});
+    		}
+        });
+    }
+    
+    // 虚拟化拓扑
+    function openVmTopology(data){
+    	centerDiv.children().remove();
+    	$('<div style="width:100%;height:100%;"></div>').appendTo(centerDiv).panel('RenderP',{
+			href : data.href,
+			title: data.title,
+			onLoad : function(){
+				oc.resource.loadScript('resource/module/vm/topology/js/vm_topology.js?t='+new Date(),function(){
+					oc.module.vm.topology.graph(data);
+				});
+			}
+		});
+    }
+    
+    //基础架构拓扑
+    function vmTopo(){
+    	$('#vmTreeMenu').remove();
+    	$('.vmReportsContent').remove();
+    	$('.vm_strategy').remove();
+    	
+    	oc.util.ajax({
+	    	url:oc.resource.getUrl('portal/vm/topologyVm/getLeftNavigateTree.htm'),
+	    	timeout:null,
+			startProgress:null,
+			stopProgress:null,
+	    	success:function(d){
+				var arr = [];
+	    		if(d.data && d.code ==200){
+				    var vmTopologyContent = indexDiv.find('.vmTopologyContent:first');
+	    			for(var i=0;i<d.data.length;i++){
+	    				if(d.data[i].vmtype == 'VCenter'){
+	    					var node = {
+	    						id: d.data[i].uuid,
+	    						text: d.data[i].vmname
+	    					};
+							var topologyPages = [];
+					    	for(var k=0;k<d.data.length;k++){
+					    		if((d.data[k].puuid==d.data[i].uuid || d.data[k].vcenteruuid==d.data[i].uuid) && d.data[k].vmtype!='VCenter'){
+					    			topologyPages.push({
+					    				id: d.data[k].uuid,
+					    				text: d.data[k].vmname.length>8 ? (d.data[k].vmname.substring(0,8)+"...") : d.data[k].vmname,
+					    				state: 'open',
+					    				attributes: {
+					    					name: d.data[k].vmname,
+					    					title: d.data[k].vmfullname,
+					    					datacenteruuid: d.data[k].uuid,
+					    					href: oc.resource.getUrl('resource/module/vm/topology/topology.html')
+					    				}
+							        });
+					    		}
+					    	}
+					    	if(topologyPages.length > 0){
+					    		node.state = "closed";
+					    		node.children = topologyPages;
+					    	}
+					    	arr.push(node);
+	    				}
+	    			}
+	    		}
+	    		
+	    		var topoMenuTree = $('.vmTopologyContent').tree({
+	    			fit: true,
+	    			animate: true,
+	    			lines: true,
+	    			loader: function(param,success,error){
+	    				if(!param.id){
+	    					success(arr);
+	    				}
+	    			},
+	    			onLoadSuccess: function(node,data){
+	    				if(data.length > 0){
+		    				var firstNode = $('.vmTopologyContent').tree('find',data[0].id);
+		    				$(firstNode.target).click();
+	    				}else{
+	    					var tempdata = {
+	    							datacenteruuid:"---",
+									href:oc.resource.getUrl('resource/module/vm/topology/topology.html'),
+									name:"基础架构拓扑",
+									title:"基础架构拓扑"	
+	    					};
+	    					openVmTopology(tempdata);
+	    				}
+	    			},
+	    			onClick: function(node){
+	    				if(node.children){
+	    					$('.vmTopologyContent').tree('expand',node.target);
+	    					var clickNode = $('.vmTopologyContent').tree('find',node.children[0].id);
+	    					$(clickNode.target).click();
+	    				}else{
+	    					openVmTopology(node.attributes);
+	    				}
+	    			}
+	    		});
+	    	}
+	    });
+    }
+    
+    //虚拟化报表-资源统计
+    function _clickResourcesCountReport(href, data, e){
+    	centerDiv.html('');
+        $('<div style="width:100%;height:100%;"></div>').appendTo(centerDiv).panel('RenderP', {
+            title: data.hideTitle ? undefined : data.name,
+            href: href,
+            onLoad:function(){
+				oc.resource.loadScript('resource/module/vm/report/js/vm_resourceCount.js',function(){
+					oc.vm.resourcecount.open();
+				});
+			}
+        });
+    }
+    
+    //虚拟化报表-性能报表
+ 	function _clickPerformanceReport(href, data){
+ 		centerDiv.html('');
+        $('<div style="width:100%;height:100%;"></div>').appendTo(centerDiv).panel('RenderP', {
+            title: data.hideTitle ? undefined : data.name,
+            href: href,
+            onLoad:function(){
+				oc.resource.loadScript('resource/module/vm/report/js/report_main_center_download.js',function(){
+					oc.vm.main.center.download.open(data.dataOption);
+				});
+			}
+        });
+    }
+    
+ 	function _editReportSuccess(href, data){
+ 		centerDiv.html('');
+        $('<div style="width:100%;height:100%;"></div>').appendTo(centerDiv).panel('RenderP', {
+            title: data.hideTitle ? undefined : data.name,
+            href: href,
+            onLoad:function(){
+				oc.vm.main.center.download.open(data.dataOption);
+			}
+        });
+    }
+    
+    function vmReport(){
+    	$('#vmTreeMenu').remove();
+    	$('.vmTopologyContent').remove();
+    	$('.vm_strategy').remove();
+    	
+    	//添加报表
+       	indexDiv.find('#addVmReportTemplate').on('click',function(){
+    		oc.resource.loadScript('resource/module/vm/report/js/vm_report_template_detail_pickgrid.js',function(){
+    			oc.module.vm.report.template.detail.pickgrid.open();
+    		});
+    	});
+    	
+        var arr_report_resourceCount = {
+        		id: 'resourceCount',
+        		text: '资源统计',
+        		state: 'closed',
+        		href: oc.resource.getUrl('resource/module/vm/report/vm_resourceCount.html'),
+        		name: '虚拟资源统计报表',
+        		children: [{
+        			id: -1,
+        			text: '虚拟资源统计',
+        			href: oc.resource.getUrl('resource/module/vm/report/vm_resourceCount.html'),
+        			name: '虚拟资源统计'
+        		}]
+        },arr_report_performanceReport = {
+        		id: 'performanceReport',
+        		text: '性能报表',
+        		name: '性能报表',
+        		state: 'open',
+        		href: oc.resource.getUrl('resource/module/report-management/report_main_center_detail.html'),
+        		isParent: true,
+        		type: 8
+        },arr_report_alarmCount = {
+        		id: 'alarmCount',
+        		text: '告警统计',
+        		name: '告警统计',
+        		state: 'open',
+        		href: oc.resource.getUrl('resource/module/report-management/report_main_center_detail.html'),
+        		isParent: true,
+        		type: 9
+        };
+        
+        var arr = [];
+    	var performanceReportContent = [];
+    	var alarmCountContent = [];
+    	
+    	oc.util.ajax({
+    		url:oc.resource.getUrl('portal/vm/vmReport/getAllVmReportForMenu.htm'),
+    		successMsg:null,
+    		success:function(data){
+    			var contentData = data.data;
+    			
+    			if(contentData){
+    				for(var i=0;i<contentData.length;i++){
+    					var contentDataTemp = contentData[i];
+    					if(contentDataTemp && contentDataTemp.reportTemplateType && contentDataTemp.reportTemplateId){
+    						var vmReportTemplateId = contentDataTemp.reportTemplateId;
+    						var vmReportTemplateType = contentDataTemp.reportTemplateType;
+    						var vmReportName = (null==contentDataTemp.reportTemplateName?"":contentDataTemp.reportTemplateName);
+    						
+    						switch (vmReportTemplateType) {
+	    						case 8:
+	    							performanceReportContent.push({
+	    								id: vmReportTemplateId,
+	    								text: vmReportName,
+	    								name: vmReportName,
+	    								href: oc.resource.getUrl('resource/module/vm/report/report_main_center_download.html'),
+	    								attributes: {
+	    										reportTemplateId : vmReportTemplateId,
+	    										reportTemplateName : vmReportName,
+	    										reportTemplateType : vmReportTemplateType
+	    								}
+	    							});
+	    							break;
+	    						case 9:
+	    							alarmCountContent.push({
+	    								id: vmReportTemplateId,
+	    								text: vmReportName,
+	    								name: vmReportName,
+	    								href: oc.resource.getUrl('resource/module/vm/report/report_main_center_download.html'),
+	    								attributes: {
+	    									reportTemplateId : vmReportTemplateId,
+	    									reportTemplateName : vmReportName,
+	    									reportTemplateType : vmReportTemplateType
+	    								}
+	    							});
+	    							break;
+	    					}
+    					}
+    				}
+    				
+    				if(performanceReportContent.length > 0){
+    					arr_report_performanceReport.state = 'closed';
+    					arr_report_performanceReport.children = performanceReportContent;
+    				}
+    					
+    				if(alarmCountContent.length > 0){
+    					arr_report_alarmCount.state = 'closed';
+	    				arr_report_alarmCount.children = alarmCountContent;
+    				}
+    				
+    				arr.push(arr_report_resourceCount);
+    				arr.push(arr_report_performanceReport);
+    				arr.push(arr_report_alarmCount);
+    			}
+    			
+    			var reportMenuTree = $('.vmReportsContent').tree({
+        			fit: true,
+        			animate: true,
+        			lines: true,
+        			loader: function(param,success,error){
+        				if(!param.id){
+        					success(arr);
+        				}
+        			},
+        			onLoadSuccess: function(node,data){
+        				var firstNode = $('.vmReportsContent').tree('find',data[0].id);
+        				$(firstNode.target).click();
+        			},
+        			onClick: function(node){
+        				if(node.id=='resourceCount' || node.id==-1){
+        					_clickResourcesCountReport(node.href, {name:node.name});
+        				}else if(node.isParent){
+        					reportMainMenuClick(node.href,{name:node.name, type:node.type});
+        				}else{
+        					_clickPerformanceReport(node.href, {name:node.name, dataOption:node.attributes});
+        				}
+        			}
+        		});
+    		}
+    	});
+    }
+	
+	//点击虚拟化报表,资源统计显示，统计情况
+	function reportMainMenuClick(href,data){
+		centerDiv.html('');
+		$('<div style="width:100%;height:100%;"></div>').appendTo(centerDiv).panel('RenderP',{
+		title:data.name,
+		href:href,
+		onLoad:function(){
+			oc.resource.loadScript('resource/module/report-management/js/report_main_center_detail.js',function(){
+					oc.report.main.center.detail.openWithTemplateType(data);
+				});
+			}
+		});
+	}
+	
+	
+	//-- 单位转换方法开始 --
+	function unitTransform(value,unit){
+		var str;
+		var valueTemp;
+		if(null==value){
+			return '--';
+		}
+		if(isNaN(value)){
+			valueTemp = new Number(value.trim());	
+		}else{
+			valueTemp = new Number(value);
+		}
+			
+		if(isNaN(valueTemp)){
+			return value + unit;
+		}
+		switch(unit){
+		case "ms":
+		case "毫秒":
+			str = transformMillisecond(valueTemp);
+			break;
+		case "s":
+		case "秒":
+			str = transformSecond(valueTemp);
+			break;
+		case "bps":
+		case "比特/秒":
+			str = transformBps(valueTemp);
+			break;
+		case "KB/s":
+			str = transformKBs(valueTemp);
+			break;
+		case "Byte":
+			str = transformByte(valueTemp);
+			break;
+		case "KB":
+			str = transformKB(valueTemp);
+			break;
+		case "MB":
+			str = transformMb(valueTemp);
+			break;
+		default:
+			str = value + unit;
+			break;
+		}
+		return str;
+		
+	}
+	function transformMillisecond(milliseconds){
+		var millisecond = milliseconds;
+		var seconds = 0, second = 0;
+		var minutes = 0, minute = 0;
+		var hours = 0, hour = 0;
+		var day = 0;
+		if(milliseconds > 1000){
+			millisecond = milliseconds % 1000;
+			second = seconds = (milliseconds - millisecond) / 1000;
+		}
+		if(seconds > 60){
+			second = seconds % 60;
+			minute = minutes = (seconds - second) / 60;
+		}
+		if(minutes > 60){
+			minute = minutes % 60;
+			hour = hours = (minutes - minute) / 60;
+		}
+		if(hours > 24){
+			hour = hours % 24;
+			day = (hours - hour) / 24;
+		}
+		var sb = "";
+		sb = day > 0 ? (sb+=(day + "天")) : sb;
+		sb = hour > 0 ? (sb+=(hour + "小时")) : sb;
+		sb = minute > 0 ? (sb+=(minute + "分")) : sb;
+		sb = second > 0 ? (sb+=(second + "秒")) : sb;
+		sb = millisecond > 0 ? (sb+=(millisecond + "毫秒")) : sb;
+		sb = ""==sb ? (sb+=(millisecond + "毫秒")) : sb;
+		return sb;
+	}
+	
+	function transformSecond(seconds){
+		var second = seconds;
+		var minutes = 0, minute = 0;
+		var hours = 0, hour = 0;
+		var day = 0;
+		if(seconds > 60){
+			second = seconds % 60;
+			minute = minutes = (seconds - second) / 60;
+		}
+		if(minutes > 60){
+			minute = minutes % 60;
+			hour = hours = (minutes - minute) / 60;
+		}
+		if(hours > 24){
+			hour = hours % 24;
+			day = (hours - hour) / 24;
+		}
+		var sb = "";
+		sb = day > 0 ? (sb+=(day + "天")) : sb;
+		sb = hour > 0 ? (sb+=(hour + "小时")) : sb;
+		sb = minute > 0 ? (sb+=(minute + "分")) : sb;
+		sb = second > 0 ? (sb+=(second + "秒")) : sb;
+		sb = ""==sb.toString() ? (sb+=(second + "秒")) : sb;
+		return sb;
+	}
+	
+	function transformBps(bpsNum){
+		var sb = "";
+		var precision = 2;
+		if(bpsNum > 1000 * 1000 * 1000){
+			sb+=(bpsNum / (1000 * 1000 * 1000)).toFixed(precision) + "Gbps";
+		}else if(bpsNum > 1000 * 1000){
+			sb+=(bpsNum / (1000 * 1000)).toFixed(precision) + "Mbps";
+		}else if(bpsNum > 1000){
+			sb+=(bpsNum / 1000).toFixed(precision) + "Kbps";
+		}else{
+			sb+=bpsNum.toFixed(precision) + "bps";
+		}
+		return sb;
+	} 
+	
+	function transformKBs(KBsNum){
+		var sb = "";
+		var precision = 2;
+		if(KBsNum > 1024 * 1024){
+			sb+=(KBsNum / (1024 * 1024)).toFixed(precision) + "GB/s";
+		}else if(KBsNum > 1024){
+			sb+=(KBsNum / 1024).toFixed(precision) + "MB/s";
+		}else{
+			sb+=KBsNum.toFixed(precision) + "KB/s";
+		}
+		return sb;
+	}
+	
+	function transformByte(byteNum){
+		var sb = "";
+		var precision = 2;
+		
+		if(byteNum > (1024 * 1024 * 1024-1)){
+			sb+=(byteNum / (1024 * 1024 * 1024)).toFixed(precision) + "GB";
+		}else if(byteNum > (1024 * 1024-1)){
+			sb+=(byteNum / (1024 * 1024)).toFixed(precision) + "MB";
+		}else if(byteNum > (1024-1)){
+			sb+=(byteNum / 1024).toFixed(precision) + "KB";
+		}else{
+			sb+=byteNum.toFixed(precision) + "Byte";
+		}
+		return sb;
+	}
+	
+	function transformKB(KBNum){
+		var sb = "";
+		var precision = 2;
+		
+		if(KBNum > (1024 * 1024-1)){
+			sb+=(KBNum / (1024 * 1024)).toFixed(precision) + "GB";
+		}else if(KBNum > (1024-1)){
+			sb+=(KBNum / 1024).toFixed(precision) + "MB";
+		}else{
+			sb+=KBNum.toFixed(precision) + "KB";
+		}
+		return sb;
+	}
+	
+	function transformMb(mbNum){
+		var sb = "";
+		var precision = 2;
+		
+		if(mbNum > (1024-1)){
+			sb+=(mbNum / 1024).toFixed(precision) + "GB";
+		}else{
+			sb+=mbNum.toFixed(precision) + "MB";
+		}
+		return sb;
+	}
+	//-- 单位转换方法结束 --
+	
+	oc.vm.indexpage = {
+			addNavsublistItem:function(type,reportTemplateId,reportTemplateName){
+				var clickDownloadUrl = oc.resource.getUrl('resource/module/vm/report/report_main_center_download.html');
+				var node = {
+						id:reportTemplateId,
+						text:reportTemplateName,
+						name:reportTemplateName,
+						href: clickDownloadUrl,
+						attributes:{
+							reportTemplateId:reportTemplateId,
+							reportTemplateName:reportTemplateName,
+							reportTemplateType:type
+						},
+				}
+				
+				switch (type) {
+					case 8:
+						var dom = $('.vmReportsContent').tree('find', 'performanceReport');
+						$('.vmReportsContent').tree('append', {
+							parent: dom.target,
+							data:node
+						});
+						break;
+					case 9:
+						var dom = $('.vmReportsContent').tree('find', 'alarmCount');
+						$('.vmReportsContent').tree('append', {
+							parent: dom.target,
+							data:node
+						});
+						break;
+				} 
+			},
+			editNavsublistItem:function(reportTemplateId,reportTemplateName,reportTemplateType){
+				var reportTemplateType;
+				indexDiv.find('[name="titleName-'+reportTemplateId+'"]').each(function(){
+					$(this).html(reportTemplateName);
+					$(this).attr('title',reportTemplateName);
+					reportTemplateType = $(this).attr('type');
+				});
+				
+				var dataOption = {
+						reportTemplateId : reportTemplateId,
+						reportTemplateName : reportTemplateName,
+						reportTemplateType : parseInt(reportTemplateType)
+				};
+				var data = {name:reportTemplateName,dataOption:dataOption};
+				var clickDownloadUrl = oc.resource.getUrl('resource/module/vm/report/report_main_center_download.html');
+				_editReportSuccess(clickDownloadUrl,data);
+			},reportMainMenuClick:function(clickUrl,data){
+				reportMainMenuClick(clickUrl,data);
+			},removeLeftMenu:function(thisReportTemplateId){
+				var node = $('.vmReportsContent').tree('find',thisReportTemplateId);
+				$('.vmReportsContent').tree('remove', node.target);
+//				indexDiv.find('[name="titleName-'+thisReportTemplateId+'"]').parent().parent().remove();
+			},unitTransform : function(value,unit){
+				return unitTransform(value,unit);
+			},openVmTopologyClick:function(data){
+				openVmTopology(data);
+			}
+	}
+	oc.resource.loadI18n('oc.resource.management.js');
+});
+</script>

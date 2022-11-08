@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.profilelib.dao.TimelineDAO">
+	 
+	 <select id="getTimelineById" 
+		resultType="com.mainsteam.stm.profilelib.po.TimelinePO"
+		parameterType="long">
+		SELECT
+			TIME_LINE_ID AS lineId,
+			START_TIME AS startTime,
+			END_TIME AS endTime,
+			LINE_TYPE AS lineType,
+			PROFILE_ID AS profileId,
+			LINE_NAME AS lineName
+		FROM 
+		STM_PROFILELIB_TIMELINE where TIME_LINE_ID = #{timelineId}
+	</select>
+	 <select id="getAllTimeline" 
+		resultType="com.mainsteam.stm.profilelib.po.TimelinePO">
+		SELECT
+			TIME_LINE_ID AS lineId,
+			START_TIME AS startTime,
+			END_TIME AS endTime,
+			LINE_TYPE AS lineType,
+			PROFILE_ID AS profileId,
+			LINE_NAME AS lineName
+		FROM 
+		STM_PROFILELIB_TIMELINE
+	</select>
+		
+	<select id="getTimelineByProfileId" 
+		resultType="com.mainsteam.stm.profilelib.po.TimelinePO"
+		parameterType="long"> 
+		SELECT
+			TIME_LINE_ID AS lineId,
+			START_TIME AS startTime,
+			END_TIME AS endTime,
+			LINE_TYPE AS lineType,
+			PROFILE_ID AS profileId,
+			LINE_NAME AS lineName
+		FROM 
+		STM_PROFILELIB_TIMELINE where PROFILE_ID = #{profileId}
+	</select>
+		
+	 <insert id="insertTimeline" 
+		parameterType="com.mainsteam.stm.profilelib.po.TimelinePO">
+		insert into STM_PROFILELIB_TIMELINE
+		(TIME_LINE_ID,PROFILE_ID, LINE_NAME, START_TIME, END_TIME, 
+		LINE_TYPE) 
+		values (#{lineId}, #{profileId}, #{lineName}, #{startTime}, #{endTime}, 
+		#{lineType} ) </insert>
+	
+	<update id="updateTimeline" 
+		parameterType="com.mainsteam.stm.profilelib.po.TimelinePO">
+		update  STM_PROFILELIB_TIMELINE
+		<set>
+			<if test="lineName != null"> LINE_NAME =#{lineName},</if>
+			<if test="startTime != null"> START_TIME = #{startTime},</if>
+			<if test="endTime != null">   END_TIME = #{endTime},</if>
+			<if test="lineType != null"> LINE_TYPE= #{lineType},</if>
+		</set>	
+	    where TIME_LINE_ID = #{lineId} </update>
+	<delete id="removeTimelineById" parameterType="long"> 
+		delete from STM_PROFILELIB_TIMELINE where TIME_LINE_ID = #{timelineId}</delete>
+	<delete id="removeTimelineByProfileId" parameterType="long"> 
+		delete from STM_PROFILELIB_TIMELINE where PROFILE_ID = #{profileId}</delete>
+	<delete id="removeTimelineByProfileIds" parameterType="long"> 
+		delete from STM_PROFILELIB_TIMELINE where PROFILE_ID in <foreach
+		item="item" index="index" collection="list" open="(" 
+		separator="," close=")"> #{item} </foreach> </delete>
+</mapper>

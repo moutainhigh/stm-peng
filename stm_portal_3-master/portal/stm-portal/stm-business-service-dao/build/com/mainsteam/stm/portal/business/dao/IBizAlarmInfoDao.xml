@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.portal.business.dao.IBizAlarmInfoDao">
+	<select id="getAlarmInfo" resultType="com.mainsteam.stm.portal.business.bo.BizAlarmInfoBo" parameterType="com.mainsteam.stm.portal.business.bo.BizAlarmInfoBo">
+	SELECT A.ID AS id,A.BIZ_ID AS bizId,A.DEATH_THRESHOLD AS deathThreshold,
+A.DEATH_ALARM_CONTENT AS deathAlarmContent,A.SERIOUS_THRESHOLD AS seriousThreshold,
+A.SERIOUS_ALARM_CONTENT AS seriousAlarmContent,A.WARN_THRESHOLD AS warnThreshold,
+A.WARN_ALARM_CONTENT AS warnAlarmContent,A.NORMAL_CONTENT AS normalContent
+ FROM STM_BIZ_ALARM_INFO A WHERE 1=1
+ <if test="id != 0"> AND A.ID = #{id}</if>
+ <if test="bizId != 0"> AND A.BIZ_ID = #{bizId}</if>
+	</select>
+	<select id="getAlarmInfoById" resultType="com.mainsteam.stm.portal.business.bo.BizAlarmInfoBo" parameterType="long">
+	SELECT A.ID AS id,A.BIZ_ID AS bizId,A.DEATH_THRESHOLD AS deathThreshold,
+A.DEATH_ALARM_CONTENT AS deathAlarmContent,A.SERIOUS_THRESHOLD AS seriousThreshold,
+A.SERIOUS_ALARM_CONTENT AS seriousAlarmContent,A.WARN_THRESHOLD AS warnThreshold,
+A.WARN_ALARM_CONTENT AS warnAlarmContent,A.NORMAL_CONTENT AS normalContent
+ FROM STM_BIZ_ALARM_INFO A WHERE 1=1
+ AND A.BIZ_ID = #{bizid}
+	</select>
+	<update id="updateBizAlarmInfo" parameterType="com.mainsteam.stm.portal.business.bo.BizAlarmInfoBo">
+		UPDATE STM_BIZ_ALARM_INFO
+		<set>
+		 	<if test="bizId != 0"> BIZ_ID = #{bizId},</if>
+			<if test="deathThreshold != null"> DEATH_THRESHOLD = #{deathThreshold}, </if>
+			<if test="deathAlarmContent != null"> DEATH_ALARM_CONTENT = #{deathAlarmContent}, </if>
+			<if test="seriousThreshold != null"> SERIOUS_THRESHOLD = #{seriousThreshold}, </if>
+			<if test="seriousAlarmContent != null"> SERIOUS_ALARM_CONTENT = #{seriousAlarmContent}, </if>
+			<if test="warnThreshold != null"> WARN_THRESHOLD = #{warnThreshold}, </if>
+			<if test="warnAlarmContent != null"> WARN_ALARM_CONTENT = #{warnAlarmContent}, </if>
+			<if test="normalContent != null"> NORMAL_CONTENT = #{normalContent}, </if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+	<insert id="insertBizAlarmInfo" parameterType="com.mainsteam.stm.portal.business.bo.BizAlarmInfoBo">
+		INSERT INTO STM_BIZ_ALARM_INFO(ID,BIZ_ID,DEATH_THRESHOLD,DEATH_ALARM_CONTENT,SERIOUS_THRESHOLD,SERIOUS_ALARM_CONTENT,WARN_THRESHOLD,WARN_ALARM_CONTENT,NORMAL_CONTENT)
+		VALUES(#{id},#{bizId},#{deathThreshold},#{deathAlarmContent},#{seriousThreshold},#{seriousAlarmContent},#{warnThreshold},#{warnAlarmContent},#{normalContent})
+	</insert>
+	
+	<delete id="deleteInfo" parameterType="long">
+	DELETE FROM STM_BIZ_ALARM_INFO WHERE BIZ_ID=#{bizid}
+	</delete>
+</mapper>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+	
+	<bean id="alarmService" class="com.mainsteam.stm.alarm.AlarmServiceSync">
+		<property name="dataSyncDAO" ref="dataSyncDAO" />
+	</bean>
+	
+	<!-- 告警事件服务 -->
+	<bean id="alarmEventService" class="com.mainsteam.stm.alarm.event.AlarmEventServiceImpl">
+		<property name="alarmEventDao" ref="alarmEventDao" />
+	</bean>
+	<bean id="alarmEventDao" class="com.mainsteam.stm.alarm.event.dao.AlarmEventDAOImpl">
+		<property name="session" ref="sqlSession" />
+	</bean>
+	
+	<!-- 告警服务 -->
+	<bean id="alarmNotifyService" class="com.mainsteam.stm.alarm.notify.AlarmNotifyServiceImpl">
+		<property name="alarmNotifyDao" ref="alarmNotifyDAO" />
+	</bean>
+	<bean id="alarmNotifyDAO" class="com.mainsteam.stm.alarm.notify.dao.AlarmNotifyDAOImpl">
+		<property name="session" ref="sqlSession" />
+		<property name="sqlSessionFactory" ref="myBatisSqlSessionFactory" />
+	</bean>
+	
+		<!-- 短信邮件通知模板服务 -->
+	<bean id="smsOrEmailNotifyTemplateService" class="com.mainsteam.stm.alarm.notify.SmsOrEmailNotifyTemplateServiceImpl">
+		<property name="smsOrEmailNotifyTemplateDao" ref="smsOrEmailNotifyTemplateDao" />
+	</bean>
+	<bean id="smsOrEmailNotifyTemplateDao" class="com.mainsteam.stm.alarm.notify.dao.SmsOrEmailNotifyTemplateDAOImpl">
+		<property name="session" ref="sqlSession" />
+	</bean>
+
+	<!-- 告警模板服务 -->
+	<bean id="alarmNotifyTempletService" class="com.mainsteam.stm.alarm.notify.AlarmNotifyTempletServiceImpl">
+		<property name="alarmNotifyTempletDao" ref="alarmNotifyTempletDAO" />
+	</bean>
+	<bean id="alarmNotifyTempletDAO" class="com.mainsteam.stm.alarm.notify.dao.AlarmNotifyTempletDAOImpl">
+		<property name="session" ref="sqlSession" />
+	</bean>
+	
+	<!-- 报表接口  -->
+	<bean id="instanceAlarmEventReportService" class="com.mainsteam.stm.alarm.event.report.InstanceAlarmEventReportServiceImpl">
+		<property name="alarmEventDAO" ref="alarmEventDao" />
+	</bean>
+	
+	
+</beans>

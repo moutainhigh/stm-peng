@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/mvc      
+    http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+    http://www.springframework.org/schema/aop
+	http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+	">
+	<!-- 拓扑图管理 -->
+		<!-- seq -->
+	<bean id="stm_topo_auth_setting_seq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="stm_topo_auth_setting"></constructor-arg>
+	</bean>
+	<bean id="stm_topo_node_seq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_TOPO_NODE"></constructor-arg>
+	</bean>
+	<bean id="stm_topo_link_seq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_TOPO_LINK"></constructor-arg>
+	</bean>
+	<bean id="stm_topo_group_seq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_TOPO_GROUP"></constructor-arg>
+	</bean>
+	<bean id="stm_topo_subtopo_seq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_TOPO_SUBTOPO"></constructor-arg>
+	</bean>
+	<bean id="stm_topo_othernode_seq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_TOPO_OTHERNODE"></constructor-arg>
+	</bean>
+	<bean id="stm_topo_vlan" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_TOPO_VLAN"></constructor-arg>
+	</bean>
+	<bean id="stm_topo_mapline_seq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="stm_topo_mapline"></constructor-arg>
+	</bean>
+	<bean id="stm_topo_mapnode_seq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="stm_topo_mapnode"></constructor-arg>
+	</bean>
+		<!-- dao -->
+	<bean id="stm_topo_iNodeDao" class="com.mainsteam.stm.topo.dao.impl.INodeDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+		<constructor-arg ref="stm_topo_node_seq" name="seq"></constructor-arg>
+	</bean>
+	<bean id="stm_topo_iLinkDao" class="com.mainsteam.stm.topo.dao.impl.ILinkDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+		<constructor-arg ref="stm_topo_link_seq" name="seq"></constructor-arg>
+	</bean>
+	<bean id="stm_topo_iGroupDao" class="com.mainsteam.stm.topo.dao.impl.IGroupDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+		<constructor-arg ref="stm_topo_group_seq" name="seq"></constructor-arg>
+	</bean>
+	<bean id="stm_topo_topofind_dao" class="com.mainsteam.stm.topo.dao.impl.TopoFindDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+	</bean>
+		<!-- service -->
+	<bean id="stm_topo_TopoGraphImpl" class="com.mainsteam.stm.topo.service.impl.TopoGraphImpl">
+		<property name="ndao" ref="stm_topo_iNodeDao"></property>
+		<property name="ldao" ref="stm_topo_iLinkDao"></property>
+		<property name="gdao" ref="stm_topo_iGroupDao"></property>
+	</bean>
+	<!-- 设置管理 -->
+		<!-- seq -->
+	<bean id="stm_topo_setting_seq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_TOPO_SETTING"></constructor-arg>
+	</bean>
+		<!-- dao -->
+	<bean id="stm_topo_settingDao" class="com.mainsteam.stm.topo.dao.impl.SettingDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+		<constructor-arg ref="stm_topo_setting_seq" name="seq"></constructor-arg>
+	</bean>
+		<!-- service -->
+	<bean id="stm_topo_settingApi" class="com.mainsteam.stm.topo.service.impl.SettingImpl">
+		<property name="settingDao" ref="stm_topo_settingDao" />
+	</bean>
+
+<!-- 拓扑图片上传、下载 -->
+	<bean id="topoImageApi" class="com.mainsteam.stm.topo.service.impl.TopoImageImpl">
+		<property name="iconDao" ref="stm_topo_iconDao" />
+	</bean>
+	<bean id="stm_topo_iconDao" class="com.mainsteam.stm.topo.dao.impl.IconDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+		<constructor-arg ref="stm_topo_iconSeq" name="seq"></constructor-arg>
+	</bean>
+	<bean id="stm_topo_iconSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="stm_topo_icon"></constructor-arg>
+	</bean>
+
+<!-- 背板管理模块 -->
+	<bean id="backbordApi" class="com.mainsteam.stm.topo.service.impl.BackbordImpl">
+		<property name="backbordRealDao" ref="stm_topo_backbord_realDao" />
+		<property name="backbordBaseDao" ref="stm_topo_backbord_baseDao" />
+	</bean>
+	<!-- 背板实时表 -->
+	<bean id="stm_topo_backbord_realDao" class="com.mainsteam.stm.topo.dao.impl.BackbordRealDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+		<constructor-arg ref="stm_topo_backbord_realSeq" name="seq"></constructor-arg>
+	</bean>
+	<bean id="stm_topo_backbord_realSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="stm_topo_backbord_real"></constructor-arg>
+	</bean>
+	<!-- 背板默认表 -->
+	<bean id="stm_topo_backbord_baseDao" class="com.mainsteam.stm.topo.dao.impl.BackbordBaseDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+		<constructor-arg ref="stm_topo_backbord_baseSeq" name="seq"></constructor-arg>
+	</bean>
+	<bean id="stm_topo_backbord_baseSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="stm_topo_backbord_base"></constructor-arg>
+	</bean>
+	
+<!-- IP-MAC-PORT模块 -->
+	<bean id="macApi" class="com.mainsteam.stm.topo.service.impl.MacImpl">
+		<property name="macBaseDao" ref="stm_topo_macBaseDao" />
+		<property name="macRuntimeDao" ref="stm_topo_macRuntimeDao" />
+		<property name="latestMacDao" ref="stm_topo_latestMacDao" />
+		<property name="macHistoryDao" ref="stm_topo_macHistoryDao" />
+	</bean>
+	
+	<!-- mac实时表 -->
+	<bean id="stm_topo_macRuntimeDao" class="com.mainsteam.stm.topo.dao.impl.MacRuntimeDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+		<constructor-arg ref="stm_topo_mac_runtimeSeq" name="seq"></constructor-arg>
+	</bean>
+	<bean id="stm_topo_mac_runtimeSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="stm_topo_mac_runtime"></constructor-arg>
+	</bean>
+	
+	<!-- mac基准表 -->
+	<bean id="stm_topo_macBaseDao" class="com.mainsteam.stm.topo.dao.impl.MacBaseDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+		<constructor-arg ref="stm_topo_mac_baseSeq" name="seq"></constructor-arg>
+	</bean>
+	<bean id="stm_topo_mac_baseSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="stm_topo_mac_base"></constructor-arg>
+	</bean>
+	
+	<!-- 新增mac表 -->
+	<bean id="stm_topo_latestMacDao" class="com.mainsteam.stm.topo.dao.impl.MacLatestDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+		<constructor-arg ref="stm_topo_mac_latestSeq" name="seq"></constructor-arg>
+	</bean>
+	<bean id="stm_topo_mac_latestSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="stm_topo_latest_mac"></constructor-arg>
+	</bean>
+	
+	<!-- mac历史变更表 -->
+	<bean id="stm_topo_macHistoryDao" class="com.mainsteam.stm.topo.dao.impl.MacHistoryDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+		<constructor-arg ref="stm_topo_mac_historySeq" name="seq"></constructor-arg>
+	</bean>
+	<bean id="stm_topo_mac_historySeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="stm_topo_mac_history"></constructor-arg>
+	</bean>
+	<!-- ip-mac-port 发现 -->
+	<bean id="ipmacService" class="com.qwserv.itm.netprober.impl.IpmacServiceImpl"></bean>
+	
+	
+</beans>

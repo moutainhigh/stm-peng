@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<base>
+<script async type="text/javascript">
+	 var base = document.getElementsByTagName('base')[0],baseUrl;
+	 if(navigator.appName=='Microsoft Internet Explorer'){
+		 baseUrl=window.location.href.split('resource')[0]+'resource/';
+	 }else{
+		 baseUrl=window.location.pathname.split('resource')[0]+'resource/';
+	 }
+	 base.setAttribute('href',baseUrl);
+</script>
+<title>ITManager</title>
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+
+	<link rel="stylesheet" href="third/ACE/assets/css/font-awesome.css" />
+		<!-- 新加图标 -->
+        <link rel="stylesheet" href="third/ACE/icomoon/style.css" />
+        <link rel="stylesheet" href="third/ACE/assets/css/menu.css" />
+        <!--top样式-->
+        <link href="themes/blue/css/topo.css" rel="stylesheet" id="skin_topo">
+        <link href="themes/blue/css/Skin.css" rel="stylesheet" id="skin_topSkin"  rel="stylesheet">
+        <!--top map样式-->
+        <link rel="stylesheet" type="text/css" href="module/map/css/courtMap.css">
+
+        <!--极简模式样式-->
+        <link href="themes/blue/simple/css/simple.css" rel="stylesheet" id="skin_simple">
+		
+		<link href="third/jquery-ui-1.11.1.custom/jquery-ui.css" rel="stylesheet">
+		<link href="third/jquery-easyui-1.4/themes/blue/easyui.css" rel="stylesheet" id="skin_easyui">
+		<link href="third/jquery-easyui-1.4/themes/icon.css" rel="stylesheet" id="skin_icon">
+		<link href="third/zTree_v3/css/zTreeStyle/zTreeStyle.css" rel="stylesheet">
+		<link href="third/uploadify/uploadify.css" rel="stylesheet">
+		<link href="third/umeditor/themes/classic/css/umeditor.css" rel="stylesheet">
+
+		<link href="themes/blue/css/main.css" id="skin_main" rel="stylesheet">
+		
+		<link rel="stylesheet" href="themes/blue/css/Newskin.css"  id="skin_newSkin"/>
+		<link rel="shortcut icon" href="favicon.ico">
+		<link rel="Bookmark" href="favicon.ico">
+		
+<!--<link href="themes/default/css/topo.css" rel="stylesheet" id="skin_topo">-->
+<!--[if lt IE 9]>
+        <script src="http://cdn.bootcss.com/html5shiv/3.7.0/html5shiv.min.js"></script>
+        <script src="http://cdn.bootcss.com/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+    <style type="text/css">
+    	html.panel-fit,body.panel-noscroll {
+			min-height: 600px;
+			min-width: 1024px;
+			width:100%;
+			height:100%;
+			padding :0px;
+		}
+    	html.panel-fit{
+			overflow: auto;
+		}
+    </style>
+</head>
+
+<body class="home-body" style="background: white;">
+	<div id="oc_index_layout" class="easyui-panel" data-options="fit:true">
+		<div id="oc_index_resource_detail" style="width:1108px;height:595px;"></div>
+	</div>
+	
+	<script src="third/jquery-1.7.2.js"></script>
+	<script src="third/jquery-ui-1.11.1.custom/jquery-ui.js"></script>
+
+	<script src="third/jquery-easyui-1.4/jquery.easyui.min.js"></script>
+	<script src="third/jquery-easyui-1.4/locale/easyui-lang-zh_CN.js"></script>
+	
+	<script src="third/jquery.form.js"></script>
+	<script src="third/jquery.multifile.js"></script>
+	<script src="third/jquery.cookie.js"></script>
+	<!-- <script src="third/jquery.upload.js"></script> -->
+	
+	<script src="third/zTree_v3/js/jquery.ztree.all-3.5.js"></script>
+	
+	<script src="third/highcharts/js/highcharts-more.js"></script>
+	<script src="third/highcharts/js/highcharts.js"></script>
+	<script src="third/highcharts/js/exporting.js"></script>
+	<script src="third/moment/moment.min.js"></script>
+	<script src="third/canvas/raphael.js"></script>
+	<script src="third/canvas/raphael-fn.js"></script>
+	<script src="third/crypto-js-3.1.6/crypto-js.js"></script>
+	
+	<script src="js/oc.js"></script>
+
+	<script src="js/ui/oc.ui.js"></script>
+	<script src="js/ui/jquery.colorpicker.js"></script>
+	<script src="third/uploadify/jquery.uploadify.js" type="text/javascript"></script>
+	<script src="third/umeditor/umeditor.config.js" type="text/javascript"></script>
+	<script src="third/umeditor/umeditor.min.js" type="text/javascript"></script>
+	<script src="third/umeditor/lang/zh-cn/zh-cn.js" type="text/javascript"></script>
+	<script src="third/echarts3.0/echarts.min.gzjs" type="text/javascript"></script>
+	<script src="resource/third/echarts3.0/liquidfill.gzjs" type="text/javascript"></script>
+	<script type="text/javascript" src=""></script>
+	<script type="text/javascript">
+		(function(){
+    		oc.util.ajax({
+				url:oc.resource.getUrl('system/login/login.htm'),
+				data:{u:oc.util.AESencrypt('admin'),p:oc.util.MD5('admin')},//zgjk2015pw
+				success:function(d){
+					if(d.code==200){
+						oc.util.ajax({
+							url:oc.resource.getUrl('system/skin/get.htm'),
+							successMsg:null,
+							failureMsg:'',
+							success:function(d){
+								
+								oc.resource.loadScripts(["resource/index_user.js","resource/index_skin.js"], function(){
+									var data=$.parseJSON(d.data);
+									var skin = data.selected;
+								/* 	if(skin != null && skin != undefined && skin != ""){
+										switch (skin) {
+										case "darkgreen":
+											$('body').css('background','#343845');
+											break;
+										default:
+											$('body').css('background','white');
+											break;
+										}
+									} */
+									var skin_easyui = $("#skin_easyui"), skin_oc = $("#skin_oc"), skin_topo = $("#skin_topo"), skin_icon = $("#skin_icon"),
+									skin_simple = $("#skin_simple"), skin_newSkin=$("#skin_newSkin"),skin_topSkin=$("#skin_topSkin"),skin_main=$("#skin_main");
+									if(skin != null && skin != undefined && skin != ""){
+										switch (skin) {
+										case "darkgreen":
+											//skin_easyui.attr("href", "third/jquery-easyui-1.4/themes/default/easyui.css");
+														skin_icon.attr("href", "themes/default/css/icon.css");
+														skin_oc.attr("href", "themes/default/css/oc.css");
+														skin_topo.attr("href", "themes/default/css/topo.css");
+														skin_simple.attr("href", "themes/default/simple/css/simple.css");
+														skin_newSkin.attr("href","themes/default/css/Newskin.css");
+														skin_topSkin.attr("href","themes/default/css/Skin.css");
+														skin_main.attr("href","themes/default/css/main.css");
+											break;
+										default:
+										//	skin_easyui.attr("href", "third/jquery-easyui-1.4/themes/" + skin + "/easyui.css");
+										skin_icon.attr("href", "themes/" + skin + "/css/icon.css");
+										skin_oc.attr("href", "themes/" + skin + "/css/oc.css");
+										skin_topo.attr("href", "themes/" + skin + "/css/topo.css");
+										skin_simple.attr("href", "themes/" + skin + "/simple/css/simple.css");
+										skin_newSkin.attr("href","themes/"+skin+"/css/Newskin.css");
+											break;
+										}
+									}
+									oc.index.loadLoginUser(function(user){
+						    			oc.resource.loadScript('resource/module/business-service/biz-detail-info/js/resource_info.js', function(){
+							    			oc.module.biz.resourceinfo.openByParentRes({selector:$('#oc_index_resource_detail'),instanceId:oc.resource.href.split('?')[1].split('&')[0]});
+						    			});
+									});
+									
+								});
+							}
+						});
+					}
+				},
+				failureMsg:null,
+				successMsg:null
+			});
+
+		})();
+	</script>
+</body>
+</html>

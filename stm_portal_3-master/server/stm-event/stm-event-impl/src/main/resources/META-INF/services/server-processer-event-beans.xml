@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                    http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+                    http://www.springframework.org/schema/context
+                    http://www.springframework.org/schema/context/spring-context-3.2.xsd
+                    http://www.springframework.org/schema/task
+                    http://www.springframework.org/schema/task/spring-task-3.2.xsd ">
+	<bean id="alarmEventHandle" class="com.mainsteam.stm.event.ResourceEventHandleImpl">
+		<property name="alarmService" ref="alarmSyncService" />
+		<property name="instanceService" ref="resourceInstanceService" />
+		<property name="profileService"  ref="profileService"/>
+		<property name="alarmSnapshotUtils" ref="alarmSnapshotUtils"/>
+		<property name="capacityService" ref="capacityService" />
+		<property name="customMetricService" ref="customMetricService"/>
+	</bean>
+	
+	<bean id="chageAlarmCalculateService" class="com.mainsteam.stm.state.ChageAlarmCalculateService">
+		<property name="alarmService" ref="alarmSyncService" />
+		<property name="instanceService" ref="resourceInstanceService" />
+		<property name="profileService"  ref="profileService"/>
+		<property name="timelineService" ref="timelineService"/>
+		<property name="metricDataService" ref="metricDataService"/>
+		<property name="alarmSnapshotUtils" ref="alarmSnapshotUtils"/>
+	</bean>
+	
+	<bean id="alarmEventNotifyMessageSelector" class="com.mainsteam.stm.event.AlarmEventNotifyMessageSelector"/>
+	
+	<bean id="alarmSnapshotUtils" class="com.mainsteam.stm.event.AlarmSnapshotUtils">
+		<property name="fileClientApi" ref="fileClient" />
+		<property name="profilefaultService" ref="profilefaultService"/>
+	</bean>
+	
+</beans>

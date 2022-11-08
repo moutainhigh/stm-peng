@@ -1,0 +1,852 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">
+  <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0"/>
+   <PluginClassAliasList> 
+    <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+    <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+    <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+    <PluginClassAlias id="columnPasteProcessor" class="com.mainsteam.stm.plugin.common.ColumnPasteProcessor"/>
+    <PluginClassAlias id="RegularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+    <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+    <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+    <PluginClassAlias id="tableConverter" class="com.mainsteam.stm.plugin.common.TableResultSetConverter"/>
+    <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+    <PluginClassAlias id="ChangeRateProcessor" class="com.mainsteam.stm.plugin.common.ChangeRateProcessor"/>
+    <PluginClassAlias id="processConverter" class="com.mainsteam.stm.plugin.common.ProcessResultSetConverter"/>
+    <PluginClassAlias id="uptimeProcessor" class="com.mainsteam.stm.plugin.common.UptimeProcessor"/>
+    <PluginClassAlias id="FormatProcessor" class="com.mainsteam.stm.plugin.common.FormatProcessor"/>
+    <PluginClassAlias id="columnSplitProcessor" class="com.mainsteam.stm.plugin.common.ColumnSplitProcessor"/>
+    <PluginClassAlias id="mergeSubResultSetProcessor" class="com.mainsteam.stm.plugin.common.MergeSubResultSetProcessor"/>
+    <PluginClassAlias id="rowFilterProcessor" class="com.mainsteam.stm.plugin.common.RowFilterProcessor"/>
+    <PluginClassAlias id="columnAddProcessor" class="com.mainsteam.stm.plugin.common.ColumnAddProcessor"/>
+    <PluginClassAlias id="HostTimeProcessor" class="com.mainsteam.stm.plugin.common.HostTimeProcessor"/>
+    <PluginClassAlias id="RowFilterByInstPropertyProcessor" class="com.mainsteam.stm.plugin.common.RowFilterByInstPropertyProcessor" />
+    <PluginClassAlias id="columnAddProcessor" class="com.mainsteam.stm.plugin.common.ColumnAddProcessor" />
+  </PluginClassAliasList>
+  <MetricPlugin metricid="macAddress" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="NICIndex,NICPhysAddress" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="getBulk" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.6" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT NICPhysAddress" />
+            </PluginDataHandler>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\S+)" />
+            </PluginDataHandler>
+            <PluginDataHandler classKey="rowFilterProcessor">
+                <Parameter value="" key="MacAddress" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="availability" collectType="" pluginid="IcmpPlugin">
+        <PluginResultMetaInfo columns="ip,isAlive,ResponseTime" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="IP" value="IP" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT isAlive" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="broadPktsRate" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="broadPktsRateIndex,ifInBroadcastPkts_ifHCInBroadcastPkts,ifOutBroadcastPkts_ifHCOutBroadcastPkts" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="getBulk" />
+            <Parameter type="" key="COUNTER64" value="1.3.6.1.2.1.31.1.1.1.9" />
+            <Parameter type="" key="COUNTER64" value="1.3.6.1.2.1.31.1.1.1.13" />
+            <Parameter type="" key="COUNTER32" value="1.3.6.1.2.1.31.1.1.1.3" />
+            <Parameter type="" key="COUNTER32" value="1.3.6.1.2.1.31.1.1.1.5" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="COLUMNINDEX" value="broadPktsRateIndex" />
+                <Parameter type="" key="FUNCTION" value="ROUND_CHGV" />
+                <Parameter type="" key="COUNTER32" value="2^32">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+                <Parameter type="" key="COUNTER64" value="2^64">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(ifInBroadcastPkts_ifHCInBroadcastPkts)+sum(ifOutBroadcastPkts_ifHCOutBroadcastPkts)) as broadPktsRate" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="discardsRate" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="discardsRateIndex,ifInDiscards,ifInUcastPkts,ifInMulticastPkts,ifInBroadcastPkts,ifOutDiscards,ifOutUcastPkts,ifOutMulticastPkts,ifOutBroadcastPkts" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="getBulk" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.13" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.11" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.2" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.3" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.19" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.17" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.4" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.5" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="COLUMNINDEX" value="discardsRateIndex" />
+                <Parameter type="" key="FUNCTION" value="ROUND_CHG" />
+                <Parameter type="" key="MOD" value="2^32">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(ifInDiscards+ifOutDiscards)/sum(ifInUcastPkts+ifInMulticastPkts+ifInBroadcastPkts+ifOutUcastPkts+ifOutMulticastPkts+ifOutBroadcastPkts))*100 as discardsRate" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="icmpInMsgsRate" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.5.1.0" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="ROUND_CHGV" />
+                <Parameter type="" key="MOD" value="2^32,2^64">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="icmpOutMsgsRate" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.5.14.0" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="ROUND_CHGV" />
+                <Parameter type="" key="MOD" value="2^32,2^64">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sysObjectID" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.1.2.0" />
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="inBroadPktsRate" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="inBroadPktsRateIndex,ifInBroadcastPkts_ifHCInBroadcastPkts" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="getBulk" />
+            <Parameter type="" key="COUNTER64" value="1.3.6.1.2.1.31.1.1.1.9" />
+            <Parameter type="" key="COUNTER32" value="1.3.6.1.2.1.31.1.1.1.3" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="COLUMNINDEX" value="inBroadPktsRateIndex" />
+                <Parameter type="" key="FUNCTION" value="ROUND_CHGV" />
+                <Parameter type="" key="COUNTER32" value="2^32">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+                <Parameter type="" key="COUNTER64" value="2^64">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(ifInBroadcastPkts_ifHCInBroadcastPkts)) as inBroadPktsRate" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="outBroadPktsRate" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="outBroadPktsRateIndex,ifOutBroadcastPkts_ifHCOutBroadcastPkts" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="getBulk" />
+            <Parameter type="" key="COUNTER64" value="1.3.6.1.2.1.31.1.1.1.13" />
+            <Parameter type="" key="COUNTER32" value="1.3.6.1.2.1.31.1.1.1.5" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="COLUMNINDEX" value="outBroadPktsRateIndex" />
+                <Parameter type="" key="FUNCTION" value="ROUND_CHGV" />
+                <Parameter type="" key="COUNTER32" value="2^32">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+                <Parameter type="" key="COUNTER64" value="2^64">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(ifOutBroadcastPkts_ifHCOutBroadcastPkts)) as outBroadPktsRate" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="inBroadPkts" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="inBroadPktsIndex,ifInBroadcastPkts_ifHCInBroadcastPkts" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.3:1.3.6.1.2.1.31.1.1.1.9" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(ifInBroadcastPkts_ifHCInBroadcastPkts)) as inBroadPkts" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="outBroadPkts" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="outBroadPktsIndex,ifOutBroadcastPkts_ifHCOutBroadcastPkts" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.5:1.3.6.1.2.1.31.1.1.1.13" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(ifOutBroadcastPkts_ifHCOutBroadcastPkts)) as outBroadPkts" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+  <MetricPlugin metricid="SystemTemperature" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get" />
+            <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.3.1.3.0" />
+        </PluginParameter>
+    </MetricPlugin>
+     <MetricPlugin metricid="WebisTimeoutAvailability" collectType="" pluginid="TxPlugin">
+        <PluginResultMetaInfo columns="WebisTimeoutAvailability" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="" value="" />
+        </PluginParameter>
+        <PluginDataHandlers>
+         <PluginDataHandler classKey="RegularFilter">
+        	 <Parameter type="" key="REGULAR" value="timeout\s+:\s+(\d+)"/>
+     		 </PluginDataHandler>
+     		 <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="WebisTimeoutAvailability" value="1,0;1" />
+            </PluginDataHandler>
+     	 </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="WebisTimeout" collectType="" pluginid="TxPlugin">
+        <PluginResultMetaInfo columns="WebisTimeout" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="" value="" />
+        </PluginParameter>
+        <PluginDataHandlers>
+         <PluginDataHandler classKey="RegularFilter">
+        	 <Parameter type="" key="REGULAR" value="timeout\s+:\s+(\d+)"/>
+     		 </PluginDataHandler>
+     		 <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="WebisTimeout" value="1,超时;未超时" />
+            </PluginDataHandler>
+     	 </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="SIPStatus" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="SIPIndex,SIPValue" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk" />
+            <Parameter type="" key="" value="1.3.6.1.4.1.9.9.644.1.2.6.1.5" />
+        </PluginParameter>
+        <PluginDataHandlers>
+             <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="SIPValue" value="200,注册成功;注册未成功" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="SIPAvailability" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="SIPValue" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get" />
+            <Parameter type="" key="" value="1.3.6.1.4.1.9.9.644.1.2.6.1.5.1" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="SIPValue" value="200,1;0" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="AUXDISPLAYName" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="AUXDISPLAYName" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get" />
+            <Parameter type="" key="" value="1.3.6.1.4.1.9.9.643.1.2.1.1.2.30" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+        	 <Parameter type="" key="REGULAR" value="(\S+)\s+--"/>
+     		 </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="AUXDISPLAYStatus" collectType="" pluginid="TxPlugin">
+        <PluginResultMetaInfo columns="AUXDISPLAYStatus" />
+        <PluginParameter type="ArrayType">
+            <Parameter key="" value=""/>
+        </PluginParameter>
+        <PluginDataHandlers>
+        <PluginDataHandler classKey="RegularFilter">
+        	 <Parameter type="" key="REGULAR" value="Presentation Device Status: ([^&amp;]*)&amp;__&amp;/admin/pages/images/[^.]*.gif"/>
+     	</PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="AUXDISPLAYAvailability" collectType="" pluginid="TxPlugin">
+        <PluginResultMetaInfo columns="AUXDISPLAYAvailability" />
+        <PluginParameter type="ArrayType">
+            <Parameter key="" value=""/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+        	 <Parameter type="" key="REGULAR" value="Presentation Device Status: [^&amp;]*&amp;__&amp;/admin/pages/images/([^.]*).gif"/>
+     		 </PluginDataHandler>
+     		 <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="AUXDISPLAYAvailability" value="OK,1;0" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="Name" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.1.5.0" />
+        </PluginParameter>
+    </MetricPlugin>
+  <MetricPlugin metricid="UiDeciveverName" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="UiDeciveverName" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get" />
+            <Parameter type="" key="" value="1.3.6.1.4.1.9.9.643.1.2.1.1.2.34" />
+        </PluginParameter>
+        <PluginDataHandlers>
+        <PluginDataHandler classKey="RegularFilter">
+        <Parameter type="" key="REGULAR" value="(UI_DEVICE)"/>
+      </PluginDataHandler>
+      </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="UiDeciveState" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="UiDeciveState" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get" />
+            <Parameter type="" key="" value="1.3.6.1.4.1.9.9.643.1.2.1.1.3.34" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="UiDeciveState" value="0,noError;1,other;2,cableError;3,powerError;4,mgmtSysConfigError;5,systemError;6,deviceError;7,linkError;8,commError;9,detectionDisabled;" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="UiDeciveAvailability" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="UiDeciveAvailability" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get" />
+            <Parameter type="" key="" value="1.3.6.1.4.1.9.9.643.1.2.1.1.3.34" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="UiDeciveAvailability" value="0,1;0" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sysUpTime" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="sysUpTime" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.1.3.0" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT sysUpTime/100 as sysUpTime" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+  <MetricPlugin metricid="IP" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.4.20.1.1" />
+        </PluginParameter>
+    </MetricPlugin>
+  <MetricPlugin metricid="totalMemSize" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="totalMemIndex,totalMemValue" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.25.2.3.1.5" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT SUM(totalMemValue)/1024/1024 as totalMemSize" />
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor"> 
+        		<Parameter type="" key="" value="TO_HUNDRED"/> 
+     		</PluginDataHandler> 
+        </PluginDataHandlers>
+    </MetricPlugin>
+  <MetricPlugin metricid="TimeDelay" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="ctpIndex,ctpStreamType" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk" />
+            <Parameter type="" key="" value="1.3.6.1.4.1.9.9.644.1.4.9.1.6" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT SUM(ctpIndex)/COUNT(ctpStreamType) as TimeDelay" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+  <MetricPlugin metricid="JitterPeriod" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="ctpIndex,ctpStreamType" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk" />
+            <Parameter type="" key="" value="1.3.6.1.4.1.9.9.644.1.4.10.1.23" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT SUM(ctpIndex)/COUNT(ctpStreamType) as TimeDelay" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+   </MetricPlugin>
+  <MetricPlugin metricid="memPoolUse" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="totalMemIndex,memPoolUseValue" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.25.2.3.1.6" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT SUM(memPoolUseValue)/1024 as memPoolUse" />
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+  <MetricPlugin metricid="cpuRate" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="cpuUsage" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.25.3.3.1.2.768" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+  <MetricPlugin metricid="memRate" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="memIndex,memPoolUsed" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.25.2.3.1.6" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="ResourceProperty" key="totalMemSize" value="totalMemSize" />
+                <Parameter type="" key="SELECT" value="SELECT (sum(memPoolUsed)/1024/1024/${totalMemSize}) as memRate" />
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+  <MetricPlugin metricid="MicrophoneIndex" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="MicrophoneIndex,MicrophoneType" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk" />
+            <Parameter type="" key="" value="1.3.6.1.4.1.9.9.643.1.2.1.1.4" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="rowFilterProcessor">
+                <Parameter type="" key="FilterColumn" value="MicrophoneType" />
+                <Parameter type="" key="ReservedValues" value="13" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="MicrophoneIndex" />
+            <Parameter type="" key="ValueColumnTitle" value="MicrophoneIndex" />
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="MicrophoneName" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="MicrophoneIndex,MicrophoneName" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk" />
+            <Parameter type="" key="" value="1.3.6.1.4.1.9.9.643.1.2.1.1.2" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="MicrophoneIndex" />
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="MicrophoneIndex" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="MicrophoneIndex" />
+            <Parameter type="" key="ValueColumnTitle" value="MicrophoneName" />
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="MicrophoneIndex" />
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="MicrophoneState" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="MicrophoneIndex,MicrophoneState" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk" />
+            <Parameter type="" key="" value="1.3.6.1.4.1.9.9.643.1.2.1.1.3" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="MicrophoneIndex" />
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="MicrophoneIndex" />
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="MicrophoneState" value="0,noError;1,other;2,cableError;3,powerError;4,mgmtSysConfigError;5,systemError;6,deviceError;7,linkError;8,commError;9,detectionDisabled;" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="MicrophoneIndex" />
+            <Parameter type="" key="ValueColumnTitle" value="MicrophoneState" />
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="MicrophoneIndex" />
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="MICifStatus" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="MicrophoneIndex,MicrophoneState" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk" />
+            <Parameter type="" key="" value="1.3.6.1.4.1.9.9.643.1.2.1.1.3" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="MicrophoneIndex" />
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="MicrophoneIndex" />
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="MicrophoneState" value="0,1;0" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <!-- Display -->
+    <MetricPlugin metricid="DisplayIndex" collectType="" pluginid="TxPlugin">
+        <PluginResultMetaInfo columns="DisplayIndex" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="" value="" />
+        </PluginParameter>
+        <PluginDataHandlers>
+        	<PluginDataHandler classKey="columnAddProcessor">
+                <Parameter type="" key="ColumnName" value="DisplayIndex" />
+                <Parameter type="" key="ColumnValue" value="Left Display" />
+                <Parameter type="" key="ColumnValue" value="Right Display" />
+            </PluginDataHandler>
+           <PluginDataHandler classKey="RegularFilter">
+        	 <Parameter type="" key="REGULAR" value="(\S+) Display"/>
+     		 </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DisplayIndex" />
+            <Parameter type="" key="ValueColumnTitle" value="DisplayIndex" />
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="DisplayName" collectType="" pluginid="TxPlugin">
+        <PluginResultMetaInfo columns="DisplayIndex" />
+        <PluginParameter type="ArrayType"> 
+      	<Parameter key="" value=""/>
+    	</PluginParameter> 
+        <PluginDataHandlers>
+        	<PluginDataHandler classKey="columnAddProcessor">
+                <Parameter type="" key="ColumnName" value="DisplayIndex" />
+                <Parameter type="" key="ColumnValue" value="Left Display" />
+                <Parameter type="" key="ColumnValue" value="Right Display" />
+            </PluginDataHandler>
+             <PluginDataHandler classKey="RegularFilter">
+        	 <Parameter type="" key="REGULAR" value="(\S+) Display"/>
+     		 </PluginDataHandler>
+     		 <PluginDataHandler classKey="selectProcessor">
+        	<Parameter type="" key="SELECT" value="SELECT (DisplayIndex + 'Display') as DisplayName, DisplayIndex"/>
+      		 </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DisplayIndex" />
+            <Parameter type="" key="ValueColumnTitle" value="DisplayName" />
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="DisplayIndex" />
+        </PluginDataConverter>
+    </MetricPlugin>
+    
+    <MetricPlugin metricid="DisplayifStatus" collectType="" pluginid="TxPlugin">
+        <PluginResultMetaInfo columns="DisplayIndex,DisplayState" />
+        <PluginParameter type="ArrayType">
+           <Parameter key="" value=""/>
+        </PluginParameter>
+        <PluginDataHandlers>
+        	 <PluginDataHandler classKey="RegularFilter">
+        	 <Parameter type="" key="REGULAR" value="(\S+) Display Status: [^&amp;]*&amp;__&amp;/admin/pages/images/([^.]*).gif"/>
+     		 </PluginDataHandler>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="DisplayIndex" />
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="DisplayIndex" />
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="DisplayState" value="OK,1;0" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="DisplayTemperature" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="DisplayTemperature" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get" />
+            <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.3.1.3.2" />
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="HdmiCableStatus" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="DisplayIndex,HdmiCableStatus" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk" />
+            <Parameter type="" key="" value="1.3.6.1.4.1.9.9.643.1.2.3.1.2.6" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="HdmiCableStatus" value="1,plugged;2,loose;3,unplugged;4,unknown;5,internalError;" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="HdmiPowerStatus" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="DisplayIndex,HdmiPowerStatus" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk" />
+            <Parameter type="" key="" value="1.3.6.1.4.1.9.9.643.1.2.3.1.3.6" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="HdmiPowerStatus" value="1,on;2,standby;3,off;4,unknown;5,internalError;" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <!-- Camera -->
+    <MetricPlugin metricid="CameraIndex" collectType="" pluginid="TxPlugin">
+        <PluginResultMetaInfo columns="CameraIndex" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="" value="" />
+        </PluginParameter>
+        <PluginDataHandlers>
+        	<PluginDataHandler classKey="columnAddProcessor">
+                <Parameter type="" key="ColumnName" value="CameraIndex" />
+                <Parameter type="" key="ColumnValue" value="Left Camera" />
+                <Parameter type="" key="ColumnValue" value="Right Camera" />
+            </PluginDataHandler>
+           <PluginDataHandler classKey="RegularFilter">
+        	 <Parameter type="" key="REGULAR" value="(\S+) Camera"/>
+     		 </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="CameraIndex" />
+            <Parameter type="" key="ValueColumnTitle" value="CameraIndex" />
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="CameraName" collectType="" pluginid="TxPlugin">
+        <PluginResultMetaInfo columns="CameraIndex" />
+        <PluginParameter type="ArrayType"> 
+      	<Parameter key="" value=""/>
+    	</PluginParameter> 
+        <PluginDataHandlers>
+        	<PluginDataHandler classKey="columnAddProcessor">
+                <Parameter type="" key="ColumnName" value="CameraIndex" />
+                <Parameter type="" key="ColumnValue" value="Left Camera" />
+                <Parameter type="" key="ColumnValue" value="Right Camera" />
+            </PluginDataHandler>
+             <PluginDataHandler classKey="RegularFilter">
+        	 <Parameter type="" key="REGULAR" value="(\S+) Camera"/>
+     		 </PluginDataHandler>
+     		 <PluginDataHandler classKey="selectProcessor">
+        	<Parameter type="" key="SELECT" value="SELECT (CameraIndex + 'Camera') as CameraName, CameraIndex"/>
+      		 </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="CameraIndex" />
+            <Parameter type="" key="ValueColumnTitle" value="CameraName" />
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="CameraIndex" />
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="CameraifStatus" collectType="" pluginid="TxPlugin">
+        <PluginResultMetaInfo columns="CameraIndex,CameraState" />
+        <PluginParameter type="ArrayType">
+           <Parameter key="" value=""/>
+        </PluginParameter>
+        <PluginDataHandlers>
+        	 <PluginDataHandler classKey="RegularFilter">
+        	 <Parameter type="" key="REGULAR" value="(\S+) Camera Status:  [^&amp;]*&amp;__&amp;/admin/pages/images/([^.]*).gif"/>
+     		 </PluginDataHandler>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="CameraIndex" />
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="CameraIndex" />
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="CameraState" value="OK,1;0" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="CameraTemperature" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="CameraTemperature" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get" />
+            <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.3.1.3.1" />
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="CameraHDCableStatus" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="CameraIndex,CameraHDCableStatus" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk" />
+            <Parameter type="" key="" value="1.3.6.1.4.1.9.9.643.1.2.3.1.2.3" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="CameraHDCableStatus" value="1,plugged;2,loose;3,unplugged;4,unknown;5,internalError;" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="CameraHDPowerStatus" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="CameraIndex,CameraHDPowerStatus" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk" />
+            <Parameter type="" key="" value="1.3.6.1.4.1.9.9.643.1.2.3.1.3.3" />
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="CameraHDPowerStatus" value="1,on;2,standby;3,off;4,unknown;5,internalError;" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="SIPName" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="SIPName" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.54.1.1.1.1.3.1" />
+        </PluginParameter>
+        <PluginDataHandlers>
+      		 <PluginDataHandler classKey="selectProcessor">
+        	 <Parameter type="" key="SELECT" value="SELECT (SIPName + ' SIP') as SIPName"/>
+      		 </PluginDataHandler>
+    	</PluginDataHandlers>
+    </MetricPlugin>
+    <!-- CM -->
+    <MetricPlugin metricid="UnifiedCMName" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="UnifiedCMName" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.54.1.1.1.1.3.1" />
+        </PluginParameter>
+        <PluginDataHandlers>
+      		 <PluginDataHandler classKey="selectProcessor">
+        	 <Parameter type="" key="SELECT" value="SELECT (UnifiedCMName + ' UnifiedCM') as UnifiedCMName"/>
+      		 </PluginDataHandler>
+    	</PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="UnifiedCMState" collectType="" pluginid="TxPlugin">
+        <PluginResultMetaInfo columns="UnifiedCMState" />
+        <PluginParameter type="ArrayType">
+           <Parameter key="" value=""/>
+        </PluginParameter>
+        <PluginDataHandlers>
+        	 <PluginDataHandler classKey="RegularFilter">
+        	 <Parameter type="" key="REGULAR" value="=====([^=]*)=====[^=]*=====[^=]*=====[^=]*"/>
+     		 </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="UnifiedCMAvailability" collectType="" pluginid="TxPlugin">
+        <PluginResultMetaInfo columns="UnifiedCMAvailability" />
+        <PluginParameter type="ArrayType">
+           <Parameter key="" value=""/>
+        </PluginParameter>
+        <PluginDataHandlers>
+        	 <PluginDataHandler classKey="RegularFilter">
+        	 <Parameter type="" key="REGULAR" value="=====([^=]*)=====[^=]*=====[^=]*=====[^=]*"/>
+     		 </PluginDataHandler>
+     		 <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="UnifiedCMAvailability" value="OK,1;0" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <!-- AudioBox -->
+    <MetricPlugin metricid="AudioBoxName" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="AudioBoxName" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.54.1.1.1.1.3.1" />
+        </PluginParameter>
+        <PluginDataHandlers>
+      		<PluginDataHandler classKey="selectProcessor">
+        	<Parameter type="" key="SELECT" value="SELECT (AudioBoxName + ' AudioBox') as AudioBoxName"/>
+      		</PluginDataHandler>
+    	</PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="AudioBoxState" collectType="" pluginid="TxPlugin">
+        <PluginResultMetaInfo columns="AudioBoxState" />
+        <PluginParameter type="ArrayType">
+           <Parameter key="" value=""/>
+        </PluginParameter>
+        <PluginDataHandlers>
+        	 <PluginDataHandler classKey="RegularFilter">
+        	 <Parameter type="" key="REGULAR" value="=====[^=]*=====[^=]*=====([^=]*)=====[^=]*"/>
+     		 </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="AudioBoxAvailability" collectType="" pluginid="TxPlugin">
+        <PluginResultMetaInfo columns="AudioBoxAvailability" />
+        <PluginParameter type="ArrayType">
+           <Parameter key="" value=""/>
+        </PluginParameter>
+        <PluginDataHandlers>
+        	 <PluginDataHandler classKey="RegularFilter">
+        	 <Parameter type="" key="REGULAR" value="=====[^=]*=====[^=]*=====([^=]*)=====[^=]*"/>
+     		 </PluginDataHandler>
+     		 <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="AudioBoxAvailability" value="OK,1;0" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <!-- LightUnit -->
+    <MetricPlugin metricid="LightUnitName" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="LightUnitName" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.54.1.1.1.1.3.1" />
+        </PluginParameter>
+        <PluginDataHandlers>
+      		<PluginDataHandler classKey="selectProcessor">
+        	<Parameter type="" key="SELECT" value="SELECT (LightUnitName + ' LightUnit') as LightUnitName"/>
+      		</PluginDataHandler>
+    	</PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="LightUnitState" collectType="" pluginid="TxPlugin">
+        <PluginResultMetaInfo columns="LightUnitState" />
+        <PluginParameter type="ArrayType">
+           <Parameter key="" value=""/>
+        </PluginParameter>
+        <PluginDataHandlers>
+        	 <PluginDataHandler classKey="RegularFilter">
+        	 <Parameter type="" key="REGULAR" value="=====[^=]*=====[^=]*=====[^=]*=====([^=]*)"/>
+     		 </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="LightUnitAvailability" collectType="" pluginid="TxPlugin">
+        <PluginResultMetaInfo columns="LightUnitAvailability" />
+        <PluginParameter type="ArrayType">
+           <Parameter key="" value=""/>
+        </PluginParameter>
+        <PluginDataHandlers>
+        	 <PluginDataHandler classKey="RegularFilter">
+        	 <Parameter type="" key="REGULAR" value="=====[^=]*=====[^=]*=====[^=]*=====([^=]*)"/>
+     		 </PluginDataHandler>
+     		 <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="LightUnitAvailability" value="OK,1;Not Detected,1;0" />
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="HttpTimeoutName" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="HttpTimeoutName" />
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get" />
+            <Parameter type="" key="" value="1.3.6.1.2.1.54.1.1.1.1.3.1" />
+        </PluginParameter>
+        <PluginDataHandlers>
+      		<PluginDataHandler classKey="selectProcessor">
+        	<Parameter type="" key="SELECT" value="SELECT (HttpTimeoutName + ' HttpTimeout') as HttpTimeoutName"/>
+      		</PluginDataHandler>
+    	</PluginDataHandlers>
+    </MetricPlugin>
+    </MetricPlugins>

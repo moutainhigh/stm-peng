@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.portal.config.dao.IBackupPlanDao">
+	<resultMap id="boResult"
+		type="com.mainsteam.stm.portal.config.bo.BackupPlanBo">
+		<id column="ID" property="id" />
+		<result column="BEGIN_TIME" property="beginDate" />
+		<result column="END_TIME" property="endDate" />
+		<result column="BACKUP_DESC" property="desc" />
+		<result column="ENTRY_ID" property="entryId" />
+		<result column="ENTRY_DATETIME" property="entryTime" />
+	</resultMap>
+	
+	<insert id="insert" parameterType="com.mainsteam.stm.portal.config.bo.BackupPlanBo">
+		INSERT INTO
+		STM_CONFIG_BACKUP(ID,NAME,BEGIN_TIME,END_TIME,TYPE,BACKUP_DESC,ENTRY_ID,ENTRY_DATETIME,MONTH,WEEK,DAY,HOUR,MINUTE)
+		VALUES(#{id},#{name},#{beginDate},#{endDate},#{type},#{desc},#{entryId},#{entryTime},#{month},#{week},#{day},#{hour},#{minute})
+	</insert>
+	
+	<select id="get" parameterType="Long" resultMap="boResult">
+		SELECT
+		ID,NAME,BEGIN_TIME,END_TIME,TYPE,BACKUP_DESC,ENTRY_ID,ENTRY_DATETIME,MONTH,WEEK,DAY,HOUR,MINUTE
+		FROM STM_CONFIG_BACKUP WHERE ID = #{id}
+	</select>
+	
+	<select id="getByName" parameterType="String" resultMap="boResult">
+		SELECT
+		ID,NAME,BEGIN_TIME,END_TIME,TYPE,BACKUP_DESC,ENTRY_ID,ENTRY_DATETIME,MONTH,WEEK,DAY,HOUR,MINUTE
+		FROM STM_CONFIG_BACKUP WHERE NAME = #{name}
+	</select>
+	
+	<update id="update" parameterType="com.mainsteam.stm.portal.config.bo.BackupPlanBo">
+		UPDATE STM_CONFIG_BACKUP SET
+		<if test="name != null">
+			NAME = #{name},
+		</if>
+		<if test="type != null">
+			TYPE = #{type},
+		</if>
+		BEGIN_TIME = #{beginDate},END_TIME =
+		#{endDate},BACKUP_DESC=#{desc},HOUR =
+		#{hour},MINUTE=#{minute},MONTH=#{month},WEEK=#{week},DAY=#{day}
+		WHERE ID = #{id}
+	</update>
+	
+	<delete id="del" parameterType="Long">
+		DELETE FROM
+		STM_CONFIG_BACKUP
+		WHERE ID = #{id}
+	</delete>
+	
+	<delete id="batchDelPlan" parameterType="Long">
+		DELETE FROM STM_CONFIG_BACKUP WHERE ID in
+		 <foreach item="ids" index="index" collection="array" open="(" separator="," close=")">  
+  			#{ids}
+ 		 </foreach>
+	</delete>
+	
+	<select id="pageSelect" resultMap="boResult"
+		parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		SELECT
+		A.ID,A.NAME,A.BEGIN_TIME,A.END_TIME,A.TYPE,A.BACKUP_DESC,A.ENTRY_ID,A.ENTRY_DATETIME,
+		A.MONTH,A.WEEK,A.DAY,A.HOUR,A.MINUTE
+		,B.NAME AS ENTRYNAME
+		FROM STM_CONFIG_BACKUP A
+		LEFT JOIN STM_SYS_USER B ON A.ENTRY_ID = B.ID
+	</select>
+	
+	<update id="upateDevicePlan" parameterType="com.mainsteam.stm.portal.config.bo.BackupPlanBo">
+		UPDATE STM_CONFIG_RESOURCE_PROP SET BACKUP_ID = #{id} WHERE RESOURCE_ID IN
+		<foreach item="item" index="index" collection="resourceIds" open="(" separator="," close=")">  
+  			#{item}
+ 		 </foreach> 
+	</update>
+</mapper>

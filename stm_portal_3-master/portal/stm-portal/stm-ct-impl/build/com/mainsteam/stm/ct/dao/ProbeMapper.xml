@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.ct.dao.ProbeMapper">
+
+    <sql id="whereIfSql">
+        <if test="condition.probe_site != null and condition.probe_site != ''">
+            AND probe_site = #{condition.probe_site}
+        </if>
+        <if test="condition.probe_ip != null and condition.probe_ip != ''">
+            AND probe_ip like CONCAT('%',#{condition.probe_ip},'%')
+        </if>
+        <if test="condition.probe_port != null and condition.probe_port != ''">
+            AND probe_port = #{condition.probe_port}
+        </if>
+        <if test="condition.probe_status != null and condition.probe_status != ''">
+            AND probe_status = #{condition.probe_status}
+        </if>
+
+    </sql>
+
+    <select id="getProbeList" resultType="com.mainsteam.stm.ct.bo.MsProbe">
+        SELECT
+            *
+        FROM
+            ms_probe
+        WHERE
+            1 = 1
+            <include refid="whereIfSql"/>
+        ORDER BY
+            id ASC
+    </select>
+    <select id="get" parameterType="java.lang.Long" resultType="com.mainsteam.stm.ct.bo.MsProbe">
+    	 SELECT
+            *
+        FROM
+            ms_probe
+        WHERE 
+        	id=#{id}
+    </select>
+	<insert id="insert" parameterType="com.mainsteam.stm.ct.bo.MsProbe">
+		INSERT INTO `ms_probe` (`probe_site`, `probe_ip`, `probe_port`, `probe_status`, `last_time`, `create_time`, `update_time`) 
+		VALUES ( #{probe_site}, #{probe_ip}, #{probe_port}, #{probe_status}, #{last_time}, #{create_time}, #{update_time});
+	</insert>
+	<update id="update" parameterType="com.mainsteam.stm.ct.bo.MsProbe">
+		UPDATE `ms_probe` SET 
+		 `probe_site`=#{probe_site},
+		 `probe_ip`=#{probe_ip},
+		 `probe_port`=#{probe_port},
+		 `probe_status`=#{probe_status},
+		 `last_time`=#{last_time},
+		 `update_time`=#{update_time}
+		 WHERE `id`=#{id};
+	</update>
+	<delete id="del" parameterType="java.lang.Long">
+		delete from ms_probe where id =#{id}
+	</delete>
+</mapper>

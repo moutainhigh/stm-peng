@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.metric.dao.CustomMetricDAO">
+
+	<sql id="customMetricColumn"> 
+		customMetricId,customMetricName,customMetricUnit,customMetricStyle,
+		isMonitor,isAlert,freq,flapping,updateTime
+	</sql>
+	<sql id="customMetricColumnValue">
+		#{customMetricId},#{customMetricName},#{customMetricUnit},#{customMetricStyle},
+		#{isMonitor},#{isAlert},#{freq},#{flapping},#{updateTime}
+	</sql>
+	<sql id="table">
+		 STM_CUSTOM_METRIC_MAIN
+	</sql>
+	<sql id="selectSql">
+		select <include refid="customMetricColumn"/>
+		from   <include refid="table"/>
+	</sql>
+	
+	<select id="getAllCustomMetricDOs" resultType="com.mainsteam.stm.metric.dao.pojo.CustomMetricDO">
+	   <include refid="selectSql"/>
+	</select> 
+	
+	
+	<insert id="insertCustomMetric" 
+		parameterType="com.mainsteam.stm.metric.dao.pojo.CustomMetricDO">
+		insert into <include refid="table"/>
+		(<include refid="customMetricColumn"/>) 
+		values(<include refid="customMetricColumnValue"/>) 
+	</insert>
+	<update id="updateCustomMetric" 
+		parameterType="com.mainsteam.stm.metric.dao.pojo.CustomMetricDO">
+		update <include refid="table"/> 
+		<set>
+			<if test="customMetricName != null">  customMetricName= #{customMetricName},</if>
+			<if test="customMetricUnit != null"> customMetricUnit=#{customMetricUnit}, </if>
+			<!-- <if test="customMetricStyle != null"> customMetricStyle = #{customMetricStyle},</if> -->
+			<if test="isMonitor != null"> isMonitor=#{isMonitor},</if>
+			<if test="isAlert != null">  isAlert =#{isAlert},</if>
+			<if test="freq != null">  freq= #{freq},</if>
+			<if test="flapping > 0"> flapping=#{flapping}, </if>
+			<if test="updateTime != null"> updateTime=#{updateTime}, </if>
+		</set>	
+		where customMetricId = #{customMetricId} 
+	</update>
+	<delete id="removeMetricById" parameterType="String"> 
+		delete from <include refid="table"/>  where customMetricId = #{customMetricId} 
+	</delete>
+	<select id="getMetricDOById" 
+		resultType="com.mainsteam.stm.metric.dao.pojo.CustomMetricDO"
+		parameterType="String"> 
+		<include refid="selectSql"/> where customMetricId = #{customMetricId} 
+	</select>
+	<select id="getAllMetric" 
+		resultType="com.mainsteam.stm.metric.dao.pojo.CustomMetricDO"
+		parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		<include refid="selectSql"/>
+		<if test="condition!=null">
+			where 1=1 
+			<if test="condition.customMetricName != null"> and  customMetricName like #{condition.customMetricName}</if>
+			<if test="condition.customMetricStyle != null"> and customMetricStyle = #{condition.customMetricStyle}</if>
+			<if test="condition.isMonitor != null"> and isMonitor=#{condition.isMonitor}</if>
+			<if test="condition.isAlert != null"> and  isAlert =#{condition.isAlert}</if>
+		</if>
+	</select>
+	<select id="getMetricDOByIds" 
+		resultType="com.mainsteam.stm.metric.dao.pojo.CustomMetricDO">
+		<include refid="selectSql"/> where customMetricId in 
+		<foreach collection="list" index="index" item="item" open="(" separator="," close=")">#{item}</foreach>
+	</select>
+	<select id="getMetricCount"
+		parameterType="com.mainsteam.stm.metric.dao.pojo.CustomMetricDO" resultType="int">
+		select count(*)	from <include refid="table"/> 
+		<trim prefix="where" prefixOverrides="and">
+			<if test="customMetricName != null"> and  customMetricName like #{customMetricName}</if>
+			<if test="customMetricStyle != null"> and customMetricStyle = #{customMetricStyle}</if>
+			<if test="isMonitor != null"> and isMonitor=#{isMonitor}</if>
+			<if test="isAlert != null"> and  isAlert =#{isAlert}</if>
+		</trim>
+	</select>	
+ </mapper>

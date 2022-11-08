@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                    http://www.springframework.org/schema/context
+                    http://www.springframework.org/schema/context/spring-context-2.5.xsd
+                    ">
+	<bean id="customPropDefService" class="com.mainsteam.stm.instancelib.service.impl.CustomPropDefServiceImpl" init-method="start">
+		<property name="propDefinitionDAO" ref="customPropDefinitionDAO">
+		</property>
+	</bean>
+	<bean id="customPropDefinitionDAO" class="com.mainsteam.stm.instancelib.dao.impl.CustomPropDefinitionDAOImpl">
+		<property name="session" ref="sqlSession">
+		</property>
+	</bean>
+	<bean id="customPropService" class="com.mainsteam.stm.instancelib.service.impl.CustomPropServiceImpl" >
+		<property name="propDAO" ref="propDAO"></property>
+		<property name="propTypeDAO" ref="propTypeDAO"></property>
+		<property name="instancelibEventManager" ref="instancelibEventManager"></property> 
+		<property name="propCache" ref="propCache"></property> 
+	</bean>
+	<bean id="discoverPropService" class="com.mainsteam.stm.instancelib.service.impl.DiscoverPropServiceImpl" >
+		<property name="propDAO" ref="propDAO"></property>
+		<property name="propTypeDAO" ref="propTypeDAO"></property>
+		<property name="instancelibEventManager" ref="instancelibEventManager"></property> 
+		<property name="propCache" ref="propCache"></property> 
+	</bean>
+	<bean id="extendPropService" class="com.mainsteam.stm.instancelib.service.impl.ExtendPropServiceImpl" >
+		<property name="propDAO" ref="propDAO"></property>
+		<property name="propTypeDAO" ref="propTypeDAO"></property>
+		<property name="instancelibEventManager" ref="instancelibEventManager"></property> 
+		<property name="propCache" ref="propCache"></property> 
+	</bean>
+	<bean id="modulePropService" class="com.mainsteam.stm.instancelib.service.impl.ModulePropServiceImpl">
+		<property name="propDAO" ref="propDAO"></property>
+		<property name="propTypeDAO" ref="propTypeDAO"></property>
+		<property name="instancelibEventManager" ref="instancelibEventManager"></property> 
+		<property name="propCache" ref="propCache"></property> 
+	</bean>
+	<bean id="compositePropService" class="com.mainsteam.stm.instancelib.service.impl.CompositePropServiceImpl">
+		<property name="propDAO" ref="propDAO"></property>
+		<property name="propTypeDAO" ref="propTypeDAO"></property>
+	</bean>
+	<bean id="propDAO" class="com.mainsteam.stm.instancelib.dao.impl.PropDAOImpl">
+		<property name="session" ref="sqlSession"></property>
+		<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+	</bean>
+	<bean id="propTypeDAO" class="com.mainsteam.stm.instancelib.dao.impl.PropTypeDAOImpl">
+		<property name="session" ref="sqlSession"></property>
+		<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+	</bean>
+	<bean id="customModulePropDAO" class="com.mainsteam.stm.instancelib.dao.impl.CustomModulePropDAOImpl">
+		<property name="session" ref="sqlSession"></property>
+		<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+	</bean>
+	
+	<!-- 表 stm_instancelib_composite_main 和 stm_instancelib_resource_main 主键序列值-->
+    <bean id="instanceSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_INSTANCELIB_INSTANCE"></constructor-arg>
+	</bean>
+	<!-- 资源实例 -->
+	<bean id="resourceInstanceService" class="com.mainsteam.stm.instancelib.service.impl.ResourceInstanceServiceImpl">
+		<property name="resourceInstanceDAO" ref="resourceInstanceDAO"></property>
+		<property name="propDAO" ref="propDAO"></property>
+		<property name="propTypeDAO" ref="propTypeDAO"></property>
+		<property name="customPropService" ref="customPropService"></property>
+		<property name="discoverPropService" ref="discoverPropService"></property>
+		<property name="extendPropService" ref="extendPropService"></property>
+		<property name="modulePropService" ref="modulePropService"></property>
+		<property name="extendPropExtendService" ref="extendPropService"></property>
+		<property name="customPropExtendService" ref="customPropService"></property>
+		<property name="discoverPropExtendService" ref="discoverPropService"></property>
+		<property name="modulePropExtendService" ref="modulePropService"></property>
+	 	<property name="instanceSeq" ref="instanceSeq"></property> 
+	 	<property name="instancelibEventManager" ref="instancelibEventManager"></property> 
+	 	<property name="cache" ref="resourceInstanceCache"></property> 
+	 	<property name="initLoadPropKey" ref="initLoadPropKey"></property> 
+	 	<property name="resourceComparer" ref="resourceComparer"></property>
+	 	<property name="capacityService" ref="capacityService"></property>
+	 	<property name="propCache" ref="propCache"></property> 
+	 	<property name="licenseCategoryRelation" ref="licenseCategoryRelation"></property>
+	 	<property name="customModulePropCache" ref="customModulePropCache"></property>
+	 	<property name="customModulePropService" ref="customModulePropService"></property>	
+	</bean>
+	<!--  <bean id="coreResourceInstanceService" class="com.mainsteam.stm.instancelib.service.impl.CoreResourceInstanceServiceImpl">
+		<property name="resourceInstanceService" ref="resourceInstanceService"></property>
+		<property name="resourceInstanceDAO" ref="resourceInstanceDAO"></property>
+	</bean>-->
+	<bean id="customModulePropService" class="com.mainsteam.stm.instancelib.service.impl.CustomModulePropServiceImpl">
+		<property name="customModulePropCache" ref="customModulePropCache"></property>
+		<property name="customModulePropDAO" ref="customModulePropDAO"></property>
+		<property name="modulePropService" ref="modulePropService"></property>
+	</bean>
+	
+	<bean id="resourceComparer" class="com.mainsteam.stm.instancelib.util.ResourceComparer">
+		<property name="capacityService" ref="capacityService"></property>
+	</bean>
+	
+	<bean id="resourceInstanceDAO" class="com.mainsteam.stm.instancelib.dao.impl.ResourceInstanceDAOImpl">
+		<property name="session" ref="sqlSession"></property>
+		<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+	</bean>
+	
+	<!-- 复合实例 -->
+	<bean id="compositeInstanceService" class="com.mainsteam.stm.instancelib.service.impl.CompositeInstanceServiceImpl">
+		<property name="compositePropService" ref="compositePropService"></property>
+		<property name="compositePropExtendService" ref="compositePropService"></property>
+	   <property name="instanceCollectionService" ref="instanceCollectionService"></property>
+		<property name="relationService" ref="relationService"></property>
+		<property name="relationExtendService" ref="relationService"></property>
+		<property name="compositeInstanceDAO" ref="compositeInstanceDAO"></property>
+		<property name="instanceSeq" ref="instanceSeq"></property>
+	</bean>
+    <bean id="relationService" class="com.mainsteam.stm.instancelib.service.impl.RelationServiceImpl">
+		<property name="relationDAO" ref="relationDAO"></property>
+		<property name="instancelibEventManager" ref="instancelibEventManager"></property>
+	</bean> 
+	<bean id="instanceCollectionService" class="com.mainsteam.stm.instancelib.service.impl.InstaceCollectionServiceImpl">
+		<property name="instaceCollectionDAO" ref="instaceCollectionDAO"></property>
+		<property name="compositeInstanceService" ref="compositeInstanceService"></property>
+		<property name="resourceInstanceService" ref="resourceInstanceService"></property>
+	</bean>
+	
+	<bean id="compositeInstanceDAO" class="com.mainsteam.stm.instancelib.dao.impl.CompositeInstanceDAOImpl">
+		<property name="session" ref="sqlSession"></property>
+	</bean>
+    <bean id="instaceCollectionDAO" class="com.mainsteam.stm.instancelib.dao.impl.InstaceCollectionDAOImpl">
+		<property name="session" ref="sqlSession"></property>
+	</bean>
+	<bean id="relationDAO" class="com.mainsteam.stm.instancelib.dao.impl.RelationDAOImpl">
+		<property name="session" ref="sqlSession"></property>
+	</bean>
+	
+	<!-- 用于管理实例监听和拦截器 -->
+	<bean id="instancelibEventManager" class="com.mainsteam.stm.instancelib.interceptor.InstancelibEventManagerImpl">
+	</bean>
+	
+	<bean id="instancelibRegister" class="com.mainsteam.stm.instancelib.interceptor.InstancelibEventRegisterLoad">
+		<property name="instancelibEventManager" ref="instancelibEventManager"></property>
+	</bean>
+	
+	<!-- 用于缓存 -->
+	<bean id="resourceInstanceCache" class="com.mainsteam.stm.instancelib.util.ResourceInstanceCache">
+	</bean>
+	<!-- 用于缓存 -->
+	<bean id="propCache" class="com.mainsteam.stm.instancelib.util.PropCache">
+	</bean>
+	<!-- 用于缓存 -->
+	<bean id="customModulePropCache" class="com.mainsteam.stm.instancelib.util.CustomModulePropCache">
+	</bean>
+	<bean id="initLoadPropKey" class="com.mainsteam.stm.instancelib.util.InitLoadPropKeyUtil" init-method="start">
+	</bean>
+	<!-- 用于采集器远程调用Bean -->
+	<bean id="resourceInstanceSyncMBean" class="com.mainsteam.stm.instancelib.remote.ResourceInstanceSync" init-method="start">
+		<property name="resourceInstanceExtendService" ref="resourceInstanceService" />
+	</bean>
+</beans>

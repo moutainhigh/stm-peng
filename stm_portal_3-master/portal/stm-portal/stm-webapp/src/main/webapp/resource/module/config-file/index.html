@@ -1,0 +1,309 @@
+<div id="oc_config_file_index" class="easyui-layout" style="width:100%;height:100%;">
+	<div data-options="region:'west',title:'自定义配置组<span id=\'addConfigGroupBtn\' class=\'fa fa-plus locate-right margin-top8 openbesinesswin\'></span>'" style="width: 200px;">
+		<div class="customgroup"></div>
+		<div id="rightButtonMenu" class="easyui-menu" style="width:30px;display:none;">
+			<div id="menu_edit">编辑</div>
+			<div id="menu_del">删除</div>
+		</div>
+		<!-- 
+		<span>
+			<span id="operConfigGroupBtn" class="fa fa-wrench locate-right margin-top8"></span>
+			<span id="addConfigGroupBtn" class="fa fa-plus locate-right margin-top8 openbesinesswin"></span>
+		</span>
+		</div>' class="customgroup"></div>
+		 -->
+	</div>
+	<div data-options="region:'center'" id="configCenter"></div>
+</div>
+<script>
+	$(function(){
+		var indexDiv = $('#oc_config_file_index'),chooseGroupId = null,chooseGroupName = null;
+		var centerDiv = null, isOpenOperation = false,curShowResourceGroupId = -1;
+		indexDiv.layout({
+			fit:true
+		});
+		centerDiv=indexDiv.layout('panel','center');
+		var operBtn = indexDiv.find("#operConfigGroupBtn"),addBtn = $("#addConfigGroupBtn");
+		
+		var highlight = $('#sidebar').find('#mainMenu').find('li.module-href.highlight').find('li.highlight:first');
+		if(highlight.hasClass('open')){
+			treeMenuTitleName = highlight.find('li.highlight:first').find('a:first').attr('rightmarkname');
+		}else{
+			treeMenuTitleName = highlight.find('a:first').attr('rightmarkname');
+		}
+		
+		//左侧菜单点击事件
+		function click_renderCenter(title){
+			centerDiv.children().html('');
+			centerDiv.children().remove();
+			$('<div style="width:100%; height:100%;"></div>').appendTo(centerDiv).panel('RenderP',{
+ 				title: title,
+ 				href: oc.resource.getUrl('resource/module/config-file/device/device.html')
+ 			});
+		}
+		
+		//初始化右键menu
+		$('#rightButtonMenu').menu({
+			onClick:function(item){
+				var node = $(item.target).data('node');
+				switch (item.text) {
+				case '编辑':
+					oc.util.ajax({
+						  url: oc.resource.getUrl('portal/config/file/getCustomGroup.htm'),
+						  data:{id: node.id},
+						  successMsg:null,
+						  success:function(data){
+							  showAddGroupDiv('edit', node.name, node.id, node.resourceInstanceIds.join());
+						  }
+					});
+					break;
+				case '删除':
+					oc.ui.confirm('确认删除' + node.name + '自定义配置组吗?',function(){
+						  //发送删除请求
+						  oc.util.ajax({
+							  url: oc.resource.getUrl('portal/config/file/delCustomGroup.htm'),
+							  data:{id: node.id},
+							  success:function(){
+								  $('.customgroup').tree('reload');
+							  }
+						  });
+					});
+					break;
+				default:
+					break;
+				}
+			}
+		});
+		
+		//菜单树
+		var configMenuTree = $('.customgroup').tree({
+			url: oc.resource.getUrl('portal/config/file/getAllCustomGroup.htm?dataType=json'),
+			fit: true,
+			animate: true,
+			lines: true,
+			loadFilter: function(data){
+				var arr = [];
+				for(var i = 0; i<data.data.length; i++){
+					var customGroup = data.data[i];
+					arr.push({
+						id: customGroup.id,
+						name: customGroup.name,
+						text: customGroup.name+'<span class="s-digit">'+customGroup.resourceInstanceIds.length+'</span>',
+						resourceInstanceIds: customGroup.resourceInstanceIds
+					});
+				}
+				return arr;
+			},
+			onLoadSuccess: function(node,data){
+				if(data.length>0){
+					var firstNode = configMenuTree.tree('find',data[0].id);
+					$(firstNode.target).click();
+				}else{
+					//没有自定义配置组
+					var hasClickResourceMenu = $('#mainMenu').find('a[rightmarkname="自定义配置组"]:first').attr('hasClickDevice');
+					if(hasClickResourceMenu){
+						//没有组显示空表格
+						chooseGroupId = getChooseGroupId(1);
+						chooseGroupName = getChooseGroupName(1);
+						click_renderCenter("没有自定义配置组");
+					}else{
+						//首次点击默认进入设备一览
+						highlight.parent().find('a[rightmarkname="设备一览"]').click();
+					}
+				}
+			},
+			onClick: function(node){
+				chooseGroupId = getChooseGroupId(node.id);
+				chooseGroupName = getChooseGroupName(node.name);
+				click_renderCenter("配置变更管理-"+node.name);
+			},
+			onContextMenu: function(e, node){
+				//修改选中状态
+				var selectedNode = $('.customgroup').tree('getSelected');
+				$(selectedNode.target).removeClass('tree-node-selected');
+				$(node.target).addClass('tree-node-selected');
+				
+				//取消浏览器右键菜单
+				e.preventDefault();
+				
+				//右键菜单赋值
+				$('#rightButtonMenu').find('#menu_edit').data('node',node);
+				$('#rightButtonMenu').find('#menu_del').data('node',node);
+				
+				$('#rightButtonMenu').menu('show',{
+					left:e.pageX,
+					top:e.pageY
+				});
+			}
+		});
+		
+		addBtn.on('click',function(e){
+			e.stopPropagation();
+			showAddGroupDiv('add');
+		});
+		
+		//修改或者添加展示dialog
+		function showAddGroupDiv(type,groupNameParam,groupId,resourceInstanceIds){
+		  var addWindow = $('<div/>');
+		  addWindow.append('<form class="oc-form col1" style="padding:0;"><div class="form-group" style="padding:0 5px; text-align:left;" ><span>配置组名称 : </span><div><input type="text" class="oc-enter" id="cutomGroupNameInputId" maxlength=15 /><input type="text" name="config-hidden-text" style="display:none;"></div></div></form>');
+		  addWindow.append('<div id="groupPicktree" style="overflow: hidden; width: 97%;height:250px; margin:auto;"></div>');
+		  var groupPicktree = null, dialogTitle = '', pickTreeCfg = null,nowGroupName = '',groupOperationUrl = '',transData = {};
+		  pickTreeCfg = {
+			  selector:"#groupPicktree",
+			  dataType:'array',
+			  isInteractive:true,
+			  requestType:'sync'
+		  };
+		  if(type == 'add'){
+			  groupOperationUrl = 'portal/config/file/addCustomGroup.htm';
+			  dialogTitle = '添加自定义配置组';
+			  pickTreeCfg.lUrl = oc.resource.getUrl('portal/config/file/getAllResourceDef.htm');
+		  }else if(type == 'edit'){
+			  var curGroupHaveResourceIds = resourceInstanceIds;
+			  transData.id = groupId;
+			  groupOperationUrl = 'portal/config/file/editCustomGroup.htm';
+			  dialogTitle = '修改自定义配置组';
+			  pickTreeCfg.lUrl = oc.resource.getUrl('portal/config/file/getLeftResourceDef.htm?ids=' + curGroupHaveResourceIds);
+			  pickTreeCfg.rUrl = oc.resource.getUrl('portal/config/file/getRightResourceDef.htm?ids=' + curGroupHaveResourceIds);
+			  nowGroupName = groupNameParam;
+		  }
+		  //构建dialog
+		  addWindow.dialog({
+			  title:dialogTitle,
+			  width:600,
+			  height:400,
+			  modal:true,
+			  buttons:[{
+					text:'保存',
+					iconCls:'fa fa-check-circle',
+					handler:function(){
+						var groupName = $('#cutomGroupNameInputId').val();
+						if(groupName == null || groupName == undefined || groupName.trim() == ''){
+							alert('请输入名称');
+							return;
+						}
+						var checkData = groupPicktree.getRightTreeData(), resourceInstanceIdArray = new Array(), checkedResourceIDs = '';
+						for(var i = 0 ; i < checkData.length ; i++){
+							var selectData = checkData[i];
+							if(!selectData.isParent){
+								checkedResourceIDs += selectData.id + ',';
+								resourceInstanceIdArray.push(selectData.id);
+							}
+						}
+						checkedResourceIDs = checkedResourceIDs.substring(0,checkedResourceIDs.length - 1);
+						if(type == 'edit' && curGroupHaveResourceIds == checkedResourceIDs && groupName == nowGroupName){
+							alert('未做任何修改');
+							return;
+						}
+						
+						if(resourceInstanceIdArray.length <= 0){
+							alert('请选择网络设备');
+							return;
+						}
+						
+						transData.name = groupName;
+						transData.resourceInstanceIds = checkedResourceIDs;
+						//发送添加请求
+						oc.util.ajax({
+							url: oc.resource.getUrl(groupOperationUrl),
+							data:transData,
+							failureMsg:null,
+							successMsg:null,
+							success: function(data){
+								var result = eval(data);
+								if(data.code == 201){
+									alert('配置组名称已存在!');
+									return;
+								}
+								if(result.data >= 1){
+									if(groupName.length > 6){
+										 groupName = groupName.substring(0, 6) + "...";
+									}
+									if(type == 'add'){
+										var liData = {
+										  name:groupName,
+										  info:{
+											  resourceInstanceIds:resourceInstanceIdArray,
+											  id:result.data,
+											  name:groupName
+										  },
+										  isOpenOperation:isOpenOperation
+										};
+									}else if(type == 'edit'){
+										if(groupId == curShowResourceGroupId){
+											//修改的自定义资源类正在右边展示
+											curShowResourceGroupId = -1;
+										}
+									}
+									addWindow.dialog('destroy');
+									alert('操作成功');
+									configMenuTree.tree('reload');
+								}else{
+									alert('operation fail!');
+								}
+							}
+						});
+					}
+				},{
+					text:'取消',
+					iconCls:'fa fa-times-circle',
+					handler:function(){
+						addWindow.dialog('close');
+					}
+				}
+			  ]
+		  });
+		  $('#cutomGroupNameInputId').val(nowGroupName);
+		  groupPicktree = oc.ui.picktree(pickTreeCfg);
+		}
+		
+		oc.ns('oc.module.config.index');
+		oc.module.config.index={
+			updateGroupInfoForMoveResource:function(groupIds,resourceInstanceIds){
+				//删除设备后修改配置组信息
+				var liArray = customGroupDiv.ul.find('li');
+				for(var x = 0 ; x < liArray.length ; x ++){
+					var liItem = $(liArray[x]);
+					var textTag = liItem.find('span[class="text"]');
+					for(var y in groupIds){
+						if(textTag.attr('value')!=groupIds[y]){
+							continue;
+						}else{
+							var oldResourceArray = textTag.next().attr('value')==""?[]:textTag.next().attr('value').split(',');
+							var newResourceArray = oldResourceArray;
+//							console.log(newResourceArray);
+							for(var m in resourceInstanceIds){
+								if(oldResourceArray.length==0){
+									newResourceArray.push(resourceInstanceIds[m]);
+								}else{
+									var flag = true;
+									for(var n in oldResourceArray){
+										if(resourceInstanceIds[m] == oldResourceArray[n]){
+											flag = false;
+											break;
+										} 
+									}
+									if(flag) newResourceArray.push(resourceInstanceIds[m]);
+								}
+							}
+							textTag.next().attr('value',newResourceArray.join());
+							textTag.next().html(newResourceArray.length + "");
+						}
+					}
+				}
+			},
+			getChooseGroupId:function(){
+				return chooseGroupId;
+			},
+			getChooseGroupName:function(){
+				return chooseGroupName;
+			}
+		};
+		function getChooseGroupId(groupId){
+			return groupId;
+		}
+		function getChooseGroupName(groupName){
+			return groupName;
+		}
+	});
+</script>

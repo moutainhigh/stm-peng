@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.portal.netflow.dao.inf.IIfNextHopDao">
+
+	<select id="getTotalIfNextHopNetflows" resultType="Long" parameterType="com.mainsteam.stm.portal.netflow.bo.NetflowParamBo">
+		
+		select 
+			ifnull(sum(flowTotal), 0) as wholeFlows
+		from
+		(
+			select 
+				flowTotal,
+				np
+			from
+			(
+				select
+					t1.next_hop as np,
+					ifnull(sum(ifnull(t1.flowIn, 0)+ifnull(t2.flowOut, 0)), 0) as flowTotal
+				from
+				(
+					select 
+						sum(octets_total) as flowIn, sum(packet_total) as packetIn, next_hop 
+					from 
+						ANA_IF_IN_AS_NH_${tableSuffix} 
+					where 
+						if_in_id in (${ifId}) and acq_time <![CDATA[ > ]]> #{stime} and acq_time <![CDATA[ <= ]]> #{etime} group by next_hop
+				) t1 left join
+				(
+					select 
+						sum(octets_total) as flowOut, sum(packet_total) as packetOut, next_hop 
+					from 
+						ANA_IF_OUT_AS_NH_${tableSuffix} 
+					where 
+						if_out_id in (${ifId}) and acq_time <![CDATA[ > ]]> #{stime} and acq_time <![CDATA[ <= ]]> #{etime} group by next_hop
+				) t2
+				on t1.next_hop=t2.next_hop
+				group by t1.next_hop
+			) t3
+		union
+			select 
+				flowTotal,
+				np
+			from
+			(
+				select
+					t4.next_hop as np,
+					ifnull(sum(ifnull(t5.flowIn, 0)+ifnull(t4.flowOut, 0)), 0) as flowTotal
+				from
+				(
+					select 
+						sum(octets_total) as flowOut, sum(packet_total) as packetOut, next_hop 
+					from 
+						ANA_IF_OUT_AS_NH_${tableSuffix} 
+					where 
+						if_out_id in (${ifId}) and acq_time <![CDATA[ > ]]> #{stime} and acq_time <![CDATA[ <= ]]> #{etime} group by next_hop
+				) t4 left join
+				(
+					select 
+						sum(octets_total) as flowIn, sum(packet_total) as packetIn, next_hop 
+					from 
+						ANA_IF_IN_AS_NH_${tableSuffix} 
+					where 
+						if_in_id in (${ifId}) and acq_time <![CDATA[ > ]]> #{stime} and acq_time <![CDATA[ <= ]]> #{etime} group by next_hop
+				) t5
+				on t4.next_hop=t5.next_hop
+			) t6
+			group by t6.np
+		) t7
+		
+	</select>
+	
+	<!-- 包，流量，连接数 -->
+	<select id="getIfNextHopTotal" resultType="com.mainsteam.stm.portal.netflow.bo.Whole" parameterType="com.mainsteam.stm.portal.netflow.bo.NetflowParamBo">
+		
+		select 
+			ifnull(sum(flowTotal), 0) as wholeFlows,
+			ifnull(sum(packetTotal), 0) as wholePackets,
+			ifnull(sum(connectTotal), 0) as wholeConnects
+		from
+		(
+			select 
+				flowTotal,
+				packetTotal,
+				connectTotal,
+				np
+			from
+			(
+				select
+					t1.next_hop as np,
+					ifnull(sum(ifnull(t1.flowIn, 0)+ifnull(t2.flowOut, 0)), 0) as flowTotal,
+					ifnull(sum(ifnull(t1.packetIn, 0)+ifnull(t2.packetOut, 0)), 0) as packetTotal,
+					ifnull(sum(ifnull(t1.connectIn, 0)+ifnull(t2.connectOut, 0)), 0) as connectTotal
+				from
+				(
+					select 
+						sum(octets_total) as flowIn, sum(packet_total) as packetIn, next_hop, sum(flow_total) as connectIn 
+					from 
+						ANA_IF_IN_AS_NH_${tableSuffix} 
+					where 
+						if_in_id in (${ifId}) and acq_time <![CDATA[ > ]]> #{stime} and acq_time <![CDATA[ <= ]]> #{etime} group by next_hop
+				) t1 left join
+				(
+					select 
+						sum(octets_total) as flowOut, sum(packet_total) as packetOut, next_hop, sum(flow_total) as connectOut 
+					from 
+						ANA_IF_OUT_AS_NH_${tableSuffix} 
+					where 
+						if_out_id in (${ifId}) and acq_time <![CDATA[ > ]]> #{stime} and acq_time <![CDATA[ <= ]]> #{etime} group by next_hop
+				) t2
+				on t1.next_hop=t2.next_hop
+				group by t1.next_hop
+			) t3
+		union
+			select 
+				flowTotal,
+				packetTotal,
+				connectTotal,
+				np
+			from
+			(
+				select
+					t4.next_hop as np,
+					ifnull(sum(ifnull(t5.flowIn, 0)+ifnull(t4.flowOut, 0)), 0) as flowTotal,
+					ifnull(sum(ifnull(t5.packetIn, 0)+ifnull(t4.packetOut, 0)), 0) as packetTotal,
+					ifnull(sum(ifnull(t5.connectIn, 0)+ifnull(t4.connectOut, 0)), 0) as connectTotal
+				from
+				(
+					select 
+						sum(octets_total) as flowOut, sum(packet_total) as packetOut, next_hop, sum(flow_total) as connectOut 
+					from 
+						ANA_IF_OUT_AS_NH_${tableSuffix} 
+					where 
+						if_out_id in (${ifId}) and acq_time <![CDATA[ > ]]> #{stime} and acq_time <![CDATA[ <= ]]> #{etime} group by next_hop
+				) t4 left join
+				(
+					select 
+						sum(octets_total) as flowIn, sum(packet_total) as packetIn, next_hop, sum(flow_total) as connectIn 
+					from 
+						ANA_IF_IN_AS_NH_${tableSuffix} 
+					where 
+						if_in_id in (${ifId}) and acq_time <![CDATA[ > ]]> #{stime} and acq_time <![CDATA[ <= ]]> #{etime} group by next_hop
+				) t5
+				on t4.next_hop=t5.next_hop
+			) t6
+			group by t6.np
+		) t7
+		
+	</select>
+
+	<select id="ifNextHopPageSelect" resultType="com.mainsteam.stm.portal.netflow.bo.NetflowBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		
+	select * from
+	(	
+		select * from
+		(
+			select
+				nextHop, 
+				
+				flowIn,
+				flowOut,
+				flowTotal,
+				speedIn,
+				speedOut,
+				
+				packetIn,
+				packetOut,
+				packetTotal,
+				packetInSpeed,
+				packetOutSpeed,
+				packetTotalSpeed,
+				
+				connectNumberIn,
+				connectNumberOut,
+				connectNumberTotal,
+				connectNumberInSpeed,
+				connectNumberOutSpeed,
+				connectNumberTotalSpeed,
+				
+				flowPctge,
+				packetPctge,
+				connectPctge
+			from
+			(
+				select
+					t1.next_hop as nextHop,
+					
+					ifnull(t1.flowIn, 0) as flowIn, 
+					ifnull(t2.flowOut, 0) as flowOut,
+					ifnull(sum(ifnull(t1.flowIn, 0)+ifnull(t2.flowOut, 0)), 0) as flowTotal,
+					ifnull(t1.flowIn, 0) / ${condition.timeInterval} as speedIn,
+					ifnull(t2.flowOut, 0) / ${condition.timeInterval} as speedOut,
+					sum(ifnull(t1.flowIn, 0)+ifnull(t2.flowOut, 0))/${condition.timeInterval} as speedTotal,	
+					
+					ifnull(t1.packetIn, 0) as packetIn, 
+					ifnull(t2.packetOut, 0) as packetOut,
+					ifnull(sum(ifnull(t1.packetIn, 0)+ifnull(t2.packetOut, 0)), 0) as packetTotal,
+					ifnull(t1.packetIn, 0)/${condition.timeInterval} as packetInSpeed,
+					ifnull(t2.packetOut, 0)/${condition.timeInterval} as packetOutSpeed,
+					sum(ifnull(t1.packetIn, 0)+ifnull(t2.packetOut, 0))/${condition.timeInterval} as packetTotalSpeed,
+					
+					ifnull(t1.connectIn, 0) as connectNumberIn,
+					ifnull(t2.connectOut, 0) as connectNumberOut,
+					sum(ifnull(t1.connectIn, 0)+ifnull(t2.connectOut, 0)) as connectNumberTotal,
+					ifnull(t1.connectIn, 0)/${condition.timeInterval} as connectNumberInSpeed,
+					ifnull(t2.connectOut, 0)/${condition.timeInterval} as connectNumberOutSpeed,
+					sum(ifnull(t1.connectIn, 0)+ifnull(t2.connectOut, 0))/${condition.timeInterval} as connectNumberTotalSpeed,
+
+					sum(ifnull(t1.flowIn, 0)+ifnull(t2.flowOut, 0))/${condition.wholeFlows} as flowPctge,
+					sum(ifnull(t1.packetIn, 0)+ifnull(t2.packetOut, 0))/${condition.wholePackets} as packetPctge,
+					sum(ifnull(t1.connectIn, 0)+ifnull(t2.connectOut, 0))/${condition.wholeConnects} as connectPctge
+				from
+				(
+					select 
+						sum(octets_total) as flowIn, sum(packet_total) as packetIn, next_hop, sum(flow_total) as connectIn 
+					from 
+						ANA_IF_IN_AS_NH_${condition.tableSuffix} 
+					where 
+						if_in_id in (${condition.ifId}) and acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime} group by next_hop
+				) t1 left join
+				(
+					select 
+						sum(octets_total) as flowOut, sum(packet_total) as packetOut, next_hop, sum(flow_total) as connectOut 
+					from 
+						ANA_IF_OUT_AS_NH_${condition.tableSuffix} 
+					where 
+						if_out_id in (${condition.ifId}) and acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime} group by next_hop
+				) t2
+				on t1.next_hop=t2.next_hop
+				group by t1.next_hop
+			) t3
+			group by t3.nextHop
+		) t7
+		union
+		select * from
+		(
+			select 
+				nextHop,
+				flowIn,
+				flowOut,
+				flowTotal,
+				speedIn,
+				speedOut,
+				
+				packetIn,
+				packetOut,
+				packetTotal,
+				packetInSpeed,
+				packetOutSpeed,
+				packetTotalSpeed,
+				
+				connectNumberIn,
+				connectNumberOut,
+				connectNumberTotal,
+				connectNumberInSpeed,
+				connectNumberOutSpeed,
+				connectNumberTotalSpeed,
+				
+				flowPctge,
+				packetPctge,
+				connectPctge
+			from
+			(
+				select
+					t4.next_hop as nextHop,
+					
+					ifnull(t5.flowIn, 0) as flowIn, 
+					ifnull(t4.flowOut, 0) as flowOut,
+					ifnull(sum(ifnull(t5.flowIn, 0)+ifnull(t4.flowOut, 0)), 0) as flowTotal,
+					ifnull(t5.flowIn, 0) / ${condition.timeInterval} as speedIn,
+					ifnull(t4.flowOut, 0) / ${condition.timeInterval} as speedOut,
+					sum(ifnull(t5.flowIn, 0)+ifnull(t4.flowOut, 0))/${condition.timeInterval} as speedTotal,	
+					
+					ifnull(t5.packetIn, 0) as packetIn, 
+					ifnull(t4.packetOut, 0) as packetOut,
+					ifnull(sum(ifnull(t5.packetIn, 0)+ifnull(t4.packetOut, 0)), 0) as packetTotal,
+					ifnull(t5.packetIn, 0)/${condition.timeInterval} as packetInSpeed,
+					ifnull(t4.packetOut, 0)/${condition.timeInterval} as packetOutSpeed,
+					sum(ifnull(t5.packetIn, 0)+ifnull(t4.packetOut, 0))/${condition.timeInterval} as packetTotalSpeed,
+					
+					ifnull(t5.connectIn, 0) as connectNumberIn,
+					ifnull(t4.connectOut, 0) as connectNumberOut,
+					sum(ifnull(t5.connectIn, 0)+ifnull(t4.connectOut, 0)) as connectNumberTotal,
+					ifnull(t5.connectIn, 0)/${condition.timeInterval} as connectNumberInSpeed,
+					ifnull(t4.connectOut, 0)/${condition.timeInterval} as connectNumberOutSpeed,
+					sum(ifnull(t5.connectIn, 0)+ifnull(t4.connectOut, 0))/${condition.timeInterval} as connectNumberTotalSpeed,
+
+					sum(ifnull(t5.flowIn, 0)+ifnull(t4.flowOut, 0)) / ${condition.wholeFlows} as flowPctge,
+					sum(ifnull(t5.packetIn, 0)+ifnull(t4.packetOut, 0)) / ${condition.wholePackets} as packetPctge,
+					sum(ifnull(t5.connectIn, 0)+ifnull(t4.connectOut, 0)) / ${condition.wholeConnects} as connectPctge
+					
+				from
+				(
+					select 
+						sum(octets_total) as flowOut, sum(packet_total) as packetOut, next_hop, sum(flow_total) as connectOut 
+					from 
+						ANA_IF_OUT_AS_NH_${condition.tableSuffix} 
+					where 
+						if_out_id in (${condition.ifId}) and acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime} group by next_hop
+				) t4 left join
+				(
+					select 
+						sum(octets_total) as flowIn, sum(packet_total) as packetIn, next_hop, sum(flow_total) as connectIn 
+					from 
+						ANA_IF_IN_AS_NH_${condition.tableSuffix} 
+					where 
+						if_in_id in (${condition.ifId}) and acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime} group by next_hop
+				) t5
+				on t4.next_hop=t5.next_hop
+				group by t5.next_hop
+			) t6
+			group by t6.nextHop
+		) t8
+		) t11
+		group by t11.nextHop
+		<if test="condition!=null">
+			order by
+	 		<if test="condition.sort != null">t11.${condition.sort} </if>
+			<if test="condition.order != null"> ${condition.order} </if>
+		</if>
+	</select>
+	
+	<select id="getIfNextHopChartData" parameterType="com.mainsteam.stm.portal.netflow.bo.NetflowParamBo" resultType="com.mainsteam.stm.portal.netflow.bo.NetflowBo">
+		
+		select * from 
+		(
+			select * from
+			(
+				select
+					t3.acq_time,
+					flowIn,
+					flowOut,
+					packetIn,
+					packetOut,
+					speedIn,
+					speedOut,
+					flowTotal,
+					packetTotal,
+					sum(ifnull(speedIn, 0) + ifnull(speedOut, 0)) as speedTotal,
+					flowTotal / ${wholeFlows} as flowPctge
+				from
+				(
+					select
+						t1.acq_time,
+						ifnull(t1.flowIn, 0) as flowIn, ifnull(t2.flowOut, 0) as flowOut,
+						ifnull(t1.packetIn, 0) as packetIn, ifnull(t2.packetOut, 0) as packetOut,
+						ifnull(sum(ifnull(t1.flowIn, 0)+ifnull(t2.flowOut, 0)), 0) as flowTotal,
+						ifnull(sum(ifnull(t1.packetIn, 0)+ifnull(t2.packetOut, 0)), 0) as packetTotal,
+						ifnull(t1.flowIn, 0) / ${timeInterval} as speedIn,
+						ifnull(t2.flowOut, 0) / ${timeInterval} as speedOut
+					from
+					(
+						select 
+							sum(octets_total) as flowIn, sum(packet_total) as packetIn, next_hop, acq_time
+						from 
+							ANA_IF_IN_AS_NH_${tableSuffix} 
+						where 
+							if_in_id in (${ifId}) and next_hop=#{nextHop} and acq_time in(${timeParam})
+						group by acq_time
+					) t1 left join
+					(
+						select 
+							sum(octets_total) as flowOut, sum(packet_total) as packetOut, next_hop, acq_time
+						from 
+							ANA_IF_OUT_AS_NH_${tableSuffix} 
+						where 
+							if_out_id in (${ifId}) and next_hop=#{nextHop} and acq_time in(${timeParam})
+						group by next_hop
+					) t2
+					on t1.next_hop=t2.next_hop
+					group by t1.acq_time
+				) t3
+				group by t3.acq_time
+			) t7
+			group by t7.acq_time			
+			union
+			select * from
+			(
+				select 
+					t6.acq_time,
+					flowIn,
+					flowOut,
+					packetIn,
+					packetOut,
+					speedIn,
+					speedOut,
+					flowTotal,
+					packetTotal,
+					sum(ifnull(speedIn, 0) + ifnull(speedOut, 0)) as speedTotal,
+					flowTotal / ${wholeFlows} as flowPctge
+				from
+				(
+					select
+						t4.acq_time,
+						ifnull(t5.flowIn, 0) as flowIn, ifnull(t4.flowOut, 0) as flowOut,
+						ifnull(t5.packetIn, 0) as packetIn, ifnull(t4.packetOut, 0) as packetOut,
+						ifnull(sum(ifnull(t5.flowIn, 0)+ifnull(t4.flowOut, 0)), 0) as flowTotal,
+						ifnull(sum(ifnull(t5.packetIn, 0)+ifnull(t4.packetOut, 0)), 0) as packetTotal,
+						ifnull(t5.flowIn, 0) / ${timeInterval} as speedIn,
+						ifnull(t4.flowOut, 0) / ${timeInterval} as speedOut
+					from
+					(
+						select 
+							sum(octets_total) as flowOut, sum(packet_total) as packetOut, next_hop, acq_time
+						from 
+							ANA_IF_OUT_AS_NH_${tableSuffix} 
+						where 
+							if_out_id in (${ifId}) and next_hop=#{nextHop} and acq_time in(${timeParam})
+						group by acq_time
+					) t4 left join
+					(
+						select 
+							sum(octets_total) as flowIn, sum(packet_total) as packetIn, next_hop, acq_time 
+						from 
+							ANA_IF_IN_AS_NH_${tableSuffix} 
+						where 
+							if_in_id in (${ifId}) and next_hop=#{nextHop} and acq_time in(${timeParam})
+						group by acq_time
+					) t5
+					on t4.next_hop=t5.next_hop
+					group by t4.acq_time
+				) t6
+				group by t6.acq_time
+			) t8
+		) t11
+		group by t11.acq_time
+	</select>
+	
+</mapper>

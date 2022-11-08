@@ -1,0 +1,729 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">
+    <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0">
+    </GlobalMetricSetting>
+    <PluginClassAliasList>
+        <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+        <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+        <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+        <PluginClassAlias id="columnPasteProcessor" class="com.mainsteam.stm.plugin.common.ColumnPasteProcessor"/>
+        <PluginClassAlias id="RegularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+        <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+        <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+        <PluginClassAlias id="tableConverter" class="com.mainsteam.stm.plugin.common.TableResultSetConverter"/>
+        <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+        <PluginClassAlias id="ChangeRateProcessor" class="com.mainsteam.stm.plugin.common.ChangeRateProcessor"/>
+        <PluginClassAlias id="rowFilterProcessor" class="com.mainsteam.stm.plugin.common.RowFilterProcessor"/>
+        <PluginClassAlias id="FormatProcessor" class="com.mainsteam.stm.plugin.common.FormatProcessor"/>
+        <PluginClassAlias id="RowFilterByInstPropertyProcessor" class="com.mainsteam.stm.plugin.common.RowFilterByInstPropertyProcessor"/>
+        <PluginClassAlias id="rangeCheckProcessor" class="com.mainsteam.stm.plugin.common.RangeCheckProcessor"/>
+    </PluginClassAliasList>
+    <MetricPlugin metricid="macAddress" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="NICIndex,NICPhysAddress"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="getBulk"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.6"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT NICPhysAddress"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="rowFilterProcessor">
+                <Parameter value="" key="MacAddress"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="Name" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.1.5.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="sysObjectID" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.1.2.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="sysUpTime" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="sysUpTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.1.3.0"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT sysUpTime/100 as sysUpTime"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sysDescr" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.1.1.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ip" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.4.22.1.3"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="availability" collectType="" pluginid="IcmpPlugin">
+        <PluginResultMetaInfo columns="ip,isAlive,ResponseTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT isAlive"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <!-- port -->
+    <MetricPlugin metricid="ifName" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="ifIndex,ifName_ifDesc"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.1588.2.1.1.1.6.2.1.37"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="ifName_ifDesc"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifIndex" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="ifIndex,ifDesc,ifType"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="getBulk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.1588.2.1.1.1.6.2.1.1"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.1588.2.1.1.1.6.2.1.2"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="ifIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifType" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="ifIndex,ifType"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="getBulk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.1588.2.1.1.1.6.2.1.2"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="ifType" value="1,stitch;2,flannel;3,loom;4,bloom;5,rdbloom;6,wormhole;7,other;8,unknown"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="ifType"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifAdminStatus" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="ifIndex,ifAdminStatus"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="getBulk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.1588.2.1.1.1.6.2.1.5"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="ifAdminStatus" value="1,up;2,down;3,testing"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="ifAdminStatus"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifOperStatus" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="ifIndex,ifOperStatus"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="getBulk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.1588.2.1.1.1.6.2.1.4"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="ifOperStatus" value="0,unknown;1,online;2,offline;3,testing;4,faulty"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="ifOperStatus"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifInOctetsSpeed" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="ifIndex,ifInOctets_ifHCInOctets"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="getBulk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.1588.2.1.1.1.6.2.1.12"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>
+                <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/>
+                <Parameter type="" key="MOD" value="2^32">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ifIndex,(ifInOctets_ifHCInOctets*4) as ifInOctetsSpeed"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="ifInOctetsSpeed"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifOutOctetsSpeed" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="ifIndex,ifOutOctets_ifHCOutOctets"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="getBulk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.1588.2.1.1.1.6.2.1.11"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>
+                <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/>
+                <Parameter type="" key="MOD" value="2^32">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ifIndex,(ifOutOctets_ifHCOutOctets*4) as ifOutOctetsSpeed"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="ifOutOctetsSpeed"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifAvailability" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="ifIndex,ifAdminStatus"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="getBulk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.1588.2.1.1.1.6.2.1.5"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter key="ifAdminStatus" value="1,1;0"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="ifAdminStatus"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <!-- 电源 -->
+    <MetricPlugin metricid="powerIndex" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="powerIndex,powerType"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.1588.2.1.1.1.1.22.1.2"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="rowFilterProcessor">
+                <Parameter type="" key="FilterColumn" value="powerType"/>
+                <Parameter type="" key="ReservedValues" value="3"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="powerIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="powerIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="powerSupplyName" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="powerIndex,powerSupplyName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.1588.2.1.1.1.1.22.1.1"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT powerIndex,('power'+powerIndex) as powerSupplyName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="rowFilterProcessor">
+                <Parameter type="" key="FilterColumn" value="powerIndex"/>
+                <Parameter type="" key="ReservedValues" value="7"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="powerIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="powerSupplyName"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="powerIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="powerSupplyState" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="powerIndex,powerSupplyState"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.1588.2.1.1.1.1.22.1.4"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="rowFilterProcessor">
+                <Parameter type="" key="FilterColumn" value="powerIndex"/>
+                <Parameter type="" key="ReservedValues" value="7"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="powerSupplyState" value="1,1;0"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="powerIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="powerSupplyState"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="powerIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <!-- 风扇 -->
+    <MetricPlugin metricid="fanIndex" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="fanIndex,fanType"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.1588.2.1.1.1.1.22.1.2"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="rowFilterProcessor">
+                <Parameter type="" key="FilterColumn" value="fanType"/>
+                <Parameter type="" key="ReservedValues" value="2"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="fanIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="fanIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fanName" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="fanIndex,fanName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.1588.2.1.1.1.1.22.1.1"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT fanIndex,('fan'+fanIndex) as fanName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="fanIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="fanIndex"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="fanIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="fanName"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fanIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fanRunState" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="fanIndex,fanRunState"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.1588.2.1.1.1.1.22.1.3"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="fanIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="fanIndex"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="fanRunState" value="4,1;0"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="fanIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="fanRunState"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fanIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="temperatureIndex" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="temperatureIndex,temperatureType"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.1588.2.1.1.1.1.22.1.2"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="rowFilterProcessor">
+                <Parameter type="" key="FilterColumn" value="temperatureType"/>
+                <Parameter type="" key="ReservedValues" value="1"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="temperatureIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="temperatureIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="temperatureName" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="temperatureIndex,temperatureName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.1588.2.1.1.1.1.22.1.1"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT temperatureIndex,('temperature'+temperatureIndex) as temperatureName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="temperatureIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="temperatureIndex"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="temperatureIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="temperatureName"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="temperatureIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="temperatureValue" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="temperatureIndex,temperatureValue"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.1588.2.1.1.1.1.22.1.4"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="temperatureIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="temperatureIndex"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="temperatureIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="temperatureValue"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="temperatureIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="temperatureState" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="temperatureIndex,temperatureState"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.1588.2.1.1.1.1.22.1.3"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="temperatureIndex"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="temperatureIndex"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="temperatureState" value="4,1;0"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="temperatureIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="temperatureState"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="temperatureIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifNum" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="ifNumIndex,ifIndex"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="getBulk"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.1"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (count(ifIndex)) as ifNum"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="throughput" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="throughputIndex,ifInOctets_ifHCInOctets"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="getBulk"/>
+            <Parameter type="" key="COUNTER64" value="1.3.6.1.2.1.31.1.1.1.6"/>
+            <Parameter type="" key="COUNTER32" value="1.3.6.1.2.1.2.2.1.10"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="COLUMNINDEX" value="throughputIndex"/>
+                <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/>
+                <Parameter type="" key="COUNTER32" value="2^32">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+                <Parameter type="" key="COUNTER64" value="2^64">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="rangeCheckProcessor">
+                <Parameter type="" key="ColumnName" value="ifInOctets_ifHCInOctets"/>
+                <Parameter type="" key="&lt;=" value="10000000000"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(ifInOctets_ifHCInOctets)*8) as throughput"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="inDiscardsRate" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="inDiscardsRateIndex,ifInDiscards,ifInUcastPkts,ifInMulticastPkts,ifInBroadcastPkts"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="getBulk"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.13"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.11"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.2"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.3"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="COLUMNINDEX" value="inDiscardsRateIndex"/>
+                <Parameter type="" key="FUNCTION" value="ROUND_CHG"/>
+                <Parameter type="" key="MOD" value="2^32">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(ifInDiscards)/sum(ifInUcastPkts+ifInMulticastPkts+ifInBroadcastPkts)*100) as inDiscardsRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="outDiscardsRate" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="outDiscardsRateIndex,ifOutDiscards,ifOutUcastPkts,ifOutMulticastPkts,ifOutBroadcastPkts"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="getBulk"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.19"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.17"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.4"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.5"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="COLUMNINDEX" value="outDiscardsRateIndex"/>
+                <Parameter type="" key="FUNCTION" value="ROUND_CHG"/>
+                <Parameter type="" key="MOD" value="2^32">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(ifOutDiscards)/sum(ifOutUcastPkts+ifOutMulticastPkts+ifOutBroadcastPkts)*100) as outDiscardsRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="discardsRate" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="discardsRateIndex,ifInDiscards,ifInUcastPkts,ifInMulticastPkts,ifInBroadcastPkts,ifOutDiscards,ifOutUcastPkts,ifOutMulticastPkts,ifOutBroadcastPkts"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="getBulk"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.13"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.11"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.2"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.3"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.19"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.17"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.4"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.5"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="COLUMNINDEX" value="discardsRateIndex"/>
+                <Parameter type="" key="FUNCTION" value="ROUND_CHG"/>
+                <Parameter type="" key="MOD" value="2^32">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(ifInDiscards+ifOutDiscards)/sum(ifInUcastPkts+ifInMulticastPkts+ifInBroadcastPkts+ifOutUcastPkts+ifOutMulticastPkts+ifOutBroadcastPkts))*100 as discardsRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="icmpInMsgsRate" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.5.1.0"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/>
+                <Parameter type="" key="MOD" value="2^32,2^64">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="icmpOutMsgsRate" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.5.14.0"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/>
+                <Parameter type="" key="MOD" value="2^32,2^64">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="tcpCurrEstab" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.6.9.0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="inBroadPktsRate" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="inBroadPktsRateIndex,ifInBroadcastPkts_ifHCInBroadcastPkts"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="getBulk"/>
+            <Parameter type="" key="COUNTER64" value="1.3.6.1.2.1.31.1.1.1.9"/>
+            <Parameter type="" key="COUNTER32" value="1.3.6.1.2.1.31.1.1.1.3"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="COLUMNINDEX" value="inBroadPktsRateIndex"/>
+                <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/>
+                <Parameter type="" key="COUNTER32" value="2^32">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+                <Parameter type="" key="COUNTER64" value="2^64">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(ifInBroadcastPkts_ifHCInBroadcastPkts)) as inBroadPktsRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="outBroadPktsRate" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="outBroadPktsRateIndex,ifOutBroadcastPkts_ifHCOutBroadcastPkts"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="getBulk"/>
+            <Parameter type="" key="COUNTER64" value="1.3.6.1.2.1.31.1.1.1.13"/>
+            <Parameter type="" key="COUNTER32" value="1.3.6.1.2.1.31.1.1.1.5"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="COLUMNINDEX" value="outBroadPktsRateIndex"/>
+                <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/>
+                <Parameter type="" key="COUNTER32" value="2^32">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+                <Parameter type="" key="COUNTER64" value="2^64">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(ifOutBroadcastPkts_ifHCOutBroadcastPkts)) as outBroadPktsRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="broadPktsRate" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="broadPktsRateIndex,ifInBroadcastPkts_ifHCInBroadcastPkts,ifOutBroadcastPkts_ifHCOutBroadcastPkts"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="getBulk"/>
+            <Parameter type="" key="COUNTER64" value="1.3.6.1.2.1.31.1.1.1.9"/>
+            <Parameter type="" key="COUNTER64" value="1.3.6.1.2.1.31.1.1.1.13"/>
+            <Parameter type="" key="COUNTER32" value="1.3.6.1.2.1.31.1.1.1.3"/>
+            <Parameter type="" key="COUNTER32" value="1.3.6.1.2.1.31.1.1.1.5"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="COLUMNINDEX" value="broadPktsRateIndex"/>
+                <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/>
+                <Parameter type="" key="COUNTER32" value="2^32">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+                <Parameter type="" key="COUNTER64" value="2^64">
+                    <!--增加的模值。一般用于网络接口中，它使用的是类似counter32或者counter64等计数，当达到阈值时会重置为0，然后再进行计算。为了计算准确性，需要加入一个模量再对比前后两次的值进行增量计算。-->
+                </Parameter>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(ifInBroadcastPkts_ifHCInBroadcastPkts)+sum(ifOutBroadcastPkts_ifHCOutBroadcastPkts)) as broadPktsRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="inBroadPkts" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="inBroadPktsIndex,ifInBroadcastPkts_ifHCInBroadcastPkts"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.3:1.3.6.1.2.1.31.1.1.1.9"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(ifInBroadcastPkts_ifHCInBroadcastPkts)) as inBroadPkts"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="outBroadPkts" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="outBroadPktsIndex,ifOutBroadcastPkts_ifHCOutBroadcastPkts"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.5:1.3.6.1.2.1.31.1.1.1.13"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(ifOutBroadcastPkts_ifHCOutBroadcastPkts)) as outBroadPkts"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuRate" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="cpuRateIndex,cpuUsage1_cpuUsage4_cpuUsage5"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.1588.2.1.1.1.26.1"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (max(cpuUsage1_cpuUsage4_cpuUsage5)) as cpuRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memRate" collectType="SNMP" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="memRateIndex,memUsed"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="walk"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.1588.2.1.1.1.26.6"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (max(memUsed)) as memRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+</MetricPlugins>

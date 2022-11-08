@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.profilelib.dao.ProfileQueryDAO">
+	<select id="queryProfileByDCS"	resultType="long" parameterType="int">
+		select distinct plib.PROFILE_ID as profileId from STM_PROFILELIB_MAIN plib,STM_PROFILELIB_INSTANCE res,STM_INSTANCELIB_RESOURCE_MAIN ilib
+		where (plib.PARENT_PROFILE_ID &lt;=0 or plib.PARENT_PROFILE_ID IS NULL) AND plib.PROFILE_ID = res.PROFILE_ID and res.INSTANCE_ID = ilib.InstanceId and ilib.LIFESTATE='MONITORED' and ilib.RESOURCEID != 'Layer2Link' and ilib.DISCOVERNODE = #{value}
+	</select>
+</mapper>

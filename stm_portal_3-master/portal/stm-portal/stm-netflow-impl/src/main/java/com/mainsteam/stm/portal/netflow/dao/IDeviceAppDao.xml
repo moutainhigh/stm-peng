@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.portal.netflow.dao.IDeviceAppDao">
+
+	<select id="getTotalAppNetflowsOfDevice" resultType="com.mainsteam.stm.portal.netflow.bo.Whole" parameterType="com.mainsteam.stm.portal.netflow.bo.NetflowParamBo">
+		SELECT
+			IFNULL(sum(ifnull(in_flows, 0) + ifnull(out_flows, 0)),0) AS wholeFlows,
+			IFNULL(sum(ifnull(in_packages, 0) + ifnull(out_packages, 0)),0) AS wholePackets,
+			IFNULL(sum(ifnull(connectNumberIn, 0) + ifnull(connectNumberOut, 0)),0) AS wholeConnects
+		FROM
+		(
+		SELECT
+			in_flows,
+			out_flows,
+			in_packages,
+			out_packages,
+			connectNumberIn,
+			connectNumberOut
+		FROM
+			(
+				(
+					SELECT
+						g. NAME,
+						g.id,
+						sum(octets_total) AS in_flows,
+						sum(packet_total) AS in_packages,
+						SUM(FLOW_TOTAL) connectNumberIn
+					FROM
+						CONF_APPLICATION_GROUP g
+					LEFT JOIN 
+						CONF_APPLICATION_GROUP_MAP m ON g.id = m.app_group_id
+					LEFT JOIN 
+						CONF_APPLICATION a ON m.app_id = a.id
+					LEFT JOIN 
+						ANA_IF_IN_APP_${tableSuffix} f ON a.id = f.app_id
+					and router_ip in
+						<foreach collection="deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+					AND acq_time <![CDATA[ > ]]> ${stime}
+					AND acq_time <![CDATA[ <= ]]> ${etime}
+					GROUP BY g.id
+				) t1
+				LEFT JOIN (
+					SELECT
+						g. NAME,
+						g.id,
+						sum(octets_total) AS out_flows,
+						sum(packet_total) AS out_packages,
+						SUM(FLOW_TOTAL) connectNumberOut
+					FROM
+						CONF_APPLICATION_GROUP g
+					LEFT JOIN 
+						CONF_APPLICATION_GROUP_MAP m ON g.id = m.app_group_id
+					LEFT JOIN 
+						CONF_APPLICATION a ON m.app_id = a.id
+					LEFT JOIN 
+						ANA_IF_OUT_APP_${tableSuffix} f ON a.id = f.app_id
+					and router_ip in
+						<foreach collection="deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+					AND acq_time <![CDATA[ > ]]> ${stime}
+					AND acq_time <![CDATA[ <= ]]> ${etime}
+					GROUP BY g.id
+				) t2 ON t1.id = t2.id
+			)
+		UNION
+			SELECT
+				in_flows,
+				out_flows,
+				in_packages,
+				out_packages,
+				connectNumberIn,
+				connectNumberOut
+			FROM
+			(
+				(
+					SELECT
+						g. NAME,
+						g.id,
+						sum(octets_total) AS in_flows,
+						sum(packet_total) AS in_packages,
+						SUM(FLOW_TOTAL) connectNumberIn
+					FROM
+						CONF_APPLICATION_GROUP g
+					LEFT JOIN 
+						CONF_APPLICATION_GROUP_MAP m ON g.id = m.app_group_id
+					LEFT JOIN 
+						CONF_APPLICATION a ON m.app_id = a.id
+					LEFT JOIN 
+						ANA_IF_IN_APP_${tableSuffix} f ON a.id = f.app_id
+					and router_ip in
+						<foreach collection="deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+					AND acq_time <![CDATA[ > ]]> ${stime}
+					AND acq_time <![CDATA[ <= ]]> ${etime}
+					GROUP BY g.id
+				) t1
+				RIGHT JOIN 
+				(
+					SELECT
+						g. NAME,
+						g.id,
+						sum(octets_total) AS out_flows,
+						sum(packet_total) AS out_packages,
+						SUM(FLOW_TOTAL) connectNumberOut
+					FROM
+						CONF_APPLICATION_GROUP g
+					LEFT JOIN 
+						CONF_APPLICATION_GROUP_MAP m ON g.id = m.app_group_id
+					LEFT JOIN 
+						CONF_APPLICATION a ON m.app_id = a.id
+					LEFT JOIN 
+						ANA_IF_OUT_APP_${tableSuffix} f ON a.id = f.app_id
+					and router_ip in
+						<foreach collection="deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+					AND acq_time <![CDATA[ > ]]> ${stime}
+					AND acq_time <![CDATA[ <= ]]> ${etime}
+					GROUP BY g.id
+				) t2 ON t1.id = t2.id
+			)
+		) t3
+	</select>
+
+	<select id="deviceAppNetflowPageSelect" resultType="com.mainsteam.stm.portal.netflow.bo.NetflowBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		
+		select * from
+		(
+			SELECT
+				NAME,
+				id AS appId,
+				ifnull(in_flows, 0) AS flowIn,
+				ifnull(in_packages, 0) AS packetIn,
+				ifnull(out_flows, 0) AS flowOut,
+				ifnull(out_packages, 0) AS packetOut,
+				ifnull(in_flows, 0) + ifnull(out_flows, 0) AS flowTotal,
+				ifnull(in_packages, 0) + ifnull(out_packages, 0) AS packetTotal,
+				ifnull(in_flows, 0) / ${condition.timeInterval} AS speedIn,
+				ifnull(out_flows, 0) / ${condition.timeInterval} AS speedOut,
+				ifnull(in_flows, 0) / ${condition.timeInterval} + ifnull(out_flows, 0) / ${condition.timeInterval} AS speedTotal,
+				(ifnull(in_flows, 0) + ifnull(out_flows, 0)) / ${condition.wholeFlows} AS flowPctge,
+				ifnull(in_packages/${condition.timeInterval},0) packetInSpeed,ifnull(out_packages/${condition.timeInterval},0) packetOutSpeed,ifnull((ifnull(in_packages,0)+ifnull(out_packages,0))/${condition.timeInterval},0) packetTotalSpeed,
+				ifnull(connectNumberIn,0) connectNumberIn,ifnull(connectNumberOut,0) connectNumberOut,ifnull(ifnull(connectNumberIn,0)+ifnull(connectNumberOut,0),0) connectNumberTotal,
+				ifnull(connectNumberIn/${condition.timeInterval},0) connectNumberInSpeed,ifnull(connectNumberOut/${condition.timeInterval},0) connectNumberOutSpeed,ifnull((ifnull(connectNumberIn,0)+ifnull(connectNumberOut,0))/${condition.timeInterval},0) connectNumberTotalSpeed
+			FROM
+				(
+				SELECT
+					t1. NAME,
+					t1.id,
+					ifnull(in_flows, 0) as in_flows,
+					ifnull(in_packages, 0) as in_packages,
+					ifnull(out_flows, 0) as out_flows,
+					ifnull(out_packages, 0) as out_packages,
+					ifnull(connectNumberIn,0) connectNumberIn,
+					ifnull(connectNumberOut,0) connectNumberOut
+				FROM
+					(
+						(
+							SELECT
+								g. NAME,
+								g.id,
+								sum(octets_total) AS in_flows,
+								sum(packet_total) AS in_packages,
+								SUM(FLOW_TOTAL) AS connectNumberIn
+							FROM
+								CONF_APPLICATION_GROUP g left join
+									CONF_APPLICATION_GROUP_MAP m on g.id = m.app_group_id,
+									ANA_IF_OUT_APP_${condition.tableSuffix} f
+								where m.app_id = f.app_id
+							AND router_ip in
+						<foreach collection="condition.deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+							AND acq_time <![CDATA[ > ]]> ${condition.stime}
+							AND acq_time <![CDATA[ <= ]]> ${condition.etime}
+							GROUP BY g.id
+						) t1
+						LEFT JOIN 
+						(
+							SELECT
+								g. NAME,
+								g.id,
+								sum(octets_total) AS out_flows,
+								sum(packet_total) AS out_packages,
+								SUM(FLOW_TOTAL) AS connectNumberOut
+							FROM
+								CONF_APPLICATION_GROUP g left join
+									CONF_APPLICATION_GROUP_MAP m on g.id = m.app_group_id,
+									ANA_IF_OUT_APP_${condition.tableSuffix} f
+								where m.app_id = f.app_id
+							AND router_ip in
+						<foreach collection="condition.deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+							AND acq_time <![CDATA[ > ]]> ${condition.stime}
+							AND acq_time <![CDATA[ <= ]]> ${condition.etime}
+							GROUP BY g.id
+						) t2 ON t1.id = t2.id
+					)
+				UNION
+					SELECT
+						t2. NAME,
+						t2.id,
+						ifnull(in_flows, 0) as in_flows,
+						ifnull(in_packages, 0) as in_packages,
+						ifnull(out_flows, 0) as out_flows,
+						ifnull(out_packages, 0) as out_packages,
+						ifnull(connectNumberIn,0) AS connectNumberIn,
+						ifnull(connectNumberOut,0) AS connectNumberOut
+					FROM
+						(
+							(
+								SELECT
+									g. NAME,
+									g.id,
+									sum(octets_total) AS in_flows,
+									sum(packet_total) AS in_packages,
+									SUM(FLOW_TOTAL) AS connectNumberIn
+								FROM
+									CONF_APPLICATION_GROUP g left join
+									CONF_APPLICATION_GROUP_MAP m on g.id = m.app_group_id,
+									ANA_IF_OUT_APP_${condition.tableSuffix} f
+								where m.app_id = f.app_id
+								AND router_ip in
+						<foreach collection="condition.deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+								AND acq_time <![CDATA[ > ]]> ${condition.stime}
+								AND acq_time <![CDATA[ <= ]]> ${condition.etime}
+								GROUP BY g.id
+							) t1
+							RIGHT JOIN 
+							(
+								SELECT
+									g. NAME,
+									g.id,
+									sum(octets_total) AS out_flows,
+									sum(packet_total) AS out_packages,
+									SUM(FLOW_TOTAL) AS connectNumberOut
+								FROM
+									CONF_APPLICATION_GROUP g left join
+									CONF_APPLICATION_GROUP_MAP m on g.id = m.app_group_id,
+									ANA_IF_OUT_APP_${condition.tableSuffix} f
+								where m.app_id = f.app_id
+								AND router_ip in
+						<foreach collection="condition.deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+								AND acq_time <![CDATA[ > ]]> ${condition.stime}
+								AND acq_time <![CDATA[ <= ]]> ${condition.etime}
+								GROUP BY g.id
+							) t2 ON t1.id = t2.id
+						)
+				) t3
+			group by t3.name
+		) t4
+		<if test="condition!=null">
+			order by
+	 		<if test="condition.sort != null">t4.${condition.sort}</if>
+			<if test="condition.order != null"> ${condition.order} </if>
+		</if>
+	</select>
+	
+	<select id="queryDeviceAppNetflowOfTimepoint" parameterType="com.mainsteam.stm.portal.netflow.bo.NetflowParamBo" resultType="com.mainsteam.stm.portal.netflow.bo.NetflowBo">
+		select * from
+		(
+			SELECT
+				acq_time,
+				ifnull(in_flows, 0) AS flowIn,
+				ifnull(in_packages, 0) AS packetIn,
+				ifnull(out_flows, 0) AS flowOut,
+				ifnull(out_packages, 0) AS packetOut,
+				ifnull(in_flows, 0) + ifnull(out_flows, 0) AS flowTotal,
+				ifnull(in_packages, 0) + ifnull(out_packages, 0) AS packetTotal,
+				ifnull(in_flows, 0) / ${timeInterval} AS speedIn,
+				ifnull(out_flows, 0) / ${timeInterval} AS speedOut,
+				ifnull(in_flows, 0) / ${timeInterval} + ifnull(out_flows, 0) / ${timeInterval} AS speedTotal,
+				(ifnull(in_flows, 0) + ifnull(out_flows, 0)) / ${wholeFlows} AS flowPctge
+			FROM
+			(
+			SELECT
+				t1.acq_time,
+				ifnull(in_flows, 0) as in_flows,
+				ifnull(in_packages, 0) as in_packages,
+				ifnull(out_flows, 0) as out_flows,
+				ifnull(out_packages, 0) as out_packages
+			FROM
+				(
+					(
+						SELECT
+							f.acq_time,
+							g.id,
+							sum(octets_total) AS in_flows,
+							sum(packet_total) AS in_packages
+						FROM
+							CONF_APPLICATION_GROUP g
+						LEFT JOIN 
+							CONF_APPLICATION_GROUP_MAP m ON g.id = m.app_group_id
+						LEFT JOIN 
+							CONF_APPLICATION a ON m.app_id = a.id
+						LEFT JOIN 
+							ANA_IF_IN_APP_${tableSuffix} f ON a.id = f.app_id
+						WHERE
+							g.id = ${appId} and router_ip in
+						<foreach collection="deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+						AND f.acq_time IN (${timeParam})
+						GROUP BY
+							acq_time
+					) t1
+					LEFT JOIN 
+					(
+						SELECT
+							f.acq_time,
+							g.id,
+							sum(octets_total) AS out_flows,
+							sum(packet_total) AS out_packages
+						FROM
+							CONF_APPLICATION_GROUP g
+						LEFT JOIN 
+							CONF_APPLICATION_GROUP_MAP m ON g.id = m.app_group_id
+						LEFT JOIN 
+							CONF_APPLICATION a ON m.app_id = a.id
+						LEFT JOIN 
+							ANA_IF_OUT_APP_${tableSuffix} f ON a.id = f.app_id
+						WHERE
+							g.id = ${appId} and router_ip in
+						<foreach collection="deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+						AND f.acq_time IN (${timeParam})
+						GROUP BY
+							acq_time
+					) t2 ON t1.acq_time = t2.acq_time
+				)
+			UNION
+				SELECT
+					t2.acq_time,
+					ifnull(in_flows, 0) as in_flows,
+					ifnull(in_packages, 0) as in_packages,
+					ifnull(out_flows, 0) as out_flows,
+					ifnull(out_packages, 0) as out_packages
+				FROM
+				(
+					(
+						SELECT
+							f.acq_time,
+							g.id,
+							sum(octets_total) AS in_flows,
+							sum(packet_total) AS in_packages
+						FROM
+							CONF_APPLICATION_GROUP g
+						LEFT JOIN 
+							CONF_APPLICATION_GROUP_MAP m ON g.id = m.app_group_id
+						LEFT JOIN 
+							CONF_APPLICATION a ON m.app_id = a.id
+						LEFT JOIN 
+							ANA_IF_IN_APP_${tableSuffix} f ON a.id = f.app_id
+						WHERE
+							g.id = ${appId} and router_ip in
+						<foreach collection="deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+						AND f.acq_time IN (${timeParam})
+						GROUP BY
+							acq_time
+					) t1
+					RIGHT JOIN (
+						SELECT
+							f.acq_time,
+							g.id,
+							sum(octets_total) AS out_flows,
+							sum(packet_total) AS out_packages
+						FROM
+							CONF_APPLICATION_GROUP g
+						LEFT JOIN 
+							CONF_APPLICATION_GROUP_MAP m ON g.id = m.app_group_id
+						LEFT JOIN 
+							CONF_APPLICATION a ON m.app_id = a.id
+						LEFT JOIN 
+							ANA_IF_OUT_APP_${tableSuffix} f ON a.id = f.app_id
+						WHERE 
+							g.id = ${appId} and router_ip in
+						<foreach collection="deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+						AND f.acq_time IN (${timeParam})
+						GROUP BY
+							acq_time
+					) t2 ON t1.acq_time = t2.acq_time
+				)
+			) t3
+		) t4
+		group by t4.acq_time
+	</select>
+	
+</mapper>

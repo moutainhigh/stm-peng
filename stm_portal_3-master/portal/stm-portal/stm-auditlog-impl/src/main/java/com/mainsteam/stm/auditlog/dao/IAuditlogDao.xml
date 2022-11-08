@@ -1,0 +1,1691 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.auditlog.dao.IAuditlogDao">
+   
+   
+   
+   
+   
+  <insert id="insert" parameterType="com.mainsteam.stm.auditlog.bo.AuditlogBo">
+	    insert into STM_SYS_AUDITLOG(ID,OPER_USER,OPER_IP,OPER_MODULE,MODULE_ID,OPER_TYPE,OPER_OBJECT,OPER_DATE,DEL_STATUS) values (#{id},#{oper_user}, #{oper_ip}, #{oper_module},#{oper_module_id}, #{oper_type}, #{oper_object}, #{oper_date},#{del_status})
+	</insert>
+   
+   
+   
+   
+   
+  <select id="pageSelect" resultType="com.mainsteam.stm.auditlog.bo.AuditlogBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="mysql">
+		select * from (SELECT
+		a.ID,
+		a.OPER_USER,
+		a.OPER_IP,
+		a.OPER_MODULE,
+		a.MODULE_ID,
+		a.OPER_TYPE,
+	IF (
+		@OPER_OBJECT = a.OPER_OBJECT ,@rank := @rank + 1 ,@rank := 1
+		) AS rank,
+		(
+		@OPER_OBJECT := a.OPER_OBJECT
+		) OPER_OBJECT,
+ 		a.OPER_DATE
+	FROM
+	STM_SYS_AUDITLOG a,
+		(
+		SELECT
+			@rank := 0 ,@OPER_OBJECT := NULL
+		) b
+	WHERE a.DEL_STATUS = "0"
+    <if test="condition!=null">
+      <if test="condition.oper_module_id != null"> AND a.MODULE_ID = #{condition.oper_module_id}</if>
+      <if test="condition.beginDate != null"> AND unix_timestamp(a.OPER_DATE)           <![CDATA[ >= ]]>  unix_timestamp(#{condition.beginDate})</if>
+      <if test="condition.endDate != null"> AND unix_timestamp(a.OPER_DATE)           <![CDATA[ <= ]]> unix_timestamp(#{condition.endDate})</if>
+      <if test="condition.oper_type != null"> AND a.OPER_TYPE = #{condition.oper_type}</if>
+      <if test="condition.keyword!=null"> and (a.OPER_USER like concat('%',#{condition.keyword},'%') or a.OPER_IP like concat('%',#{condition.keyword},'%') or a.OPER_OBJECT like concat('%',#{condition.keyword},'%'))</if>
+    </if>
+    )aa where aa.rank=1 
+  </select>
+   
+   
+   
+   
+   
+  <select id="pageSelect" resultType="com.mainsteam.stm.auditlog.bo.AuditlogBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oracle">
+		select * from (SELECT A.ID,
+       A.OPER_USER,
+       A.OPER_IP,
+       A.OPER_MODULE,
+       A.MODULE_ID,
+       A.OPER_TYPE,
+       A.OPER_OBJECT,
+       A.OPER_DATE,
+       ROW_NUMBER() OVER(PARTITION BY A.OPER_OBJECT,A.OPER_DATE ORDER BY A.ID,A.OPER_OBJECT,A.OPER_DATE) NUM
+  	   FROM STM_SYS_AUDITLOG A
+		where DEL_STATUS = '0'
+    <if test="condition!=null">
+      <if test="condition.oper_module_id != null"> AND A.MODULE_ID = #{condition.oper_module_id}</if>
+      <if test="condition.beginDate != null"> AND A.OPER_DATE           <![CDATA[ >= ]]>  to_date(#{condition.beginDate}, 'yyyy-mm-dd hh24:mi:ss')</if>
+      <if test="condition.endDate != null"> AND A.OPER_DATE           <![CDATA[ <= ]]> to_date(#{condition.endDate}, 'yyyy-mm-dd hh24:mi:ss')</if>
+      <if test="condition.oper_type != null"> AND A.OPER_TYPE = #{condition.oper_type}</if>
+      <if test="condition.keyword!=null"> and (A.OPER_USER like '%'||#{condition.keyword}||'%' or A.OPER_IP like '%'||#{condition.keyword}||'%' or A.OPER_OBJECT like '%'||#{condition.keyword}||'%')</if>
+    </if>
+    )aa where aa.NUM=1
+  </select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="pageSelect" resultType="com.mainsteam.stm.auditlog.bo.AuditlogBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="dm">
+		SELECT ID,OPER_USER,OPER_IP,OPER_MODULE,MODULE_ID,OPER_TYPE,OPER_OBJECT,OPER_DATE FROM STM_SYS_AUDITLOG
+		where DEL_STATUS = '0'
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="condition!=null">
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.oper_module_id != null"> AND MODULE_ID = #{condition.oper_module_id}</if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.beginDate != null"> AND OPER_DATE           <![CDATA[ >= ]]>  to_date(#{condition.beginDate}, 'yyyy-mm-dd hh24:mi:ss')</if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.endDate != null"> AND OPER_DATE           <![CDATA[ <= ]]> to_date(#{condition.endDate}, 'yyyy-mm-dd hh24:mi:ss')</if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.oper_type != null"> AND OPER_TYPE = #{condition.oper_type}</if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.keyword!=null"> and (OPER_USER like '%'||#{condition.keyword}||'%' or OPER_IP like '%'||#{condition.keyword}||'%' or OPER_OBJECT like '%'||#{condition.keyword}||'%')</if>
+		
+		
+    
+    
+    
+    
+    
+    
+    
+    
+    </if>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+  <select id="pageSelect" resultType="com.mainsteam.stm.auditlog.bo.AuditlogBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oscar">
+		SELECT ID,OPER_USER,OPER_IP,OPER_MODULE,MODULE_ID,OPER_TYPE,OPER_OBJECT,OPER_DATE FROM STM_SYS_AUDITLOG
+		where DEL_STATUS = '0'
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="condition!=null">
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.oper_module_id != null"> AND MODULE_ID = #{condition.oper_module_id}</if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.beginDate != null"> AND OPER_DATE           <![CDATA[ >= ]]>  to_date(#{condition.beginDate}, 'yyyy-mm-dd hh24:mi:ss')</if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.endDate != null"> AND OPER_DATE           <![CDATA[ <= ]]> to_date(#{condition.endDate}, 'yyyy-mm-dd hh24:mi:ss')</if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.oper_type != null"> AND OPER_TYPE = #{condition.oper_type}</if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.keyword!=null"> and (OPER_USER like '%'||#{condition.keyword}||'%' or OPER_IP like '%'||#{condition.keyword}||'%' or OPER_OBJECT like '%'||#{condition.keyword}||'%')</if>
+		
+		
+    
+    
+    
+    
+    
+    
+    
+    
+    </if>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="get" resultType="com.mainsteam.stm.auditlog.bo.AuditlogBo" parameterType="long">
+		SELECT ID,OPER_USER,OPER_IP,OPER_MODULE,OPER_TYPE,OPER_OBJECT,OPER_DATE FROM STM_SYS_AUDITLOG where ID=#{id}
+	</select>
+   
+   
+   
+   
+   
+  <delete id="batchDel">
+		delete from STM_SYS_AUDITLOG where  ID = #{id}
+	</delete>
+   
+   
+   
+   
+   
+  <select id="selectAllList" resultType="com.mainsteam.stm.auditlog.bo.AuditlogBo" parameterType="com.mainsteam.stm.auditlog.bo.AuditlogQueryBo" databaseId="mysql">
+		SELECT ID,OPER_USER,OPER_IP,OPER_MODULE,OPER_TYPE,OPER_OBJECT,OPER_DATE FROM STM_SYS_AUDITLOG
+		where DEL_STATUS = '0'
+ 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <!--           <if test="oper_module != null"> AND OPER_MODULE = #{oper_module}</if> -->
+           
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="oper_module_id != null"> AND MODULE_ID = #{oper_module_id}</if>
+           
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="beginDate != null"> AND unix_timestamp(OPER_DATE)           <![CDATA[ >= ]]>  unix_timestamp(#{beginDate})</if>
+           
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="endDate != null"> AND unix_timestamp(OPER_DATE)           <![CDATA[ <= ]]>unix_timestamp(#{endDate})</if>
+           
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="oper_type != null"> AND OPER_TYPE = #{oper_type}</if>
+           
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="keyword!=null"> and (OPER_USER like concat('%',#{keyword},'%') or OPER_IP like concat('%',#{keyword},'%') or OPER_OBJECT like concat('%',#{keyword},'%'))</if>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="selectAllList" resultType="com.mainsteam.stm.auditlog.bo.AuditlogBo" parameterType="com.mainsteam.stm.auditlog.bo.AuditlogQueryBo" databaseId="oracle">
+		SELECT ID,OPER_USER,OPER_IP,OPER_MODULE,OPER_TYPE,OPER_OBJECT,OPER_DATE FROM STM_SYS_AUDITLOG
+		where DEL_STATUS = '0'
+ 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <!--           <if test="oper_module != null"> AND OPER_MODULE = #{oper_module}</if> -->
+           
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="oper_module_id != null"> AND MODULE_ID = #{oper_module_id}</if>
+           
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="beginDate != null"> AND OPER_DATE           <![CDATA[ >= ]]>  to_date(#{beginDate}, 'yyyy-mm-dd hh24:mi:ss')</if>
+			 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="endDate != null"> AND OPER_DATE           <![CDATA[ <= ]]> to_date(#{endDate}, 'yyyy-mm-dd hh24:mi:ss')</if>
+           
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="oper_type != null"> AND OPER_TYPE = #{oper_type}</if>
+           
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="keyword!=null"> and (OPER_USER like '%'||#{keyword}||'%' or OPER_IP like '%'||#{keyword}||'%' or OPER_OBJECT like '%'||#{keyword}||'%')</if>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="selectAllList" resultType="com.mainsteam.stm.auditlog.bo.AuditlogBo" parameterType="com.mainsteam.stm.auditlog.bo.AuditlogQueryBo" databaseId="dm">
+		SELECT ID,OPER_USER,OPER_IP,OPER_MODULE,OPER_TYPE,OPER_OBJECT,OPER_DATE FROM STM_SYS_AUDITLOG
+		where DEL_STATUS = '0'
+ 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <!--           <if test="oper_module != null"> AND OPER_MODULE = #{oper_module}</if> -->
+           
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="oper_module_id != null"> AND MODULE_ID = #{oper_module_id}</if>
+           
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="beginDate != null"> AND OPER_DATE           <![CDATA[ >= ]]>  to_date(#{beginDate}, 'yyyy-mm-dd hh24:mi:ss')</if>
+			 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="endDate != null"> AND OPER_DATE           <![CDATA[ <= ]]> to_date(#{endDate}, 'yyyy-mm-dd hh24:mi:ss')</if>
+           
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="oper_type != null"> AND OPER_TYPE = #{oper_type}</if>
+           
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="keyword!=null"> and (OPER_USER like '%'||#{keyword}||'%' or OPER_IP like '%'||#{keyword}||'%' or OPER_OBJECT like '%'||#{keyword}||'%')</if>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+  <select id="selectAllList" resultType="com.mainsteam.stm.auditlog.bo.AuditlogBo" parameterType="com.mainsteam.stm.auditlog.bo.AuditlogQueryBo" databaseId="oscar">
+		SELECT ID,OPER_USER,OPER_IP,OPER_MODULE,OPER_TYPE,OPER_OBJECT,OPER_DATE FROM STM_SYS_AUDITLOG
+		where DEL_STATUS = '0'
+ 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <!--           <if test="oper_module != null"> AND OPER_MODULE = #{oper_module}</if> -->
+           
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="oper_module_id != null"> AND MODULE_ID = #{oper_module_id}</if>
+           
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="beginDate != null"> AND OPER_DATE           <![CDATA[ >= ]]>  to_date(#{beginDate}, 'yyyy-mm-dd hh24:mi:ss')</if>
+			 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="endDate != null"> AND OPER_DATE           <![CDATA[ <= ]]> to_date(#{endDate}, 'yyyy-mm-dd hh24:mi:ss')</if>
+           
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="oper_type != null"> AND OPER_TYPE = #{oper_type}</if>
+           
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="keyword!=null"> and (OPER_USER like '%'||#{keyword}||'%' or OPER_IP like '%'||#{keyword}||'%' or OPER_OBJECT like '%'||#{keyword}||'%')</if>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <update id="deleteSelect" parameterType="long">
+		UPDATE STM_SYS_AUDITLOG
+		SET DEL_STATUS = '1'  
+  		WHERE ID in
+ 		 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <foreach item="id" index="index" collection="array" open="(" separator="," close=")">  
+   			#{id}  
+  		</foreach>  
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </update>
+   
+   
+   
+   
+   
+  <update id="deleteAll">
+		UPDATE STM_SYS_AUDITLOG
+		SET DEL_STATUS = '1'
+	</update>
+   
+   
+   
+   
+   
+  <select id="selectBuList" resultType="com.mainsteam.stm.auditlog.bo.AuditlogBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="mysql">
+		SELECT ID,OPER_DATE,DEL_STATUS FROM STM_SYS_AUDITLOG
+		WHERE 1=1
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="condition!=null">
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.oper_date != null"> AND unix_timestamp(OPER_DATE)           <![CDATA[ > ]]>unix_timestamp(#{condition.oper_date})</if>
+		
+		
+    
+    
+    
+    
+    
+    
+    
+    
+    </if>
+		
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="selectBuList" resultType="com.mainsteam.stm.auditlog.bo.AuditlogBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oracle">
+		SELECT ID,OPER_DATE,DEL_STATUS FROM STM_SYS_AUDITLOG
+		WHERE 1=1
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="condition!=null">
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.oper_date != null"> AND OPER_DATE           <![CDATA[ > ]]>#{condition.oper_date}</if>
+		
+		
+    
+    
+    
+    
+    
+    
+    
+    
+    </if>
+		
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="selectBuList" resultType="com.mainsteam.stm.auditlog.bo.AuditlogBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="dm">
+		SELECT ID,OPER_DATE,DEL_STATUS FROM STM_SYS_AUDITLOG
+		WHERE 1=1
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="condition!=null">
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.oper_date != null"> AND OPER_DATE           <![CDATA[ > ]]>#{condition.oper_date}</if>
+		
+		
+    
+    
+    
+    
+    
+    
+    
+    
+    </if>
+		
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+  <select id="selectBuList" resultType="com.mainsteam.stm.auditlog.bo.AuditlogBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oscar">
+		SELECT ID,OPER_DATE,DEL_STATUS FROM STM_SYS_AUDITLOG
+		WHERE 1=1
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="condition!=null">
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.oper_date != null"> AND OPER_DATE           <![CDATA[ > ]]>#{condition.oper_date}</if>
+		
+		
+    
+    
+    
+    
+    
+    
+    
+    
+    </if>
+		
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="queryBuCount" resultType="int" parameterType="com.mainsteam.stm.auditlog.bo.AuditlogBo" databaseId="mysql">
+		SELECT COUNT(*) FROM STM_SYS_AUDITLOG
+		WHERE 1=1
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="oper_date != null"> AND unix_timestamp(OPER_DATE)           <![CDATA[ > ]]>unix_timestamp(#{oper_date})</if>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="queryBuCount" resultType="int" parameterType="com.mainsteam.stm.auditlog.bo.AuditlogBo" databaseId="oracle">
+		SELECT COUNT(*) FROM STM_SYS_AUDITLOG
+		WHERE 1=1
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="oper_date != null"> AND OPER_DATE           <![CDATA[ > ]]>#{oper_date}</if>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="queryBuCount" resultType="int" parameterType="com.mainsteam.stm.auditlog.bo.AuditlogBo" databaseId="dm">
+		SELECT COUNT(*) FROM STM_SYS_AUDITLOG
+		WHERE 1=1
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="oper_date != null"> AND OPER_DATE           <![CDATA[ > ]]>#{oper_date}</if>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+  <select id="queryBuCount" resultType="int" parameterType="com.mainsteam.stm.auditlog.bo.AuditlogBo" databaseId="oscar">
+		SELECT COUNT(*) FROM STM_SYS_AUDITLOG
+		WHERE 1=1
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="oper_date != null"> AND OPER_DATE           <![CDATA[ > ]]>#{oper_date}</if>
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="queryLastTime" resultType="com.mainsteam.stm.auditlog.bo.AuditlogQueryBo">
+		SELECT MAX(OPER_DATE) AS OPER_DATE FROM STM_SYS_AUDITLOGBACKUP
+	</select>
+   
+   
+   
+   
+   
+  <insert id="insertBuAuditlog" databaseId="mysql" parameterType="java.util.List">
+	    insert into STM_SYS_AUDITLOGBACKUP(
+	  	   AUDITLOG_ID,     
+	       OPER_DATE,
+	       DEL_STATUS,
+	       BACKUP_DATE
+	    ) values 
+	    
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <foreach collection="list" item="item" index="index" separator=",">  
+	        (
+		       #{item.id},
+		       #{item.oper_date}, 
+		       #{item.del_status}, 
+		       #{item.backup_date}
+	        )
+	   </foreach> 
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </insert>
+   
+   
+   
+   
+   
+  <insert id="insertBuAuditlog" databaseId="oracle" parameterType="java.util.List">
+	    insert into STM_SYS_AUDITLOGBACKUP(
+	    	ID,
+	  	   AUDITLOG_ID,     
+	       OPER_DATE,
+	       DEL_STATUS,
+	       BACKUP_DATE
+	    )
+	    
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <foreach collection="list" item="item" index="index" open="(" separator="union" close=")">
+	        ( select
+	        	#{item.id,jdbcType=INTEGER},
+		       #{item.id,jdbcType=INTEGER},
+		       #{item.oper_date,jdbcType=TIMESTAMP}, 
+		       #{item.del_status,jdbcType=VARCHAR}, 
+		       #{item.backup_date,jdbcType=TIMESTAMP}
+		       from dual
+	        )
+	   </foreach> 
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </insert>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <insert id="insertBuAuditlog" databaseId="dm" parameterType="java.util.List">
+	    insert into STM_SYS_AUDITLOGBACKUP(
+	    	ID,
+	  	   AUDITLOG_ID,     
+	       OPER_DATE,
+	       DEL_STATUS,
+	       BACKUP_DATE
+	    )
+	    
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <foreach collection="list" item="item" index="index" open="(" separator="union" close=")">
+	        ( select
+	        	#{item.id,jdbcType=INTEGER},
+		       #{item.id,jdbcType=INTEGER},
+		       #{item.oper_date,jdbcType=TIMESTAMP}, 
+		       #{item.del_status,jdbcType=VARCHAR}, 
+		       #{item.backup_date,jdbcType=TIMESTAMP}
+		       from dual
+	        )
+	   </foreach> 
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </insert>
+  <insert id="insertBuAuditlog" databaseId="oscar" parameterType="java.util.List">
+	    insert into STM_SYS_AUDITLOGBACKUP(
+	    	ID,
+	  	   AUDITLOG_ID,     
+	       OPER_DATE,
+	       DEL_STATUS,
+	       BACKUP_DATE
+	    )
+	    
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <foreach collection="list" item="item" index="index" open="(" separator="union" close=")">
+	        ( select
+	        	#{item.id,jdbcType=INTEGER},
+		       #{item.id,jdbcType=INTEGER},
+		       #{item.oper_date,jdbcType=TIMESTAMP}, 
+		       #{item.del_status,jdbcType=VARCHAR}, 
+		       #{item.backup_date,jdbcType=TIMESTAMP}
+		       from dual
+	        )
+	   </foreach> 
+	
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </insert>
+   
+   
+   
+   
+   
+  <select id="queryBulist" resultType="com.mainsteam.stm.auditlog.bo.AuditlogBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="mysql">
+		select ID,BACKUP_DATE,max(OPER_DATE)AS OPER_DATE from STM_SYS_AUDITLOGBACKUP
+		WHERE 1=1
+           
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="condition!=null">
+             
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.beginDate != null"> AND unix_timestamp(BACKUP_DATE)           <![CDATA[ >= ]]>  unix_timestamp(#{condition.beginDate})</if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.endDate != null"> AND unix_timestamp(BACKUP_DATE)           <![CDATA[ <= ]]> unix_timestamp(#{condition.endDate})</if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.oper_type != null"> AND OPER_TYPE = #{condition.oper_type}</if>
+          
+		
+    
+    
+    
+    
+    
+    
+    
+    
+    </if>
+        group by BACKUP_DATE
+     
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="queryBulist" resultType="com.mainsteam.stm.auditlog.bo.AuditlogBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oracle">
+		select MAX(ID),BACKUP_DATE,max(oper_date) AS OPER_DATE from STM_SYS_AUDITLOGBACKUP
+        WHERE 1=1             
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="condition!=null">
+             
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.beginDate != null"> AND BACKUP_DATE           <![CDATA[ >= ]]>  to_date(#{condition.beginDate}, 'yyyy-mm-dd hh24:mi:ss')</if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.endDate != null"> AND BACKUP_DATE           <![CDATA[ <= ]]>to_date(#{condition.endDate}, 'yyyy-mm-dd hh24:mi:ss')</if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.oper_type != null"> AND OPER_TYPE = #{condition.oper_type}</if>
+          
+		
+    
+    
+    
+    
+    
+    
+    
+    
+    </if>
+           group by BACKUP_DATE
+     
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="queryBulist" resultType="com.mainsteam.stm.auditlog.bo.AuditlogBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="dm">
+		select MAX(ID),BACKUP_DATE,max(oper_date) AS OPER_DATE from STM_SYS_AUDITLOGBACKUP
+        WHERE 1=1             
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="condition!=null">
+             
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.beginDate != null"> AND BACKUP_DATE           <![CDATA[ >= ]]>  to_date(#{condition.beginDate}, 'yyyy-mm-dd hh24:mi:ss')</if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.endDate != null"> AND BACKUP_DATE           <![CDATA[ <= ]]>to_date(#{condition.endDate}, 'yyyy-mm-dd hh24:mi:ss')</if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.oper_type != null"> AND OPER_TYPE = #{condition.oper_type}</if>
+          
+		
+    
+    
+    
+    
+    
+    
+    
+    
+    </if>
+           group by BACKUP_DATE
+     
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+  <select id="queryBulist" resultType="com.mainsteam.stm.auditlog.bo.AuditlogBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oscar">
+		select MAX(ID),BACKUP_DATE,max(oper_date) AS OPER_DATE from STM_SYS_AUDITLOGBACKUP
+        WHERE 1=1             
+		 
+		 
+     
+     
+     
+     
+     
+     
+     
+     
+    <if test="condition!=null">
+             
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.beginDate != null"> AND BACKUP_DATE           <![CDATA[ >= ]]>  to_date(#{condition.beginDate}, 'yyyy-mm-dd hh24:mi:ss')</if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.endDate != null"> AND BACKUP_DATE           <![CDATA[ <= ]]>to_date(#{condition.endDate}, 'yyyy-mm-dd hh24:mi:ss')</if>
+			 
+			 
+       
+       
+       
+       
+       
+       
+       
+       
+      <if test="condition.oper_type != null"> AND OPER_TYPE = #{condition.oper_type}</if>
+          
+		
+    
+    
+    
+    
+    
+    
+    
+    
+    </if>
+           group by BACKUP_DATE
+     
+	
+  
+  
+  
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <update id="updateAuditlog" parameterType="com.mainsteam.stm.auditlog.bo.AuditlogBo" databaseId="mysql">
+     	update stm_sys_auditlog B
+   			set B.DEL_STATUS =
+       	(select A.DEL_STATUS
+        	from stm_sys_auditlogbackup A
+         	where B.ID = A.AUDITLOG_ID)
+ 		where EXISTS
+		(select 1 from stm_sys_auditlogbackup A where B.ID = A.AUDITLOG_ID and unix_timestamp(B.OPER_DATE)           <![CDATA[ <= ]]> unix_timestamp(#{oper_date}))
+     </update>
+   
+   
+   
+   
+   
+  <update id="updateAuditlog" parameterType="com.mainsteam.stm.auditlog.bo.AuditlogBo" databaseId="oracle">
+     	update stm_sys_auditlog B
+   			set B.DEL_STATUS =
+       	(select A.DEL_STATUS
+        	from stm_sys_auditlogbackup A
+         	where B.ID = A.AUDITLOG_ID)
+ 		where EXISTS
+		(select 1 from stm_sys_auditlogbackup A where B.ID = A.AUDITLOG_ID and  B.OPER_DATE           <![CDATA[ <= ]]> #{oper_date})
+     </update>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <update id="updateAuditlog" parameterType="com.mainsteam.stm.auditlog.bo.AuditlogBo" databaseId="dm">
+     	update stm_sys_auditlog B
+   			set B.DEL_STATUS =
+       	(select A.DEL_STATUS
+        	from stm_sys_auditlogbackup A
+         	where B.ID = A.AUDITLOG_ID)
+ 		where EXISTS
+		(select 1 from stm_sys_auditlogbackup A where B.ID = A.AUDITLOG_ID and  B.OPER_DATE           <![CDATA[ <= ]]> #{oper_date})
+     </update>
+  <update id="updateAuditlog" parameterType="com.mainsteam.stm.auditlog.bo.AuditlogBo" databaseId="oscar">
+     	update stm_sys_auditlog B
+   			set B.DEL_STATUS =
+       	(select A.DEL_STATUS
+        	from stm_sys_auditlogbackup A
+         	where B.ID = A.AUDITLOG_ID)
+ 		where EXISTS
+		(select 1 from stm_sys_auditlogbackup A where B.ID = A.AUDITLOG_ID and  B.OPER_DATE           <![CDATA[ <= ]]> #{oper_date})
+     </update>
+   
+   
+   
+   
+   
+  <insert id="insertBuAuditlogRule" parameterType="com.mainsteam.stm.auditlog.bo.AuditlogBo" databaseId="mysql">
+	    insert into STM_SYS_AUDITLOGBACKUP_RULE(
+	  	   ID,     
+	       BACKUP_DAY,
+	       BACKUP_TIME,
+	       STATUS,
+	       OPEN_DATE
+	    ) values 
+	    (
+		   #{id},
+		   #{backup_day}, 
+		   #{backup_time}, 
+		   #{status},
+		   #{open_date}
+	    )
+	</insert>
+   
+   
+   
+   
+   
+  <insert id="insertBuAuditlogRule" parameterType="com.mainsteam.stm.auditlog.bo.AuditlogBo" databaseId="oracle">
+	    insert into STM_SYS_AUDITLOGBACKUP_RULE(
+	  	   ID,     
+	       BACKUP_DAY,
+	       BACKUP_TIME,
+	       STATUS,
+	       OPEN_DATE
+	    ) values 
+	    (
+		   #{id},
+		   #{backup_day}, 
+		   #{backup_time}, 
+		   #{status},
+		   #{open_date}
+	    )
+	</insert>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <insert id="insertBuAuditlogRule" parameterType="com.mainsteam.stm.auditlog.bo.AuditlogBo" databaseId="dm">
+	    insert into STM_SYS_AUDITLOGBACKUP_RULE(
+	  	   ID,     
+	       BACKUP_DAY,
+	       BACKUP_TIME,
+	       STATUS,
+	       OPEN_DATE
+	    ) values 
+	    (
+		   #{id},
+		   #{backup_day}, 
+		   #{backup_time}, 
+		   #{status},
+		   #{open_date}
+	    )
+	</insert>
+  <insert id="insertBuAuditlogRule" parameterType="com.mainsteam.stm.auditlog.bo.AuditlogBo" databaseId="oscar">
+	    insert into STM_SYS_AUDITLOGBACKUP_RULE(
+	  	   ID,     
+	       BACKUP_DAY,
+	       BACKUP_TIME,
+	       STATUS,
+	       OPEN_DATE
+	    ) values 
+	    (
+		   #{id},
+		   #{backup_day}, 
+		   #{backup_time}, 
+		   #{status},
+		   #{open_date}
+	    )
+	</insert>
+   
+   
+   
+   
+   
+  <select id="selectAuditlogRule" resultType="com.mainsteam.stm.auditlog.bo.AuditlogRuleBo">
+		SELECT BACKUP_DAY,BACKUP_TIME,STATUS,OPEN_DATE 
+		FROM STM_SYS_AUDITLOGBACKUP_RULE
+		WHERE ID = 1
+	</select>
+   
+   
+   
+   
+   
+  <!-- 
+	<select id="selectAuditlogRule" resultType="com.mainsteam.stm.auditlog.bo.AuditlogRuleBo" databaseId="oracle">
+		SELECT BACKUP_DAY,BACKUP_TIME,STATUS,OPEN_DATE 
+		FROM STM_SYS_AUDITLOGBACKUP_RULE
+	</select>
+	 -->
+   
+   
+   
+   
+   
+  <update id="updateAuditlogRule" parameterType="com.mainsteam.stm.auditlog.bo.AuditlogBo" databaseId="mysql">
+		UPDATE stm_sys_auditlogbackup_rule
+		SET BACKUP_DAY = #{backup_day},
+		BACKUP_TIME = #{backup_time},
+		STATUS = #{status},
+		OPEN_DATE = #{open_date}
+		WHERE ID = 1
+	</update>
+   
+   
+   
+   
+   
+  <update id="updateAuditlogRule" parameterType="com.mainsteam.stm.auditlog.bo.AuditlogBo" databaseId="oracle">
+		UPDATE stm_sys_auditlogbackup_rule
+		SET BACKUP_DAY = #{backup_day,jdbcType=INTEGER},
+		BACKUP_TIME = #{backup_time,jdbcType=VARCHAR},
+		STATUS = #{status,jdbcType=VARCHAR},
+		OPEN_DATE = #{open_date,jdbcType=DATE}
+		WHERE ID = 1
+	</update>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <update id="updateAuditlogRule" parameterType="com.mainsteam.stm.auditlog.bo.AuditlogBo" databaseId="dm">
+		UPDATE stm_sys_auditlogbackup_rule
+		SET BACKUP_DAY = #{backup_day,jdbcType=INTEGER},
+		BACKUP_TIME = #{backup_time,jdbcType=VARCHAR},
+		STATUS = #{status,jdbcType=VARCHAR},
+		OPEN_DATE = #{open_date,jdbcType=DATE}
+		WHERE ID = 1
+	</update>
+  <update id="updateAuditlogRule" parameterType="com.mainsteam.stm.auditlog.bo.AuditlogBo" databaseId="oscar">
+		UPDATE stm_sys_auditlogbackup_rule
+		SET BACKUP_DAY = #{backup_day,jdbcType=INTEGER},
+		BACKUP_TIME = #{backup_time,jdbcType=VARCHAR},
+		STATUS = #{status,jdbcType=VARCHAR},
+		OPEN_DATE = #{open_date,jdbcType=DATE}
+		WHERE ID = 1
+	</update>
+</mapper>

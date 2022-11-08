@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.system.um.domain.dao.IDomainDao">
+	 
+   
+   
+   
+  <insert id="insert" parameterType="com.mainsteam.stm.system.um.domain.bo.Domain">
+	    insert into STM_SYS_DOMAIN(ID,NAME,DESCRIPTION,CREATOR_ID,CREATED_TIME,STATUS) values (#{id},#{name}, #{description}, #{creatorId}, #{createdTime}, #{status})
+	</insert>
+	 
+   
+   
+   
+  <select id="pageSelect" resultType="com.mainsteam.stm.system.um.domain.bo.Domain" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		SELECT ID,
+		NAME,
+		DESCRIPTION,
+		CREATOR_ID AS creatorId,
+		CREATED_TIME AS createdTime,
+		STATUS
+		FROM STM_SYS_DOMAIN
+		where 1=1
+		  
+		 
+     
+     
+     
+    <if test="condition!=null">
+		 	 
+			 
+       
+       
+       
+      <if test="condition.userType == 1"> and ID IN (SELECT DISTINCT(DOMAIN_ID) FROM STM_SYS_USER_DOMAIN_ROLE_REL REL WHERE REL.USER_ID=#{condition.id} AND REL.ROLE_ID = 2) </if>
+		 
+		
+    
+    
+    
+    </if>
+ 
+		 
+     
+     
+     
+    <!-- 		<if test="sort != null"> -->
+ 
+		 
+     
+     
+     
+    <!-- 			ORDER BY  convert(${sort} USING gbk) COLLATE gbk_chinese_ci ${order} -->
+ 
+		 
+     
+     
+     
+    <!-- 		</if> -->
+	
+	
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+  <select id="get" resultType="com.mainsteam.stm.system.um.domain.bo.Domain" parameterType="long">
+		SELECT ID,
+		NAME,
+		DESCRIPTION,
+		CREATOR_ID AS creatorId,
+		CREATED_TIME AS createdTime,
+		STATUS
+		FROM STM_SYS_DOMAIN where ID=#{id}
+	</select>
+	 
+   
+   
+   
+  <select id="queryByName" parameterType="string" resultType="java.lang.Integer">
+		SELECT ID
+		FROM STM_SYS_DOMAIN where NAME=#{name}
+	</select>
+	 
+   
+   
+   
+  <update id="update" parameterType="com.mainsteam.stm.system.um.domain.bo.Domain">
+		update STM_SYS_DOMAIN
+		 
+		 
+     
+     
+     
+    <set>
+			 
+			 
+       
+       
+       
+      <if test="name != null"> NAME = #{name}, </if>
+			 
+			 
+       
+       
+       
+      <if test="description != null"> DESCRIPTION = #{description} ,</if>
+			 
+			 
+       
+       
+       
+      <if test="status != null"> STATUS = #{status}, </if>
+		
+		
+    
+    
+    
+    </set>
+		 where ID = #{id}
+	
+	
+  
+  
+  
+  </update>
+	 
+   
+   
+   
+  <update id="batchUpdate" parameterType="com.mainsteam.stm.system.um.domain.bo.Domain">
+		update STM_SYS_DOMAIN
+		 
+		 
+     
+     
+     
+    <set>
+			 
+			 
+       
+       
+       
+      <if test="status != null"> STATUS = #{status}, </if>
+		
+		
+    
+    
+    
+    </set>
+		  where ID = #{id}
+	
+	
+  
+  
+  
+  </update>
+	 
+   
+   
+   
+  <!-- 查询所有域管理员 -->
+	 
+   
+   
+   
+  <select id="getDomainAdmin" resultType="com.mainsteam.stm.system.um.relation.bo.UserDomain" parameterType="com.mainsteam.stm.system.um.relation.bo.UmRelation">
+		SELECT 
+		USER_ID AS userId,
+		DOMAIN_ID AS domainId,
+		OCUSER.NAME AS userName,
+		OCUSER.ACCOUNT AS userAccount,
+		OCUSER.STATUS AS userStatus,
+		OCUSER.USER_TYPE AS userType
+		FROM STM_SYS_USER_DOMAIN_ROLE_REL RELATION
+		LEFT JOIN STM_SYS_USER OCUSER ON  RELATION.USER_ID= OCUSER.ID where RELATION.ROLE_ID = #{roleId} AND RELATION.DOMAIN_ID=#{domainId}
+	</select>
+	 
+   
+   
+   
+  <!-- 根据DomainId查询该域下选中的用户角色信息 -->
+	 
+   
+   
+   
+  <select id="getUserRoleByDomainId" resultType="com.mainsteam.stm.system.um.relation.bo.UserRole" databaseId="mysql">
+		select 
+		RELATION.USER_ID AS userId, 
+		RELATION.ROLE_ID as roleId,
+		RELATION.DOMAIN_ID as domainId,
+		OCUSER.NAME as userName,
+		OCUSER.ACCOUNT as userAccount,
+		OCUSER.STATUS as userStatus,
+		OCUSER.USER_TYPE as userType,
+		GROUP_CONCAT(ROLE.NAME SEPARATOR ';') as roleName
+		FROM STM_SYS_USER_DOMAIN_ROLE_REL RELATION
+ 		LEFT JOIN STM_SYS_USER OCUSER ON RELATION.USER_ID=OCUSER.ID
+ 		LEFT JOIN STM_SYS_ROLE ROLE ON RELATION.ROLE_ID= ROLE.ID
+ 		WHERE RELATION.DOMAIN_ID=#{domainId} group by RELATION.USER_ID ORDER BY ROLE.ID
+	</select>
+	 
+   
+   
+   
+  <select id="getUserRoleByDomainId" resultType="com.mainsteam.stm.system.um.relation.bo.UserRole" databaseId="oracle">
+ 		select RELATION.USER_ID as userId,
+		       min(RELATION.ROLE_ID) as roleId,
+		       max(RELATION.DOMAIN_ID) as domainId,
+		       max(OCUSER.NAME) as userName,
+		       max(OCUSER.ACCOUNT) as userAccount,
+		       max(OCUSER.STATUS) as userStatus,
+		       max(OCUSER.USER_TYPE) as userType,
+		       REPLACE (WM_CONCAT(ROLE.NAME),',',';') as roleName
+		  FROM STM_SYS_USER_DOMAIN_ROLE_REL RELATION
+		  LEFT JOIN STM_SYS_USER OCUSER
+		    ON RELATION.USER_ID = OCUSER.ID
+		  LEFT JOIN STM_SYS_ROLE ROLE
+		    ON RELATION.ROLE_ID = ROLE.ID
+		 WHERE RELATION.DOMAIN_ID = #{domainId}
+		 group by RELATION.USER_ID
+	</select>
+	 
+  
+   
+  
+   
+  
+   
+  <select id="getUserRoleByDomainId" resultType="com.mainsteam.stm.system.um.relation.bo.UserRole" databaseId="dm">
+ 		select RELATION.USER_ID as userId,
+		       min(RELATION.ROLE_ID) as roleId,
+		       max(RELATION.DOMAIN_ID) as domainId,
+		       max(OCUSER.NAME) as userName,
+		       max(OCUSER.ACCOUNT) as userAccount,
+		       max(OCUSER.STATUS) as userStatus,
+		       max(OCUSER.USER_TYPE) as userType,
+		       REPLACE (WM_CONCAT(ROLE.NAME),',',';') as roleName
+		  FROM STM_SYS_USER_DOMAIN_ROLE_REL RELATION
+		  LEFT JOIN STM_SYS_USER OCUSER
+		    ON RELATION.USER_ID = OCUSER.ID
+		  LEFT JOIN STM_SYS_ROLE ROLE
+		    ON RELATION.ROLE_ID = ROLE.ID
+		 WHERE RELATION.DOMAIN_ID = #{domainId}
+		 group by RELATION.USER_ID
+	</select>
+  <select id="getUserRoleByDomainId" resultType="com.mainsteam.stm.system.um.relation.bo.UserRole" databaseId="oscar">
+ 		select RELATION.USER_ID as userId,
+		       min(RELATION.ROLE_ID) as roleId,
+		       max(RELATION.DOMAIN_ID) as domainId,
+		       max(OCUSER.NAME) as userName,
+		       max(OCUSER.ACCOUNT) as userAccount,
+		       max(OCUSER.STATUS) as userStatus,
+		       max(OCUSER.USER_TYPE) as userType,
+		       REPLACE (WM_CONCAT(ROLE.NAME),',',';') as roleName
+		  FROM STM_SYS_USER_DOMAIN_ROLE_REL RELATION
+		  LEFT JOIN STM_SYS_USER OCUSER
+		    ON RELATION.USER_ID = OCUSER.ID
+		  LEFT JOIN STM_SYS_ROLE ROLE
+		    ON RELATION.ROLE_ID = ROLE.ID
+		 WHERE RELATION.DOMAIN_ID = #{domainId}
+		 group by RELATION.USER_ID
+	</select>
+	 
+   
+   
+   
+  <select id="getDomainDcsRel" resultType="com.mainsteam.stm.system.um.domain.bo.DomainDcs" parameterType="long">
+		SELECT ddr.DOMAIN_ID AS "dominId",
+		 ddr.DCS_ID AS "dcsId", 
+		 ddr.IS_CHECKED AS "isChecked" 
+		FROM STM_SYS_DOMAIN_DCS_REL ddr where ddr.DOMAIN_ID=#{domainId}
+	</select>
+	 
+   
+   
+   
+  <insert id="batchInsertDomainDcsRel" parameterType="com.mainsteam.stm.system.um.domain.bo.DomainDcs">
+		INSERT INTO STM_SYS_DOMAIN_DCS_REL (DOMAIN_ID,DCS_ID,IS_CHECKED) VALUES (#{domainId},#{dcsId},1)
+	</insert>
+	 
+   
+   
+   
+  <delete id="batchDeleteDomainDcsRel" parameterType="long">
+		DELETE FROM STM_SYS_DOMAIN_DCS_REL where DOMAIN_ID = #{domainId}
+	</delete>
+	 
+   
+   
+   
+  <select id="getAllDomains" resultType="com.mainsteam.stm.system.um.domain.bo.Domain">
+		SELECT ID,
+		NAME,
+		DESCRIPTION,
+		CREATOR_ID AS creatorId,
+		CREATED_TIME AS createdTime,
+		STATUS
+		FROM STM_SYS_DOMAIN
+	</select>
+	 
+   
+   
+   
+  <select id="getDomains" parameterType="com.mainsteam.stm.system.um.relation.bo.UmRelation" resultType="com.mainsteam.stm.system.um.domain.bo.Domain">
+		SELECT 
+			ID,
+			NAME,
+			DESCRIPTION,
+			CREATOR_ID AS creatorId,
+			CREATED_TIME AS createdTime,
+			STATUS 
+		from STM_SYS_DOMAIN
+		WHERE ID IN 
+		(SELECT DISTINCT(DOMAIN_ID) FROM STM_SYS_USER_DOMAIN_ROLE_REL REL WHERE REL.USER_ID=#{userId} AND REL.ROLE_ID =#{roleId})
+	</select>
+	 
+   
+   
+   
+  <delete id="batchDel">
+		DELETE from STM_SYS_DOMAIN WHERE ID = #{domainId}
+	</delete>
+	 
+   
+   
+   
+  <select id="queryDomainUsers" resultType="com.mainsteam.stm.system.um.user.bo.User" databaseId="mysql">
+		SELECT 
+			OCUSER.ID,
+			OCUSER.NAME,
+			OCUSER.SEX,
+			OCUSER.ACCOUNT,
+			OCUSER.PASSWORD,OCUSER.USER_TYPE userType,OCUSER.MOBILE,OCUSER.EMAIL,OCUSER.STATUS,RELATION.ROLE_ID,OCROLE.NAME AS ROLENAME
+		FROM STM_SYS_USER_DOMAIN_ROLE_REL RELATION
+		LEFT JOIN STM_SYS_USER OCUSER ON RELATION.USER_ID=OCUSER.ID LEFT JOIN STM_SYS_ROLE OCROLE ON RELATION.ROLE_ID=OCROLE.ID where RELATION.DOMAIN_ID IN
+		 
+		 
+     
+     
+     
+    <foreach item="id" index="index" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+		group by RELATION.USER_ID
+	
+	
+  
+  
+  
+  </select>
+	 
+   
+   
+   
+  <select id="queryDomainUsers" resultType="com.mainsteam.stm.system.um.user.bo.User" databaseId="oracle">
+		select 
+			max(OCUSER.ID) as id,
+			max(OCUSER.NAME) as name,
+			max(OCUSER.SEX) as sex,
+			max(OCUSER.ACCOUNT) as account,
+			max(OCUSER.PASSWORD) as password,
+			max(OCUSER.USER_TYPE) AS userType,
+			max(OCUSER.MOBILE) as mobile,
+			max(OCUSER.EMAIL) as email,
+			max(OCUSER.STATUS) as status
+		FROM STM_SYS_USER_DOMAIN_ROLE_REL RELATION
+		LEFT JOIN STM_SYS_USER OCUSER ON RELATION.USER_ID=OCUSER.ID where RELATION.DOMAIN_ID IN
+		 
+		 
+     
+     
+     
+    <foreach item="id" index="index" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+		group by RELATION.USER_ID
+	
+	
+  
+  
+  
+  </select>
+	 
+  
+   
+  
+   
+  
+   
+  <select id="queryDomainUsers" resultType="com.mainsteam.stm.system.um.user.bo.User" databaseId="dm">
+		select 
+			max(OCUSER.ID) as id,
+			max(OCUSER.NAME) as name,
+			max(OCUSER.SEX) as sex,
+			max(OCUSER.ACCOUNT) as account,
+			max(OCUSER.PASSWORD) as password,
+			max(OCUSER.USER_TYPE) AS userType,
+			max(OCUSER.MOBILE) as mobile,
+			max(OCUSER.EMAIL) as email,
+			max(OCUSER.STATUS) as status
+		FROM STM_SYS_USER_DOMAIN_ROLE_REL RELATION
+		LEFT JOIN STM_SYS_USER OCUSER ON RELATION.USER_ID=OCUSER.ID where RELATION.DOMAIN_ID IN
+		 
+		 
+     
+     
+     
+    <foreach item="id" index="index" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+		group by RELATION.USER_ID
+	
+	
+  
+  
+  
+  </select>
+  <select id="queryDomainUsers" resultType="com.mainsteam.stm.system.um.user.bo.User" databaseId="oscar">
+		select 
+			max(OCUSER.ID) as id,
+			max(OCUSER.NAME) as name,
+			max(OCUSER.SEX) as sex,
+			max(OCUSER.ACCOUNT) as account,
+			max(OCUSER.PASSWORD) as password,
+			max(OCUSER.USER_TYPE) AS userType,
+			max(OCUSER.MOBILE) as mobile,
+			max(OCUSER.EMAIL) as email,
+			max(OCUSER.STATUS) as status
+		FROM STM_SYS_USER_DOMAIN_ROLE_REL RELATION
+		LEFT JOIN STM_SYS_USER OCUSER ON RELATION.USER_ID=OCUSER.ID where RELATION.DOMAIN_ID IN
+		 
+		 
+     
+     
+     
+    <foreach item="id" index="index" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+		group by RELATION.USER_ID
+	
+	
+  
+  
+  
+  </select>
+</mapper>

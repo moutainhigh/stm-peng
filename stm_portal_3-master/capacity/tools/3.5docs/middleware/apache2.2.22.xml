@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	
+	<devicetypeinfo devicetype="Apache2.2.22" ismulticoltype="true" majortype="middleware" minortype="ApacheHTTPServer" manufacturer="Apache" devicetype_zh="Apache2.2.22">
+		
+		<devicetypes>
+		</devicetypes>
+		
+		<!-- 该设备类型定义的命令，用于合并命令执行 -->
+		<commands>			
+			<!--Apache服务可用性-->
+			<command coltype="INNER_PROC" comid="getOc4jAvailability" command="com.qwserv.itm.pal.appmdl.apache.ApacheCollectorUtil.getOc4jAvailability"/>
+			<command coltype="WMI" comid="operationSystem" command="root\cimv2::select caption from Win32_OperatingSystem"/><!--主机操作系统 -->
+			<command coltype="WMI" comid="osVersion" command="root\cimv2::select version from Win32_OperatingSystem"/><!--操作系统版本 -->
+			<command coltype="WMI" comid="hostName" command="root\cimv2::select CSName from Win32_OperatingSystem"/><!--主机名称 -->
+			<command coltype="WMI" comid="systemInfo" command="root\cimv2::select description from Win32_OperatingSystem"/><!--主机说明 -->
+			<!--Apache CPU利用率-->
+			<command coltype="WMI" comid="apache_cpurate" command="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Process where Name like '%httpd%' or Name like '%Apache%'"/>
+			<!--物理内存总大小 KByte-->
+			<command coltype="WMI" comid="physical_total_memory" command="root\cimv2::SELECT TotalVisibleMEMorySize FROM Win32_OperatingSystem" />
+			<!--Apache内存使用内存 Byte-->
+			<command coltype="WMI" comid="apache_used_memory" command="root\cimv2::select WorkingSetPrivate from Win32_PerfFormattedData_PerfProc_Process where Name like '%httpd%' or Name like '%Apache%'"/>
+			<!-- Apache Server Status HTML Content -->
+			<command coltype="INNER_PROC" comid="apacheServerStatus" command="com.qwserv.itm.pal.appmdl.apache.ApacheCollectorUtil.getStatusHtml"/>
+			
+			<command coltype="CLI" comid="chk_common" command="/tmp/os.sh"/>
+			<command coltype="CLI" comid="chk_physicalrate" command="/tmp/appinfo.sh javaw"/>
+		</commands>
+		
+		<!-- 描述该类设备的所有指标采集,一行对应一个指标 -->
+		<resources>
+			<!-- 服务器可用性 -->
+			<resource kpiid="M8Availability" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getOc4jAvailability" select="" merge="" deal=""/>
+				</collects>
+				<!--
+				<translations>
+					<translation source="1" dest="可用"/>
+					<translation source="0" dest="不可用"/>
+				</translations>
+				-->
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M8Availability" field="value" fieldtype="" willalert="y"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.equals(&quot;不可用&quot;)" alertdesc5="服务不可用"
+					alertcontin="1" alertype="501200" circle="5" storefactor="1"/>
+			</resource>
+
+			<!--主机操作系统 -->
+			<resource kpiid="M8operationSystem" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="operationSystem" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_M8operationSystem" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  alertype="501201" circle="1440" storefactor="0"/>
+				
+			</resource>
+			<!--主机名称 -->
+			<resource kpiid="M8hostName" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="hostName" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_M8hostName" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  alertype="501202" circle="1440" storefactor="0"/>
+				
+			</resource>
+			<!--主机说明 -->
+			<resource kpiid="M8systemInfo" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="systemInfo" select="" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_d_M8systemInfo" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501203" circle="1440" storefactor="0"/>
+			</resource>
+			<!-- 主机说明 -->
+			<resource kpiid="M8systemInfo" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;systeminfo&gt;([\s\S]*)&lt;/systeminfo&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M8systemInfo" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<!--操作系统版本 -->
+			<resource kpiid="M8osVersion" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="osVersion" select="" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_d_M8osVersion" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501204" circle="1440" storefactor="0"/>
+			</resource>
+			
+			<!-- 操作系统版本 -->
+			<resource kpiid="M8osVersion" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;osversion&gt;([\s\S]*)&lt;/osversion&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M8osVersion" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!--繁忙服务数量-->
+			<resource kpiid="M8requestCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="apacheServerStatus" select="(\d+)\srequests currently being processed" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M8requestCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501205" circle="5" storefactor="1"/>
+			</resource>
+
+			<!--总传输量-->
+			<resource kpiid="M8totalTraffic" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="apacheServerStatus" select="Total Traffic:\s*(.+?)&lt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M8totalTraffic" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501206" circle="5" storefactor="1"/>
+			</resource>
+
+			<!--请求数/秒-->
+			<resource kpiid="M8requestsSec" coltype="INNER_PROC" value="" valuetype="Integer" unit="个/秒">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="apacheServerStatus" select="(\d+)\srequests\Ssec" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M8requestsSec" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501207" circle="5" storefactor="1"/>
+			</resource>
+
+			<!--字节数/请求-->
+			<resource kpiid="M8BRequest" coltype="INNER_PROC" value="" valuetype="Float" unit="Byte">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="apacheServerStatus" select="(\d+)\sB\Srequest" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M8BRequest" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501208" circle="5" storefactor="1"/>
+			</resource>
+
+			<!--总访问次数-->
+			<resource kpiid="M8totalAccesses" coltype="INNER_PROC" value="" valuetype="Integer" unit="次">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="apacheServerStatus" select="Total accesses\S\s(\d+)" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M8totalAccesses" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501209" circle="5" storefactor="1"/>
+			</resource>
+
+			<!--空闲服务数量-->
+			<resource kpiid="M8idleWorkers" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="apacheServerStatus" select="(\d+)\sidle workers" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M8idleWorkers" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501210" circle="5" storefactor="1"/>
+			</resource>
+
+			<!--apache运行时间-->
+			<resource kpiid="M8serverUptime" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="apacheServerStatus" select="Server uptime:\s*(.+?)\S\Sdt" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M8serverUptime" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501211" circle="5" storefactor="1"/>
+			</resource>
+
+			<!--字节数/秒-->
+			<resource kpiid="M8BSecond" coltype="INNER_PROC" value="" valuetype="Float" unit="Byte/s">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="apacheServerStatus" select="(\d+)\sB\Ssecond" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M8BSecond" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501212" circle="5" storefactor="1"/>
+			</resource>
+
+			<!--版本-->
+			<resource kpiid="M8version" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="apacheServerStatus" select="Server Version: \s*(.+?)\S\Sdt" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M8version" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501213" circle="1440" storefactor="1"/>
+			</resource>
+		
+		<!-- Apache CPU利用率 -->
+			<resource kpiid="M8cpuRate" coltype="WMI" value="" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="apache_cpurate" select="" merge="sum" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M8cpuRate" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501214" circle="5" storefactor="1"/>
+			</resource>
+
+			<!--物理内存总大小 KByte-->
+			<resource kpiid="M8phyTotalMemory" coltype="WMI" value="" valuetype="Float" unit="KByte">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="physical_total_memory" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M8phyTotalMemory" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501215" circle="1440" storefactor="1"/>
+			</resource>
+
+			<!--Apache内存使用内存 Byte-->
+			<resource kpiid="M8apacheUsedMemory" coltype="WMI" value="" valuetype="Float" unit="Byte">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="apache_used_memory" select="" merge="sum" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M8apacheUsedMemory" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501216" circle="5" storefactor="1"/>
+			</resource>
+
+			<!--Apache内存使用率-->
+			<resource kpiid="M8apacheMemoryRate" coltype="WMI" value="100*$d1/$d2/1024" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="apache_used_memory" select="" merge="sum" deal=""/>
+					<collect exeorder="20" comid="physical_total_memory" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M8apacheMemoryRate" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="501217" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- 系统可管理内存-->
+			<resource kpiid="M8phyTotalMemory" coltype="CLI" value="$d1/1024" valuetype="Float" unit="GB">
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;memsize&gt;(\w+)&lt;/memsize&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M8phyTotalMemory" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+
+			<!--Apache 内存利用率 -->
+			<resource kpiid="M8apacheMemoryRate" coltype="CLI" value="" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="chk_physicalrate" select="&lt;get_appmemrate&gt;([\s\S]*)&lt;/get_appmemrate&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_d_M8apacheMemoryRate" field="value" fieldtype="" willalert="y"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>=80"
+					alertdesc3="内存利用率超过${trigervalue1}%，当前值为${value}%" alertexp4="${value}>=90" alertdesc4="内存利用率超过${trigervalue1}%，当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+		</resources>
+	</devicetypeinfo>
+</root>

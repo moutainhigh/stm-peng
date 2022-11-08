@@ -1,0 +1,1641 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">  
+  <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0"/>  
+  <PluginClassAliasList> 
+    <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+    <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+    <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+    <PluginClassAlias id="columnPasteProcessor" class="com.mainsteam.stm.plugin.common.ColumnPasteProcessor"/>
+    <PluginClassAlias id="RegularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+    <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+    <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+    <PluginClassAlias id="tableConverter" class="com.mainsteam.stm.plugin.common.TableResultSetConverter"/>
+    <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+    <PluginClassAlias id="ChangeRateProcessor" class="com.mainsteam.stm.plugin.common.ChangeRateProcessor"/>
+    <PluginClassAlias id="rowFilterProcessor" class="com.mainsteam.stm.plugin.common.RowFilterProcessor"/>
+  </PluginClassAliasList>  
+  <MetricPlugin metricid="macAddress" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="NICIndex,NICPhysAddress"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.6"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT NICPhysAddress"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="(\S+)"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="Name" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="get"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.1.5.0"/> 
+    </PluginParameter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="availability" collectType="" pluginid="IcmpPlugin"> 
+    <PluginResultMetaInfo columns="ip,isAlive,ResponseTime"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="DiscoveryInfo" key="IP" value="IP"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT isAlive"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="icmpDelayTime" collectType="" pluginid="IcmpPlugin"> 
+    <PluginResultMetaInfo columns="ip,isAlive,ResponseTime"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="DiscoveryInfo" key="IP" value="IP"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT ResponseTime"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="sysObjectID" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="get"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.1.2.0"/> 
+    </PluginParameter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="sysUpTime" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="sysUpTime"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="get"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.1.3.0"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT sysUpTime/100 as sysUpTime"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="sysDescr" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="get"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.1.1.0"/> 
+    </PluginParameter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ip" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.20.1.1"/> 
+    </PluginParameter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="arpTable" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="arpTableIndex,IfIndex,MacAddress,IPAddress,ArpType"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.22.1.1"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.22.1.2"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.22.1.3"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.22.1.4"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="tableConverter"/> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="fdbTable" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="fdbTableIndex,MacAddress,Port,Status"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.17.4.3.1.1"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.17.4.3.1.2"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.17.4.3.1.3"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="tableConverter"/> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="basePortTable" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="basePortTableIndex,BasePort,BasePortIfIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.17.1.4.1.1"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.17.1.4.1.2"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="tableConverter"/> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ipRouteTable" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ipRouteTableIndex,DestIPAddress,IfIndex,MainRoutingMetric,BackupingRoutingMetric1,BackupingRoutingMetric2,BackupingRoutingMetric3,BackupingRoutingMetric4,nextHop,RouteType,RouteProtocol,RouteAge,SubnetMask,RouteInfo"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.21.1.1"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.21.1.2"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.21.1.3"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.21.1.4"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.21.1.5"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.21.1.6"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.21.1.12"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.21.1.7"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.21.1.8"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.21.1.9"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.21.1.10"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.21.1.11"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.21.1.13"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="tableConverter"/> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ipAddrTable" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ipAddrTableIndex,IPAddress,IfIndex,SubnetMask,BroadcastAddress,IPReassembleMaxSize"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.20.1.1"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.20.1.2"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.20.1.3"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.20.1.4"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.4.20.1.5"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="tableConverter"/> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifNum" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifNumIndex,ifIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.1"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT (count(ifIndex)) as ifNum"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="throughput" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="throughputIndex,ifInOctets_ifHCInOctets,ifOutOctets_ifHCOutOctets"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.10:1.3.6.1.2.1.31.1.1.1.6"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.16:1.3.6.1.2.1.31.1.1.1.10"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT ((sum(ifInOctets_ifHCInOctets)+sum(ifOutOctets_ifHCOutOctets))/8/1024/1024) as throughput"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="throughputIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="inDiscardsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="inDiscardsRateIndex,ifInDiscards,ifInUcastPkts_ifHCInUcastPkts,ifInNucastPkts,ifInErrors"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.13:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.11:1.3.6.1.2.1.31.1.1.1.7:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.12:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.14:0"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT ((sum(ifInDiscards)/(sum(ifInUcastPkts_ifHCInUcastPkts)+sum(ifInNucastPkts)+sum(ifInDiscards)+sum(ifInErrors)))*100) as inDiscardsRate"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="inDiscardsRateIndex"/>  
+        <Parameter type="" key="FUNCTION" value="CHGR"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="outDiscardsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="outDiscardsRateIndex,ifOutDiscards,ifOutUcastPkts_ifHCOutUcastPkts,ifOutNucastPkts,ifOutErrors"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.19:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.17:1.3.6.1.2.1.31.1.1.1.11:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.18:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.20:0"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT ((sum(ifOutDiscards)/(sum(ifOutUcastPkts_ifHCOutUcastPkts)+sum(ifOutNucastPkts)+sum(ifOutDiscards)+sum(ifOutErrors)))*100) as outDiscardsRate"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="outDiscardsRateIndex"/>  
+        <Parameter type="" key="FUNCTION" value="CHGR"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="discardsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="discardsRateIndex,ifInDiscards,ifInUcastPkts_ifHCInUcastPkts,ifInNucastPkts,ifOutDiscards,ifOutUcastPkts_ifHCOutUcastPkts,ifOutNucastPkts,ifInErrors,ifOutErrors"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.13:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.11:1.3.6.1.2.1.31.1.1.1.7:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.12:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.19"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.17:1.3.6.1.2.1.31.1.1.1.11:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.18:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.14:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.20:0"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT (((sum(ifInDiscards)+sum(ifOutDiscards))/(sum(ifInUcastPkts_ifHCInUcastPkts)+sum(ifInNucastPkts)+sum(ifOutUcastPkts_ifHCOutUcastPkts)+sum(ifOutNucastPkts)+sum(ifInDiscards)+sum(ifOutDiscards)+sum(ifInErrors)+sum(ifOutErrors)))*100) as discardsRate"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="discardsRateIndex"/>  
+        <Parameter type="" key="FUNCTION" value="CHGR"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="icmpInMsgsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="get"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.5.1.0"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="icmpOutMsgsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="get"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.5.14.0"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="tcpCurrEstab" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="get"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.6.9.0"/> 
+    </PluginParameter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="inBroadPktsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="inBroadPktsRateIndex,ifInBroadcastPkts_ifHCInBroadcastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.3:1.3.6.1.2.1.31.1.1.1.9"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT (sum(ifInBroadcastPkts_ifHCInBroadcastPkts)) as inBroadPktsRate"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="inBroadPktsRateIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="outBroadPktsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="outBroadPktsRateIndex,ifOutBroadcastPkts_ifHCOutBroadcastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.5:1.3.6.1.2.1.31.1.1.1.13"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT (sum(ifOutBroadcastPkts_ifHCOutBroadcastPkts)) as outBroadPktsRate"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="outBroadPktsRateIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="broadPktsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="broadPktsRateIndex,ifInBroadcastPkts_ifHCInBroadcastPkts,ifOutBroadcastPkts_ifHCOutBroadcastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.3:1.3.6.1.2.1.31.1.1.1.9"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.5:1.3.6.1.2.1.31.1.1.1.13"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT (sum(ifInBroadcastPkts_ifHCInBroadcastPkts)+sum(ifOutBroadcastPkts_ifHCOutBroadcastPkts)) as broadPktsRate"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="broadPktsRateIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="inBroadPkts" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="inBroadPktsIndex,ifInBroadcastPkts_ifHCInBroadcastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.3:1.3.6.1.2.1.31.1.1.1.9"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT (sum(ifInBroadcastPkts_ifHCInBroadcastPkts)) as inBroadPkts"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="outBroadPkts" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="outBroadPktsIndex,ifOutBroadcastPkts_ifHCOutBroadcastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.5:1.3.6.1.2.1.31.1.1.1.13"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT (sum(ifOutBroadcastPkts_ifHCOutBroadcastPkts)) as outBroadPkts"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifName" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifName_ifDesc"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.1:1.3.6.1.2.1.2.2.1.2"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifName_ifDesc"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifAlias" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifAlias"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.18"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifAlias"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifDesc" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifDesc"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.2"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifDesc"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifIndex" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifType,ifSpeed"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.3"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.5:1.3.6.1.2.1.31.1.1.1.15"/>
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="rowFilterProcessor"> 
+        <Parameter type="" key="FilterColumn" value="ifType"/>  
+        <Parameter type="" key="ReservedValues" value="6,18,19,22,24,31,37,39,45,53,62,117,171,1,136"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="rowFilterProcessor">
+        <Parameter type="" key="FilterColumn" value="ifSpeed"/>
+        <Parameter type="" key="RemoveValues" value="0"/>
+      </PluginDataHandler>
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifType" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifType"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.3"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="ifType" value="6,ethernetCsmacd;26,ethernet3Mbit;62,fastEther;69,fastEtherFX;117,gigabitEthernet;217,pdnEtherLoop1;218,pdnEtherLoop2;222,ciscoISLvlan;233,aviciOpticalEther;135,l2vlan;136,l3ipvlan;137,l3ipxvlan;other"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifType"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifSpeed" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifSpeed1,ifSpeed2"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.5"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.15"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT ifIndex,(ifSpeed1!=0?ifSpeed1:ifSpeed2) as ifSpeed"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifSpeed"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifMac" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifMac"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.6"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifMac"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifAdminStatus" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifAdminStatus"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.7"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="ifAdminStatus" value="1,up;2,down;3,testing"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifAdminStatus"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifAvailability" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifOperStatus,ifAdminStatus"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.8"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.7"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT ifIndex,((ifOperStatus=='1' &amp;&amp; ifAdminStatus=='1')?'1':'0') as ifAvailability"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifAvailability"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifOperStatus" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifOperStatus"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.8"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="ifOperStatus" value="1,up;2,down;3,testing;4,unknown;5,dormant;6,notPresent;7,lowerLayerDown"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifOperStatus"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifBandWidthUtil" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifInOctets_ifHCInOctets,ifOutOctets_ifHCOutOctets"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.10:1.3.6.1.2.1.31.1.1.1.6"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.16:1.3.6.1.2.1.31.1.1.1.10"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="ResourceProperty" key="ifSpeed" value="ifSpeed"/>  
+        <Parameter type="" key="SELECT" value="SELECT ifIndex,(ifInOctets_ifHCInOctets+ifOutOctets_ifHCOutOctets)*8*100/${ifSpeed} as ifBandWidthUtil"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifBandWidthUtil"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifInOctetsSpeed" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifInOctets_ifHCInOctets"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.10:1.3.6.1.2.1.31.1.1.1.6"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT ifIndex,(ifInOctets_ifHCInOctets*8) as ifInOctetsSpeed"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifInOctetsSpeed"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifOutOctetsSpeed" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifOutOctets_ifHCOutOctets"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.16:1.3.6.1.2.1.31.1.1.1.10"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT ifIndex,(ifOutOctets_ifHCOutOctets*8) as ifOutOctetsSpeed"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifOutOctetsSpeed"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifInBandWidthUtil" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifInOctets_ifHCInOctets"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.10:1.3.6.1.2.1.31.1.1.1.6"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="ResourceProperty" key="ifSpeed" value="ifSpeed"/>  
+        <Parameter type="" key="SELECT" value="SELECT ifIndex,(((ifInOctets_ifHCInOctets*8)/${ifSpeed})*100) as ifInBandWidthUtil"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifInBandWidthUtil"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifOutBandWidthUtil" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifOutOctets_ifHCOutOctets"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.16:1.3.6.1.2.1.31.1.1.1.10"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="ResourceProperty" key="ifSpeed" value="ifSpeed"/>  
+        <Parameter type="" key="SELECT" value="SELECT ifIndex,(((ifOutOctets_ifHCOutOctets*8)/${ifSpeed})*100) as ifOutBandWidthUtil"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifOutBandWidthUtil"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifInDiscardsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifInDiscards,ifInUcastPkts_ifHCInUcastPkts,ifInNucastPkts,ifInErrors"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.13"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.11:1.3.6.1.2.1.31.1.1.1.7:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.12:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.14:0"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT ifIndex,((ifInDiscards/(ifInDiscards+ifInUcastPkts_ifHCInUcastPkts+ifInNucastPkts+ifInErrors))*100) as ifInDiscardsRate"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="CHGR"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifInDiscardsRate"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifOutDiscardsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifOutDiscards,ifOutUcastPkts_ifHCOutUcastPkts,ifOutNucastPkts,ifOutErrors"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.19"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.17:1.3.6.1.2.1.31.1.1.1.11:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.18:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.20:0"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT ifIndex,((ifOutDiscards/(ifOutDiscards+ifOutUcastPkts_ifHCOutUcastPkts+ifOutNucastPkts+ifOutErrors))*100) as ifOutDiscardsRate"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="CHGR"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifOutDiscardsRate"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifDiscardsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifInDiscards,ifInUcastPkts_ifHCInUcastPkts,ifInNucastPkts,ifOutDiscards,ifOutUcastPkts_ifHCOutUcastPkts,ifOutNucastPkts,ifInErrors,ifOutErrors"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.13"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.11:1.3.6.1.2.1.31.1.1.1.7:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.12:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.19"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.17:1.3.6.1.2.1.31.1.1.1.11:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.18:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.14:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.20:0"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT ifIndex,(((ifInDiscards+ifOutDiscards)/(ifInDiscards+ifInUcastPkts_ifHCInUcastPkts+ifInNucastPkts+ifOutDiscards+ifOutUcastPkts_ifHCOutUcastPkts+ifOutNucastPkts+ifInErrors+ifOutErrors))*100) as ifDiscardsRate"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="CHGR"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifDiscardsRate"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifInDiscardsSpeed" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifInDiscards"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.13"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifInDiscards"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifOutDiscardsSpeed" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifOutDiscards"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.19"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifOutDiscards"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifDiscardsSpeed" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifInDiscards,ifOutDiscards"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.13"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.19"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT ifIndex,((ifInDiscards+ifOutDiscards)*100) as ifDiscardsSpeed"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifDiscardsSpeed"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifInDiscards" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifInDiscards"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.13"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifInDiscards"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifOutDiscards" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifOutDiscards"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.19"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifOutDiscards"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifInErrors" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifInErrors"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.14"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifInErrors"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifOutErrors" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifOutErrors"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.20"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifOutErrors"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifInUcastPktsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifInUcastPkts_ifHCInUcastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.11:1.3.6.1.2.1.31.1.1.1.7"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifInUcastPkts_ifHCInUcastPkts"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifOutUcastPktsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifOutUcastPkts_ifHCOutUcastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.17:1.3.6.1.2.1.31.1.1.1.11"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifOutUcastPkts_ifHCOutUcastPkts"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifUcastPktsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifInUcastPkts_ifHCInUcastPkts,ifOutUcastPkts_ifHCOutUcastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.11:1.3.6.1.2.1.31.1.1.1.7"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.17:1.3.6.1.2.1.31.1.1.1.11"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT ifIndex,(ifInUcastPkts_ifHCInUcastPkts+ifOutUcastPkts_ifHCOutUcastPkts) as ifUcastPktsRate"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifUcastPktsRate"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifInUcastPkts" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifInUcastPkts_ifHCInUcastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.11:1.3.6.1.2.1.31.1.1.1.7"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifInUcastPkts_ifHCInUcastPkts"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifOutUcastPkts" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifOutUcastPkts_ifHCOutUcastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.17:1.3.6.1.2.1.31.1.1.1.11"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifOutUcastPkts_ifHCOutUcastPkts"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifInBroadPktsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifInBroadcastPkts_ifHCInBroadcastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.3:1.3.6.1.2.1.31.1.1.1.9"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifInBroadcastPkts_ifHCInBroadcastPkts"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifOutBroadPktsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifOutBroadcastPkts_ifHCOutBroadcastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.5:1.3.6.1.2.1.31.1.1.1.13"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifOutBroadcastPkts_ifHCOutBroadcastPkts"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifBroadPktsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifInBroadcastPkts_ifHCInBroadcastPkts,ifOutBroadcastPkts_ifHCOutBroadcastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.3:1.3.6.1.2.1.31.1.1.1.9"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.5:1.3.6.1.2.1.31.1.1.1.13"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT ifIndex,(ifInBroadcastPkts_ifHCInBroadcastPkts+ifOutBroadcastPkts_ifHCOutBroadcastPkts) as ifBroadPktsRate"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifBroadPktsRate"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifInBroadPkts" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifInBroadcastPkts_ifHCInBroadcastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.3:1.3.6.1.2.1.31.1.1.1.9"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifInBroadcastPkts_ifHCInBroadcastPkts"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifOutBroadPkts" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifOutBroadcastPkts_ifHCOutBroadcastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.5:1.3.6.1.2.1.31.1.1.1.13"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifOutBroadcastPkts_ifHCOutBroadcastPkts"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifInMultiPktsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifInMulticastPkts_ifHCInMulticastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.2:1.3.6.1.2.1.31.1.1.1.8"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifInMulticastPkts_ifHCInMulticastPkts"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifOutMultiPktsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifOutMulticastPkts_ifHCOutMulticastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.4:1.3.6.1.2.1.31.1.1.1.12"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifOutMulticastPkts_ifHCOutMulticastPkts"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifMultiPktsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifInMulticastPkts_ifHCInMulticastPkts,ifOutMulticastPkts_ifHCOutMulticastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.2:1.3.6.1.2.1.31.1.1.1.8"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.4:1.3.6.1.2.1.31.1.1.1.12"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT ifIndex,(ifInMulticastPkts_ifHCInMulticastPkts+ifOutMulticastPkts_ifHCOutMulticastPkts) as ifMultiPktsRate"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifMultiPktsRate"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifInMultiPkts" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifInMulticastPkts_ifHCInMulticastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.2:1.3.6.1.2.1.31.1.1.1.8"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifInMulticastPkts_ifHCInMulticastPkts"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifOutMultiPkts" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifOutMulticastPkts_ifHCOutMulticastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.31.1.1.1.4:1.3.6.1.2.1.31.1.1.1.12"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifOutMulticastPkts_ifHCOutMulticastPkts"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifInNucastPkts" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifInNucastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.12"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifInNucastPkts"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifOutNucastPkts" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifOutNucastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.18"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifOutNucastPkts"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifInErrorsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifInErrors,ifInDiscards,ifInUcastPkts_ifHCInUcastPkts,ifInNucastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.14"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.13:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.11:1.3.6.1.2.1.31.1.1.1.7:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.12:0"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT ifIndex,((ifInErrors/(ifInErrors+ifInDiscards+ifInUcastPkts_ifHCInUcastPkts+ifInNucastPkts))*100) as ifInErrorsRate"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="CHGR"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifInErrorsRate"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifOutErrorsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifOutErrors,ifOutDiscards,ifOutUcastPkts_ifHCOutUcastPkts,ifOutNucastPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.20"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.19:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.17:1.3.6.1.2.1.31.1.1.1.11:0"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.18:0"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT ifIndex,((ifOutErrors/(ifOutErrors+ifOutDiscards+ifOutUcastPkts_ifHCOutUcastPkts+ifOutNucastPkts))*100) as ifOutErrorsRate"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="CHGR"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifOutErrorsRate"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="cpuNum" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="cpuNumIndex,cpmCPUTotalPhysicalIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.109.1.1.1.1.2"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT (differ_count(cpmCPUTotalPhysicalIndex)) as cpuNum"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="powerNum" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="powerNumIndex,ciscoEnvMonSupplyStatusDescr"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.5.1.2"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT (count(ciscoEnvMonSupplyStatusDescr)) as powerNum"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="totalMemSize" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="totalMemSizeIndex,memPoolUesd,memPoolFree"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.48.1.1.1.5"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.48.1.1.1.6"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT (sum(memPoolUesd)+sum(memPoolFree)) as totalMemSize"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="cpuRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="cpuRateIndex,cpuUsage1_cpuUsage4_cpuUsage5"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.109.1.1.1.1.4:1.3.6.1.4.1.9.9.109.1.1.1.1.5.1:1.3.6.1.4.1.9.9.109.1.1.1.1.5.2"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT (first(cpuUsage1_cpuUsage4_cpuUsage5)) as cpuRate"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="memRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="memRateIndex,memPoolUesd"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.48.1.1.1.5"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="ResourceProperty" key="totalMemSize" value="totalMemSize"/>  
+        <Parameter type="" key="SELECT" value="SELECT ((sum(memPoolUesd)/${totalMemSize})*100) as memRate"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="memPoolUsed" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="memPoolUsedIndex,memPoolUesd"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.48.1.1.1.5"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT (sum(memPoolUesd)) as memPoolUsed"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="memPoolFree" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="memPoolFreeIndex,memPoolFree"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.48.1.1.1.6"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT (sum(memPoolFree)) as memPoolFree"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifArpInPktsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,locIfarpInPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.2.2.1.1.106"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="locIfarpInPkts"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifArpOutPktsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,locIfarpOutPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.2.2.1.1.107"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="locIfarpOutPkts"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifArpPktsRate" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,locIfarpInPkts,locIfarpOutPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.2.2.1.1.106"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.2.2.1.1.107"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT ifIndex,(locIfarpInPkts+locIfarpOutPkts) as ifArpPktsRate"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifArpPktsRate"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifArpInPkts" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,locIfarpInPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.2.2.1.1.106"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="locIfarpInPkts"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifArpOutPkts" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,locIfarpOutPkts"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.2.2.1.1.107"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="locIfarpOutPkts"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="powerIndex" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="powerIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.5.1.2"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="powerIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="powerIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="powerSupplyName" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="powerIndex,powerSupplyName"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.5.1.2"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="powerIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="powerSupplyName"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="powerIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="powerSupplySource" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="powerIndex,powerSupplySource"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.5.1.4"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="powerSupplySource" value="1,未知;2,交流电源;3,直流电源;4,外部电源;5,内部冗余电源"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="powerIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="powerSupplySource"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="powerIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="powerSupplyState" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="powerIndex,powerSupplyState"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.5.1.3"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="powerIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="powerSupplyState"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="powerIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="fanIndex" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="fanIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.4.1.2"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="fanIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="fanIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="fanName" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="fanIndex,fanName"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.4.1.2"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="fanIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="fanName"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="fanIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="fanRunState" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="fanIndex,fanRunState"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.4.1.3"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="fanIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="fanRunState"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="fanIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="temperatureIndex" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="temperatureIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.3.1.2"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="temperatureIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="temperatureIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="temperatureName" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="temperatureIndex,temperatureName"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.3.1.2"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="temperatureIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="temperatureName"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="temperatureIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="temperatureValue" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="temperatureIndex,temperatureValue"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.3.1.3"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="temperatureIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="temperatureValue"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="temperatureIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="temThresholdHigh" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="temperatureIndex,temperatureThresholdHigh"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.3.1.4"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="temperatureIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="temperatureThresholdHigh"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="temperatureIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="temLastShutdown" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="temperatureIndex,temperatureLastShutdown"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.3.1.5"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="temperatureIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="temperatureLastShutdown"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="temperatureIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="temperatureState" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="temperatureIndex,temperatureState"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.3.1.6"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="temperatureIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="temperatureState"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="temperatureIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="voltageIndex" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="voltageIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.2.1.2"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="voltageIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="voltageIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="voltageName" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="voltageIndex,voltageName"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.2.1.2"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="voltageIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="voltageName"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="voltageIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="voltageValue" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="voltageIndex,voltageValue"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.2.1.3"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT voltageIndex,(voltageValue/1000) as voltageValue"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="voltageIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="voltageValue"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="voltageIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="volThresholdLow" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="voltageIndex,voltageThresholdLow"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.2.1.4"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT voltageIndex,(voltageThresholdLow/1000) as volThresholdLow"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="voltageIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="volThresholdLow"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="voltageIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="volThresholdHigh" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="voltageIndex,voltageThresholdHigh"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.2.1.5"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT voltageIndex,(voltageThresholdHigh/1000) as volThresholdHigh"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="voltageIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="volThresholdHigh"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="voltageIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="volLastShutdown" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="voltageIndex,voltageLastShutdown"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.2.1.6"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT voltageIndex,(voltageLastShutdown/1000) as volLastShutdown"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="voltageIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="volLastShutdown"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="voltageIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="voltageState" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="voltageIndex,voltageState"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.13.1.2.1.7"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="voltageIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="voltageState"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="voltageIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="vlanIndex" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="vlanIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.46.1.3.1.1.2"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="vlanIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="vlanIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="VlanID" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="vlanIndex,VlanID"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.46.1.3.1.1.2"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="(.*\.(\d+))"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="vlanIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="VlanID"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="vlanIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="VlanName" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="vlanIndex,VlanName"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.46.1.3.1.1.4"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="vlanIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="VlanName"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="vlanIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="VlanState" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="vlanIndex,VlanState"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.46.1.3.1.1.2"/> 
+    </PluginParameter>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="vlanIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="VlanState"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="vlanIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="vlanTable" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="vlanTableIndex,VLAN的索引号,VLAN名称"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.46.1.3.1.1.4"/>  
+      <Parameter type="" key="" value="1.3.6.1.4.1.9.9.46.1.3.1.1.4"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="tableConverter"/> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ifOctetsSpeed" collectType="" pluginid="SnmpPlugin"> 
+    <PluginResultMetaInfo columns="ifIndex,ifOutOctets,ifInOctets"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="method" value="walk"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.16"/>  
+      <Parameter type="" key="" value="1.3.6.1.2.1.2.2.1.10"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter type="" key="SELECT" value="SELECT ifIndex,(ifOutOctets+ifInOctets)*8 as ifOctetsSpeed"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="ChangeRateProcessor"> 
+        <Parameter type="" key="COLUMNINDEX" value="ifIndex"/>  
+        <Parameter type="" key="FUNCTION" value="ROUND_CHGV"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="ifIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="ifOctetsSpeed"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin> 
+</MetricPlugins>

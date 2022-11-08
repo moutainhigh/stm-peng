@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.topo.dao.IBackbordRealDao">
+	 
+   
+   
+   
+   
+  <resultMap type="com.mainsteam.stm.topo.bo.BackbordBo" id="backbordRealMap">
+		 
+     
+     
+     
+     
+    <id column="id" property="id"/>
+		 
+     
+     
+     
+     
+    <result column="instanceId" property="instanceId"/>
+		 
+     
+     
+     
+     
+    <result column="info" property="info"/>
+	
+  
+  
+  
+  
+  </resultMap>
+	 
+   
+   
+   
+   
+  <insert id="insert" parameterType="com.mainsteam.stm.topo.bo.BackbordBo">
+		insert into STM_TOPO_BACKBORD_REAL(id,instanceId,baseId,info)
+		values (#{id},#{instanceId},#{baseId},#{info})
+	</insert>
+	 
+   
+   
+   
+   
+  <delete id="truncateAll">
+		truncate table STM_TOPO_BACKBORD_REAL
+	</delete>
+	 
+   
+   
+   
+   
+  <select id="getAll" resultMap="backbordRealMap">
+		select * from STM_TOPO_BACKBORD_REAL
+	</select>
+	 
+   
+   
+   
+   
+  <update id="batchUpdateInfo" parameterType="java.util.Map">
+		update STM_TOPO_BACKBORD_REAL set info = #{info} where baseId = #{baseId}
+	</update>
+	 
+   
+   
+   
+   
+  <update id="batchAddUpdateInfo" parameterType="java.util.Map">
+		update STM_TOPO_BACKBORD_REAL set info = concat(info,#{info}) where baseId = #{baseId}
+	</update>
+	 
+   
+   
+   
+   
+  <update id="addUpdateInfo" parameterType="java.util.Map">
+		update STM_TOPO_BACKBORD_REAL set info = concat(info,#{info}) where INSTANCEID = #{instanceId}
+	</update>
+	 
+   
+   
+   
+   
+  <insert id="insertOrUpdate" parameterType="java.util.Map" databaseId="mysql">
+		insert into STM_TOPO_BACKBORD_REAL(id,instanceId,baseId,info)
+		values (#{id},#{instanceId},#{baseId},#{info}) on duplicate key update 
+		instanceId = values(instanceId),
+		baseId = values(baseId),
+		info = values(info)
+	</insert>
+	 
+   
+   
+   
+   
+  <insert id="insertOrUpdate" parameterType="java.util.Map" databaseId="oracle">
+		merge into STM_TOPO_BACKBORD_REAL t using(select #{id} id,#{instanceId} instanceId,#{baseId} baseId,#{info} info from dual) t1
+			on (t.instanceId = t1.instanceId)
+		when matched then
+			update set t.baseId = t1.baseId,t.info = t1.info
+		when not matched then
+			insert values(t1.id,t1.instanceId,t1.baseId,t1.info)
+	</insert>
+	 
+  
+   
+  
+   
+  
+   
+  
+   
+  <insert id="insertOrUpdate" parameterType="java.util.Map" databaseId="dm">
+		merge into STM_TOPO_BACKBORD_REAL t using(select #{id} id,#{instanceId} instanceId,#{baseId} baseId,#{info} info from dual) t1
+			on (t.instanceId = t1.instanceId)
+		when matched then
+			update set t.baseId = t1.baseId,t.info = t1.info
+		when not matched then
+			insert values(t1.id,t1.instanceId,t1.baseId,t1.info)
+	</insert>
+  <insert id="insertOrUpdate" parameterType="java.util.Map" databaseId="oscar">
+		merge into STM_TOPO_BACKBORD_REAL t using(select #{id} id,#{instanceId} instanceId,#{baseId} baseId,#{info} info from dual) t1
+			on (t.instanceId = t1.instanceId)
+		when matched then
+			update set t.baseId = t1.baseId,t.info = t1.info
+		when not matched then
+			insert values(t1.id,t1.instanceId,t1.baseId,t1.info)
+	</insert>
+	 
+   
+   
+   
+   
+  <select id="selectByInstanceId" resultMap="backbordRealMap">  
+       SELECT * from STM_TOPO_BACKBORD_REAL where instanceId = #{instanceId}
+    </select>
+</mapper>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.topo.dao.IGroupDao">
+	
+	<delete id="truncateAll">
+		truncate table STM_TOPO_GROUP
+	</delete>
+	<select id="getAll" resultType="com.mainsteam.stm.topo.bo.GroupBo">
+		select * from STM_TOPO_GROUP
+	</select>
+	<select id="getById" resultType="com.mainsteam.stm.topo.bo.GroupBo" parameterType="long">
+		select * from STM_TOPO_GROUP where id=#{id}
+	</select>
+	<select id="getByIds" resultType="com.mainsteam.stm.topo.bo.GroupBo" parameterType="long">
+		select * from STM_TOPO_GROUP
+		<where>
+			<if test="list.size()>0">
+				id in
+				<foreach collection="list" item="id" open="(" close=")" separator=",">
+					#{id}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	<insert id="insert" parameterType="com.mainsteam.stm.topo.bo.GroupBo">
+		insert into STM_TOPO_GROUP
+			(id,name,x,y,height,width,subTopoId)
+		values
+			(#{id},#{name},#{x},#{y},#{height},#{width},#{subTopoId})
+	</insert>
+	<update id="updateForGraph" parameterType="com.mainsteam.stm.topo.bo.GroupBo">
+		update STM_TOPO_GROUP
+		set
+			name=#{name},x=#{x},y=#{y},height=#{height},width=#{width}
+		where
+			id=#{id}
+	</update>
+	<delete id="deleteByIds" parameterType="java.util.List">
+		delete 
+		from STM_TOPO_GROUP
+		<where>
+			<foreach collection="list" item="id" open="id in (" close=")" separator=",">
+				#{id}
+			</foreach>
+		</where>
+	</delete>
+	<select id="getBySubTopoId" parameterType="map" resultType="com.mainsteam.stm.topo.bo.GroupBo">
+		select * from STM_TOPO_GROUP
+		<where>
+			<if test="id!=null">
+				subTopoId=#{id}
+			</if>
+			<if test="id==null">
+				subTopoId is null
+			</if>
+		</where>
+	</select>
+</mapper>

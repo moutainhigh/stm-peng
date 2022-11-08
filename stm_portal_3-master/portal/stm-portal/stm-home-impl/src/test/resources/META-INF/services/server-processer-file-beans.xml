@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="fileDao" class="com.mainsteam.stm.platform.file.dao.impl.FileDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+	</bean>
+	
+	<bean name="fileSequence" factory-bean="platformSeqFactory" factory-method="getSeq" >
+		<constructor-arg value="STM_FILE_SYSTEM"></constructor-arg>
+	</bean>
+	
+	<bean id="fileClient" class="com.mainsteam.stm.platform.file.service.impl.FileClientImpl">
+		<property name="fileDao" ref="fileDao" />
+		<property name="fileSequence" ref="fileSequence" />
+	</bean>
+	
+</beans>

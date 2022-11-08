@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.alarm.notify.dao.SmsOrEmailNotifyTemplateDAO">
+
+	<sql id="AlarmNotifyAlias">
+		TMP_ID as templateID,
+		TMP_NAME as templateName,
+		TMP_TYPE as templateType,
+		CONTENT as content,
+		TITLE AS title,
+		IS_DEFAULT as isDefaultTemplate,
+		PROVIDER as provider,
+		UPDATE_TIME as updateTime,
+		SYS_MODULE as sysModuleEnum
+	</sql>
+	
+	<insert id="addTemplate"  parameterType="com.mainsteam.stm.alarm.obj.SmsOrEmailNotifyTemplate">
+	    INSERT INTO STM_NOTIFY_SMS_EMAIL(TMP_ID,TMP_NAME,TMP_TYPE,CONTENT,TITLE,IS_DEFAULT,PROVIDER,UPDATE_TIME,SYS_MODULE)
+	    VALUES (#{templateID},#{templateName},#{templateType},#{content},#{title},#{isDefaultTemplate},#{provider},#{updateTime},#{sysModuleEnum})
+	</insert>
+
+	<update id="updateTemplate" parameterType="com.mainsteam.stm.alarm.obj.SmsOrEmailNotifyTemplate">
+		UPDATE STM_NOTIFY_SMS_EMAIL SET TMP_NAME=#{templateName},CONTENT=#{content},UPDATE_TIME=#{updateTime},TITLE=#{title} WHERE TMP_ID=#{templateID}
+	</update>
+
+	<delete id="deleteTemplate" parameterType="java.util.List">
+		DELETE FROM STM_NOTIFY_SMS_EMAIL WHERE TMP_ID IN
+		<foreach collection="list" item="entity" open="(" close=")" separator=",">
+			#{entity}
+		</foreach>
+		 AND IS_DEFAULT=0
+	</delete>
+
+	<delete id="resetDefaultTemplate" parameterType="com.mainsteam.stm.alarm.obj.SmsOrEmailNotifyTemplate">
+		DELETE FROM STM_NOTIFY_SMS_EMAIL WHERE IS_DEFAULT=1 AND TMP_ID=#{templateID}
+	</delete>
+
+	<select id="findTemplateByCondition" resultType="com.mainsteam.stm.alarm.obj.SmsOrEmailNotifyTemplate">
+		SELECT <include refid="AlarmNotifyAlias"/>
+		FROM STM_NOTIFY_SMS_EMAIL
+		<where>
+			<if test="templateID !=0">
+				TMP_ID=#{templateID}
+			</if>
+			<if test="templateType !=null">
+				AND TMP_TYPE=#{templateType}
+			</if>
+			<if test="provider !=0">
+				AND PROVIDER=#{provider}
+			</if>
+			<if test="sysModuleEnum !=null">
+				AND SYS_MODULE=#{sysModuleEnum}
+			</if>
+
+		</where>
+	</select>
+
+	<select id="findDefaultTemplate" resultType="com.mainsteam.stm.alarm.obj.SmsOrEmailNotifyTemplate">
+		SELECT <include refid="AlarmNotifyAlias"/>
+		FROM STM_NOTIFY_SMS_EMAIL
+		WHERE
+			IS_DEFAULT=1
+			<if test="templateType !=null">
+				AND TMP_TYPE=#{templateType}
+			</if>
+			<if test="sysModuleEnum !=null">
+				AND SYS_MODULE=#{sysModuleEnum}
+			</if>
+	</select>
+
+</mapper>

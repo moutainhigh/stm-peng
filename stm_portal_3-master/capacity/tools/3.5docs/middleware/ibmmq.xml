@@ -1,0 +1,665 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<!--  WEBSPHERE MQ 资源配置文件
+	devicetype:			设备类型名称
+	ismulticoltype:		是否允许采集方式多选
+	majortype:			主要分类（可以理解为设备类型）
+	minortype:			次要分类
+	manufacturer:		厂商
+	devicetype_zh:		设备类型中文描述
+	 -->
+	<devicetypeinfo devicetype="MW_IBMMQ" ismulticoltype="false" majortype="middleware" minortype="WebSphereMQ" manufacturer="IBM" devicetype_zh="WebSphere MQ">
+		
+		<!-- 该设备类型定义的命令，用于合并命令执行 -->
+		<commands>
+			<!-- coltype:采集方式，comid：命令ID，command：命令 -->
+
+			<!-- WebSphere MQ CPU利用率 -->
+			<command coltype="WMI" comid="cpuWmiCmd" command="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Process where Name like '%mq%'"/>
+			<!-- WebSphere MQ 内存利用率 -->
+			<command coltype="WMI" comid="memWmiCmd" command="root\cimv2::select WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name like '%mq%'"/>
+			<!--系统内存-->
+			<command coltype="WMI" comid="chk_pmemcap" command="root\cimv2::select TotalVisibleMemorySize from Win32_OperatingSystem"/>
+			<!-- 操作系统名称 -->
+			<command coltype="WMI" comid="osNameWmiCmd" command="root\cimv2::select Caption from Win32_OperatingSystem"/>
+			<!-- 操作系统版本 -->
+			<command coltype="WMI" comid="osVerWmiCmd" command="root\cimv2::select Version from Win32_OperatingSystem"/>
+			<!-- 服务包版本 -->			
+			<command coltype="WMI" comid="SPWmiCmd" command="root\cimv2::select ServicePackMajorVersion,ServicePackMinorVersion from Win32_OperatingSystem"/>
+			<!--主机名称 -->
+			<command coltype="WMI" comid="chk_hostname" command="root\cimv2::select Name from Win32_ComputerSystem"/>
+			<!--主机说明-->
+			<command coltype="WMI" comid="systemInfo" command="root\cimv2::select description from Win32_OperatingSystem"/>
+			
+			<!-- CLI方式采集-->
+			<command coltype="CLI" comid="mainssh" command="/tmp/os.sh"/>
+			<command coltype="CLI" comid="cpumemssh" command="/tmp/appinfo.sh mq"/>
+			
+			<!-- coltype:采集方式，comid：命令ID，command：命令 -->
+			<command coltype="INNER_PROC" comid="mainResourceCmd" command="com.mainsteam.stm.plugin.ibmmq.IBMMQCollector.collectMainRes"/>
+			<command coltype="INNER_PROC" comid="ChannelResCmd" command="com.mainsteam.stm.plugin.ibmmq.IBMMQCollector.collectChannelRes"/>
+			<command coltype="INNER_PROC" comid="QueueResCmd" command="com.mainsteam.stm.plugin.ibmmq.IBMMQCollector.collectQueueRes"/>
+			<command coltype="INNER_PROC" comid="getAvail" command="com.mainsteam.stm.plugin.ibmmq.IBMMQCollector.isAppOnline"/>
+		</commands>
+		<!--配置MQ管理器的KPI-->
+		<!-- 描述该类设备的所有指标采集,一行对应一个指标 -->
+     		<resources>
+			
+			<!--队列管理器可用性-->
+		   <resource kpiid="M1Availability" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="getAvail" select="" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m1_queuemanagena" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				<translations>
+					<translation source="true" dest="1"/>
+					<translation source="false" dest="0"/>
+				</translations>
+			</resource>
+			
+			<!-- 一个resource值一个特定的kpi指标,如CPU利用率，kpiid：指标id，coltype：采集方式，value：结果计算表达式（默认为$d1） ，valuetype(Integer/Float/String)：采集值类型，unit：单位 -->
+			<!-- 通道总数 -->
+			<resource kpiid="M1ChannelCount" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<!-- exeorder：执行序号数字越小，执行越前，comid：命令id，select：select函数(默认为 '([\w]+)'  )，deal：函数 -->
+			      <collect exeorder="10" comid="mainResourceCmd" select="&lt;channelCount&gt;([\s\S]*)&lt;/channelCount&gt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<!-- 
+				table:数据库表，指标采集数据保存的地方
+				field:数据库字段名，保存的字段名
+				fieldtype:数据库字段属性String、Integer、Float
+				willalert:是否告警
+				alertexp1:告警条件1
+				alertdesc1:告警描述1
+				alertexp2:告警条件2
+				alertdesc2:告警描述2
+				alertexp3:告警条件3
+				alertdesc3:告警描述3
+				alertexp4:告警条件4
+				alertdesc4:告警描述4
+				alertexp5:告警条件5
+				alertdesc5:告警描述5
+				alertcontin:连续若干次告警
+				alertype:事件类型
+				storefactor:存盘倍数（默认值）（采集周期的倍数，0表示不存）
+				circle:采集周期(默认值)
+				 -->
+				<kpipolicy table="res_m1_channelCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="60" storefactor="1"/>
+				
+			</resource>
+			<!--队列管理器名称-->
+		   <resource kpiid="M1QueueManagerName" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="mainResourceCmd" select="&lt;queueManagerName&gt;([\s\S]*)&lt;/queueManagerName&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m1_queuemanagena" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--显示名称
+		   <resource kpiid="M1ResDispName" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					
+					<collect exeorder="10" comid="mainResourceCmd" select="&lt;resDisplayName&gt;([\s\S]*)&lt;/resDisplayName&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m1_resdisname" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			-->
+			<!--队列管理器状态-->
+            <resource kpiid="M1QueueManagerStatus" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="mainResourceCmd" select="&lt;queueManagerStatus&gt;([\s\S]*)&lt;/queueManagerStatus&gt;" merge="" deal=""/>
+				</collects>
+			
+				<kpipolicy table="res_m1_queueManstus" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="!&quot;${value}&quot;.contains(&quot;connected&quot;)" alertdesc5="队列管理器不可用"
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				<translations>
+					<translation source="connected" dest="正在运行"/>
+					<translation source="not connected" dest="已停止"/>
+				</translations>
+			</resource>
+
+           <!-- 监听器状态 -->
+			<resource kpiid="M1ListenerStatus" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="mainResourceCmd" select="&lt;listenerStatus&gt;([\s\S]*)&lt;/listenerStatus&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m1_listenerstatu" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="!&quot;${value}&quot;.contains(&quot;available&quot;)" alertdesc5="监听器不可用"
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				<translations>
+					<translation source="available" dest="已连接"/>
+					<translation source="not available" dest="未连接"/>
+				</translations>
+			</resource>
+
+			<!-- 队列总数 -->
+			<resource kpiid="M1QueueCount" coltype="INNER_PROC" value="" valuetype="String" unit="个">
+				<collects>
+					<collect exeorder="10" comid="mainResourceCmd" select="&lt;queueCount&gt;([\s\S]*)&lt;/queueCount&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m1_queuecount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+
+			<!-- CPU 利用率 WINDOWS -->
+			<resource kpiid="M1CPURate" coltype="WMI" value="" valuetype="Integer" unit="%">
+				<collects>
+					<collect exeorder="10" comid="cpuWmiCmd" select="" merge="sum" deal=""/>
+				</collects>
+				<kpipolicy table="res_m1_cpurate_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>60"
+					alertdesc3="CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}>80" alertdesc4="CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+
+			<!-- 内存利用率 -->
+			<resource kpiid="M1MEMRate" coltype="WMI" value="$d1/$d2/1024*100" valuetype="Integer" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="memWmiCmd" select="" merge="sum" deal=""/>
+					<collect exeorder="20" comid="chk_pmemcap" select="" merge="" deal=""/>
+					
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_m1_memrate_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>60"
+					alertdesc3="内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}>80" alertdesc4="内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+
+
+            <!--  OS 名称-->
+			<resource kpiid="M1Osname" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="osNameWmiCmd" select="" merge="" deal=""/>
+
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_m1_osname_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+
+
+            <!--  OS 版本 -->
+			<resource kpiid="M1OsVer" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="osVerWmiCmd" select="" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_m1_osversion_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+
+
+           <!--  服务包版本 -->
+			<resource kpiid="M1SPName" coltype="WMI" value="$d1+'.'+$d2" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="SPWmiCmd" select="(\S+)\t(\S+)" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_m1_sp_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+
+
+			<!-- CHANNEL 通道KPI -->
+			<!--组装格式为：   通道ID		通道名称	通道类型	通道描述	连接名称	通道状态	传输队列	协议类型 -->
+			<!--通道描述-->
+			<resource kpiid="M1Channel_Desc" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<!-- exeorder：执行序号数字越小，执行越前，comid：命令id，select：select函数(默认为 '([\w]+)'  )，deal：函数 -->
+					<collect exeorder="10" comid="ChannelResCmd" select="$key\t[\S\.]*\t[\S ]*\t([\S ]*)\t[\S ]*\t[\S ]*\t[\S ]*\t\S+" merge="" deal=""/>
+				</collects>
+			
+				<kpipolicy table="res_m1_channeldesc" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="15" storefactor="1"/>
+				
+			</resource>
+			<!--通道ID-->
+			<resource kpiid="M1Channel_Id" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<!-- exeorder：执行序号数字越小，执行越前，comid：命令id，select：select函数(默认为 '([\w]+)'  )，deal：函数 -->
+					<collect exeorder="10" comid="ChannelResCmd" select="($key)\t[\S\. ]*\t[\S ]*\t[\S ]*\t[\S ]*\t[\S ]*\t[\S ]*\t\S+" merge="" deal=""/>
+				</collects>
+			
+				<kpipolicy table="res_m1_channelid" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--通道类型--> 
+			<resource kpiid="M1Channel_Type" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<!-- exeorder：执行序号数字越小，执行越前，comid：命令id，select：select函数(默认为 '([\w]+)'  )，deal：函数 -->
+					<collect exeorder="10" comid="ChannelResCmd" select="$key\t[\S\. ]*\t([\S ]*)\t[\S ]*\t[\S ]*\t[\S ]*\t[\S ]*\t\S+" merge="" deal=""/>
+				</collects>
+			
+				<kpipolicy table="res_m1_channeltype" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				<translations>	
+					<translation source="1" dest="发送方"/>
+					<translation source="2" dest="服务器"/>
+					<translation source="3" dest="接收方"/>
+					<translation source="4" dest="请求方"/>
+					<translation source="6" dest="客户机连接"/>
+					<translation source="7" dest="服务器连接"/>
+					<translation source="8" dest="集群接收方"/>
+					<translation source="9" dest="集群发送方"/>
+				</translations>
+			</resource>
+			<!--传输队列 -->
+            <resource kpiid="M1Channel_TransQ" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<!-- exeorder：执行序号数字越小，执行越前，comid：命令id，select：select函数(默认为 '([\w]+)'  )，deal：函数 -->
+					<collect exeorder="10" comid="ChannelResCmd" select="$key\t[\S\. ]*\t[\S ]*\t[\S ]*\t[\S ]*\t[\S ]*\t([\S ]*)\t\S+" merge="" deal=""/>
+				</collects>
+			
+				<kpipolicy table="res_m1_channeltransQ" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--通道名称-->
+			 <resource kpiid="M1Channel_Name" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<!-- exeorder：执行序号数字越小，执行越前，comid：命令id，select：select函数(默认为 '([\w]+)'  )，deal：函数 -->
+					<collect exeorder="10" comid="ChannelResCmd" select="$key\t([\S\. ]*)\t[\S ]*\t[\S ]*\t[\S ]*\t[\S ]*\t[\S ]*\t\S+" merge="" deal=""/>
+				</collects>
+			
+				<kpipolicy table="res_m1_channelname" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--通道状态-->
+			<resource kpiid="M1Channel_Status" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<!-- exeorder：执行序号数字越小，执行越前，comid：命令id，select：select函数(默认为 '([\w]+)'  )，deal：函数 -->
+					<collect exeorder="10" comid="ChannelResCmd" select="$key\t[\S\. ]*\t[\S ]*\t[\S ]*\t[\S ]*\t([\S ]*)\t[\S ]*\t\S+" merge="" deal=""/>
+				</collects>
+			
+				<kpipolicy table="res_m1_channelstatus" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="15" storefactor="1"/>
+				<translations>
+					<translation source="Channel Available" dest="活动" />
+					<translation source="Channel Unavailable" dest="非活动" />
+				</translations>
+			</resource>
+		<!--协议类型-->
+			<resource kpiid="M1ProtocolType" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<!-- exeorder：执行序号数字越小，执行越前，comid：命令id，select：select函数(默认为 '([\w]+)'  )，deal：函数 -->
+					<collect exeorder="10" comid="ChannelResCmd" select="$key\t[\S\. ]*\t[\S ]*\t[\S ]*\t[\S ]*\t[\S ]*\t[\S ]*\t(\S+)" merge="" deal=""/>
+				</collects>
+			
+				<kpipolicy table="res_m1_protocoltype" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				<translations>
+					<translation source="0" dest="LOCAL"/>
+					<translation source="1" dest="LU6.2"/>
+					<translation source="2" dest="TCP/IP"/>
+					<translation source="3" dest="NetBIOS"/>
+					<translation source="4" dest="SPX"/>
+					<translation source="5" dest="DECnet"/>
+					<translation source="6" dest="UCP"/>	
+					
+				</translations>
+			</resource>
+			<!-- 连接名称-->
+			<resource kpiid="M1ConnName" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<!-- exeorder：执行序号数字越小，执行越前，comid：命令id，select：select函数(默认为 '([\w]+)'  )，deal：函数 -->
+					<collect exeorder="10" comid="ChannelResCmd" select="$key\t[\S\. ]*\t[\S ]*\t[\S ]*\t([\S ]*)\t[\S ]*\t[\S ]*\t\S+" merge="" deal=""/>
+				</collects>
+			
+				<kpipolicy table="res_m1_connname" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+            
+		<!--MQ  队列KPI -->
+		<!-- 返回格式为     队列ID	队列名称	队列类型	队列描述	平均利用率	队列放入消息	取出消息	最大深度	最大长度	队列状态	当前深度 -->
+
+ 		  <resource kpiid="M1Queue_Desc" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<!-- 队列描述-->
+				<collects>
+					<!-- exeorder：执行序号数字越小，执行越前，comid：命令id，select：select函数(默认为 '([\w]+)'  )，deal：函数 -->
+					<collect exeorder="10" comid="QueueResCmd" select="$key\t[\S\. ]*\t[\w ]*\t([\S ]+)\t[\S\. ]+\t[\d ]*\t[\d ]*\t[\d ]*\t[\d ]*\t\S+\t[\d ]*" merge="" deal=""/>
+					
+				</collects>
+			
+				<kpipolicy table="res_m1_queuedescr" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			<!--平均利用率-->	
+			</resource>
+					<resource kpiid="M1Queue_Util" coltype="INNER_PROC" value="" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<!-- exeorder：执行序号数字越小，执行越前，comid：命令id，select：select函数(默认为 '([\w]+)'  )，deal：函数 -->
+					<collect exeorder="10" comid="QueueResCmd" select="$key\t[\S\. ]*\t[\w ]*\t[\S ]+\t([\S\. ]+)\t[\d ]*\t[\d ]*\t[\d ]*\t[\d ]*\t\S+\t[\d ]*" merge="" deal=""/>
+				</collects>
+			
+				<kpipolicy table="res_m1_queueutil" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>60"
+					alertdesc3="队列平均利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}>90" alertdesc4="队列平均利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="15" storefactor="1"/>
+				
+			</resource>
+			<!-- 队列放入消息-->
+			<resource kpiid="M1PutMessageCount" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<!-- exeorder：执行序号数字越小，执行越前，comid：命令id，select：select函数(默认为 '([\w]+)'  )，deal：函数 -->
+					<collect exeorder="10" comid="QueueResCmd" select="$key\t[\S\. ]*\t[\w ]*\t[\S ]+\t[\S\. ]+\t([\d ]*)\t[\d ]*\t[\d ]*\t[\d ]*\t\S+\t[\d ]*" merge="" deal=""/>
+				</collects>
+			
+				<kpipolicy table="res_m1_putmesscount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				<translations>	
+					<translation source="0" dest="允许"/>
+					<translation source="1" dest="禁止"/>
+					<translation source=" " dest=" "/>					
+				</translations>
+			</resource>
+			<!-- 队列取出消息 -->
+		   <resource kpiid="M1GetMessageCount" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<!-- exeorder：执行序号数字越小，执行越前，comid：命令id，select：select函数(默认为 '([\w]+)'  )，deal：函数 -->
+					<collect exeorder="10" comid="QueueResCmd" select="$key\t[\S\. ]*\t[\w ]*\t[\S ]+\t[\S\. ]+\t[\d ]*\t([\d ]*)\t[\d ]*\t[\d ]*\t\S+\t[\d ]*" merge="" deal=""/>
+				</collects>
+			
+				<kpipolicy table="res_m1_getmessCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				<translations>	
+					<translation source="0" dest="允许"/>
+					<translation source="1" dest="禁止"/>
+					<translation source=" " dest=" "/>					
+				</translations>
+			</resource>
+			<!--队列ID-->
+			<resource kpiid="M1Queue_Id" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<!-- exeorder：执行序号数字越小，执行越前，comid：命令id，select：select函数(默认为 '([\w]+)'  )，deal：函数 -->
+					<collect exeorder="10" comid="QueueResCmd" select="($key)\t[\S\. ]*\t[\w ]*\t[\S ]+\t[\S\. ]+\t[\d ]*\t[\d ]*\t[\d ]*\t[\d ]*\t\S+\t[\d ]*" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m1_queueid" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--队列类型-->
+			<resource kpiid="M1Queue_Type" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					
+					<collect exeorder="10" comid="QueueResCmd" select="$key\t[\S\. ]*\t([\w ])\t[\S ]+\t[\S\. ]+\t[\d ]*\t[\d ]*\t[\d ]*\t[\d ]*\t\S+\t[\d ]*" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m1_queuetype" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				<translations>	
+					<translation source="1" dest="本地"/>
+					<translation source="2" dest="模型"/>
+					<translation source="3" dest="别名"/>
+					<translation source="6" dest="远程定义"/>
+					<translation source="7" dest="集群"/>
+					
+				</translations>
+			</resource>
+			<!--队列名称-->
+			<resource kpiid="M1Queue_Name" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					
+					<collect exeorder="10" comid="QueueResCmd" select="$key\t([\S\. ]*)\t[\w ]*\t[\S ]+\t[\S\. ]+\t[\d ]*\t[\d ]*\t[\d ]*\t[\d ]*\t\S+\t[\d ]*" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m1_queuename" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			<!--队列状态-->
+			<resource kpiid="M1Queue_Status" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<!-- exeorder：执行序号数字越小，执行越前，comid：命令id，select：select函数(默认为 '([\w]+)'  )，deal：函数 -->
+					<collect exeorder="10" comid="QueueResCmd" select="$key\t[\S\. ]*\t[\w ]*\t[\S ]+\t[\S\. ]+\t[\d ]*\t[\d ]*\t[\d ]*\t[\d ]*\t(\S+)\t[\d ]*" merge="" deal=""/>
+				</collects>
+			
+				<kpipolicy table="res_m1_queuestatus" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="15" storefactor="1"/>
+				<translations>
+					<translation source="Current" dest="正在运行"/>
+					<translation source="Inactive" dest="已停止"/>
+				</translations>
+			</resource>
+			<!--最大队列深度-->
+			<resource kpiid="M1MaxQueueDepth" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<!-- exeorder：执行序号数字越小，执行越前，comid：命令id，select：select函数(默认为 '([\w]+)'  )，deal：函数 -->
+					<collect exeorder="10" comid="QueueResCmd" select="$key\t[\S\. ]*\t[\w ]*\t[\S ]+\t[\S\. ]+\t[\d ]*\t[\d ]*\t([\d ]*)\t[\d ]*\t\S+\t[\d ]*" merge="" deal=""/>
+				</collects>
+			
+				<kpipolicy table="res_m1_maxqueuelen" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="15" storefactor="1"/>
+				
+			</resource>
+			<!--队列当前深度-->
+			<resource kpiid="M1CurDepth" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<!-- exeorder：执行序号数字越小，执行越前，comid：命令id，select：select函数(默认为 '([\w]+)'  )，deal：函数 -->
+					<collect exeorder="10" comid="QueueResCmd" select="$key\t[\S\. ]*\t[\w ]*\t[\S ]+\t[\S\. ]+\t[\d ]*\t[\d ]*\t[\d ]*\t[\d ]*\t\S+\t([\d ]*)" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m1_curdepth" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="15" storefactor="1"/>
+				
+			</resource>
+			<!--最大消息长度-->
+			<resource kpiid="M1MaxMessageLength" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<!-- exeorder：执行序号数字越小，执行越前，comid：命令id，select：select函数(默认为 '([\w]+)'  )，deal：函数 -->
+					<collect exeorder="10" comid="QueueResCmd" select="$key\t[\S\. ]*\t[\w ]*\t[\S ]+\t[\S\. ]+\t[\d ]*\t[\d ]*\t[\d ]*\t([\d ]*)\t\S+\t[\d ]*" merge="" deal=""/>
+				</collects>
+			
+				<kpipolicy table="res_m1_maxmessagelen" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 主机名-->
+			<resource kpiid="M1Name" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_hostname" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_m1_hostname_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<!-- 主机说明-->
+			<resource kpiid="M1SystemInfo" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="systemInfo" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_m1_sysInfo_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- CLI方式采集 CPU 利用率 LINUX -->
+			<resource kpiid="M1CPURate" coltype="CLI" value="" valuetype="Integer" unit="%">
+				<collects>
+					<collect exeorder="10" comid="cpumemssh" select="&lt;get_cpurate&gt;(.*)&lt;/get_cpurate&gt;" merge="" deal=""/>
+
+				</collects>
+				
+				<kpipolicy table="res_m1_cpurate_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>60"
+					alertdesc3="CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}>80" alertdesc4="CPU利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			
+			<resource kpiid="M1MEMRate" coltype="CLI" value="" valuetype="Integer" unit="%">
+				<collects>
+					<collect exeorder="10" comid="cpumemssh" select="&lt;get_appmemrate&gt;(.*)&lt;/get_appmemrate&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m1_memrate_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>60"
+					alertdesc3="内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}>80" alertdesc4="内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			
+			<resource kpiid="M1Osname" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="mainssh" select="&lt;os&gt;(.*)&lt;/os&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m1_osname_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			
+			<resource kpiid="M1OsVer" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="mainssh" select="&lt;osversion&gt;(.*)&lt;/osversion&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m1_osversion_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			
+			<resource kpiid="M1SPName" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="mainssh" select="" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m1_sp_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<resource kpiid="M1Name" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="mainssh" select="&lt;hostname&gt;(\w+)&lt;/hostname&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m1_hostname_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<resource kpiid="M1SystemInfo" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="mainssh" select="&lt;systeminfo&gt;(\w+)&lt;/systeminfo&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_m1_sysInfo_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			
+			
+		</resources>
+
+	</devicetypeinfo>
+</root>

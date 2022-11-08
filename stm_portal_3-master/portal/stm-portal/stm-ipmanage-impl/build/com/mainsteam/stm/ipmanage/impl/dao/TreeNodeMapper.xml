@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.ipmanage.impl.dao.TreeNodeMapper">
+	<select id="getList" resultType="com.mainsteam.stm.ipmanage.bo.TreeNode" parameterType="java.lang.Integer">
+		select * from tree_node where parent_id =#{id};
+	</select>
+	<select id="getParentTreeNodeByIp" parameterType="com.mainsteam.stm.ipmanage.bo.TreeNode">
+		select * from tree_node where ip1=#{ip1} and  ip2=#{ip2} and  <![CDATA[ node_maskbit < 24 ]]>;
+	</select>
+	
+	<insert id="insert" parameterType="com.mainsteam.stm.ipmanage.bo.TreeNode">
+		INSERT INTO `tree_node` ( `node_ip`, `node_maskbit`, `parent_id`, `has_subnet`,`has_child`, `create_time`, `node_name`, `update_time`,`ip1`,`ip2`,`ip3`, `domain`,`extr1`)
+		 VALUES ( #{node_ip}, #{node_maskbit}, #{parent_id}, #{has_subnet},#{has_child}, #{create_time}, #{node_name}, #{update_time},#{ip1},#{ip2},#{ip3}, #{domain},#{extr1});
+	</insert>
+	<update id="update" parameterType="com.mainsteam.stm.ipmanage.bo.TreeNode">
+		UPDATE `tree_node` SET 
+		<if test="has_subnet!=null and has_subnet!=''">
+			`has_subnet`= #{has_subnet}, 
+		</if>
+		<if test="node_name!=null and node_name!=''">
+			`node_name`=#{node_name},
+		</if>
+		<if test="has_child!=null and has_child!=''">
+			`has_child`=#{has_child},
+		</if>
+		<if test="extr1!=null and extr1!=''">
+			`extr1`=#{extr1}
+		</if>
+		`update_time`=#{update_time} 
+		WHERE (`id`=#{id});
+	</update>
+	<delete id="del" parameterType="java.lang.Integer">
+		delete from tree_node where id=#{id};
+	</delete>
+</mapper>

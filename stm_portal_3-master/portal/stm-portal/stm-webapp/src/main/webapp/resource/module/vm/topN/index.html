@@ -1,0 +1,45 @@
+<div class="oc-vm" id="oc-vm" style="height:100%;">
+	<div class="fulltool" style="z-index: 999;">
+		<a class="full-ico full-ico-scroon" title="工作台"></a> 
+<!-- 		<a class="full-ico full-ico-min" title="大屏"></a>  -->
+		<a class="full-ico full-ico-edit costombtn" title="设置"></a>
+	</div>
+	<div class="content" style="height:100%;"></div>
+	<script type="text/javascript" src="module/vm/topN/setting/workbench.js"></script>
+<!-- 	<script type="text/javascript" src="module/vm/topN/setting/screen.js"></script> -->
+<!-- 	<script type="text/javascript" src="module/vm/topN/common/common.js"></script> -->
+	<script type="text/javascript">
+		(function() {
+			var vm = $('#oc-vm'),content=vm.find('>div.content'),curActive,
+				fulltool=vm.find('.fulltool:first');
+// 			if(oc.isSimple){
+// 				fulltool.hide();
+// 				content.load(oc.resource.getUrl('resource/module/vm/topN/screen/screen.html'),function(){
+// 					$(this).find('span.ico-max:first').hide();
+// 				});
+// 			}else{
+				function _click(jq,href){
+					jq.addClass('active').siblings().removeClass('active');
+					content.load(oc.resource.getUrl(href));
+				}
+				
+				fulltool.mouseleave().find(' > a:first').click(function() {//workbench
+					_click($(this),'resource/module/vm/topN/workbench/workbench.html');
+					curActive='workbench';
+				}).click()
+// 				.next().click(function() {//screen
+// 					_click($(this),'resource/module/vm/topN/screen/screen.html');
+// 					curActive='screen';
+// 				})
+				.next().click(function() {//setting
+					if(curActive=='workbench'){
+						oc.vm.setting.workbench.open();
+					}
+// 					else{
+// 						oc.vm.setting.screen.open();
+// 					}
+				});
+// 			}
+		})();
+	</script>
+</div>

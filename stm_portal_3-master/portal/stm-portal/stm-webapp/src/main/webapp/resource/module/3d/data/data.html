@@ -1,0 +1,117 @@
+<div class="panel-header" style="width: 1167px;">
+<div class="oc-header-r"><div class="oc-header-m">
+<div class="panel-title">数据管理</div>
+<div class="panel-tool"></div>
+</div>
+</div>
+</div>
+<div id="settingService">
+	<form id="pageTag-form" class="oc-form col1" style="height: 100%;">
+		<div class="form-group">
+			<label id="thirdDIntegration">3D机房集成：</label>
+			<div>
+				<input type="hidden" name="id"> 
+				<span class='oc-top0 locate-left status oc-switch close gray_color' data-data=''></span>
+			</div>
+		</div>
+		<div class="form-group 3d-data-togoole">
+			<label>IP地址/域名：</label>
+			<div>
+				<input type="text" name="ip" required  />
+			</div>
+		</div>
+		<div class="form-group 3d-data-togoole" style="margin-bottom: 10px;">
+			<label>端口：</label>
+			<div>
+				<input type="text" name="port"  value="8020"/>
+				<a id="submitForm" href="javascript:void(0);">应用</a>
+			</div>
+		</div>
+	</form>
+    <div  class="3d-data-togoole d-data-togoole">
+	<form class="oc-form col1" style="height: 100%;">
+		<div class="form-group">
+			<span>请在弹出的3D后台地址窗口中上传场景、产品库文件、visio数据</span>
+		</div>
+	</form>
+</div>
+</div>
+ 
+<script>
+	(function(){
+		var threedInfo = {};
+		oc.util.ajax({
+			url: oc.resource.getUrl('portal/3d/url/get3DInfo.htm'),
+			data:null,
+			async:false,
+			successMsg:null,
+			success: function(data){
+				if(data.code&&data.code==200){
+					threedInfo = data.data;
+					if(data.data.status){
+						$('.oc-switch').removeClass('close gray_color').addClass('open');
+						$('input[name="ip"]').val(data.data.ip);
+						$('input[name="port"]').val(data.data.port);
+ 						if(data.data.port==0){
+							$('input[name="port"]').val("");
+						} 
+					}else{
+						$('.oc-switch').removeClass('open').addClass('close gray_color');
+					}
+				}else{alert("error");}
+			}
+		});
+		
+		var form=oc.ui.form({selector:$('#pageTag-form')});
+		
+		$('.oc-switch').on('click',function(e){
+			e.stopPropagation();
+			$(this).hasClass('close')?$(this).removeClass('close gray_color').addClass('open')
+					:$(this).removeClass('open').addClass('close gray_color');
+			$(this).hasClass('close')?$(".3d-data-togoole").hide():$(".3d-data-togoole").show();
+			var that = this;
+			oc.util.ajax({
+				url: oc.resource.getUrl('portal/3d/url/updateStatus.htm'),
+				data:{status:$(this).hasClass('close')?"0":"1"},
+				successMsg:null,
+				success: function(data){
+					if(data.code&&data.code==200){
+						if($(that).hasClass('close')){
+							oc.index.navigator.moduleChange('12',false);
+						}else{
+							oc.index.navigator.moduleChange('12',true);
+						}
+						alert('操作成功')
+					}else{alert("操作失败");}
+				}
+			});
+		}).hasClass('close')?$(".3d-data-togoole").hide():$(".3d-data-togoole").show();
+		
+		$('#submitForm').linkbutton('RenderLB', {
+			text : '应用',
+			iconCls : 'fa fa-check-circle',
+			onClick : function() {
+				if(form.validate()){
+		 		var port=$('input[name="port"]').val();
+					if(port==""){
+						port=0;
+					}
+					oc.util.ajax({
+						url: oc.resource.getUrl('portal/3d/url/updateIp.htm'),
+						data:{ip:$('input[name="ip"]').val(),port:port},
+						successMsg:null,
+						success: function(data){
+							if(data.code&&data.code==200){
+								alert('操作成功');
+								var adminPath = "http://"+ $('input[name="ip"]').val()+":"
+									+$('input[name="port"]').val()+"/uinv_dev/admin.html";
+								oc.index.loadRights();
+								window.open(adminPath);
+							}else{alert("操作失败");}
+						}
+					});
+				}
+			}
+		});
+	})();
+</script>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base>
+<meta charset="UTF-8">
+<title>OC4扩展平台</title>
+<link rel="stylesheet" type="text/css" href="../extended-platform/js/easyui/themes/bootstrap/easyui.css">
+<link rel="stylesheet" type="text/css" href="../extended-platform/js/easyui/themes/icon.css">
+<link rel="stylesheet" type="text/css" href="../extended-platform/js/zTree_v3/css/zTreeStyle/zTreeStyle.css">
+
+<script type="text/javascript" src="../extended-platform/js/easyui/jquery.min.js"></script>
+<script type="text/javascript" src="../extended-platform/js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../extended-platform/js/easyui/locale/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="../extended-platform/js/zTree_v3/js/jquery.ztree.all-3.5.js"></script>
+<script type="text/javascript" src="js/oc.util.js"></script>
+<style type="text/css">
+	.title-red:{color: red;}
+</style>
+<script type="text/javascript">
+var base = document.getElementsByTagName('base')[0],baseUrl;
+if(navigator.appName=='Microsoft Internet Explorer'){
+	 baseUrl=window.location.href.split('resource')[0];
+}else{
+	 baseUrl=window.location.pathname.split('resource')[0];
+}
+base.setAttribute('href',baseUrl+'resource/');
+$(function(){
+	$.ajax({
+		url:baseUrl+'extendedplatform/resourceprofile/loginAccount.htm',
+		async:false,
+		type:'post',
+		success:function(acount){
+			if(!acount || acount!="oc-dev-admin"){
+				top.location.href=baseUrl+"resource/login.html";
+			}
+		}
+	});
+	
+});
+</script>
+</head>
+<body>
+<div id="cc" class="easyui-layout" style="width:600px;height:400px;" fit="true">   
+    <div data-options="region:'north',title:'',split:true" style="height:100px;display: none;">
+    	<h1>OneCenter 扩展平台</h1>
+    </div> 
+    <div data-options="region:'west',title:'系统菜单',split:true" style="width:180px;">
+		<div id="menu-div"></div>
+    </div>   
+    <div id="oc-main-content-div" data-options="region:'center',title:'模型策略同步',href:'extended-platform/resource-profile/sync.html'" style="padding:5px;"></div>   
+    
+    <script type="text/javascript">
+    	$(function(){
+    		var extendedMenu = [ {
+    			value : baseUrl+"resource/extended-platform/resource-profile/sync.html",
+    			text : "模型策略同步"
+    		},{
+    			value:baseUrl+"resource/extended-platform/resource-profile/resource-manager.html",
+    			text:"资源管理"
+    		},{
+    			value:baseUrl+"resource/extended-platform/resource-profile/profile-manager.html",
+    			text:"策略管理"
+    		} ];
+    		
+    		
+    		
+    		oc.util.datalistMenu({
+    			selector:$("#menu-div"),
+    			contentSelector:$("#oc-main-content-div"),
+    			data : extendedMenu
+    		});
+    	});
+    </script>
+</div>  
+</body>
+</html>

@@ -1,0 +1,3 @@
+@echo off
+echo 信息采集器正在关闭...
+net stop <OC4_DCS_SERVICE_NAME>

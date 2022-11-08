@@ -1,0 +1,1052 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<!-- 
+	devicetype:			设备类型名称
+	ismulticoltype:		是否允许采集方式多选
+	majortype:			主要分类（可以理解为设备类型）
+	minortype:			次要分类
+	manufacturer:		厂商
+	devicetype_zh:		设备类型中文描述
+	 -->
+	<devicetypeinfo devicetype="DB2" ismulticoltype="true" majortype="database" minortype="DB2s" manufacturer="" devicetype_zh="DB2数据库">
+		
+		<!-- 用于定位设备为该类设备的多个sysoid标识，如果snmp采集为sysoid，如果其他方式自行定义 -->
+		<devicetypes>
+		</devicetypes>
+		
+		<!-- 该设备类型定义的命令，用于合并命令执行 -->
+		<commands>
+			<!-- coltype:采集方式，comid：命令ID，command：命令 -->
+			<!-- 操作系统 主机名称 内存大小 -->
+			<command coltype="CLI" comid="chk_os" command="/tmp/os.sh" />
+			<command coltype="WMI" comid="chk_os_wmi" command="root\cimv2::SELECT Caption from Win32_OperatingSystem" />
+			<command coltype="WMI" comid="chk_hostname_wmi" command="root\cimv2::SELECT Name FROM Win32_ComputerSystem" />
+			<command coltype="WMI" comid="chk_TotalMemSize_wmi" command="root\cimv2::SELECT TotalVisibleMEMorySize FROM Win32_OperatingSystem" />
+			<command coltype="WMI" comid="chk_FreePhysicalMemory_wmi" command="root\cimv2::SELECT FreePhysicalMemory from Win32_OperatingSystem" />
+
+			<!-- CPU和内存利用率 -->
+			<command coltype="CLI" comid="chk_mem_cpu" command="/tmp/appinfo.sh ${installPath}" />
+			<command coltype="WMI" comid="chk_memrate_wmi" command="root\cimv2::select WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name like 'db2%'" />
+			<command coltype="WMI" comid="chk_cpurate_wmi" command="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Process where Name like 'db2%'" />
+			
+			<command coltype="JDBC" comid="systemUptime" command="SELECT timestampdiff(4,(CURRENT_TIMESTAMP) -(DB2START_TIME)),DB2START_TIME FROM TABLE( SNAPSHOT_DBM(-1))"/><!--连续运行时间 -->
+			<command coltype="JDBC" comid="version" command="SELECT versionnumber FROM SYSIBM.SYSVERSIONS"/><!--DB2版本 -->
+			<command coltype="JDBC" comid="serviceName" command="select distinct svcename from table(sysfun.get_dbm_config()) as dbmcfg"/><!--TCP/IP服务名称 -->
+			<command coltype="JDBC" comid="instanceAvailability" command="SELECT versionnumber FROM SYSIBM.SYSVERSIONS"/><!--实例状态 -->
+			<command coltype="JDBC" comid="maxConnCount" command="select connections_top from sysibmadm.snapdb"/><!--数据库最大并发连接数 -->
+			<command coltype="JDBC" comid="remoteConn" command="select rem_cons_in from sysibmadm.snapdbm with ur"/><!--远程连接数 -->
+			<command coltype="JDBC" comid="connSummer" command="select REM_CONS_IN+LOCAL_CONS from sysibmadm.snapdbm with ur"/><!--尝试连接总数 -->
+			<command coltype="JDBC" comid="localConn" command="select LOCAL_CONS from sysibmadm.snapdbm with ur"/><!--本地连接数 -->
+			<command coltype="JDBC" comid="agentNumber" command="select AGENTS_REGISTERED  from sysibmadm.snapdbm SNAPSHOT_DBM with ur"/><!--代理数 -->
+			<command coltype="JDBC" comid="activeAgent" command="select agents_registered-idle_agents as agents_register from sysibmadm.snapdbm with ur"/><!--活动代理数 -->
+			<command coltype="JDBC" comid="idleAgent" command="select idle_agents from sysibmadm.snapdbm with ur"/><!--空闲代理数 -->
+			
+			<command coltype="JDBC" comid="rollbackRate" command="select  rollback_sql_stmts/(rollback_sql_stmts+commit_sql_stmts)*100 from TABLE(SYSPROC.SNAPSHOT_DATABASE('${dbName}',-2)) AS SNAPSHOT_DATABASE with ur"/><!--事务回滚率 -->
+			<command coltype="JDBC" comid="dbLogSize" command="SELECT TOTAL_LOG_USED_KB FROM SYSIBMADM.LOG_UTILIZATION with ur"/><!--日志大小 -->
+			<command coltype="JDBC" comid="dbLogRate" command="SELECT TOTAL_LOG_USED/(TOTAL_LOG_AVAILABLE+TOTAL_LOG_USED)*100 a FROM SYSIBMADM.SNAPDB"/><!--日志空间利用率 -->
+			<command coltype="JDBC" comid="IOWriteCount" command="select total_writes from SYSIBMADM.bp_write_io where bp_name not like '%K'"/><!--IO写次数 -->
+		  <command coltype="JDBC" comid="IOReadCount" command="select total_physical_reads from SYSIBMADM.bp_read_io where bp_name not like '%K'"/><!--IO读次数 -->
+			
+			<!--数据库子资源 -->
+			<command coltype="JDBC" comid="db2DBName" command="select rtrim(DB_NAME),trim(DB_PATH) from SYSIBMADM.SNAPDB"/><!--数据库名称 -->
+			<command coltype="JDBC" comid="db2DBSize" command="select (SUM(total_pages)*4)/1024.0 TOTAL_ALLOCATED_SPACE_IN_GB from table (snapshot_tbs_cfg('$childid',-1)) TBS_SPCE"/><!--数据库大小 -->
+			
+			<command coltype="JDBC" comid="path" command="select db_path from TABLE( SNAPSHOT_DATABASE('$childid',-1 )) as SNAPSHOT_DATABASE"/><!--数据库路径 -->
+			<command coltype="JDBC" comid="availability" command="SELECT current timestamp FROM sysibm.sysdummy1"/><!--数据库可用性 -->
+			<command coltype="JDBC" comid="bufPolDataLcRds" command="select sum(POOL_DATA_L_READS) from TABLE(SNAPSHOT_BP( '$childid',-1 )) as SNAPSHOT_BP"/><!--缓冲池数据页逻辑读次数 -->
+			<command coltype="JDBC" comid="bufPolIndexLcRds" command="Select sum(POOL_INDEX_L_READS) from TABLE(SNAPSHOT_BP( '$childid',-1 )) as SNAPSHOT_BP"/><!--缓冲池索引页逻辑读次数 -->
+			<command coltype="JDBC" comid="bufPolDataPhylRds" command="select sum(POOL_DATA_P_READS) from TABLE(SNAPSHOT_BP( '$childid',-1 )) as SNAPSHOT_BP"/><!--缓冲池数据页物理读次数 -->
+			<command coltype="JDBC" comid="bufPolIndexPhylRds" command="select sum(POOL_INDEX_P_READS) from TABLE(SNAPSHOT_BP( '$childid',-1 )) as SNAPSHOT_BP"/><!--缓冲池索引页物理读次数 -->
+			<command coltype="JDBC" comid="bufPolHitRate" command="select sum(POOL_DATA_L_READS), sum(POOL_DATA_P_READS) from TABLE( SNAPSHOT_BP('$childid',-1 )) as SNAPSHOT_BP"/><!--数据缓冲池命中率 -->
+
+			<command coltype="JDBC" comid="indexBufPolHitRate" command="select sum(POOL_INDEX_L_READS), sum(POOL_INDEX_P_READS) from TABLE( SNAPSHOT_BP('$childid',-1 )) as SNAPSHOT_BP"/><!--索引缓冲池命中率-->
+
+			<command coltype="JDBC" comid="directoryBufHitRate" command="select CAT_CACHE_LOOKUPS,CAT_CACHE_OVERFLOWS from TABLE( SNAPSHOT_DATABASE( '$childid', -1 )) as SNAPSHOT_DATABASE"/><!--目录缓冲命中率 -->
+
+			<command coltype="JDBC" comid="packageBufHitRate" command="select PKG_CACHE_LOOKUPS, PKG_CACHE_NUM_OVERFLOWS from TABLE( SNAPSHOT_DATABASE( '$childid', -1 )) as SNAPSHOT_DATABASE"/><!--包缓冲命中率 -->
+
+			<command coltype="JDBC" comid="directReadTimes" command="Select sum(DIRECT_READS) from TABLE( SNAPSHOT_BP('$childid' ,-1 )) as SNAPSHOT_BP"/><!--直接读次数 -->
+
+			<command coltype="JDBC" comid="directWriteTimes" command="Select sum(DIRECT_WRITES) from TABLE(SNAPSHOT_BP( '$childid', -1 )) as SNAPSHOT_BP"/><!--直接写次数 -->
+
+			<command coltype="JDBC" comid="curConnCount" command="select count(*) FROM TABLE( SNAPSHOT_APPL('$childid' ,-1 )) as SNAPSHOT_APPL"/><!--当前连接数 -->
+
+			<command coltype="JDBC" comid="deadlockCount" command="SELECT DEADLOCKS FROM TABLE( SNAPSHOT_DATABASE('$childid' ,-1 )) as SNAPSHOT_DATABASE"/><!--死锁数 -->
+
+			<command coltype="JDBC" comid="lockWaitCount" command="SELECT LOCK_WAITS FROM TABLE( SNAPSHOT_DATABASE('$childid', -1 )) as SNAPSHOT_DATABASE"/><!--锁等待数 -->
+
+			<command coltype="JDBC" comid="lockEscalateCount" command="SELECT LOCK_ESCALS FROM TABLE( SNAPSHOT_DATABASE('$childid',  -1 )) as SNAPSHOT_DATABASE"/><!--锁升级数 -->
+
+			<command coltype="JDBC" comid="appSortCount" command="SELECT TOTAL_SORTS FROM TABLE( SNAPSHOT_DATABASE('$childid' ,-1 )) as SNAPSHOT_DATABASE"/><!--应用排序数 -->
+
+			<command coltype="JDBC" comid="sortOverUtilRatio" command="SELECT TOTAL_SORTS,SORT_OVERFLOWS FROM TABLE(SNAPSHOT_DATABASE( '$childid', -1 )) as SNAPSHOT_DATABASE"/><!--排序溢出百分比 -->
+			
+			<command coltype="JDBC" comid="failWorkNumber" command="SELECT sum(FAILED_SQL_STMTS) FROM TABLE(SYSPROC.SNAPSHOT_DATABASE('$childid',-2)) AS SNAPSHOT_DATABASE with ur"/><!--失败事务数 -->
+			<command coltype="JDBC" comid="workUnitNumber" command="SELECT sum(COMMIT_SQL_STMTS)+sum(ROLLBACK_SQL_STMTS)+sum(INT_COMMITS)+sum(INT_ROLLBACKS) FROM TABLE(SYSPROC.SNAPSHOT_DATABASE('$childid',-2)) AS SNAPSHOT_DATABASE with ur"/><!--工作单元数 -->
+			<command coltype="JDBC" comid="lockListinUse" command="select lock_list_in_use from sysibmadm.snapdb where db_name='$childid' with ur"/><!--锁定列表使用数 -->
+			<command coltype="JDBC" comid="waitsForLock" command="select (locks_waiting/APPLS_CUR_CONS)*100 from sysibmadm.snapdb where db_name='$childid' with ur"/><!--正在等待锁定的应用程序百分比 -->
+			
+			
+<!--表空间子资源 -->
+			<command coltype="JDBC" comid="id" command="select tablespace_name, tablespace_id from table(snapshot_tbs_cfg('${dbName}',-1)) as snapshot_tbs_cfg where TABLESPACE_TYPE=0"/><!--表空间ID -->
+
+			<command coltype="JDBC" comid="name" command="select tablespace_name from table(snapshot_tbs_cfg('${dbName}',-1)) as snapshot_tbs_cfg where TABLESPACE_TYPE=0"/><!--表空间名称 -->
+
+			<command coltype="JDBC" comid="instanceName" command="select tablespace_name from table(snapshot_tbs_cfg('${dbName}',-1)) as snapshot_tbs_cfg where TABLESPACE_TYPE=0"/><!--表空间实例名称 -->
+
+			<command coltype="JDBC" comid="type" command="select tablespace_name,tablespace_type from table(snapshot_tbs_cfg('${dbName}',-1)) as snapshot_tbs_cfg where tablespace_type=0"/><!--表空间类型 -->
+
+			<command coltype="JDBC" comid="size" command="select tablespace_name, page_size*total_pages/1024/1024 tablespace_size from table(snapshot_tbs_cfg('${dbName}',-1)) as snapshot_tbs_cfg where tablespace_type=0"/><!-- 表空间大小 -->
+
+			<command coltype="JDBC" comid="runStatus" command="select tablespace_name, TABLESPACE_STATE from table(snapshot_tbs_cfg('${dbName}',-1)) as snapshot_tbs_cfg where tablespace_type=0"/><!--表空间状态 -->
+
+			<command coltype="JDBC" comid="utilRatio" command="select tablespace_name, decimal(round(USED_PAGES*1.0/TOTAL_PAGES*100,2),10,2) pct from table(snapshot_tbs_cfg('${dbName}',-1)) as snapshot_tbs_cfg where tablespace_type=0 and total_pages!=0"/><!--表空间利用率 -->
+<!--系统表空间子资源-->
+			<command coltype="JDBC" comid="sysId" command="select tablespace_name, tablespace_id from table(snapshot_tbs_cfg('${dbName}',-1)) as snapshot_tbs_cfg where TABLESPACE_TYPE=1"/><!--系统表空间ID -->
+
+			<command coltype="JDBC" comid="sysName" command="select tablespace_name from table(snapshot_tbs_cfg('${dbName}',-1)) as snapshot_tbs_cfg where TABLESPACE_TYPE=1"/><!--系统表空间名称 -->
+
+			<command coltype="JDBC" comid="sysInstanceName" command="select tablespace_name from table(snapshot_tbs_cfg('${dbName}',-1)) as snapshot_tbs_cfg where TABLESPACE_TYPE=1"/><!--系统表空间实例名称 -->
+
+			<command coltype="JDBC" comid="sysType" command="select tablespace_name,tablespace_type from table(snapshot_tbs_cfg('${dbName}',-1)) as snapshot_tbs_cfg where tablespace_type=1"/><!--系统表空间类型 -->
+
+			<command coltype="JDBC" comid="sysSize" command="select tablespace_name, page_size*total_pages/1024/1024 tablespace_size from table(snapshot_tbs_cfg('${dbName}',-1)) as snapshot_tbs_cfg where tablespace_type=1"/><!--系统表空间大小 -->
+
+			<command coltype="JDBC" comid="sysRunStatus" command="select tablespace_name, TABLESPACE_STATE from table(snapshot_tbs_cfg('${dbName}',-1)) as snapshot_tbs_cfg where tablespace_type=1"/><!--系统表空间状态 -->
+			<command coltype="INNER_PROC" comid="testConn" command="com.qwserv.itm.pfl.resource.util.TestConnection.testJdbc"/>  <!-- 测试是否可连接 -->				
+
+
+	<!--SQL语句持续时间TOP10 -->
+			<command coltype="JDBC" comid="sqlTop10ElapsedTime" command="select substr(appl_name,1,15) as appl_name,elapsed_time_min as elapsed_min, appl_status as status, substr(authid,1,10) as auth_id,substr(inbound_comm_address,1,15) as ip_address, substr(stmt_text,1,30) as sql_statement from sysibmadm.long_running_sql order by 2 desc fetch first 10 rows only">
+			  <columns>
+			  <column key="appl_name" value="应用名"/>
+			  <column key="elapsed_min" value="消耗时间（分钟）"/>
+			  <column key="status" value="状态"/>
+			  <column key="auth_id" value="授权ID"/>
+			  <column key="ip_address" value="IP地址"/>
+			  <column key="sql_statement" value="SQL语句"/>
+				</columns>
+			</command>
+			<!--SQL语句持续时间TOP10 -->
+			
+			<!--SQL语句执行次数TOP10 -->
+			<command coltype="JDBC" comid="sqlTop10Execute" command="select num_executions as num_exec,average_execution_time_s as avg_time_sec,stmt_sorts as num_sorts,sorts_per_execution as sorts_per_stmt,substr(stmt_text,1,300) as sql_stmt from sysibmadm.top_dynamic_sql where num_executions>0 order by 1 desc fetch first 10 rows only with ur">
+			  <columns>
+			  <column key="num_exec" value="执行次数"/>
+			  <column key="avg_time_sec" value="平均执行时间（秒）"/>
+			  <column key="num_sorts" value="排序次数"/>
+			  <column key="sorts_per_stmt" value="平均排序次数"/>
+			  <column key="sql_stmt" value="SQL语句"/>
+				</columns>
+			</command>
+			<!--SQL语句执行次数TOP10 -->
+			
+			<!--SQL语句排序次数TOP10 -->
+			<command coltype="JDBC" comid="sqlTop10SortNum" command="select stmt_sorts,sorts_per_execution as sorts_execution,substr(stmt_text,1,300) as stmt_text from sysibmadm.top_dynamic_sql where stmt_sorts>0 order by stmt_sorts desc fetch first 10 rows only">
+			  <columns>
+			  <column key="stmt_sorts" value="排序语句"/>
+			  <column key="sorts_execution" value="执行排序"/>
+			  <column key="stmt_text" value="SQL语句"/>
+				</columns>
+			</command>
+			<!--SQL语句排序次数TOP10 -->
+			
+			<!--SQL语句全表扫描TOP10 -->
+			<command coltype="JDBC" comid="sqlTop10FullScan" command="select authid ,appl_name,percent_rows_selected from sysibmadm.appl_performance order by percent_rows_selected fetch first 10 rows only with ur">
+			  <columns>
+			  <column key="authid" value="授权ID"/>
+			  <column key="appl_name" value="应用名"/>
+			  <column key="percent_rows_selected" value="行选择百分比（%）"/>
+				</columns>
+			</command>
+			<!--SQL语句全表扫描TOP10 -->
+			
+			
+		</commands>	
+
+		
+		<!-- 描述该类设备的所有指标采集,一行对应一个指标 -->
+		<resources>
+			<!-- 设备可用性，jdbc不通则不可用，否则可用 -->
+			<resource kpiid="Availability" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="testConn" select="" merge="" deal=""/>
+				</collects>
+				<translations>
+					<translation source="0" dest="可用"/>
+          <translation source="default" dest="不可用"/>
+				</translations>
+				
+        <kpipolicy table="res_d_Availability" field="value" fieldtype="" willalert="y"
+					alertexp1="" alertdesc1="数据库连接正常" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.contains(&quot;不可用&quot;)" alertdesc5="数据库连接失败"
+					alertcontin="1" alertype="100001" circle="5" storefactor="1"/>					
+			</resource>		
+			
+			<!--SQL语句持续时间TOP10-->
+			<resource kpiid="D1sqlTop10ElapseTime" coltype="JDBC" value="" valuetype="IMME" unit="">
+				<collects>
+					<collect exeorder="10" comid="sqlTop10ElapsedTime" select="" merge="" deal=""/>
+				</collects>						
+				<kpipolicy table="res_d_D1sqlTop10ElapseTime" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>				
+			</resource>	
+			<!--SQL语句执行次数TOP10-->
+			<resource kpiid="D1sqlTop10Execute" coltype="JDBC" value="" valuetype="IMME" unit="">
+				<collects>
+					<collect exeorder="10" comid="sqlTop10Execute" select="" merge="" deal=""/>
+				</collects>						
+				<kpipolicy table="res_d_D1sqlTop10Execute" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>				
+			</resource>	
+			<!--SQL语句排序次数TOP10-->
+			<resource kpiid="D1sqlTop10SortNum" coltype="JDBC" value="" valuetype="IMME" unit="">
+				<collects>
+					<collect exeorder="10" comid="sqlTop10SortNum" select="" merge="" deal=""/>
+				</collects>						
+				<kpipolicy table="res_d_D1sqlTop10SortNum" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>				
+			</resource>	
+			<!--SQL语句全表扫描TOP10-->
+			<resource kpiid="D1sqlTop10FullScan" coltype="JDBC" value="" valuetype="IMME" unit="">
+				<collects>
+					<collect exeorder="10" comid="sqlTop10FullScan" select="" merge="" deal=""/>
+				</collects>						
+				<kpipolicy table="res_d_D1sqlTop10FullScan" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>				
+			</resource>	
+			
+			<!--连续运行时间 -->
+			<resource kpiid="D1sysUpTime" coltype="JDBC" value="60*$d1" valuetype="Integer" unit="秒">
+				<collects>
+					<collect exeorder="10" comid="systemUptime" select="(\d+)\s" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1sysUpTime" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="60" storefactor="1"/>
+				
+			</resource>
+			<!-- 操作系统(WMI方式) -->
+			<resource kpiid="D1OperateSystem" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="chk_os_wmi" select="" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_D1OperateSystem" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+                alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="0" />
+			</resource>
+			<!-- 操作系统(CLI方式) -->
+			<resource kpiid="D1OperateSystem" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="chk_os" select="&lt;os&gt;(.+)&lt;/os&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_D1OperateSystem" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+                alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="0" />
+			</resource>
+			<!-- 主机名称(WMI方式) -->
+			<resource kpiid="D1hostName" coltype="WMI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="chk_hostname_wmi" select="" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_D1hostName" istooltip="100" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+                alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="0" />
+			</resource>
+			<!-- 主机名称(CLI方式) -->
+      <resource kpiid="D1hostName" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="chk_os" select="&lt;hostname&gt;(.+)&lt;/hostname&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_D1hostName" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+                alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="0" />
+			</resource>
+
+			<!-- 主机内存大小(WMI方式) -->
+			<resource kpiid="D1TotalMemSize" coltype="WMI" value="$d1/1024/1024" valuetype="Float" unit="GB">
+				<collects>
+					<collect exeorder="10" comid="chk_TotalMemSize_wmi" select="" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_D1TotalMemSize" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+                alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="0" />
+			</resource>
+			<!-- 主机内存大小(CLI方式) -->
+			<resource kpiid="D1TotalMemSize" coltype="CLI" value="$d1/1024" valuetype="Float" unit="GB">
+				<collects>
+					<collect exeorder="10" comid="chk_os" select="&lt;memsize&gt;(.+)&lt;/memsize&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_D1TotalMemSize" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2=""
+                alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="0" />
+			</resource>
+
+			<!-- DB2CPU利用率(WMI方式) -->
+			<resource kpiid="D1cpuUsage" coltype="WMI" value="" valuetype="Integer" unit="%">
+				<collects>
+					<collect exeorder="10" comid="chk_cpurate_wmi" select="(\d+)" merge="sum" deal="" />
+				</collects>
+				<kpipolicy table="res_d_D1cpuUsage" field="value" fieldtype="" willalert="y"
+                    alertexp1="${value}&lt;60" alertdesc1="DB2 CPU利用率恢复正常，当前值为${value}。" alertexp2="" alertdesc2=""
+                    alertexp3="${value}>=60" alertdesc3="DB2 CPU利用率大于等于${trigervalue1}，当前值为${value}。"
+					alertexp4="${value}>=80" alertdesc4="DB2 CPU利用率大于等于${trigervalue1}，当前值为${value}。"
+					alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1" />
+			</resource>
+			<!-- DB2CPU利用率(CLI方式) -->
+			<resource kpiid="D1cpuUsage" coltype="CLI" value="" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="chk_mem_cpu" select="&lt;get_appcpurate&gt;(.+)&lt;/get_appcpurate&gt;" merge="" deal="" />
+				</collects>
+			<kpipolicy table="res_d_D1cpuUsage" field="value" fieldtype="" willalert="y"
+                    alertexp1="${value}&lt;60" alertdesc1="DB2 CPU利用率恢复正常，当前值为${value}。" alertexp2="" alertdesc2=""
+                    alertexp3="${value}>=60" alertdesc3="DB2 CPU利用率大于等于${trigervalue1}，当前值为${value}。"
+					alertexp4="${value}>=80" alertdesc4="DB2 CPU利用率大于等于${trigervalue1}，当前值为${value}。"
+					alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1" />
+			</resource>
+
+			<!-- DB2内存利用率(WMI方式) -->
+			<resource kpiid="D1memUsage" coltype="WMI" value="100*$d1/$d2/1024" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="chk_memrate_wmi" select="(\d+)" merge="sum" deal="" />
+					<collect exeorder="20" comid="chk_TotalMemSize_wmi" select="(\d+)" merge="" deal="" />
+				</collects>
+
+				<kpipolicy table="res_d_D1memUsage" field="value" fieldtype="" willalert="y"
+                    alertexp1="${value}&lt;60" alertdesc1="DB2内存利用率恢复正常。" alertexp2="" alertdesc2=""
+                    alertexp3="${value}>=60" alertdesc3="DB2内存利用率大于等于${trigervalue1}，当前值为${value}。"
+					alertexp4="${value}>=80" alertdesc4="DB2内存利用率大于等于${trigervalue1}，当前值为${value}。"
+					alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1" />
+			</resource>
+			<!-- DB2内存利用率(CLI方式) -->
+			<resource kpiid="D1memUsage" coltype="CLI" value="" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="chk_mem_cpu" select="&lt;get_appmemrate&gt;(.*)&lt;/get_appmemrate&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_D1memUsage" field="value" fieldtype="" willalert="y"
+                    alertexp1="${value}&lt;60" alertdesc1="DB2内存利用率恢复正常。" alertexp2="" alertdesc2=""
+                    alertexp3="${value}>=60" alertdesc3="DB2内存利用率大于等于${trigervalue1}，当前值为${value}。"
+					alertexp4="${value}>=80" alertdesc4="DB2内存利用率大于等于${trigervalue1}，当前值为${value}。"
+					alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1" />
+			</resource>
+			<!--版本 -->
+			<!--resource kpiid="D1dataBaseVersion" coltype="JDBC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="version" select="(.+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1dataBaseVersion" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>
+				
+			</resource-->
+			
+			<!--实例状态 -->
+			<resource kpiid="D1instanceAvail" coltype="JDBC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="instanceAvailability" select="(\d+)" merge="count" deal=""/>
+				</collects>
+				<translations>
+					<translation source="1" dest="1"/>
+					<translation source="default" dest="0"/>
+				</translations>
+				<kpipolicy table="res_d_D1instanceAvail" field="value" fieldtype="" willalert="y"
+					alertexp1="" alertdesc1="数据库实例连接恢复正常。" alertexp2="&quot;${value}&quot;.contains(&quot;连接失败&quot;)" alertdesc2="数据库实例连接失败。" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1" storefactor="1"/>
+				
+			</resource>
+			
+			<!--TCP/IP服务名称 -->
+			<resource kpiid="D1serviceName" coltype="JDBC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="serviceName" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1serviceName" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>
+				
+			</resource>
+			
+			<!--实例名称 -->
+			<!--resource kpiid="D1instanceName" coltype="JDBC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="instanceName" select="(.+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1instanceName" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>
+				
+			</resource-->
+			
+			<!--数据库最大并发连接数-->
+			<resource kpiid="D1maxConnCount" coltype="JDBC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="maxConnCount" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1maxConnCount" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="1"/>				
+			</resource>
+			
+			
+			<!--远程连接数-->
+			<resource kpiid="D1remoteConn" coltype="JDBC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="remoteConn" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1remoteConn" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="1"/>				
+			</resource>
+			
+			<!--尝试连接总数-->
+			<resource kpiid="D1connSummer" coltype="JDBC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="connSummer" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1connSummer" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="15" storefactor="1"/>				
+			</resource>
+			
+			<!--本地连接数-->
+			<resource kpiid="D1localConn" coltype="JDBC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="localConn" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1localConns" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="15" storefactor="1"/>				
+			</resource>
+			
+			
+				<!--代理数-->
+			<resource kpiid="D1agentNumber" coltype="JDBC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="agentNumber" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1agentNumber" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="15" storefactor="1"/>				
+			</resource>
+				<!--活动代理数-->
+			<resource kpiid="D1activeAgent" coltype="JDBC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="activeAgent" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1activeAgent" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="15" storefactor="1"/>				
+			</resource>
+				<!--空闲代理数-->
+			<resource kpiid="D1idleAgent" coltype="JDBC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="idleAgent" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1idleAgent" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="15" storefactor="1"/>				
+			</resource>
+			
+				<!--等待代理数-->
+			<resource kpiid="D1idleAgent" coltype="JDBC" value="$d1-$d2-$d3" valuetype="Integer" unit="个">
+				<collects>
+				  <collect exeorder="10" comid="agentNumber" select="(\d+)" merge="" deal=""/>
+				  <collect exeorder="20" comid="activeAgent" select="(\d+)" merge="" deal=""/>
+					<collect exeorder="30" comid="idleAgent" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1idleAgent" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="15" storefactor="1"/>				
+			</resource>
+			
+			<!--事务回滚率 -->
+			<resource kpiid="D1tranRollbackRate" coltype="JDBC" value="" valuetype="Integer" unit="%">
+				<collects>
+					<collect exeorder="10" comid="rollbackRate" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1tranRollbackRate" field="value" fieldtype="" willalert="n"
+					alertexp1="${value}&lt;80%" alertdesc1="事务回滚率恢复正常，当前值为${value}%。" alertexp2="" alertdesc2="" alertexp3="${value}>=80%"
+					alertdesc3="事务回滚率大于等于${trigervalue1}，当前值为${value}%。" alertexp4="${value}>=90%" alertdesc4="事务回滚率大于等于${trigervalue1}，当前值为${value}%。" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 数据库日志大小 -->
+			<resource kpiid="D1dbLogSize" coltype="JDBC" value="" valuetype="Integer" unit="MB">
+				<collects>
+					<collect exeorder="10" comid="dbLogSize" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1dbLogSize" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="60" storefactor="0"/>
+				
+			</resource>
+			<!-- 数据库日志利用率 -->
+			<resource kpiid="D1dbLogRate" coltype="JDBC" value="" valuetype="Integer" unit="%">
+				<collects>
+					<collect exeorder="10" comid="dbLogRate" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1dbLogRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="15" storefactor="0"/>
+				
+			</resource>
+			
+			
+	<!--数据库个数 -->
+			<resource kpiid="D1numberOfDatabase" coltype="JDBC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="db2DBName" select="" merge="count" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1numberOfDatabase" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="${value}!=${oldvalue}" alertdesc2="数据库个数发生变化，从${oldvalue}次变更为${value}次。" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>
+				
+			</resource>			
+			
+			<!--IO读次数 -->
+			<resource kpiid="D1IOReadCount" coltype="JDBC" value="" valuetype="Integer" unit="次">
+				<collects>
+					<collect exeorder="10" comid="IOReadCount" select="(\d+)" merge="sum" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1IOReadCount" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="15" storefactor="0"/>
+				
+			</resource>	
+			
+			<!--IO写次数 -->
+			<resource kpiid="D1IOWriteCount" coltype="JDBC" value="" valuetype="Integer" unit="次">
+				<collects>
+					<collect exeorder="10" comid="IOWriteCount" select="(\d+)" merge="sum" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1IOWriteCount" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="15" storefactor="0"/>
+				
+			</resource>	
+			
+			
+<!--DB2数据库子资源 -->
+
+			<!--数据库名称 -->
+			<resource kpiid="D1dbdataBaseName" coltype="JDBC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="db2DBName" select="($key)\t\S+\t" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1dbdataBaseName" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>
+				
+			</resource>
+			<!--数据库大小 -->
+			<resource kpiid="D1dbdatabaseSpace" coltype="JDBC" value="" valuetype="Integer" unit="MB">
+				<collects>
+					<collect exeorder="10" comid="db2DBSize" select="(\d+)" merge="" deal=""/>
+				</collects>						
+				<kpipolicy table="res_d_D1dbdatabaseSpace" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>				
+			</resource>	
+			
+			<!--数据库路径 -->
+			<resource kpiid="D1dbDirectory" coltype="JDBC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="db2DBName" select="$key\t(.+)\t" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1dbDirectory" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>
+				
+			</resource>
+			
+			<!--数据库可用性 -->
+			<resource kpiid="D1dbAvailability" coltype="JDBC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="availability" select="" merge="" deal=""/>
+				</collects>
+				<translations>
+					<translation source="0" dest="无法连接"/>
+					<translation source="default" dest="正常"/>
+				</translations>
+				<kpipolicy table="res_d_D1dbAvailability" field="value" fieldtype="" willalert="y"
+					alertexp1="" alertdesc1="${childname}数据库连接恢复正常。" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.contains(&quot;连接失败&quot;)" alertdesc5="${childname}数据库连接失败。"
+					alertcontin="1" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!--缓冲池数据页逻辑读次数 -->
+			<resource kpiid="D1bufPolDataLcRds" coltype="JDBC" value="" valuetype="Integer" unit="次">
+				<collects>
+					<collect exeorder="10" comid="bufPolDataLcRds" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1bufPolDataLcRds" field="value" fieldtype="" willalert="n"
+					alertexp1="${value}&lt;100000" alertdesc1="缓冲池数据页逻辑读次数恢复正常，当前值为${value}。" alertexp2="" alertdesc2="" alertexp3="${value}>=100000"
+					alertdesc3="缓冲池数据页逻辑读次数大于等于${trigervalue1}，当前值为${value}。" alertexp4="${value}>=300000" alertdesc4="缓冲池数据页逻辑读次数大于等于${trigervalue1}，当前值为${value}。" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="30" storefactor="1"/>
+				
+			</resource>
+			
+			<!--缓冲池索引页逻辑读次数 -->
+			<resource kpiid="D1bufPolIndexLcRds" coltype="JDBC" value="" valuetype="Integer" unit="次">
+				<collects>
+					<collect exeorder="10" comid="bufPolIndexLcRds" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1bufPolIndexLcRds" field="value" fieldtype="" willalert="n"
+					alertexp1="${value}&lt;100000" alertdesc1="缓冲池索引页逻辑读次数恢复正常，当前值为${value}。" alertexp2="" alertdesc2="" alertexp3="${value}>=100000"
+					alertdesc3="缓冲池索引页逻辑读次数大于等于${trigervalue1}，当前值为${value}。" alertexp4="${value}>=300000" alertdesc4="缓冲池索引页逻辑读次数大于等于${trigervalue1}，当前值为${value}。" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="30" storefactor="1"/>
+				
+			</resource>
+			
+			<!--缓冲池数据页物理读次数 -->
+			<resource kpiid="D1bufPolDataPhylRds" coltype="JDBC" value="" valuetype="Integer" unit="次">
+				<collects>
+					<collect exeorder="10" comid="bufPolDataPhylRds" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1bufPolDataPhylRds" field="value" fieldtype="" willalert="n"
+					alertexp1="${value}&lt;100000" alertdesc1="缓冲池数据页物理读次数恢复正常，当前值为${value}。" alertexp2="" alertdesc2="" alertexp3="${value}>=100000"
+					alertdesc3="缓冲池数据页物理读次数大于等于${trigervalue1}，当前值为${value}。" alertexp4="${value}>=300000" alertdesc4="缓冲池数据页物理读次数大于等于${trigervalue1}，当前值为${value}。" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="30" storefactor="1"/>
+				
+			</resource>
+			
+			<!--缓冲池索引页物理读次数 -->
+			<resource kpiid="D1bufPolIndexPhylRds" coltype="JDBC" value="" valuetype="Integer" unit="次">
+				<collects>
+					<collect exeorder="10" comid="bufPolIndexPhylRds" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1bufPolIndexPhylRds" field="value" fieldtype="" willalert="n"
+					alertexp1="${value}&lt;100000" alertdesc1="缓冲池索引页物理读次数恢复正常，当前值为${value}。" alertexp2="" alertdesc2="" alertexp3="${value}>=100000"
+					alertdesc3="缓冲池索引页物理读次数大于等于${trigervalue1}，当前值为${value}。" alertexp4="${value}>=300000" alertdesc4="缓冲池索引页物理读次数大于等于${trigervalue1}，当前值为${value}。" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="30" storefactor="1"/>
+				
+			</resource>
+			
+			<!--数据缓冲池命中率 -->
+			<resource kpiid="D1bufPolHitRate" coltype="JDBC" value="$d2/$d1*100" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="bufPolHitRate" select="(\d+)\t(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1bufPolHitRate" field="value" fieldtype="" willalert="n"
+					alertexp1="${value}>95%" alertdesc1="数据缓冲池命中率恢复正常，当前值为${value}。" alertexp2="" alertdesc2="" alertexp3="${value}&lt;=95%"
+					alertdesc3="数据缓冲池命中率小于等于${trigervalue1}，当前值为${value}。" alertexp4="${value}&lt;=90%" alertdesc4="数据缓冲池命中率小于等于${trigervalue1}，当前值为${value}。" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!--索引缓冲池命中率 -->
+			<resource kpiid="D1indexBufPolHitRate" coltype="JDBC" value="$d2/$d1*100" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="indexBufPolHitRate" select="(\d+)\t(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1indexBufPolHitRate" field="value" fieldtype="" willalert="n"
+					alertexp1="${value}>95%" alertdesc1="索引缓冲池命中率恢复正常，当前值为${value}。" alertexp2="" alertdesc2="" alertexp3="${value}&lt;=95%"
+					alertdesc3="索引缓冲池命中率小于等于${trigervalue1}，当前值为${value}。" alertexp4="${value}&lt;=90%" alertdesc4="索引缓冲池命中率小于等于${trigervalue1}，当前值为${value}。" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!--目录缓冲命中率 -->
+			<resource kpiid="D1directoryBufHitRate" coltype="JDBC" value="$d2/$d1*100" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="directoryBufHitRate" select="(\d+)\t(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1directoryBufHitRate" field="value" fieldtype="" willalert="n"
+					alertexp1="${value}>95%" alertdesc1="目录缓冲命中率恢复正常，当前值为${value}。" alertexp2="" alertdesc2="" alertexp3="${value}&lt;=95%"
+					alertdesc3="目录缓冲命中率小于等于${trigervalue1}，当前值为${value}。" alertexp4="${value}&lt;=90%" alertdesc4="目录缓冲命中率小于等于${trigervalue1}，当前值为${value}。" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!--包缓冲命中率 -->
+			<resource kpiid="D1packageBufHitRate" coltype="JDBC" value="$d2/$d1*100" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="packageBufHitRate" select="(\d+)\t(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1packageBufHitRate" field="value" fieldtype="" willalert="n"
+					alertexp1="${value}>95%" alertdesc1="包缓冲命中率恢复正常，当前值为${value}。" alertexp2="" alertdesc2="" alertexp3="${value}&lt;=95%"
+					alertdesc3="包缓冲命中率小于等于${trigervalue1}，当前值为${value}。" alertexp4="${value}&lt;=90%" alertdesc4="包缓冲命中率小于等于${trigervalue1}，当前值为${value}。" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!--直接读次数 -->
+			<resource kpiid="D1directReadTimes" coltype="JDBC" value="" valuetype="Integer" unit="次">
+				<collects>
+					<collect exeorder="10" comid="directReadTimes" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1directReadTimes" field="value" fieldtype="" willalert="n"
+					alertexp1="${value}&lt;1500" alertdesc1="恢复正常，当前值为${value}。" alertexp2="" alertdesc2="" alertexp3="${value}>=1500"
+					alertdesc3="大于等于${trigervalue1}，当前值为${value}。" alertexp4="${value}>=2000" alertdesc4="大于等于${trigervalue1}，当前值为${value}。" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			<!--直接写次数 -->
+			<resource kpiid="D1directWriteTimes" coltype="JDBC" value="" valuetype="Integer" unit="次">
+				<collects>
+					<collect exeorder="10" comid="directWriteTimes" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1directWriteTimes" field="value" fieldtype="" willalert="n"
+					alertexp1="${value}&lt;1500" alertdesc1="直接写次数恢复正常，当前值为${value}。" alertexp2="" alertdesc2="" alertexp3="${value}>=1500"
+					alertdesc3="直接写次数大于等于${trigervalue1}，当前值为${value}。" alertexp4="${value}>=2000" alertdesc4="直接写次数大于等于${trigervalue1}，当前值为${value}。" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			<!--当前连接数 -->
+			<resource kpiid="D1dbcurSession" coltype="JDBC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="curConnCount" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1dbcurSession" field="value" fieldtype="" willalert="n"
+					alertexp1="${value}&lt;150" alertdesc1="当前连接数恢复正常，当前值为${value}。" alertexp2="" alertdesc2="" alertexp3="${value}>=150"
+					alertdesc3="当前连接数大于等于${trigervalue1}，当前值为${value}。" alertexp4="${value}>=200" alertdesc4="当前连接数大于等于${trigervalue1}，当前值为${value}。" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			<!--死锁数 -->
+			<resource kpiid="D1dbdeadLock" coltype="JDBC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="deadlockCount" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1dbdeadLock" field="value" fieldtype="" willalert="n"
+					alertexp1="${value}&lt;1" alertdesc1="死锁数恢复正常，当前值为${value}。" alertexp2="" alertdesc2="" alertexp3="${value}>=1"
+					alertdesc3="死锁数大于等于${trigervalue1}，当前值为${value}。" alertexp4="${value}>=3" alertdesc4="死锁数大于等于${trigervalue1}，当前值为${value}。" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!--锁等待数 -->
+			<resource kpiid="D1dblockWait" coltype="JDBC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="lockWaitCount" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1dblockWait" field="value" fieldtype="" willalert="n"
+					alertexp1="${value}&lt;8" alertdesc1="锁等待数恢复正常，当前值为${value}。" alertexp2="" alertdesc2="" alertexp3="${value}>=8"
+					alertdesc3="锁等待数大于等于${trigervalue1}，当前值为${value}。" alertexp4="${value}>=10" alertdesc4="锁等待数大于等于${trigervalue1}，当前值为${value}。" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			<!--锁升级数 -->
+			<resource kpiid="D1lockEscalateCount" coltype="JDBC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="lockEscalateCount" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1lockEscalateCount" field="value" fieldtype="" willalert="n"
+					alertexp1="${value}&lt;4" alertdesc1="锁升级数恢复正常，当前值为${value}。" alertexp2="" alertdesc2="" alertexp3="${value}>=4"
+					alertdesc3="锁升级数大于等于${trigervalue1}，当前值为${value}。" alertexp4="${value}>=5" alertdesc4="锁升级数大于等于${trigervalue1}，当前值为${value}。" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="15" storefactor="1"/>
+				
+			</resource>
+	
+			<!--应用排序数 -->
+			<resource kpiid="D1appSortCount" coltype="JDBC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="appSortCount" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1appSortCount" field="value" fieldtype="" willalert="n"
+					alertexp1="${value}&lt;1500" alertdesc1="应用排序数恢复正常，当前值为${value}。" alertexp2="" alertdesc2="" alertexp3="${value}>=1500"
+					alertdesc3="应用排序数大于等于${trigervalue1}，当前值为${value}。" alertexp4="${value}>=2000" alertdesc4="应用排序数大于等于${trigervalue1}，当前值为${value}。" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			<!--排序溢出百分比 -->
+			<resource kpiid="D1sortOverUtilRatio" coltype="JDBC" value="($d2/$d1)*100" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="sortOverUtilRatio" select="(\d+)\t(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1sortOverUtilRatio" field="value" fieldtype="" willalert="n"
+					alertexp1="${value}&lt;5" alertdesc1="排序溢出百分比恢复正常，当前值为${value}。" alertexp2="" alertdesc2="" alertexp3="${value}>=5"
+					alertdesc3="排序溢出百分比大于等于${trigervalue1}，当前值为${value}。" alertexp4="${value}>=10" alertdesc4="排序溢出百分比大于等于${trigervalue1}，当前值为${value}。" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			<!--失败事务数 -->
+			<resource kpiid="D1failWorkNumber" coltype="JDBC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="failWorkNumber" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1failWorkNumber" field="value" fieldtype="" willalert="n"
+					alertexp1="${value}&lt;5" alertdesc1="失败事务数恢复正常，当前值为${value}。" alertexp2="" alertdesc2="" alertexp3="${value}>=5"
+					alertdesc3="失败事务数大于等于${trigervalue1}，当前值为${value}。" alertexp4="${value}>=10" alertdesc4="失败事务数大于等于${trigervalue1}，当前值为${value}。" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="15" storefactor="1"/>
+				
+			</resource>
+			<!--工作单元数 -->
+			<resource kpiid="D1workUnitNumber" coltype="JDBC" value="" valuetype="Integer" unit="个">
+				<collects>
+					<collect exeorder="10" comid="workUnitNumber" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1workUnitNumber" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="15" storefactor="1"/>
+				
+			</resource>
+			<!--锁定列表使用数 -->
+			<resource kpiid="D1lockListinUse" coltype="JDBC" value="" valuetype="Integer" unit="Byte">
+				<collects>
+					<collect exeorder="10" comid="lockListinUse" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1lockListinUse" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="15" storefactor="1"/>
+				
+			</resource>
+			<!--正在等待锁定的应用程序百分比 -->
+			<resource kpiid="D1waitsForLock" coltype="JDBC" value="" valuetype="Integer" unit="%">
+				<collects>
+					<collect exeorder="10" comid="waitsForLock" select="(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1waitsForLock" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="15" storefactor="1"/>
+				
+			</resource>
+<!--表空间子资源 -->
+			<!--表空间ID -->
+			<resource kpiid="D1tableSpaceID" coltype="JDBC" value="" valuetype="Integer" unit="">
+				<collects>
+					<collect exeorder="10" comid="id" select="$key\t(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1tableSpaceID" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>
+				
+			</resource>
+			
+			<!--表空间名称 -->
+			<resource kpiid="D1tableSpaceName" coltype="JDBC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="name" select="($key)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1tableSpaceName" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>
+				
+			</resource>
+			
+			<!-- 表空间实例名称 -->
+			<!--resource kpiid="D1instanceName" coltype="JDBC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="instanceName" select="(.+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1instanceName" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>
+				
+			</resource-->
+			
+			<!--表空间类型 -->
+			<resource kpiid="D1tableSpacetype" coltype="JDBC" value="" valuetype="Integer" unit="">
+				<collects>
+					<collect exeorder="10" comid="type" select="$key\t(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1tableSpacetype" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>
+				
+			</resource>
+			
+			<!--表空间大小 -->
+			<resource kpiid="D1tableSpaceSize" coltype="JDBC" value="" valuetype="Integer" unit="MB">
+				<collects>
+					<collect exeorder="10" comid="size" select="$key\t(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1tableSpaceSize" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>
+				
+			</resource>
+			
+			<!--表空间状态 -->
+			<resource kpiid="D1tableSpaceAvail" coltype="JDBC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="runStatus" select="$key\t(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1tableSpaceAvail" field="value" fieldtype="" willalert="y"
+				alertexp1="&quot;0&quot;.equals(&quot;${value}&quot;)" alertdesc1="${childname}表空间状态恢复正常。" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="!&quot;0&quot;.equals(&quot;${value}&quot;)" alertdesc5="${childname}表空间状态异常。"
+					alertcontin="1" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!--表空间利用率 -->
+			<resource kpiid="D1tableSpaceUtil" coltype="JDBC" value="" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="utilRatio" select="$key\t(\d+\.\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1tableSpaceUtil" field="value" fieldtype="" willalert="y"
+					alertexp1="${value}&lt;80%" alertdesc1="${childname}表空间利用率恢复正常，当前值为${value}。" alertexp2="" alertdesc2="" alertexp3="${value}>=80%"
+					alertdesc3="${childname}表空间利用率大于等于${trigervalue1}，当前值为${value}。" alertexp4="${value}>=90%" alertdesc4="${childname}表空间利用率大于等于${trigervalue1}，当前值为${value}。" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!--系统表空间子资源 -->
+			<!--系统表空间ID -->
+			<resource kpiid="D1sysTabSpaceId" coltype="JDBC" value="" valuetype="Integer" unit="">
+				<collects>
+					<collect exeorder="10" comid="sysId" select="\t$key\t(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1sysTabSpaceId" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>
+				
+			</resource>
+			
+			<!--系统表空间名称 -->
+			<resource kpiid="D1sysTabSpaceName" coltype="JDBC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="sysName" select="($key)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1sysTabSpaceName" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>
+				
+			</resource>
+			
+			<!--系统表空间实例名称 -->
+			<!--resource kpiid="D1sysTabSpaceInsName" coltype="JDBC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="sysInstanceName" select="(.+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1sysTabSpaceInsName" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>
+				
+			</resource-->
+			
+			<!--系统表空间类型 -->
+			<resource kpiid="D1sysTabSpaceType" coltype="JDBC" value="" valuetype="Integer" unit="">
+				<collects>
+					<collect exeorder="10" comid="sysType" select="$key\t(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1sysTabSpaceType" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>
+				
+			</resource>
+			
+			<!--系统表空间大小 -->
+			<resource kpiid="D1sysTabSpaceSize" coltype="JDBC" value="" valuetype="Float" unit="MB">
+				<collects>
+					<collect exeorder="10" comid="sysSize" select="$key\t(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1sysTabSpaceSize" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>
+				
+			</resource>
+			
+			<!--系统表空间状态 -->
+			<resource kpiid="D1sysTabSpaceStatus" coltype="JDBC" value="" valuetype="Integer" unit="">
+				<collects>
+					<collect exeorder="10" comid="sysRunStatus" select="$key\t(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1sysTabSpaceStatus" field="value" fieldtype="" willalert="y"
+					alertexp1="${value}==0" alertdesc1="${childname}表空间状态恢复正常。" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="${value}!=0" alertdesc5="${childname}表空间状态异常。"
+					alertcontin="1" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			
+		</resources>
+	</devicetypeinfo>
+</root>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.instancelib.dao.PropTypeDAO">
+	
+	<select id="getPropTypeDOsByInstance" resultType="com.mainsteam.stm.instancelib.dao.pojo.PropDO">
+		select INSTANCEID ,PROPKEY ,PROPTYPE
+		FROM STM_INSTANCELIB_PROP
+		where INSTANCEID=#{instanceId} and PROPTYPE=#{propType}
+	</select>
+	
+	<insert id="insertPropTypeDO"  parameterType="com.mainsteam.stm.instancelib.dao.pojo.PropDO">
+	    insert into STM_INSTANCELIB_PROP(INSTANCEID,PROPKEY,PROPTYPE) VALUES (#{instanceId}, #{propKey}, #{propType})
+	</insert>
+	
+	<update id="updatePropTypeDO" parameterType="com.mainsteam.stm.instancelib.dao.pojo.PropDO">
+		update STM_INSTANCELIB_PROP
+		set PROPTYPE=#{values} ,  PROPKEY=#{propKey}
+		where INSTANCEID=#{instanceId} and PROPTYPE=#{propType} and PROPKEY=#{propKey}
+	</update>
+	
+	<delete id="removePropTypeDOByInstanceAndKey" >
+		delete from STM_INSTANCELIB_PROP  where INSTANCEID=#{instanceId} and PROPTYPE=#{propType} and PROPKEY=#{propKey}
+	</delete>
+	
+	<delete id="removePropTypeDOByInstanceAndType" >
+		delete from STM_INSTANCELIB_PROP  where INSTANCEID=#{instanceId} and PROPTYPE=#{propType}
+	</delete>
+	
+	<delete id="removePropTypeByInstances" >
+		delete from STM_INSTANCELIB_PROP  where INSTANCEID = #{instanceId}
+	</delete>
+</mapper>

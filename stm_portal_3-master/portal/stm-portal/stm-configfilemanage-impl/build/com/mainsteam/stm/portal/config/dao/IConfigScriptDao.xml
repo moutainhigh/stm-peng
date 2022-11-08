@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.mainsteam.stm.portal.config.dao.IConfigScriptDao">
+
+	<select id="getAll" resultType="com.mainsteam.stm.portal.config.bo.ConfigScriptBo">
+		SELECT ID,NAME,OID,DIRECTORYID FROM STM_CONFIG_SCRIPT
+	</select>
+	
+	<select id="getById" parameterType="Long" resultType="com.mainsteam.stm.portal.config.bo.ConfigScriptBo">
+		SELECT ID,NAME,OID,DIRECTORYID FROM STM_CONFIG_SCRIPT
+		WHERE ID = #{id}
+	</select>
+	
+	<select id="getByDirectoryId" parameterType="Long" resultType="com.mainsteam.stm.portal.config.bo.ConfigScriptBo">
+		SELECT ID,NAME,OID,DIRECTORYID FROM STM_CONFIG_SCRIPT
+		WHERE DIRECTORYID = #{directoryId}
+	</select>
+	
+	<select id="query" parameterType="com.mainsteam.stm.portal.config.bo.ConfigScriptBo" resultType="com.mainsteam.stm.portal.config.bo.ConfigScriptBo">
+		SELECT ID,NAME,OID,DIRECTORYID FROM STM_CONFIG_SCRIPT
+		WHERE 1=0
+		<if test="id > 0">
+			OR ID = #{id}
+		</if>
+		<if test="name != null">
+			OR (NAME like CONCAT(CONCAT('%',#{name}),'%'))
+		</if>
+		<if test="oid != null">
+			OR (OID like CONCAT(CONCAT('%',#{oid}),'%'))
+		</if>
+		
+		<if test="directoryId >0">
+			OR DIRECTORYID = #{directoryId}
+		</if>
+		
+	</select>
+	
+		<select id="queryEquals" parameterType="com.mainsteam.stm.portal.config.bo.ConfigScriptBo" resultType="com.mainsteam.stm.portal.config.bo.ConfigScriptBo">
+		SELECT ID,NAME,OID,DIRECTORYID FROM STM_CONFIG_SCRIPT
+		WHERE 1=1
+		<if test="id > 0">
+			AND ID = #{id}
+		</if>
+		<if test="name != null">
+			AND NAME =#{name}
+		</if>
+		<if test="oid != null">
+			AND OID =#{oid}
+		</if>
+		<if test="directoryId >0">
+			AND DIRECTORYID = #{directoryId}
+		</if>
+		
+	</select>
+	
+	<insert id="insert" parameterType="com.mainsteam.stm.portal.config.bo.ConfigScriptBo" >
+		INSERT INTO STM_CONFIG_SCRIPT (ID,NAME,OID,DIRECTORYID) VALUES( #{id},#{name},#{oid},#{directoryId} )
+	</insert>
+	
+	<update id="update" parameterType="com.mainsteam.stm.portal.config.bo.ConfigScriptBo">
+		UPDATE STM_CONFIG_SCRIPT
+		<set>
+			<if test="name != null"> NAME = #{name}, </if>
+			<if test="oid != null"> OID = #{oid} ,</if>
+			<if test="directoryId > 0"> DIRECTORYID = #{directoryId}</if>
+		</set>
+		WHERE ID=#{id}
+	</update>
+	
+	<delete id="del" parameterType="Long">
+		DELETE FROM STM_CONFIG_SCRIPT WHERE ID=#{id}
+	</delete>
+	
+	
+	
+</mapper>

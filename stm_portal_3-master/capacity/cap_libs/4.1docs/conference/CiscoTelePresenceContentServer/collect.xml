@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">
+    <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0">
+        <ChangePluginInitParameter pluginid="HttpPlugin" parameterId="serviceType" propertyValue="CiscoTelePresenceContentServer" parameterProperty="DefaultValue"/>
+    </GlobalMetricSetting>
+    <PluginClassAliasList>
+        <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+        <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+        <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+        <PluginClassAlias id="regularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+        <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+        <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+        <PluginClassAlias id="tableConverter" class="com.mainsteam.stm.plugin.common.TableResultSetConverter"/>
+        <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+        <PluginClassAlias id="columnSelectProcessor" class="com.mainsteam.stm.plugin.common.ColumnSelectProcessor"/>
+    </PluginClassAliasList>
+
+    <MetricPlugin metricid="name" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT first(Name) AS Name"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="serial" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT first(SerialNumber) AS SerialNumber"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="softwareVersion" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT first(MajorVersion) AS MajorVersion, first(MinorVersion) AS MinorVersion"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT MajorVersion + '.' + MinorVersion AS Version"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="buildVersion" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT first(BuildVersion) AS BuildVersion"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="macAddress" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT first(MacAddress) AS MacAddress"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="ip" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo columns="IP,ContentEngineStatus"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="clusterStatusXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT IP"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="uptime" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT first(Uptime) AS Uptime"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="H323Status" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT first(H323Status) AS H323Status"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="H323IP" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="columnSelectProcessor">
+                <Parameter type="" key="SELECT" value="H323IP"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="SipStatus" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT first(SipStatus) AS SipStatus"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="SipIP" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="columnSelectProcessor">
+                <Parameter type="" key="SELECT" value="SipIP"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="totalPhysical" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT first(TotalPhysical) AS TotalPhysical"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="maxCalls" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT first(MaxCalls) AS MaxCalls"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="maxLiveCalls" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT first(MaxLiveCalls) AS MaxLiveCalls"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="cpuRate" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT first(CpuLoad) AS CpuLoad"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="memRate" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT first(TotalPhysical) AS TotalPhysical, first(FreePhysical) AS FreePhysical"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (TotalPhysical-FreePhysical)/TotalPhysical*100 AS MemRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="currentCalls" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT first(CurrentCalls) AS CurrentCalls"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="currentLiveCalls" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT first(CurrentLiveCalls) AS CurrentLiveCalls"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="contentEngineStatus" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo columns="IP,ContentEngineStatus"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="clusterStatusXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ContentEngineStatus"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="availableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="offlineTranscodingState" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT first(OfflineTranscodingState) AS OfflineTranscodingState"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="OfflineTranscodingState" value="Idle,1;0"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="availableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="fileSysName" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DriveLetter"/>
+            <Parameter type="" key="ValueColumnTitle" value="DriveLetter"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="fileSysTotalSize" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DriveLetter"/>
+            <Parameter type="" key="ValueColumnTitle" value="DriveCapacity"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="fileSysUsedSize" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DriveLetter"/>
+            <Parameter type="" key="ValueColumnTitle" value="DriveUsed"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="fileSysFreeSize" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DriveLetter"/>
+            <Parameter type="" key="ValueColumnTitle" value="DriveFree"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="fileSysRate" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo
+                columns="Name,MajorVersion,MinorVersion,BuildVersion,SerialNumber,OfflineTranscodingState,H323Status,H323IP,SipStatus,SipIP,DriveLetter,DriveCapacity,DriveUsed,DriveFree,CpuLoad,TotalPhysical,FreePhysical,MacAddress,Uptime,CurrentCalls,MaxCalls,CurrentLiveCalls,MaxLiveCalls"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT DriveLetter, DriveUsed/DriveCapacity*100 AS DriveRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DriveLetter"/>
+            <Parameter type="" key="ValueColumnTitle" value="DriveRate"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+
+</MetricPlugins>

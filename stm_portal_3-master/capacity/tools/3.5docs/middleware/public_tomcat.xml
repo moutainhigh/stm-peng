@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	
+	<devicetypeinfo devicetype="public_tomcat" ismulticoltype="true" majortype="middleware" minortype="Tomcat" manufacturer="Apache" devicetype_zh="未知">
+		
+		<devicetypes>
+		</devicetypes>
+		
+		<!-- 该设备类型定义的命令，用于合并命令执行 -->
+		<commands>			
+			<!--Tomcat服务可用性-->
+			<command coltype="INNER_PROC" comid="getOc4jAvailability" command="com.qwserv.itm.pal.appmdl.tomcat.TomcatCollectorUtil.getOc4jAvailability"/>
+			<command coltype="INNER_PROC" comid="getStatusHtml" command="com.qwserv.itm.pal.appmdl.tomcat.TomcatCollectorUtil.getStatusHtml"/>
+			
+		</commands>
+		
+		<!-- 描述该类设备的所有指标采集,一行对应一个指标 -->
+		<resources>
+			<!-- 服务器可用性 -->
+			<resource kpiid="M9Availability" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getOc4jAvailability" select="" merge="" deal=""/>
+				</collects>
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M9Availability" field="value" fieldtype="" willalert="y"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.equals(&quot;不可用&quot;)" alertdesc5="服务不可用"
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+
+
+			<!-- JVM空闲内存 -->
+			<resource kpiid="M9jvmFreeMemory" coltype="INNER_PROC" value="" valuetype="Float" unit="MB">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getStatusHtml" select="Free\s*memory:\s(.+?) MB\s*Total\s*memory" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M9jvmFreeMemory" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+
+			<!-- JVM总内存 -->
+			<resource kpiid="M9jvmTotalMemory" coltype="INNER_PROC" value="" valuetype="Float" unit="MB">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getStatusHtml" select="Total\s*memory:\s(.+?) MB\s*Max\s*memory" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M9jvmTotalMemory" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+
+			<!-- JVM允许使用的最大内存 -->
+			<resource kpiid="M9jvmMaxMemory" coltype="INNER_PROC" value="" valuetype="Float" unit="MB">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getStatusHtml" select="Max\s*memory:\s(.+?) MB" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M9jvmMaxMemory" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+
+			<!--Tomcat 版本-->
+			<resource kpiid="M9tomcatVersion" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getStatusHtml" select="Server\s*Information[\S\s]+?&lt;tr&gt;[\S\s]+?&lt;tr&gt;\s+&lt;.+?&gt;&lt;small&gt;(.+?)&lt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M9tomcatVersion" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+
+			<!--JVM版本-->
+			<resource kpiid="M9jvmVersion" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getStatusHtml" select="Server\s*Information[\S\s]+?&lt;tr&gt;[\S\s]+?&lt;tr&gt;\s+&lt;td[\S\s]+?&lt;.+?&gt;&lt;small&gt;(.+?)&lt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M9jvmVersion" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+
+			<!--JVM厂商-->
+			<resource kpiid="M9jvmVendor" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getStatusHtml" select="Server\s*Information[\S\s]+?&lt;tr&gt;[\S\s]+?&lt;tr&gt;\s+&lt;td[\S\s]+?&lt;td[\S\s]+?&lt;.+?&gt;&lt;small&gt;(.+?)&lt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M9jvmVendor" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+
+			<!--操作系统版本-->
+			<resource kpiid="M9osVersion" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getStatusHtml" select="Server\s*Information[\S\s]+?&lt;tr&gt;[\S\s]+?&lt;tr&gt;\s+&lt;td[\S\s]+?&lt;td[\S\s]+?&lt;td[\S\s]+?&lt;td[\S\s]+?&lt;.+?&gt;&lt;small&gt;(.+?)&lt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M9osVersion" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+
+			<!--操作系统类型-->
+			<resource kpiid="M9osType" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getStatusHtml" select="Server\s*Information[\S\s]+?&lt;tr&gt;[\S\s]+?&lt;tr&gt;\s+&lt;td[\S\s]+?&lt;td[\S\s]+?&lt;td[\S\s]+?&lt;td[\S\s]+?&lt;td[\S\s]+?&lt;.+?&gt;&lt;small&gt;(.+?)&lt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M9osType" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+
+			<!--操作名称-->
+			<resource kpiid="M9osName" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getStatusHtml" select="Server\s*Information[\S\s]+?&lt;tr&gt;[\S\s]+?&lt;tr&gt;\s+&lt;td[\S\s]+?&lt;td[\S\s]+?&lt;td[\S\s]+?&lt;.+?&gt;&lt;small&gt;(.+?)&lt;" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_M9osName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+		</resources>
+	</devicetypeinfo>
+</root>

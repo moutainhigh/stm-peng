@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Basic FileBox - jQuery EasyUI Demo</title>
+<link rel="stylesheet" type="text/css"
+	href="../../themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="../../themes/icon.css">
+<link rel="stylesheet" type="text/css" href="../demo.css">
+<script type="text/javascript" src="../../jquery.min.js"></script>
+<script type="text/javascript" src="../../jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../../../jquery.form.js"></script>
+<script type="text/javascript" src="../../../jquery.multifile.js"></script>
+
+<script type="text/javascript">
+	$(function() {
+
+		var options = {
+			url : "../../../../../flatform/file/fileUpload.htm",
+			type : 'POST',
+			target : '#output',
+			iframe : true,
+			//timeout: 3000,
+			success : function(responseText, statusText, xhr, $form) {
+				alert("upload successful");
+			},
+			error : function(XMLHttpRequest, textStatus, errorThrown) {
+				alert(XMLHttpRequest.responseText);
+			}
+		};
+		
+		$('#uploadBtn').bind("click", function() {
+			alert("Submit");
+			$('#uploadform').ajaxSubmit(options);
+		});
+
+	});
+</script>
+
+
+
+</head>
+<body>
+	<h2>Basic FileBox</h2>
+	<p>The filebox component represents a file field of the forms.</p>
+	<div style="margin: 20px 0;"></div>
+	<div class="easyui-panel" title="Upload File"
+		style="width: 400px; padding: 30px 70px 50px 70px">
+		<form id="uploadform" action="#" method="post" tartget="outputifr"
+			enctype="multipart/form-data" accept-charset="utf-8">
+			<div style="margin-bottom: 20px">
+				<div>File:</div>
+				<input  name="file" class="easyui-filebox"
+					style="width: 250px" data-options="prompt:'Choose a file...'">
+				
+			</div>
+			<div style="margin-bottom: 20px">
+				<div>File Group:</div>
+				<input  name="fileGroup" type="text" style="width: 250px"/>
+			</div>
+			<div>
+				<a id="uploadBtn" href="#" class="easyui-linkbutton" style="width: 100%">Upload</a>
+			</div>
+		</form>
+		<iframe id="output" name="outputifr" style="display: none"></iframe>
+	</div>
+</body>
+</html>

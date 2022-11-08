@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.ct.dao.CtAlarmMapper">
+
+    <sql id="whereIfSql">
+        <if test="condition.message != null and condition.message != ''">
+            AND message like CONCAT('%',#{condition.message},'%')
+        </if>
+        <if test="condition.resource_id != null and condition.resource_id != ''">
+            AND resource_id = #{condition.resource_id}
+        </if>
+        <if test="condition.result_id != null">
+            AND result_id = #{condition.result_id}
+        </if>
+        <if test="condition.alarm_level != null and condition.alarm_level != ''">
+            AND alarm_level = #{condition.alarm_level}
+        </if>
+        <if test="condition.confirmed != null">
+          	AND confirmed = #{condition.confirmed}
+        </if>
+        <!--<if test="condition.profileName != null and condition.profileName != ''">-->
+        <!--AND profile_name like '%{condition.profileName}%'-->
+        <!--</if>-->
+    </sql>
+    <select id="getAlarmPage" resultType="com.mainsteam.stm.ct.bo.MsCtAlarm">
+        SELECT
+          mc.id as id,
+          mc.message as message,
+          mc.resource_id as resource_id,
+          mc.result_id as result_id,
+          mc.alarm_level as alarm_level,
+          mc.confirmed as confirmed,
+          mc.alarm_time as alarm_time,
+          mc.create_time as create_time,
+          mr.test_name as resourceName
+        FROM
+          ms_ct_alarm mc
+          left join ms_resource_main mr on mr.id = mc.resource_id
+        WHERE
+          1 = 1
+          <include refid="whereIfSql"/>
+        ORDER BY
+          alarm_time DESC
+    </select>
+	<insert id="insert" parameterType="com.mainsteam.stm.ct.bo.MsCtAlarm">
+		INSERT INTO `ms_ct_alarm` 
+		( `message`, `resource_id`, `result_id`, `alarm_level`, `confirmed`, `alarm_time`, `create_time`)
+		 VALUES (#{message}, #{resource_id}, #{result_id}, #{alarm_level},#{confirmed},#{alarm_time}, #{create_time});
+	</insert>
+	<update id="update" parameterType="com.mainsteam.stm.ct.bo.MsCtAlarm">
+		UPDATE `ms_ct_alarm` 
+		SET `message`=#{message},
+		 `resource_id`=#{resource_id}, 
+		 `result_id`=#{result_id}, 
+		 `alarm_level`=#{alarm_level}, 
+		 `confirmed`=#{confirmed}, 
+		 `alarm_time`=#{alarm_time},
+		 `create_time`=#{create_time} 
+		WHERE (`id`=#{id});
+	</update>
+	<delete id="del" parameterType="java.lang.Long">
+		delete from ms_ct_alarm where id =#{id}
+	</delete>
+	<select id="getById" parameterType="java.lang.Long" resultType="com.mainsteam.stm.ct.bo.MsCtAlarm">
+		select * from ms_ct_alarm where id =#{id}
+	</select>
+</mapper>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.instancelib.dao.PropDAO">
+	<sql id="selectPropColumn">
+		select INSTANCEID ,PROPKEY ,PROPTYPE ,PROPVALUE
+	</sql>
+	<sql id="selectTable">
+		FROM STM_INSTANCELIB_PROP_VALUE
+	</sql>
+	
+	<select id="getPropDOsByInstance" resultType="com.mainsteam.stm.instancelib.dao.pojo.PropDO">
+		<include refid="selectPropColumn"/>
+		<include refid="selectTable"/>
+		where INSTANCEID=#{instanceId} and PROPTYPE=#{propType}
+	</select>
+	
+	<select id="getAllModuleAndDiscoverProp" resultType="com.mainsteam.stm.instancelib.dao.pojo.PropDO">
+			<include refid="selectPropColumn"/>
+		<include refid="selectTable"/>
+		where
+		<if test="moduleKeys != null"> 
+			(propKey in 
+			<foreach  item="item" index="index" collection="moduleKeys" open="(" separator="," close=")">
+				 #{item} 
+			</foreach>  
+			and propType='MODULE') 
+		</if>
+		<if test="moduleKeys != null and discoverKeys != null"> 
+			or 
+		</if>
+		<if test="discoverKeys != null"> 
+			(propKey in 
+			<foreach  item="item" index="index" collection="discoverKeys" open="(" separator="," close=")">
+				 #{item} 
+			</foreach>  
+			and propType='DISCOVER')
+		</if>
+		<if test="moduleKeys == null and discoverKeys == null"> 
+			propType='MODULE' or propType='DISCOVER'
+		</if>
+	</select>
+	
+	<select id="getPropDOByInstanceAndKey"  resultType="com.mainsteam.stm.instancelib.dao.pojo.PropDO">
+		<include refid="selectPropColumn"/>
+		<include refid="selectTable"/>
+		where INSTANCEID=#{instanceId} and PROPTYPE=#{propType} and PROPKEY=#{propKey} order by PROPKEY
+	</select>
+	
+	<select id="getPropDOByInstanceAndKeys"  parameterType="map" resultType="com.mainsteam.stm.instancelib.dao.pojo.PropDO">
+		<include refid="selectPropColumn"/>
+		<include refid="selectTable"/>
+		where INSTANCEID=#{instanceId} and PROPTYPE=#{propType} and PROPKEY in
+		<foreach  item="item" index="index" collection="keys" open="(" separator="," close=")">
+			 #{item} 
+		</foreach>  
+		 order by PROPKEY
+	</select>
+	
+	<insert id="insertPropDO"  parameterType="com.mainsteam.stm.instancelib.dao.pojo.PropDO">
+	    insert into STM_INSTANCELIB_PROP_VALUE(INSTANCEID,PROPKEY,PROPTYPE,PROPVALUE) VALUES (#{instanceId}, #{propKey}, #{propType},#{propValue})
+	</insert>
+	
+	<delete id="removePropDOByInstanceAndKey" >
+		delete from STM_INSTANCELIB_PROP_VALUE  where INSTANCEID=#{instanceId} and PROPTYPE=#{propType} and PROPKEY=#{propKey}
+	</delete>
+	<delete id="removePropDOByInstanceAndType" >
+		delete from STM_INSTANCELIB_PROP_VALUE  where INSTANCEID=#{instanceId} and PROPTYPE=#{propType}
+	</delete>
+	<delete id="removePropByInstances" >
+		delete from STM_INSTANCELIB_PROP_VALUE  where INSTANCEID = #{instanceId}
+	</delete>
+</mapper>

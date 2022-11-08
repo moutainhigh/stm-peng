@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                    http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+                    http://www.springframework.org/schema/context
+                    http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+	
+	<bean id="performanceStateCaluteService" class="com.mainsteam.stm.state.PerformanceStateCaluteServiceImpl">
+	</bean>
+	
+	<bean id="availableStateCalculateService" class="com.mainsteam.stm.state.AvailableStateCalculateServiceImpl">
+	</bean>
+	<bean id="profileMetricChangeMonitor" class="com.mainsteam.stm.state.sync.ProfileMetricChangeMonitor">
+		<property name="lockService" ref="lockService"/>
+		<property name="capacityService" ref="capacityService" />
+		<property name="dataSyncDAO" ref="dataSyncDAO"/>
+		<property name="resourceInstanceService" ref="resourceInstanceService"/>
+		<property name="stateCaculatUtils" ref="stateCaculatUtils"/>
+		<property name="stateEngine" ref="stateEngine" />
+		<property name="profileService" ref="profileService"/>
+		<property name="availableMetricProcess" ref="availableStateCalculateService"/>
+		<property name="performanceMetricProcess" ref="performanceStateCaluteService"/>
+		<property name="metricDataService" ref="metricDataService"/>
+		<property name="alarmNotifyService" ref="alarmNotifyService"/>
+		<property name="alarmEventService" ref="alarmEventService"/>
+		<property name="instanceStateComputeUtil" ref="instanceStateComputeUtil"/>
+	</bean>
+	
+	<bean id="profileInstanceChangeMonitor" class="com.mainsteam.stm.state.sync.ProfileInstanceChangeMonitor">
+		<property name="lockService" ref="lockService"/>
+		<property name="dataSyncDAO" ref="dataSyncDAO"/>
+		<property name="resourceInstanceService" ref="resourceInstanceService"/>
+		<property name="alarmEventService" ref="alarmEventService"/>
+		<property name="alarmNotifyService" ref="alarmNotifyService"/>
+		<property name="stateCaculatUtils" ref="stateCaculatUtils"/>
+		<property name="stateEngine" ref="stateEngine" />
+		<property name="capacityService" ref="capacityService" />
+		<property name="instanceStateComputeUtil" ref="instanceStateComputeUtil"/>
+	</bean>
+	
+	
+	<bean id="stateEngine" class="com.mainsteam.stm.state.engine.StateEngineImpl" />
+	
+</beans>

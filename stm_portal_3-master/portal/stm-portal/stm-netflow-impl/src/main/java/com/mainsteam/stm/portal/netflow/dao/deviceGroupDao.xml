@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.portal.netflow.dao.IDeviceGroupDao">
+	<select id="getAllDevice" resultType="com.mainsteam.stm.portal.netflow.bo.ConfDeviceBo">
+		select id,concat(name,'(',ip,')') name,ip from
+		CONF_DEVICE where
+		resource_id is not null
+		<if test="name!=null">
+			<if test="name != null"> and concat(name,ip) like concat('%', #{name}, '%')
+			</if>
+		</if>
+		<if test="notIds!=null">
+			and id not in
+			<foreach collection="notIds" index="index" item="item" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="ids!=null">
+			and id in
+			<foreach collection="ids" index="index" item="item" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		order by id
+	</select>
+
+	<insert id="save_device_group">
+		insert
+		CONF_DEVICE_GROUP_NETFLOW(name,description,conf_device_ids)
+		value(#{name},#{description},#{deviceIds})
+	</insert>
+
+	<select id="query_device_group" resultType="com.mainsteam.stm.portal.netflow.bo.DeviceGroupBo">
+		select
+		id,name,description,conf_device_ids deviceIds from
+		CONF_DEVICE_GROUP_NETFLOW
+		<trim prefix="where" prefixOverrides="and |or ">
+			<if test="condition.description != null"> AND name like concat('%',#{condition.description},'%')
+			</if>
+		</trim>
+		<choose>
+			<when test="condition.deviceIds!=null">
+				order by name ${condition.deviceIds}
+			</when>
+			<otherwise>
+				order by name asc
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="get_device_group" resultType="com.mainsteam.stm.portal.netflow.bo.DeviceGroupBo"
+		parameterType="java.util.HashMap">
+		select
+		id,name,description,conf_device_ids deviceIds from
+		CONF_DEVICE_GROUP_NETFLOW
+		where id = #{id}
+	</select>
+
+	<delete id="del_device_group">
+		delete from CONF_DEVICE_GROUP_NETFLOW where id
+		in
+		<foreach collection="ids" index="index" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<update id="update_device_group" parameterType="java.util.HashMap">
+		update
+		CONF_DEVICE_GROUP_NETFLOW set name =
+		#{name},description =
+		#{description},conf_device_ids = #{deviceIds}
+		where id = #{id}
+	</update>
+
+	<select id="device_getCount" resultType="java.lang.Integer"
+		parameterType="java.util.HashMap">
+		select count(1) from CONF_DEVICE_GROUP_NETFLOW where
+		name = #{name}
+		<if test="id!=null">
+			and id not in(#{id})
+		</if>
+	</select>
+</mapper>

@@ -1,0 +1,1680 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">
+    <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0"/>
+    <PluginClassAliasList>
+        <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+        <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+        <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+        <PluginClassAlias id="columnPasteProcessor" class="com.mainsteam.stm.plugin.common.ColumnPasteProcessor"/>
+        <PluginClassAlias id="RegularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+        <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+        <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+        <PluginClassAlias id="tableConverter" class="com.mainsteam.stm.plugin.common.TableResultSetConverter"/>
+        <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+        <PluginClassAlias id="ChangeRateProcessor" class="com.mainsteam.stm.plugin.common.ChangeRateProcessor"/>
+        <PluginClassAlias id="processConverter" class="com.mainsteam.stm.plugin.common.ProcessResultSetConverter"/>
+        <PluginClassAlias id="dateTimeProcessor" class="com.mainsteam.stm.plugin.common.DateTimeProcessor"/>
+        <PluginClassAlias id="FormatProcessor" class="com.mainsteam.stm.plugin.common.FormatProcessor"/>
+        <PluginClassAlias id="rowFilterProcessor" class="com.mainsteam.stm.plugin.common.RowFilterProcessor"/>
+        <PluginClassAlias id="RowFilterByInstPropertyProcessor" class="com.mainsteam.stm.plugin.common.RowFilterByInstPropertyProcessor"/>
+    	<PluginClassAlias id="subInstAvailableProcessor" class="com.mainsteam.stm.plugin.common.SubInstAvailableProcessor"/>
+    </PluginClassAliasList>
+    <MetricPlugin metricid="ifNum" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="ifInfo"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select adaptertype,Availability,deviceid,macaddress,name,netconnectionstatus,speed from Win32_NetworkAdapter where (PNPDeviceID like '%PCI%' or PNPDeviceID like '%VIF%' or PNPDeviceID is null or PNPDeviceID like '%VMBUS%') and AdapterTypeId = 0"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (count(ifInfo)) as ifNum"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="fullProcess" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="processId,procMulCpuRate,processVirtualMap,processPhysicalMem,procCommandLine,processCommand,pid"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="INDEX" value="IDProcess"/>
+            <Parameter type="" key="INDEX" value="ProcessId"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select IDProcess,PercentProcessorTime,VirtualBytes,WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name != '_Total'"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select CommandLine,Name,ProcessId from win32_process"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="SELECT processId,procMulCpuRate,processVirtualMap/1024 as processVirtualMap,processPhysicalMem/1024 as processPhysicalMem,procCommandLine,processCommand,pid" key="SELECT"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="tableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="netstat" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="proto,localAddress,foreignAddress,state"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="Get-NetworkStatistics.ps1 1+1"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Protocol=(\w+);\s*LocalAddress=(\S+);\s*RemoteAddress=(\S+);\s*State=(\w+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="state" value="NULL, ;null, "/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="tableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="availability" collectType="" pluginid="IcmpPlugin">
+        <PluginResultMetaInfo columns="ip,isAlive,ResponseTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT isAlive"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="icmpDelayTime" collectType="" pluginid="IcmpPlugin">
+        <PluginResultMetaInfo columns="ip,isAlive,ResponseTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ResponseTime"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="lastBootUpTime" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="lastBootUpTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select lastbootuptime from Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="dateTimeProcessor">
+                <Parameter type="" key="lastBootUpTime" value="SELECT yy,MM,dd,hh,mm,ss AS 'yy+'-'+MM+'-'+dd+' '+hh+':'+mm+':'+ss' FROM '(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})\.\d{6}\+\d{3}'"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="localTime" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="localTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select localdatetime from Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="dateTimeProcessor">
+                <Parameter type="" key="localTime" value="SELECT yy,MM,dd,hh,mm,ss AS 'yy+'-'+MM+'-'+dd+' '+hh+':'+mm+':'+ss' FROM '(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})\.\d{6}\+\d{3}'"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sysUpTime" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select systemuptime from Win32_PerfFormattedData_PerfOS_System"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="systemInfo" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select description from Win32_OperatingSystem"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="macAddress" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select MACAddress from Win32_NetworkAdapter where (PNPDeviceID like '%PCI%' or PNPDeviceID like '%VIF%' or PNPDeviceID is null or PNPDeviceID like '%VMBUS%') and AdapterTypeId = 0"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ip" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select ipaddress from Win32_NetworkAdapterConfiguration where IPEnabled=true"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="osVersion" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select caption from Win32_OperatingSystem"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="osSP" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select servicepackmajorversion from Win32_OperatingSystem"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="waitProcessQueue" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select processorqueuelength from Win32_PerfFormattedData_PerfOS_System"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="numOfProcess" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select numberofprocesses from Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="numberOfThread" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="numberOfThread"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select threadcount from Win32_Process"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(numberOfThread)) as numberOfThread"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="numberOfHandle" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="numberOfHandle"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select handlecount from Win32_Process"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(numberOfHandle)) as numberOfHandle"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalCoreMem" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="freeCoreMem,usedCoreMem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select poolnonpagedbytes  from Win32_PerfFormattedData_PerfOS_Memory"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select poolpagedbytes  from Win32_PerfFormattedData_PerfOS_Memory"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ((freeCoreMem+usedCoreMem)/1024/1024/1024) as totalCoreMem"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="freeCoreMem" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="freeCoreMem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select poolnonpagedbytes  from Win32_PerfFormattedData_PerfOS_Memory"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (freeCoreMem/1024/1024/1024) as freeCoreMem"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="usedCoreMem" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="usedCoreMem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select poolpagedbytes  from Win32_PerfFormattedData_PerfOS_Memory"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (usedCoreMem/1024/1024/1024) as usedCoreMem"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalVirtualMem" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="totalVirtualMem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select totalvirtualmemorysize from Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (totalVirtualMem/1024/1024) as totalVirtualMem"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="freeVirtualMem" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="freeVirtualMem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select freevirtualmemory from Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (freeVirtualMem/1024/1024) as freeVirtualMem"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="usedVirtualMem" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="totalVirtualMem,freeVirtualMem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select totalvirtualmemorysize from Win32_OperatingSystem"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select freevirtualmemory from Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (totalVirtualMem/1024/1024-freeVirtualMem/1024/1024) as usedVirtualMem"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalRecognizeMem" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="totalRecognizeMem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select commitlimit from Win32_PerfFormattedData_PerfOS_Memory"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (totalRecognizeMem/1024/1024/1024) as totalRecognizeMem"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="usedRecognizeMem" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="usedRecognizeMem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select CommittedBytes from Win32_PerfFormattedData_PerfOS_Memory"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (usedRecognizeMem/1024/1024/1024) as usedRecognizeMem"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalFSSpace" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="totalFSSpace"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select size from Win32_LogicalDisk where drivetype = 3"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(totalFSSpace)/1024/1024/1024) as totalFSSpace"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <!--
+    <MetricPlugin metricid="cpuNum" collectType="WMI" pluginid="WmiPlugin">
+      <PluginResultMetaInfo columns="" />
+      <PluginParameter type="ArrayType">
+        <Parameter type="" key="COMMAND" value="root\cimv2::Select count(numberofprocessors) from Win32_ComputerSystem" />
+      </PluginParameter>
+      <PluginDataHandlers>
+        <PluginDataHandler classKey="FormatProcessor">
+          <Parameter value="INTEGER" type="" key="" />
+        </PluginDataHandler>
+      </PluginDataHandlers>
+    </MetricPlugin>
+    -->
+    <MetricPlugin metricid="cpuCoreNum" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="cpuCore"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::Select DeviceID from Win32_Processor"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="select count(cpuCore) as cpuCore" key="SELECT"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalMemSize" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="unManageMemSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select totalvisiblememorysize from Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (unManageMemSize/1024/1024) as totalMemSize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="phyMemSize" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="phyMemSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select totalphysicalmemory from Win32_ComputerSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (phyMemSize/1024/1024/1024) as phyMemSize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="numOfHardDisk" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="numberOfHardDisk"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select deviceId from Win32_DiskDrive"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (count(numberOfHardDisk)) as numOfHardDisk"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalHardDiskSpace" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="totalHardDiskSpace"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select size from Win32_DiskDrive"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (totalHardDiskSpace/1024/1024/1024) as totalHardDiskSpace"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="Name" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select name from Win32_ComputerSystem"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="WMIAvailability" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="name"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select name from Win32_ComputerSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (count(name)) as availability"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="availability" value="0,16;1"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="numOfFileSystem" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="numberOfFileSystem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select partitions from Win32_DiskDrive"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(numberOfFileSystem)) as numOfFileSystem"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="DPC,idle,interrupt,privileged,processor,user"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select PercentIdleTime,PercentProcessorTime,PercentUserTime,PercentPrivilegedTime,PercentInterruptTime,PercentDPCTime from Win32_PerfFormattedData_PerfOS_Processor where name='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (idle+processor>50?(100-idle):idle) AS cpuRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuIdleTimePer" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="DPC,idle,interrupt,privileged,processor,user"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select PercentIdleTime,PercentProcessorTime,PercentUserTime,PercentPrivilegedTime,PercentInterruptTime,PercentDPCTime from Win32_PerfFormattedData_PerfOS_Processor where name='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT idle"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuIntTimePer" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="DPC,idle,interrupt,privileged,processor,user"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select PercentIdleTime,PercentProcessorTime,PercentUserTime,PercentPrivilegedTime,PercentInterruptTime,PercentDPCTime from Win32_PerfFormattedData_PerfOS_Processor where name='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT interrupt"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuSpeModeTimePer" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="DPC,idle,interrupt,privileged,processor,user"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select PercentIdleTime,PercentProcessorTime,PercentUserTime,PercentPrivilegedTime,PercentInterruptTime,PercentDPCTime from Win32_PerfFormattedData_PerfOS_Processor where name='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT privileged"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuUserModeTimePer" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="DPC,idle,interrupt,privileged,processor,user"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select PercentIdleTime,PercentProcessorTime,PercentUserTime,PercentPrivilegedTime,PercentInterruptTime,PercentDPCTime from Win32_PerfFormattedData_PerfOS_Processor where name='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT user"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuSysModeTimePer" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="DPC,idle,interrupt,privileged,processor,user"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select PercentIdleTime,PercentProcessorTime,PercentUserTime,PercentPrivilegedTime,PercentInterruptTime,PercentDPCTime from Win32_PerfFormattedData_PerfOS_Processor where name='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT processor"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuWaitTimePer" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="DPC,idle,interrupt,privileged,processor,user"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select PercentIdleTime,PercentProcessorTime,PercentUserTime,PercentPrivilegedTime,PercentInterruptTime,PercentDPCTime from Win32_PerfFormattedData_PerfOS_Processor where name='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT DPC"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuProcessNum" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select processorqueueLength from Win32_PerfFormattedData_PerfOS_System"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuIntRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select InterruptsPersec from Win32_PerfFormattedData_PerfOS_Processor where name = '_Total'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="memRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="unManageMemSize,freePhyMem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select totalvisiblememorysize from Win32_OperatingSystem"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select FreePhysicalMemory from Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ((unManageMemSize-freePhyMem)/unManageMemSize*100) as memRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="swapSpaceRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select pagespersec from Win32_PerfFormattedData_PerfOS_Memory"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="pageFaultRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select pagefaultspersec from Win32_PerfFormattedData_PerfOS_Memory"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="switchRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select contextswitchespersec from Win32_PerfFormattedData_PerfOS_System"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="hdWaitProQueue" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select avgdiskqueuelength from Win32_PerfFormattedData_PerfDisk_PhysicalDisk where name= '_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="hdDiskTime" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select percentdisktime from Win32_PerfFormattedData_PerfDisk_PhysicalDisk where name= '_Total'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="hdReWriSpeed" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select diskbytespersec from Win32_PerfFormattedData_PerfDisk_PhysicalDisk where name= '_Total'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="icmpMsgsRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select messagespersec from Win32_PerfFormattedData_Tcpip_ICMP"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="CoreMemUtil" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="usedCoreMem,freeCoreMem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select poolpagedbytes  from Win32_PerfFormattedData_PerfOS_Memory"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select poolnonpagedbytes  from Win32_PerfFormattedData_PerfOS_Memory"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ((usedCoreMem/(usedCoreMem+freeCoreMem))*100) as CoreMemUtil"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="VirtualMemUtil" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="totalVirtualMem,freeVirtualMem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select totalvirtualmemorysize from Win32_OperatingSystem"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select freevirtualmemory from Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (((totalVirtualMem-freeVirtualMem)/totalVirtualMem)*100) as VirtualMemUtil"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="RecognizeMemUtil" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="usedRecognizeMem,totalRecognizeMem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select CommittedBytes from Win32_PerfFormattedData_PerfOS_Memory"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select commitlimit from Win32_PerfFormattedData_PerfOS_Memory"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ((usedRecognizeMem/totalRecognizeMem)*100) as RecognizeMemUtil"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memPoolFree" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="freePhyMem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select FreePhysicalMemory from Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (freePhyMem/1024/1024) as memPoolFree"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memPoolUsed" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="phyMemSize,freePhyMem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select totalphysicalmemory from Win32_ComputerSystem"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select FreePhysicalMemory from Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (((phyMemSize/1024)-freePhyMem)/1024/1024) as memPoolUsed"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="freeFSSpace" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="freeFSSpace"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select freespace from Win32_LogicalDisk where drivetype = 3"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(freeFSSpace)/1024/1024/1024) as freeFSSpace"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memPageInRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select pagesinputpersec from Win32_PerfFormattedData_PerfOS_Memory"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="memPageOutRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select pagesoutputpersec from Win32_PerfFormattedData_PerfOS_Memory"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="hdReadSpeed" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select diskreadbytespersec from Win32_PerfFormattedData_PerfDisk_PhysicalDisk where name= '_Total'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="hdWriteSpeed" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select diskwritebytespersec from Win32_PerfFormattedData_PerfDisk_PhysicalDisk where name= '_Total'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuId" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="DeviceID,LoadPercentage,manufacturer,maxclockspeed,Name"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select DeviceID,LoadPercentage,manufacturer,maxclockspeed,Name  from win32_processor"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT DeviceID"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>
+            <Parameter type="" key="ValueColumnTitle" value="DeviceID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuModel" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="DeviceID,LoadPercentage,manufacturer,maxclockspeed,Name"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select DeviceID,LoadPercentage,manufacturer,maxclockspeed,Name  from win32_processor"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="cpuId"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT DeviceID,Name"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>
+            <Parameter type="" key="ValueColumnTitle" value="Name"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="cpuId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuSpeed" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="DeviceID,LoadPercentage,manufacturer,maxclockspeed,Name"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select DeviceID,LoadPercentage,manufacturer,maxclockspeed,Name  from win32_processor"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="cpuId"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT DeviceID,(maxclockspeed/1000) as maxclockspeed"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>
+            <Parameter type="" key="ValueColumnTitle" value="maxclockspeed"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="cpuId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuFactory" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="DeviceID,LoadPercentage,manufacturer,maxclockspeed,Name"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select DeviceID,LoadPercentage,manufacturer,maxclockspeed,Name  from win32_processor"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="cpuId"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT DeviceID,manufacturer"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>
+            <Parameter type="" key="ValueColumnTitle" value="manufacturer"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="cpuId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuMulCpuRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="DeviceID,LoadPercentage,manufacturer,maxclockspeed,Name"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select DeviceID,LoadPercentage,manufacturer,maxclockspeed,Name  from win32_processor"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="cpuId"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT DeviceID,LoadPercentage"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="LoadPercentage" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>
+            <Parameter type="" key="ValueColumnTitle" value="LoadPercentage"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="cpuId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuAvailability" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="DeviceID,LoadPercentage,manufacturer,maxclockspeed,Name"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select DeviceID,LoadPercentage,manufacturer,maxclockspeed,Name  from win32_processor"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="cpuId"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT DeviceID,Name"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="Name" value="anyValue,1;1"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="subInstAvailableProcessor">
+                <Parameter key="IndexColumn" value="DeviceID"/>
+                <Parameter key="ValueColumn" value="Name"/>
+                <Parameter type="ResourceProperty" key="IndexKey" value="cpuId"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DeviceID"/>
+            <Parameter type="" key="ValueColumnTitle" value="Name"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="cpuId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileSysName" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="deviceid,freespace,size1"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select deviceid,freespace,size  from Win32_LogicalDisk where drivetype = 3"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT deviceid"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+            <Parameter type="" key="ValueColumnTitle" value="deviceid"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileSysTotalSize" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="deviceid,freespace,size"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select deviceid,freespace,size  from Win32_LogicalDisk where drivetype = 3"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+            <Parameter type="" key="ValueColumnTitle" value="size"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileSysUsedSize" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="deviceid,freespace,size1"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select deviceid,freespace,size  from Win32_LogicalDisk where drivetype = 3"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT deviceid,(size1-freespace) as size"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+            <Parameter type="" key="ValueColumnTitle" value="size"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileSysFreeSize" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="deviceid,freespace,size1"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select deviceid,freespace,size  from Win32_LogicalDisk where drivetype = 3"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+            <Parameter type="" key="ValueColumnTitle" value="freespace"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileSysRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="deviceid,freespace,totalSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select deviceid,freespace,size  from Win32_LogicalDisk where drivetype = 3"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT deviceid,((totalSize-freespace)/totalSize)*100 as totalSize"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="totalSize" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+            <Parameter type="" key="ValueColumnTitle" value="totalSize"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="fileSysAvailability" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="deviceid,freespace,size"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select deviceid,freespace,size  from Win32_LogicalDisk where drivetype = 3"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="size" value="anyValue,1;1"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="subInstAvailableProcessor">
+                <Parameter key="IndexColumn" value="deviceid"/>
+                <Parameter key="ValueColumn" value="size"/>
+                <Parameter type="ResourceProperty" key="IndexKey" value="fileSysName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+            <Parameter type="" key="ValueColumnTitle" value="size"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="fileSysName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="hardDiskIdw" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="caption,deviceid,size1,status"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select caption,deviceid,size,status from Win32_DiskDrive"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT deviceid"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+            <Parameter type="" key="ValueColumnTitle" value="deviceid"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="hardDiskNamew" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="caption,deviceid,size1,status"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select caption,deviceid,size,status from Win32_DiskDrive"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="hardDiskIdw"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT caption,deviceid"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+            <Parameter type="" key="ValueColumnTitle" value="caption"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="hardDiskIdw"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="hardDiskTotalSizew" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="caption,deviceid,size1,status"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select caption,deviceid,size,status from Win32_DiskDrive"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="hardDiskIdw"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (size1/1024/1024/1024) as size,deviceid"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+            <Parameter type="" key="ValueColumnTitle" value="size"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="hardDiskIdw"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="hardDiskStatusw" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="caption,deviceid,size1,status"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select caption,deviceid,size,status from Win32_DiskDrive"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="hardDiskIdw"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT status,deviceid"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+            <Parameter type="" key="ValueColumnTitle" value="status"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="hardDiskIdw"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="hardDiskAvailability" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="caption,deviceid,size1,status"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select caption,deviceid,size,status from Win32_DiskDrive"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="hardDiskIdw"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (size1/1024/1024/1024) as size,deviceid"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="size" value="anyValue,1;1"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="subInstAvailableProcessor">
+                <Parameter key="IndexColumn" value="deviceid"/>
+                <Parameter key="ValueColumn" value="size"/>
+                <Parameter type="ResourceProperty" key="IndexKey" value="hardDiskIdw"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+            <Parameter type="" key="ValueColumnTitle" value="size"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="hardDiskIdw"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="serviceName" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="description,name,startmode,startname,state"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select description,name,startmode,startname,state from Win32_Service"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT name"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="name"/>
+            <Parameter type="" key="ValueColumnTitle" value="name"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="serviceDes" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="description,name,startmode,startname,state"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select description,name,startmode,startname,state from Win32_Service"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="name"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="serviceName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT description,name"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter value="null, ;$source" key="description"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="name"/>
+            <Parameter type="" key="ValueColumnTitle" value="description"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="serviceName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="serviceUpType" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="description,name,startmode,startname,state"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select description,name,startmode,startname,state from Win32_Service"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="name"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="serviceName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT name,startmode"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="startmode" value="Manual,手动;Auto,自动;Disabled,禁用"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="name"/>
+            <Parameter type="" key="ValueColumnTitle" value="startmode"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="serviceName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="serviceLogin" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="description,name,startmode,startname,state"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select description,name,startmode,startname,state from Win32_Service"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="name"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="serviceName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT name,startname"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="startname" value="localSystem,本地系统;LocalSystem,本地系统;NT AUTHORITY\LocalService,本地服务;NT Authority\LocalService,本地服务;NT AUTHORITY\networkService,网络服务;NT AUTHORITY\NetworkService,网络服务;NT Authority\NetworkService,网络服务"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="name"/>
+            <Parameter type="" key="ValueColumnTitle" value="startname"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="serviceName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="serviceRunStatus" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="description,name,startmode,startname,state"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select description,name,startmode,startname,state from Win32_Service"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="name"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="serviceName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT name,state"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="state" value="Stopped,0;Running,1"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="name"/>
+            <Parameter type="" key="ValueColumnTitle" value="state"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="serviceName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="processId" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="IDProcess,PercentProcessorTime,VirtualBytes,WorkingSet,CommandLine,CreationDate,Name,ProcessId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="INDEX" value="IDProcess"/>
+            <Parameter type="" key="INDEX" value="ProcessId"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select IDProcess,PercentProcessorTime,VirtualBytes,WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name != '_Total'"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select CommandLine,CreationDate,Name,ProcessId from win32_process"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT IDProcess as pid,Name as command"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="pid"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="processCommand" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="IDProcess,PercentProcessorTime,VirtualBytes,WorkingSet,CommandLine,CreationDate,Name,ProcessId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="INDEX" value="IDProcess"/>
+            <Parameter type="" key="INDEX" value="ProcessId"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select IDProcess,PercentProcessorTime,VirtualBytes,WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name != '_Total'"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select CommandLine,CreationDate,Name,ProcessId from win32_process"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT IDProcess as pid,Name as command"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="command"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="processPhysicalMem" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="IDProcess,PercentProcessorTime,VirtualBytes,WorkingSet,CommandLine,CreationDate,Name,ProcessId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="INDEX" value="IDProcess"/>
+            <Parameter type="" key="INDEX" value="ProcessId"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select IDProcess,PercentProcessorTime,VirtualBytes,WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name != '_Total'"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select CommandLine,CreationDate,Name,ProcessId from win32_process"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT IDProcess as pid,(WorkingSet/1024/1024) as WorkingSet,Name as command"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="WorkingSet"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="processVirtualMap" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="IDProcess,PercentProcessorTime,VirtualBytes,WorkingSet,CommandLine,CreationDate,Name,ProcessId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="INDEX" value="IDProcess"/>
+            <Parameter type="" key="INDEX" value="ProcessId"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select IDProcess,PercentProcessorTime,VirtualBytes,WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name != '_Total'"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select CommandLine,CreationDate,Name,ProcessId from win32_process"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (VirtualBytes/1024/1024) as VirtualBytes,IDProcess as pid,Name as command"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="VirtualBytes"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="processAvail" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="IDProcess,PercentProcessorTime,VirtualBytes,WorkingSet,CommandLine,CreationDate,Name,ProcessId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="INDEX" value="IDProcess"/>
+            <Parameter type="" key="INDEX" value="ProcessId"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select IDProcess,PercentProcessorTime,VirtualBytes,WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name != '_Total'"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select CommandLine,CreationDate,Name,ProcessId from win32_process"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT IDProcess as pid,(Name==null?'0':'1') as avail,Name as command"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="avail"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="procMulCpuRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="IDProcess,PercentProcessorTime,VirtualBytes,WorkingSet,CommandLine,CreationDate,Name,ProcessId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="INDEX" value="IDProcess"/>
+            <Parameter type="" key="INDEX" value="ProcessId"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select IDProcess,PercentProcessorTime,VirtualBytes,WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name != '_Total'"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select CommandLine,CreationDate,Name,ProcessId from win32_process"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (PercentProcessorTime>50?(100-PercentProcessorTime):PercentProcessorTime) as PercentProcessorTime,IDProcess as pid,Name as command"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="PercentProcessorTime"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="procMulStime" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="IDProcess,PercentProcessorTime,VirtualBytes,WorkingSet,CommandLine,CreationDate,Name,ProcessId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="INDEX" value="IDProcess"/>
+            <Parameter type="" key="INDEX" value="ProcessId"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select IDProcess,PercentProcessorTime,VirtualBytes,WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name != '_Total'"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select CommandLine,CreationDate,Name,ProcessId from win32_process"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT IDProcess as pid,CreationDate,Name as command"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="CreationDate"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="procCommandLine" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="IDProcess,PercentProcessorTime,VirtualBytes,WorkingSet,CommandLine,CreationDate,Name,ProcessId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="INDEX" value="IDProcess"/>
+            <Parameter type="" key="INDEX" value="ProcessId"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select IDProcess,PercentProcessorTime,VirtualBytes,WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name != '_Total'"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select CommandLine,CreationDate,Name,ProcessId from win32_process"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT IDProcess as pid,CommandLine,Name as command"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="CommandLine" value="null, ;&quot;null&quot;, ;$source"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="processConverter">
+            <Parameter type="" key="ValueColumnTitle" value="CommandLine"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="instanceIdKeyValues"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifDeviceID" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="adaptertype,Availability,deviceid,macaddress,name,netconnectionstatus,speed,ipaddress,index"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="INDEX" value="deviceid"/>
+            <Parameter type="" key="INDEX" value="index"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select adaptertype,Availability,deviceid,macaddress,name,netconnectionstatus,speed from Win32_NetworkAdapter where (PNPDeviceID like '%PCI%' or PNPDeviceID like '%VIF%' or PNPDeviceID is null or PNPDeviceID like '%VMBUS%') and AdapterTypeId = 0"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select index,ipaddress from Win32_NetworkAdapterConfiguration"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT deviceid"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+            <Parameter type="" key="ValueColumnTitle" value="deviceid"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifName" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="adaptertype,Availability,deviceid,macaddress,name,netconnectionstatus,speed,ipaddress,index"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="INDEX" value="deviceid"/>
+            <Parameter type="" key="INDEX" value="index"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select adaptertype,Availability,deviceid,macaddress,name,netconnectionstatus,speed from Win32_NetworkAdapter where (PNPDeviceID like '%PCI%' or PNPDeviceID like '%VIF%' or PNPDeviceID is null or PNPDeviceID like '%VMBUS%') and AdapterTypeId = 0"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select index,ipaddress from Win32_NetworkAdapterConfiguration"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifDeviceID"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT deviceid,name"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+            <Parameter type="" key="ValueColumnTitle" value="name"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifDeviceID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifType" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="adaptertype,Availability,deviceid,macaddress,name,netconnectionstatus,speed,ipaddress,index"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="INDEX" value="deviceid"/>
+            <Parameter type="" key="INDEX" value="index"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select adaptertype,Availability,deviceid,macaddress,name,netconnectionstatus,speed from Win32_NetworkAdapter where (PNPDeviceID like '%PCI%' or PNPDeviceID like '%VIF%' or PNPDeviceID is null or PNPDeviceID like '%VMBUS%') and AdapterTypeId = 0"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select index,ipaddress from Win32_NetworkAdapterConfiguration"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifDeviceID"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT deviceid,adaptertype"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+            <Parameter type="" key="ValueColumnTitle" value="adaptertype"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifDeviceID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifIPAddress" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="adaptertype,Availability,deviceid,macaddress,name,netconnectionstatus,speed,ipaddress,index"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="INDEX" value="deviceid"/>
+            <Parameter type="" key="INDEX" value="index"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select adaptertype,Availability,deviceid,macaddress,name,netconnectionstatus,speed from Win32_NetworkAdapter where (PNPDeviceID like '%PCI%' or PNPDeviceID like '%VIF%' or PNPDeviceID is null or PNPDeviceID like '%VMBUS%') and AdapterTypeId = 0"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select index,ipaddress from Win32_NetworkAdapterConfiguration"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifDeviceID"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT deviceid,ipaddress"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+            <Parameter type="" key="ValueColumnTitle" value="ipaddress"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifDeviceID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifMAC" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="adaptertype,Availability,deviceid,macaddress,name,netconnectionstatus,speed,ipaddress,index"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="INDEX" value="deviceid"/>
+            <Parameter type="" key="INDEX" value="index"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select adaptertype,Availability,deviceid,macaddress,name,netconnectionstatus,speed from Win32_NetworkAdapter where (PNPDeviceID like '%PCI%' or PNPDeviceID like '%VIF%' or PNPDeviceID is null or PNPDeviceID like '%VMBUS%') and AdapterTypeId = 0"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select index,ipaddress from Win32_NetworkAdapterConfiguration"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifDeviceID"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT deviceid,macaddress"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+            <Parameter type="" key="ValueColumnTitle" value="macaddress"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifDeviceID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifSpeed" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="adaptertype,Availability,deviceid,macaddress,name,netconnectionstatus,speed,ipaddress,index"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="INDEX" value="deviceid"/>
+            <Parameter type="" key="INDEX" value="index"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select adaptertype,Availability,deviceid,macaddress,name,netconnectionstatus,speed from Win32_NetworkAdapter where (PNPDeviceID like '%PCI%' or PNPDeviceID like '%VIF%' or PNPDeviceID is null or PNPDeviceID like '%VMBUS%') and AdapterTypeId = 0"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select index,ipaddress from Win32_NetworkAdapterConfiguration"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifDeviceID"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT deviceid,speed"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key="speed"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+            <Parameter type="" key="ValueColumnTitle" value="speed"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifDeviceID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifOperStatus" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="adaptertype,Availability,deviceid,macaddress,name,netconnectionstatus,speed,ipaddress,index"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="INDEX" value="deviceid"/>
+            <Parameter type="" key="INDEX" value="index"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select adaptertype,Availability,deviceid,macaddress,name,netconnectionstatus,speed from Win32_NetworkAdapter where (PNPDeviceID like '%PCI%' or PNPDeviceID like '%VIF%' or PNPDeviceID is null or PNPDeviceID like '%VMBUS%') and AdapterTypeId = 0"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select index,ipaddress from Win32_NetworkAdapterConfiguration"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifDeviceID"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT deviceid,netconnectionstatus"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="netconnectionstatus"
+                           value="0,down;2,Connecting;1,up;3,Disconnecting;4,Hardware not present;5,Hardware disabled;6,Hardware malfunction;7,Media disconnected;8,Authenticating;9,Authentication succeeded;10,Authentication failed;11,Invalid address;12,Credentials required"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+            <Parameter type="" key="ValueColumnTitle" value="netconnectionstatus"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifDeviceID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ifStatus" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="adaptertype,Availability,deviceid,macaddress,name,netconnectionstatus,speed,ipaddress,index"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="INDEX" value="deviceid"/>
+            <Parameter type="" key="INDEX" value="index"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select adaptertype,Availability,deviceid,macaddress,name,netconnectionstatus,speed from Win32_NetworkAdapter where (PNPDeviceID like '%PCI%' or PNPDeviceID like '%VIF%' or PNPDeviceID is null or PNPDeviceID like '%VMBUS%') and AdapterTypeId = 0"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select index,ipaddress from Win32_NetworkAdapterConfiguration"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifDeviceID"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT deviceid,((Availability==3 || Availability==4 || Availability==5 || Availability==14 || Availability==15 || Availability==16 || Availability==17)?'1':'0') as Availability"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="deviceid"/>
+            <Parameter type="" key="ValueColumnTitle" value="Availability"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="ifDeviceID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <!--
+    <MetricPlugin metricid="baseBoardName" collectType="WMI" pluginid="WmiPlugin">
+      <PluginResultMetaInfo columns="manufacturer,name,serialnumber,status"/>
+      <PluginParameter type="ArrayType">
+        <Parameter type="" key="COMMAND" value="root\cimv2::select manufacturer,name,serialnumber,status from Win32_BaseBoard"/>
+      </PluginParameter>
+      <PluginDataHandlers>
+        <PluginDataHandler classKey="selectProcessor">
+          <Parameter type="" key="SELECT" value="SELECT name"/>
+        </PluginDataHandler>
+      </PluginDataHandlers>
+      <PluginDataConverter classKey="subInstConverter">
+        <Parameter type="" key="IndexColumnTitle" value="name"/>
+        <Parameter type="" key="ValueColumnTitle" value="name"/>
+      </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="baseBoardFactory" collectType="WMI" pluginid="WmiPlugin">
+      <PluginResultMetaInfo columns="manufacturer,name,serialnumber,status"/>
+      <PluginParameter type="ArrayType">
+        <Parameter type="" key="COMMAND" value="root\cimv2::select manufacturer,name,serialnumber,status from Win32_BaseBoard"/>
+      </PluginParameter>
+      <PluginDataHandlers>
+        <PluginDataHandler classKey="selectProcessor">
+          <Parameter type="" key="SELECT" value="SELECT name,manufacturer"/>
+        </PluginDataHandler>
+      </PluginDataHandlers>
+      <PluginDataConverter classKey="subInstConverter">
+        <Parameter type="" key="IndexColumnTitle" value="name"/>
+        <Parameter type="" key="ValueColumnTitle" value="manufacturer"/>
+        <Parameter type="ResourceProperty" key="InstPropertyKey" value="baseBoardName"/>
+      </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="baseBoardNum" collectType="WMI" pluginid="WmiPlugin">
+      <PluginResultMetaInfo columns="manufacturer,name,serialnumber,status"/>
+      <PluginParameter type="ArrayType">
+        <Parameter type="" key="COMMAND" value="root\cimv2::select manufacturer,name,serialnumber,status from Win32_BaseBoard"/>
+      </PluginParameter>
+      <PluginDataHandlers>
+        <PluginDataHandler classKey="selectProcessor">
+          <Parameter type="" key="SELECT" value="SELECT name,serialnumber"/>
+        </PluginDataHandler>
+      </PluginDataHandlers>
+      <PluginDataConverter classKey="subInstConverter">
+        <Parameter type="" key="IndexColumnTitle" value="name"/>
+        <Parameter type="" key="ValueColumnTitle" value="serialnumber"/>
+        <Parameter type="ResourceProperty" key="InstPropertyKey" value="baseBoardName"/>
+      </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="baseBoardStatus" collectType="WMI" pluginid="WmiPlugin">
+      <PluginResultMetaInfo columns="name,status"/>
+      <PluginParameter type="ArrayType">
+        <Parameter type="" key="COMMAND" value="root\cimv2::select name,status from Win32_BaseBoard"/>
+      </PluginParameter>
+      <PluginDataHandlers>
+        <PluginDataHandler classKey="selectProcessor">
+          <Parameter type="" key="SELECT" value="SELECT name,status"/>
+        </PluginDataHandler>
+      </PluginDataHandlers>
+      <PluginDataConverter classKey="subInstConverter">
+        <Parameter type="" key="IndexColumnTitle" value="name"/>
+        <Parameter type="" key="ValueColumnTitle" value="status"/>
+        <Parameter type="ResourceProperty" key="InstPropertyKey" value="baseBoardName"/>
+      </PluginDataConverter>
+    </MetricPlugin>
+  -->
+    <MetricPlugin metricid="eLogFileName" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="creationdate,filename,filesize,lastmodified,maxfilesize,numberofrecords,path"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select creationdate,filename,filesize,lastmodified,maxfilesize,numberofrecords,path from Win32_NTEventlogFile"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT filename"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="filename"/>
+            <Parameter type="" key="ValueColumnTitle" value="filename"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="eLogFileCTime" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="creationdate,filename,filesize,lastmodified,maxfilesize,numberofrecords,path"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select creationdate,filename,filesize,lastmodified,maxfilesize,numberofrecords,path from Win32_NTEventlogFile"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="filename"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="eLogFileName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT filename,creationdate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="dateTimeProcessor">
+                <Parameter type="" key="creationdate" value="SELECT yy,MM,dd,hh,mm,ss AS 'yy+'-'+MM+'-'+dd+' '+hh+':'+mm+':'+ss' FROM '(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})\.\d{6}\+\d{3}'"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="filename"/>
+            <Parameter type="" key="ValueColumnTitle" value="creationdate"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="eLogFileName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+	<MetricPlugin metricid="eLogFileSize" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="creationdate,filename,filesize,lastmodified,maxfilesize,numberofrecords,path"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select creationdate,filename,filesize,lastmodified,maxfilesize,numberofrecords,path from Win32_NTEventlogFile"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="filename"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="eLogFileName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT filename,filesize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="filename"/>
+            <Parameter type="" key="ValueColumnTitle" value="filesize"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="eLogFileName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="eLogFileLastMTime" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="creationdate,filename,filesize,lastmodified,maxfilesize,numberofrecords,path"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select creationdate,filename,filesize,lastmodified,maxfilesize,numberofrecords,path from Win32_NTEventlogFile"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="filename"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="eLogFileName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT filename,lastmodified"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="dateTimeProcessor">
+                <Parameter type="" key="lastmodified" value="SELECT yy,MM,dd,hh,mm,ss AS 'yy+'-'+MM+'-'+dd+' '+hh+':'+mm+':'+ss' FROM '(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})\.\d{6}\+\d{3}'"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="filename"/>
+            <Parameter type="" key="ValueColumnTitle" value="lastmodified"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="eLogFileName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="eLogFileMaxSize" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="creationdate,filename,filesize,lastmodified,maxfilesize,numberofrecords,path"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select creationdate,filename,filesize,lastmodified,maxfilesize,numberofrecords,path from Win32_NTEventlogFile"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="filename"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="eLogFileName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT filename,maxfilesize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="filename"/>
+            <Parameter type="" key="ValueColumnTitle" value="maxfilesize"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="eLogFileName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="eLogFileRecordNum" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="creationdate,filename,filesize,lastmodified,maxfilesize,numberofrecords,path"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select creationdate,filename,filesize,lastmodified,maxfilesize,numberofrecords,path from Win32_NTEventlogFile"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="filename"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="eLogFileName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT filename,numberofrecords"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="filename"/>
+            <Parameter type="" key="ValueColumnTitle" value="numberofrecords"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="eLogFileName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="eLogFilePath" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="creationdate,filename,filesize,lastmodified,maxfilesize,numberofrecords,path"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select creationdate,filename,filesize,lastmodified,maxfilesize,numberofrecords,path from Win32_NTEventlogFile"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="filename"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="eLogFileName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT filename,path"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="filename"/>
+            <Parameter type="" key="ValueColumnTitle" value="path"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="eLogFileName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="eLogAvailability" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="creationdate,filename,filesize,lastmodified,maxfilesize,numberofrecords,path"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select creationdate,filename,filesize,lastmodified,maxfilesize,numberofrecords,path from Win32_NTEventlogFile"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RowFilterByInstPropertyProcessor">
+                <Parameter type="" key="IndexColumnTitle" value="filename"/>
+                <Parameter type="ResourceProperty" key="InstPropertyKey" value="eLogFileName"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT filename,filesize"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="filesize" value="anyValue,1;1"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="subInstAvailableProcessor">
+                <Parameter key="IndexColumn" value="filename"/>
+                <Parameter key="ValueColumn" value="filesize"/>
+                <Parameter type="ResourceProperty" key="IndexKey" value="eLogFileName"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="filename"/>
+            <Parameter type="" key="ValueColumnTitle" value="filesize"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="eLogFileName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+</MetricPlugins>

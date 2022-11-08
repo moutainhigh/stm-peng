@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">  
+  <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0"/>  
+  <PluginClassAliasList> 
+    <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+    <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+    <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+    <PluginClassAlias id="columnPasteProcessor" class="com.mainsteam.stm.plugin.common.ColumnPasteProcessor"/>
+    <PluginClassAlias id="RegularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+    <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+    <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+    <PluginClassAlias id="tableConverter" class="com.mainsteam.stm.plugin.common.TableResultSetConverter"/>
+    <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+    <PluginClassAlias id="ChangeRateProcessor" class="com.mainsteam.stm.plugin.common.ChangeRateProcessor"/>
+    <PluginClassAlias id="processConverter" class="com.mainsteam.stm.plugin.common.ProcessResultSetConverter"/>
+    <PluginClassAlias id="FormatProcessor" class="com.mainsteam.stm.plugin.common.FormatProcessor"/>
+    <PluginClassAlias id="rowFilterProcessor" class="com.mainsteam.stm.plugin.common.RowFilterProcessor"/>
+  </PluginClassAliasList>  
+  <MetricPlugin metricid="availability" collectType="" pluginid="vmPlugin6.5"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="com.mainsteam.stm.plugin.vmware.collector.VMWareDatastoreCollector.getAvailability"/>
+    </PluginParameter> 
+    <PluginDataHandlers> 
+ 	  <PluginDataHandler classKey="RegularFilter">
+      	<Parameter value="uuid" key="uuid" type="ResourceProperty"/>       
+        <Parameter type="" key="REGULAR" value="&lt;${uuid}&gt;(.+)&lt;/${uuid}&gt;"/> 
+      </PluginDataHandler>
+      <PluginDataHandler classKey="availableConverter"> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>
+  </MetricPlugin>
+  <MetricPlugin metricid="Name" collectType="" pluginid="vmPlugin6.5"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="com.mainsteam.stm.plugin.vmware.collector.VMWareDatastoreCollector.getPropValue"/>
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter">
+        <Parameter value="uuid" key="uuid" type="ResourceProperty"/> 
+        <Parameter type="" key="REGULAR" value="&lt;${uuid}&gt;(.+)&lt;/${uuid}&gt;"/>
+      </PluginDataHandler>
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="&lt;Name&gt;(.+)&lt;/Name&gt;"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="HostNum" collectType="" pluginid="vmPlugin6.5"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="com.mainsteam.stm.plugin.vmware.collector.VMWareDatastoreCollector.getPropValue"/>
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter">
+        <Parameter value="uuid" key="uuid" type="ResourceProperty"/> 
+        <Parameter type="" key="REGULAR" value="&lt;${uuid}&gt;(.+)&lt;/${uuid}&gt;"/>
+      </PluginDataHandler>
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="&lt;NumberOfHost&gt;(.+)&lt;/NumberOfHost&gt;"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <!-- VMandTemplates -->  
+  <MetricPlugin metricid="VMNum" collectType="" pluginid="vmPlugin6.5"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="com.mainsteam.stm.plugin.vmware.collector.VMWareDatastoreCollector.getPropValue"/>
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter">
+        <Parameter value="uuid" key="uuid" type="ResourceProperty"/> 
+        <Parameter type="" key="REGULAR" value="&lt;${uuid}&gt;(.+)&lt;/${uuid}&gt;"/>
+      </PluginDataHandler>
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="&lt;VMandTemplates&gt;(.+)&lt;/VMandTemplates&gt;"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="Type" collectType="" pluginid="vmPlugin6.5"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="com.mainsteam.stm.plugin.vmware.collector.VMWareDatastoreCollector.getPropValue"/>
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter">
+        <Parameter value="uuid" key="uuid" type="ResourceProperty"/> 
+        <Parameter type="" key="REGULAR" value="&lt;${uuid}&gt;(.+)&lt;/${uuid}&gt;"/>
+      </PluginDataHandler>
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="&lt;Type&gt;(\S+)\s*&lt;/Type&gt;"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="DataStorageVolume" collectType="" pluginid="vmPlugin6.5"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="com.mainsteam.stm.plugin.vmware.collector.VMWareDatastoreCollector.getPropValue"/>
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter">
+        <Parameter value="uuid" key="uuid" type="ResourceProperty"/> 
+        <Parameter type="" key="REGULAR" value="&lt;${uuid}&gt;(.+)&lt;/${uuid}&gt;"/>
+      </PluginDataHandler>
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="&lt;DataStorageVolume&gt;(.+)&lt;/DataStorageVolume&gt;"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="DaStoraAllocatSpa" collectType="" pluginid="vmPlugin6.5"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="com.mainsteam.stm.plugin.vmware.collector.VMWareDatastoreCollector.getPropValue"/>
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <!-- <PluginDataHandler classKey="translateProcessor">
+      <PluginDataHandler classKey="RegularFilter">
+        <Parameter value="uuid" key="uuid" type="ResourceProperty"/> 
+        <Parameter type="" key="REGULAR" value="&lt;${uuid}&gt;(.+)&lt;/${uuid}&gt;"/>
+      </PluginDataHandler>
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="&lt;DataStorageAllocatedSpace&gt;(.+)&lt;/DataStorageAllocatedSpace&gt;"/> 
+      </PluginDataHandler>  
+				<Parameter value="false,否;是" key="" />
+			</PluginDataHandler> --> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="DataStorageUsedSpace" collectType="" pluginid="vmPlugin6.5"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="com.mainsteam.stm.plugin.vmware.collector.VMWareDatastoreCollector.getPropValue"/>
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter">
+        <Parameter value="uuid" key="uuid" type="ResourceProperty"/> 
+        <Parameter type="" key="REGULAR" value="&lt;${uuid}&gt;(.+)&lt;/${uuid}&gt;"/>
+      </PluginDataHandler>
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="&lt;DataStorageUsedSpace&gt;(.+)&lt;/DataStorageUsedSpace&gt;"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="DataStorageFreeSpace" collectType="" pluginid="vmPlugin6.5"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="com.mainsteam.stm.plugin.vmware.collector.VMWareDatastoreCollector.getPropValue"/>
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter">
+        <Parameter value="uuid" key="uuid" type="ResourceProperty"/> 
+        <Parameter type="" key="REGULAR" value="&lt;${uuid}&gt;(.+)&lt;/${uuid}&gt;"/>
+      </PluginDataHandler>
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="&lt;DataStorageFreeSpace&gt;(.+)&lt;/DataStorageFreeSpace&gt;"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <!-- <MetricPlugin metricid="DiskConfiguredPercentage" collectType="" pluginid="vmPlugin6.5">
+		<PluginResultMetaInfo columns="" />
+		<PluginParameter type="ArrayType">
+			<Parameter value="uuid" key="uuid" type="ResourceProperty" />
+			<Parameter type="" key="COMMAND" value="com.mainsteam.stm.plugin.vmware.collector.VMWareDatastoreCollector.getPerfValue" />
+			<Parameter type="" key="COMMAND" value="com.mainsteam.stm.plugin.vmware.collector.VMWareDatastoreCollector.getPropValue" />
+		</PluginParameter>
+		<PluginDataHandlers>
+      <PluginDataHandler classKey="RegularFilter">
+        <Parameter value="uuid" key="uuid" type="ResourceProperty"/> 
+        <Parameter type="" key="REGULAR" value="&lt;${uuid}&gt;(.+)&lt;/${uuid}&gt;"/>
+      </PluginDataHandler>
+			<PluginDataHandler classKey="RegularFilter">
+				<Parameter type="" key="REGULAR" value="&lt;DiskConfiguredPercentage&gt;(.+)&lt;/DiskConfiguredPercentage&gt;" />
+			</PluginDataHandler>
+		</PluginDataHandlers>
+	</MetricPlugin> -->  
+  <MetricPlugin metricid="DiskUsagePercentage" collectType="" pluginid="vmPlugin6.5"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="com.mainsteam.stm.plugin.vmware.collector.VMWareDatastoreCollector.getPropValue"/>
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter">
+        <Parameter value="uuid" key="uuid" type="ResourceProperty"/> 
+        <Parameter type="" key="REGULAR" value="&lt;${uuid}&gt;(.+)&lt;/${uuid}&gt;"/>
+      </PluginDataHandler>
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="&lt;DiskUsagePercentage&gt;(.+)&lt;/DiskUsagePercentage&gt;"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="SummarizedIOPS" collectType="" pluginid="vmPlugin6.5"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="com.mainsteam.stm.plugin.vmware.collector.VMWareDatastoreCollector.getPerfValue"/>
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter">
+        <Parameter value="uuid" key="uuid" type="ResourceProperty"/> 
+        <Parameter type="" key="REGULAR" value="&lt;${uuid}&gt;(.+)&lt;/${uuid}&gt;"/>
+      </PluginDataHandler>
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="&lt;getSummarizedIOPS&gt;(.+)&lt;/getSummarizedIOPS&gt;"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="NormalizedLatency" collectType="" pluginid="vmPlugin6.5"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="com.mainsteam.stm.plugin.vmware.collector.VMWareDatastoreCollector.getPerfValue"/>
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter">
+        <Parameter value="uuid" key="uuid" type="ResourceProperty"/> 
+        <Parameter type="" key="REGULAR" value="&lt;${uuid}&gt;(.+)&lt;/${uuid}&gt;"/>
+      </PluginDataHandler>
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="&lt;getNormalizedLatency&gt;(.+)&lt;/getNormalizedLatency&gt;"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="VMList" collectType="" pluginid="vmPlugin6.5"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="com.mainsteam.stm.plugin.vmware.collector.VMWareDatastoreCollector.getVMList"/>
+    </PluginParameter>  
+  <PluginDataHandlers>
+      <PluginDataHandler classKey="RegularFilter">
+      	<Parameter value="uuid" key="uuid" type="ResourceProperty"/>       
+        <Parameter type="" key="REGULAR" value="&lt;${uuid}&gt;(.+)&lt;/${uuid}&gt;"/> 
+      </PluginDataHandler>
+    </PluginDataHandlers>
+  </MetricPlugin>  
+  <MetricPlugin metricid="HostList" collectType="" pluginid="vmPlugin6.5"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="com.mainsteam.stm.plugin.vmware.collector.VMWareDatastoreCollector.getHostList"/>
+    </PluginParameter>  
+  <PluginDataHandlers>
+      <PluginDataHandler classKey="RegularFilter">
+      	<Parameter value="uuid" key="uuid" type="ResourceProperty"/>       
+        <Parameter type="" key="REGULAR" value="&lt;${uuid}&gt;(.+)&lt;/${uuid}&gt;"/> 
+      </PluginDataHandler>
+    </PluginDataHandlers>
+  </MetricPlugin> 
+</MetricPlugins>

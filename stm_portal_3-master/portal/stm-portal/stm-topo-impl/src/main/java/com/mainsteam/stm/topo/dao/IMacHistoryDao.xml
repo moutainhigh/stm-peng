@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.topo.dao.IMacHistoryDao">
+   
+   
+   
+   
+   
+  <resultMap type="com.mainsteam.stm.topo.bo.MacHistoryBo" id="macHistoryMap">
+     
+     
+     
+     
+     
+    <id column="id" property="id"/>
+     
+     
+     
+     
+     
+    <result column="mac" property="mac"/>
+     
+     
+     
+     
+     
+    <result column="up_device_ip" property="upDeviceIp"/>
+     
+     
+     
+     
+     
+    <result column="up_device_interface" property="upDeviceInterface"/>
+     
+     
+     
+     
+     
+    <result column="up_device_name" property="upDeviceName"/>
+     
+     
+     
+     
+     
+    <result column="host_name" property="hostName"/>
+     
+     
+     
+     
+     
+    <result column="update_time" property="updateTime"/>
+     
+     
+     
+     
+     
+    <result column="ip" property="ip"/>
+  
+  
+  
+  
+  
+  </resultMap>
+   
+   
+   
+   
+   
+  <delete id="truncateAll">
+		truncate table STM_TOPO_MAC_HISTORY
+	</delete>
+   
+   
+   
+   
+   
+  <select id="getAll" resultMap="macHistoryMap">
+		SELECT * FROM STM_TOPO_MAC_HISTORY
+	</select>
+   
+   
+   
+   
+   
+  <insert id="insert" parameterType="com.mainsteam.stm.topo.bo.MacHistoryBo">
+		insert into STM_TOPO_MAC_HISTORY (id,mac,ip,up_device_name,up_device_ip,up_device_interface,update_time,host_name)
+		values (#{id},#{mac},#{ip},#{upDeviceName},#{upDeviceIp},#{upDeviceInterface},#{updateTime},#{hostName})
+	</insert>
+   
+   
+   
+   
+   
+  <delete id="delByIds">
+		delete from STM_TOPO_MAC_HISTORY
+		where id in
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach collection="ids" item="item" index="index" open="(" separator="," close=")">  
+         #{item}  
+      	</foreach>  
+	
+	
+  
+  
+  
+  
+  
+  </delete>
+   
+   
+   
+   
+   
+  <select id="selectByIds" resultMap="macHistoryMap">  
+       SELECT * FROM STM_TOPO_MAC_HISTORY
+       WHERE id IN 
+       
+		 
+     
+     
+     
+     
+     
+    <foreach collection="ids" item="item" index="index" open="(" separator="," close=")">  
+         #{item}  
+      </foreach>  
+    
+	
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <delete id="delByMacs">
+		delete from STM_TOPO_MAC_HISTORY
+		where mac in
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach collection="macs" item="item" index="index" open="(" separator="," close=")">  
+         #{item}  
+      	</foreach>  
+	
+	
+  
+  
+  
+  
+  
+  </delete>
+   
+   
+   
+   
+   
+  <select id="selectSubPage" resultMap="macHistoryMap" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		SELECT * FROM STM_TOPO_MAC_HISTORY
+		 
+		 
+     
+     
+     
+     
+     
+    <if test="condition != null and condition.mac != null and condition.id != null">
+			 
+			 
+       
+       
+       
+       
+       
+      <trim prefix="where" prefixOverrides="and |or ">
+		        mac=#{condition.mac} and id != #{condition.id}
+			</trim>
+		
+		
+    
+    
+    
+    
+    
+    </if>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="pageSelect" resultMap="macHistoryMap" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="mysql">
+		SELECT id,mac,ip,up_device_name,up_device_ip,up_device_interface,host_name,max(update_time) as update_time FROM STM_TOPO_MAC_HISTORY
+		 
+		 
+     
+     
+     
+     
+     
+    <if test="condition != null">
+			 
+			 
+       
+       
+       
+       
+       
+      <trim prefix="where" prefixOverrides="and |or ">
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.mac != null and condition.mac != ''"> and mac LIKE CONCAT('%', #{condition.mac}, '%')</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.startTime != null"> and update_time        <![CDATA[ >= ]]> #{condition.startTime}</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.endTime != null">and update_time        <![CDATA[ <= ]]> #{condition.endTime}</if>
+			
+			
+      
+      
+      
+      
+      
+      </trim>
+		
+		
+    
+    
+    
+    
+    
+    </if>
+		group by mac
+	
+	
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="pageSelect" resultMap="macHistoryMap" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oracle">
+		SELECT * FROM STM_TOPO_MAC_HISTORY t
+		right join (select mac,max(update_time) update_time from STM_TOPO_MAC_HISTORY
+		 
+		 
+     
+     
+     
+     
+     
+    <if test="condition != null">
+			 
+			 
+       
+       
+       
+       
+       
+      <trim prefix="where" prefixOverrides="and |or ">
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.mac != null and condition.mac != ''"> and mac LIKE '%'||#{condition.mac}||'%'</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.startTime != null"> and update_time        <![CDATA[ >= ]]> #{condition.startTime}</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.endTime != null">and update_time        <![CDATA[ <= ]]> #{condition.endTime}</if>
+			
+			
+      
+      
+      
+      
+      
+      </trim>
+		
+		
+    
+    
+    
+    
+    
+    </if>
+		group by mac) t1
+		on t.mac = t1.mac and t.update_time = t1.update_time
+	
+	
+  
+  
+  
+  
+  
+  </select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="pageSelect" resultMap="macHistoryMap" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="dm">
+		SELECT * FROM STM_TOPO_MAC_HISTORY t
+		right join (select mac,max(update_time) update_time from STM_TOPO_MAC_HISTORY
+		 
+		 
+     
+     
+     
+     
+     
+    <if test="condition != null">
+			 
+			 
+       
+       
+       
+       
+       
+      <trim prefix="where" prefixOverrides="and |or ">
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.mac != null and condition.mac != ''"> and mac LIKE '%'||#{condition.mac}||'%'</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.startTime != null"> and update_time        <![CDATA[ >= ]]> #{condition.startTime}</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.endTime != null">and update_time        <![CDATA[ <= ]]> #{condition.endTime}</if>
+			
+			
+      
+      
+      
+      
+      
+      </trim>
+		
+		
+    
+    
+    
+    
+    
+    </if>
+		group by mac) t1
+		on t.mac = t1.mac and t.update_time = t1.update_time
+	
+	
+  
+  
+  
+  
+  
+  </select>
+  <select id="pageSelect" resultMap="macHistoryMap" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oscar">
+		SELECT * FROM STM_TOPO_MAC_HISTORY t
+		right join (select mac,max(update_time) update_time from STM_TOPO_MAC_HISTORY
+		 
+		 
+     
+     
+     
+     
+     
+    <if test="condition != null">
+			 
+			 
+       
+       
+       
+       
+       
+      <trim prefix="where" prefixOverrides="and |or ">
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.mac != null and condition.mac != ''"> and mac LIKE '%'||#{condition.mac}||'%'</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.startTime != null"> and update_time        <![CDATA[ >= ]]> #{condition.startTime}</if>
+		         
+				 
+         
+         
+         
+         
+         
+        <if test="condition.endTime != null">and update_time        <![CDATA[ <= ]]> #{condition.endTime}</if>
+			
+			
+      
+      
+      
+      
+      
+      </trim>
+		
+		
+    
+    
+    
+    
+    
+    </if>
+		group by mac) t1
+		on t.mac = t1.mac and t.update_time = t1.update_time
+	
+	
+  
+  
+  
+  
+  
+  </select>
+</mapper>

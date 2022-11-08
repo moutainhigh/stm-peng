@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- 编辑使用 XMLSpy v2006 U (http://www.altova.com) 由 any (any) -->
+<!-- 编辑使用 XMLSpy v2006 U (http://www.altova.com) 由 any (any) -->
+<!-- 编辑使用 XMLSpy v2006 U (http://www.altova.com) 由 any (any) -->
+<!--W3C Schema 由 XMLSpy v2006 U 创建 (http://www.altova.com)-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+	<xs:element name="GlobalMetricSetting">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="PluginInitParameter" minOccurs="0"/>
+				<xs:element ref="ChangePluginInitParameter" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="Sysoid" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="isEncrypt" type="xs:string" use="optional"/>
+			<xs:attribute name="version" type="xs:string" use="optional"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Sysoid"/>
+	<xs:element name="PluginInitParameter">
+		<xs:complexType>
+			<xs:attribute name="pluginid" type="xs:string" use="required"/>
+			<xs:attribute name="parameterId" type="xs:string" use="required"/>
+			<xs:attribute name="parameterValue" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ChangePluginInitParameter">
+		<xs:complexType>
+			<xs:attribute name="pluginid" type="xs:string" use="required"/>
+			<xs:attribute name="parameterId" type="xs:string" use="required"/>
+			<xs:attribute name="parameterProperty" type="xs:string" use="required"/>
+			<xs:attribute name="propertyValue" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="MetricPlugin">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="PluginResultMetaInfo" minOccurs="0"/>
+				<xs:element ref="PluginParameter"/>
+				<xs:element ref="PluginDataHandlers" minOccurs="0"/>
+				<xs:element ref="PluginDataConverter" minOccurs="0"/>
+			</xs:sequence>
+			<xs:attribute name="metricid" use="required">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="20"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="pluginid" type="xs:string" use="required"/>
+			<xs:attribute name="collectType">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value=""/>
+						<xs:enumeration value="WMI"/>
+						<xs:enumeration value="TELNET"/>
+						<xs:enumeration value="SSH"/>
+						<xs:enumeration value="SNMP"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="MetricPlugins">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="GlobalMetricSetting" minOccurs="0"/>
+				<xs:element ref="PluginClassAliasList"/>
+				<xs:element ref="MetricPlugin" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="version" type="xs:string" use="required"/>
+		</xs:complexType>
+		<xs:keyref name="pluginDataConverterClassKeyref" refer="pluginClassAliasUnique">
+			<xs:selector xpath=".//MetricPlugin/PluginDataConverter"/>
+			<xs:field xpath="@classKey"/>
+		</xs:keyref>
+		<xs:keyref name="pluginDataHandlerClassKeyref" refer="pluginClassAliasUnique">
+			<xs:selector xpath=".//MetricPlugin/PluginDataHandlers/PluginDataHandler"/>
+			<xs:field xpath="@classKey"/>
+		</xs:keyref>
+		<xs:unique name="metricPluginUnique">
+			<xs:selector xpath=".//MetricPlugin"/>
+			<xs:field xpath="@metricid"/>
+			<xs:field xpath="@pluginid"/>
+		</xs:unique>
+		<xs:unique name="pluginClassAliasUnique">
+			<xs:selector xpath=".//PluginClassAliasList/PluginClassAlias"/>
+			<xs:field xpath="@id"/>
+		</xs:unique>
+	</xs:element>
+	<xs:element name="Parameter">
+		<xs:complexType>
+			<xs:attribute name="type" type="xs:string"/>
+			<xs:attribute name="key" type="xs:string" use="required"/>
+			<xs:attribute name="value" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="PluginClassAlias">
+		<xs:complexType>
+			<xs:attribute name="id" type="xs:string" use="required"/>
+			<xs:attribute name="class" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="PluginClassAliasList">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="PluginClassAlias" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="PluginDataConverter">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Parameter" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="classKey" use="required">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="subInstConverter"/>
+						<xs:enumeration value="defaultConverter"/>
+						<xs:enumeration value="availableConverter"/>
+						<xs:enumeration value="processConverter"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="PluginDataHandler">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Parameter" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="classKey" use="required">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="RegularFilter"/>
+						<xs:enumeration value="selectProcessor"/>
+						<xs:enumeration value="defaultProcessor"/>
+						<xs:enumeration value="columnPasteProcessor"/>
+						<xs:enumeration value="columnSplitProcessor"/>
+						<xs:enumeration value="translateProcessor"/>
+						<xs:enumeration value="tableConverter"/>
+						<xs:enumeration value="availableConverter"/>
+						<xs:enumeration value="SolarisNetStatProcessor"/>
+						<xs:enumeration value="ChangeRateProcessor"/>
+						<xs:enumeration value="rowFilterProcessor"/>
+						<xs:enumeration value="uptimeProcessor"/>
+						<xs:enumeration value="dateTimeProcessor"/>
+						<xs:enumeration value="FormatProcessor"/>
+						<xs:enumeration value="ResinActiveProcessor"/>
+						<xs:enumeration value="apacheProcessor"/>
+						<xs:enumeration value="columnAddProcessor"/>
+						<xs:enumeration value="memRateProcessor"/>
+						<xs:enumeration value="RowFilterByInstPropertyProcessor"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="PluginDataHandlers">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="PluginDataHandler" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="PluginParameter">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Parameter" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="type" use="required">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="ArrayType"/>
+						<xs:enumeration value="MapType"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="PluginResultMetaInfo">
+		<xs:complexType>
+			<xs:attribute name="columns" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

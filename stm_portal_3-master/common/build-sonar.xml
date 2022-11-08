@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="MS6:Framework" default="all" basedir="." xmlns:sonar="antlib:org.sonar.ant">
+
+  <property name="sonar.host.url" value="http://192.168.1.182:9000/sonar" />
+
+  <!-- Define the SonarQube properties -->
+  <property name="sonar.projectKey" value="MS6:Common" />
+  <property name="sonar.projectName" value="MS6:Common" />
+  <property name="sonar.projectVersion" value="4.1.0" />
+  <property name="sonar.language" value="java" />
+  <property name="sonar.sources" value="src/main/java" />
+  <property name="sonar.binaries" value="build" />
+  <property name="sonar.sourceEncoding" value="UTF-8" />
+  
+  <!-- Set modules IDs -->
+  <property name="sonar.modules" 
+  value="stm-common-util-impl,stm-resource-group-api,stm-resource-group-impl,stm-system-api,stm-system-impl"/>
+  
+  <!-- Override some properties at module level -->  
+  <property name="stm-common-util-impl.sonar.projectName" value="stm-common-util-impl" />
+  <property name="stm-resource-group-api.sonar.projectName" value="stm-resource-group-api" />
+  <property name="stm-resource-group-impl.sonar.projectName" value="stm-resource-group-impl" />
+  <property name="stm-system-api.sonar.projectName" value="stm-system-api" />
+  <property name="stm-system-impl.sonar.projectName" value="stm-system-impl" />
+
+  <!-- Default module base directory is <curent_directory>/<module_ID>. It can be overridden if necessary -->
+  <property name="stm-common-util-impl.sonar.projectBaseDir" value="stm-common-util/stm-common-util-impl" />
+  <property name="stm-resource-group-api.sonar.projectBaseDir" value="stm-resource-group/stm-resource-group-api" />
+  <property name="stm-resource-group-impl.sonar.projectBaseDir" value="stm-resource-group/stm-resource-group-impl" />
+  <property name="stm-system-api.sonar.projectBaseDir" value="stm-system/stm-system-api" />
+  <property name="stm-system-impl.sonar.projectBaseDir" value="stm-system/stm-system-impl" />
+
+  <target name="clean">
+    <delete dir=".sonar"/>
+	<ant dir="stm-common-util/stm-common-util-impl" target="clean"/>
+	<ant dir="stm-resource-group/stm-resource-group-api" target="clean"/>
+	<ant dir="stm-resource-group/stm-resource-group-impl" target="clean"/>
+	<ant dir="stm-system/stm-system-api" target="clean"/>
+	<ant dir="stm-system/stm-system-impl" target="clean"/>
+  </target>
+
+  <target name="compile">
+	<ant dir="stm-common-util/stm-common-util-impl" target="compile"/>
+	<ant dir="stm-resource-group/stm-resource-group-api" target="compile"/>
+	<ant dir="stm-resource-group/stm-resource-group-impl" target="compile"/>
+	<ant dir="stm-system/stm-system-api" target="compile"/>
+	<ant dir="stm-system/stm-system-impl" target="compile"/>
+  </target>
+  
+  <!-- ========= Define SonarQube target ========= -->
+  <target name="sonar" depends="compile">
+    <taskdef uri="antlib:org.sonar.ant" resource="org/sonar/ant/antlib.xml">
+	</taskdef>
+	<sonar:sonar />
+  </target>
+
+  <!-- ========= The main target "all" ========= -->  
+  <target name="all" depends="clean,compile,sonar"/>
+
+</project>

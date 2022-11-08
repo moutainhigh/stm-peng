@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                    http://www.springframework.org/schema/context
+                    http://www.springframework.org/schema/context/spring-context-2.5.xsd
+                    ">
+	
+	<bean id="autoRediscoverInstanceService" class="com.mainsteam.stm.auto.rediscover.impl.AutoRediscoverInstanceTimerImpl" init-method="init">
+		<property name="resourceInstanceService" ref="resourceInstanceService" />
+		<property name="resourceInstanceDiscoveryService" ref="resourceInstanceDiscoveryService" />
+		<property name="capacityService" ref="capacityService" />
+		<property name="profileAutoRediscoveryService" ref="profileAutoRediscoveryService"/>
+		<property name="discoverPropService" ref="discoverPropService"/>
+		<property name="profileService" ref="profileService"/>
+		<property name="discoveryVmService" ref="discoveryVmService"/>
+		<property name="profileAutoRefreshService" ref="profileAutoRefreshService"/>
+		<property name="jobExecuteTime" value="${stm.resource.auto.refresh.ExecuteTime}"/>
+	</bean>
+	
+	<bean id="autoRefreshRemoveResourceInstanceInterceptor" class="com.mainsteam.stm.auto.rediscover.interceptor.AutoRefreshInstancelibInterceptorRemoveImpl">
+		<property name="resourceInstanceExtendService" ref="resourceInstanceService"></property>
+		<property name="profileAutoRediscoveryService" ref="profileAutoRediscoveryService"></property>
+	</bean>
+	
+	<!-- ProfileAutoRediscovery bean -->	
+	<bean id="profileAutoRediscoveryService" class="com.mainsteam.stm.auto.rediscover.impl.ProfileAutoRediscoverServiceImpl" init-method="init">
+		<property name="profileAutoRediscoveryDao" ref="profileAutoRediscoveryDao"/>
+		<property name="ocProfileAutoRediscoverSequence" ref="ocProfileAutoRediscoverSequence"/>
+		<property name="ocProfileAutoRediscoverInstanceSequence" ref="ocProfileAutoRediscoverInstanceSequence"/>
+		<property name="jobExecuteTime" value="${stm.resource.auto.refresh.ExecuteTime}"/>
+	</bean>
+	<bean id="profileAutoRediscoveryDao" class="com.mainsteam.stm.auto.rediscover.dao.impl.ProfileAutoRediscoverDaoImpl">
+		<property name="session" ref="sqlSession" />
+		<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+	</bean>
+	<bean name="ocProfileAutoRediscoverSequence" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_PROFILELIB_AUTO_REDISCOVER"/>
+	</bean>
+	<bean name="ocProfileAutoRediscoverInstanceSequence" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_PROFILELIB_AUTO_REDISCOVER_INSTANCE"/>
+	</bean>
+	
+	
+	<!-- ProfileAutoRefresh bean -->	
+	<bean id="profileAutoRefreshService" class="com.mainsteam.stm.auto.rediscover.impl.ProfileAutoRefreshServiceImpl" init-method="init">
+		<property name="profileAutoRefreshDao" ref="profileAutoRefreshDao"/>
+		<property name="ocProfileAutoRefreshSequence" ref="ocProfileAutoRefreshSequence"/>
+		<property name="jobExecuteTime" value="${stm.resource.auto.refresh.ExecuteTime}"/>
+	</bean>
+	
+	<bean id="profileAutoRefreshDao" class="com.mainsteam.stm.auto.rediscover.dao.impl.ProfileAutoRefreshDaoImpl">
+		<property name="session" ref="sqlSession" />
+		<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+	</bean>
+	<bean name="ocProfileAutoRefreshSequence" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_PROFILELIB_AUTO_REFRESH"/>
+	</bean>
+</beans>

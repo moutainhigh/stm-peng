@@ -1,0 +1,534 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.portal.netflow.dao.inf.IIfNetflowDao">
+
+	<!-- 接口总连接数 -->
+	<select id="getTotalConnects" resultType="Long" parameterType="com.mainsteam.stm.portal.netflow.bo.NetflowParamBo">
+	
+		SELECT 
+			IFNULL(SUM(IFNULL(t.connectTotal, 0)), 0) AS wholeConnects
+		FROM
+			CONF_INTERFACE i
+		JOIN
+			CONF_DEVICE d
+		ON i.`DEVICE_ID`=d.`ID`
+		LEFT JOIN
+		(	
+			SELECT
+				ifId,
+				SUM(connectIn+connectOut) AS connectTotal
+			FROM
+			(
+				SELECT 
+					IFNULL(connectIn, 0) AS connectIn,
+					IFNULL(connectOut, 0) AS connectOut,
+					t1.if_in_id AS ifId
+				FROM
+				(
+				  SELECT 
+					SUM(FLOW_TOTAL) AS connectIn, IF_IN_ID 
+				  FROM 
+					ANA_IF_IN_BL_${tableSuffix}
+				  WHERE acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} 
+				  GROUP BY IF_IN_ID
+				) t1 LEFT JOIN
+				(
+				  SELECT 
+					SUM(FLOW_TOTAL) AS connectOut, IF_OUT_ID
+				  FROM 
+					ANA_IF_OUT_BL_${tableSuffix}
+				  WHERE acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} 
+				  GROUP BY IF_OUT_ID
+				) t2
+				ON t1.if_in_id=t2.if_out_id
+				GROUP BY t1.if_in_id
+				
+				UNION 
+				
+				SELECT 
+					IFNULL(connectIn, 0) AS connectIn,
+					IFNULL(connectOut, 0) AS connectOut,
+					t2.if_out_id AS ifId
+				FROM
+				(
+				  SELECT 
+					SUM(FLOW_TOTAL) AS connectIn, IF_IN_ID 
+				  FROM 
+					ANA_IF_IN_BL_${tableSuffix}
+				  WHERE acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} 
+				  GROUP BY IF_IN_ID
+				) t1 RIGHT JOIN
+				(
+				  SELECT 
+					SUM(FLOW_TOTAL) AS connectOut, IF_OUT_ID
+				  FROM 
+					ANA_IF_OUT_BL_${tableSuffix}
+				  WHERE acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} 
+				  GROUP BY IF_OUT_ID
+				) t2
+				ON t1.if_in_id=t2.if_out_id
+				GROUP BY t2.if_out_id
+			) t3
+			GROUP BY t3.ifId 
+		) t
+		ON i.`ID`=t.ifId
+		WHERE 1=1
+		and i.resource_interface_id IS NOT NULL
+		AND i.`STATE` NOT IN (126, 127)
+		AND d.`resource_id` IS NOT NULL
+		and d.active=1
+	</select>
+
+	<!-- 获取接口总包数 -->
+	<select id="getTotalIfPackets" resultType="Long" parameterType="com.mainsteam.stm.portal.netflow.bo.NetflowParamBo">
+		SELECT 
+			IFNULL(SUM(IFNULL(t.packetTotal, 0)), 0) AS wholePackets
+		FROM
+			CONF_INTERFACE i
+		JOIN
+			CONF_DEVICE d
+		ON i.`DEVICE_ID`=d.`ID`
+		LEFT JOIN
+		(	
+			SELECT
+				ifId,
+				SUM(packetIn+packetOut) AS packetTotal
+			FROM
+			(
+				SELECT 
+					IFNULL(packetIn, 0) AS packetIn,
+					IFNULL(packetOut, 0) AS packetOut,
+					t1.if_in_id AS ifId
+				FROM
+				(
+				  SELECT 
+					SUM(OCTETS_TOTAL) AS flowIn, SUM(PACKET_TOTAL) AS packetIn, IF_IN_ID 
+				  FROM 
+					ANA_IF_IN_BL_${tableSuffix}
+				  WHERE acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} 
+				  GROUP BY IF_IN_ID
+				) t1 LEFT JOIN
+				(
+				  SELECT 
+					SUM(OCTETS_TOTAL) AS flowOut, SUM(PACKET_TOTAL) AS packetOut, IF_OUT_ID
+				  FROM 
+					ANA_IF_OUT_BL_${tableSuffix}
+				  WHERE acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} 
+				  GROUP BY IF_OUT_ID
+				) t2
+				ON t1.if_in_id=t2.if_out_id
+				GROUP BY t1.if_in_id
+				
+				UNION 
+				
+				SELECT 
+					IFNULL(packetIn, 0) AS packetIn,
+					IFNULL(packetOut, 0) AS packetOut,
+					t2.if_out_id AS ifId
+				FROM
+				(
+				  SELECT 
+					SUM(OCTETS_TOTAL) AS flowIn, SUM(PACKET_TOTAL) AS packetIn, IF_IN_ID 
+				  FROM 
+					ANA_IF_IN_BL_${tableSuffix}
+				  WHERE acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} 
+				  GROUP BY IF_IN_ID
+				) t1 RIGHT JOIN
+				(
+				  SELECT 
+					SUM(OCTETS_TOTAL) AS flowOut, SUM(PACKET_TOTAL) AS packetOut, IF_OUT_ID
+				  FROM 
+					ANA_IF_OUT_BL_${tableSuffix}
+				  WHERE acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} 
+				  GROUP BY IF_OUT_ID
+				) t2
+				ON t1.if_in_id=t2.if_out_id
+				GROUP BY t2.if_out_id
+			) t3
+			GROUP BY t3.ifId
+		) t
+		ON i.`ID`=t.ifId
+		WHERE 1=1
+		and i.resource_interface_id IS NOT NULL
+		AND i.`STATE` NOT IN (126, 127)
+		AND d.`resource_id` IS NOT NULL
+		and d.active=1
+	</select>
+
+	<!-- 根据接口组ID获取接口IDs -->
+	<select id="getIfIdsByIfGroupId" resultType="Long" parameterType="long">
+		select 
+			i.id as ifId
+		from 
+			CONF_INTERFACE i
+		left join 
+		CONF_INTERFACE_GROUP_NETFLOW g
+		on find_in_set(i.ID, g.conf_interface_ids)
+		where g.id=#{ifGroupId}
+	</select>
+
+	<!-- 接口总流量 -->
+	<select id="getTotalIfNetflows" resultType="Long" parameterType="com.mainsteam.stm.portal.netflow.bo.NetflowParamBo">
+
+		SELECT 
+			ifnull(SUM(IFNULL(t.flowTotal, 0)), 0) AS wholeFlows
+		FROM
+			CONF_INTERFACE i
+		JOIN
+			CONF_DEVICE d
+		ON i.`DEVICE_ID`=d.`ID`
+		LEFT JOIN
+		(	
+			SELECT
+				ifId,
+				SUM(flowIn+flowOut) AS flowTotal
+			FROM
+			(
+				SELECT 
+					IFNULL(flowIn, 0) AS flowIn, 
+					IFNULL(packetIn, 0) AS packetIn,
+					IFNULL(flowOut, 0) AS flowOut,
+					IFNULL(packetOut, 0) AS packetOut,
+					t1.if_in_id AS ifID
+				FROM
+				(
+				  SELECT 
+					SUM(OCTETS_TOTAL) AS flowIn, SUM(PACKET_TOTAL) AS packetIn, IF_IN_ID 
+				  FROM 
+					ANA_IF_IN_BL_${tableSuffix}
+				  WHERE acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime}
+				  GROUP BY IF_IN_ID
+				) t1 LEFT JOIN
+				(
+				  SELECT 
+					SUM(OCTETS_TOTAL) AS flowOut, SUM(PACKET_TOTAL) AS packetOut, IF_OUT_ID
+				  FROM 
+					ANA_IF_OUT_BL_${tableSuffix}
+				  WHERE acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime}
+				  GROUP BY IF_OUT_ID
+				) t2
+				ON t1.if_in_id=t2.if_out_id
+				GROUP BY t1.if_in_id
+				
+				UNION 
+				
+				SELECT 
+					IFNULL(flowIn, 0) AS flowIn, 
+					IFNULL(packetIn, 0) AS packetIn,
+					IFNULL(flowOut, 0) AS flowOut,
+					IFNULL(packetOut, 0) AS packetOut,
+					t2.if_out_id AS ifID
+				FROM
+				(
+				  SELECT 
+					SUM(OCTETS_TOTAL) AS flowIn, SUM(PACKET_TOTAL) AS packetIn, IF_IN_ID 
+				  FROM 
+					ANA_IF_IN_BL_${tableSuffix}
+				  WHERE acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} 
+				  GROUP BY IF_IN_ID
+				) t1 RIGHT JOIN
+				(
+				  SELECT 
+					SUM(OCTETS_TOTAL) AS flowOut, SUM(PACKET_TOTAL) AS packetOut, IF_OUT_ID
+				  FROM 
+					ANA_IF_OUT_BL_${tableSuffix}
+				  WHERE acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} 
+				  GROUP BY IF_OUT_ID
+				) t2
+				ON t1.if_in_id=t2.if_out_id
+				GROUP BY t2.if_out_id
+			) t3
+			GROUP BY t3.ifId
+		) t
+		ON i.`ID`=t.ifId
+		where 1=1
+		and i.resource_interface_id is not null
+		AND i.`STATE` NOT IN (126, 127)
+		AND d.`resource_id` IS NOT NULL
+		and d.active=1
+	</select>
+
+	<select id="ifListPageSelect" resultType="com.mainsteam.stm.portal.netflow.bo.NetflowBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		
+		SELECT * FROM
+		(
+			SELECT 
+				i.`ID` AS ifId,
+				i.`NAME` AS ifName,
+				d.`NAME`,	
+				
+				IFNULL(t.flowIn, 0) AS flowIn,
+				IFNULL(t.flowOut, 0) AS flowOut,
+				IFNULL(t.flowTotal, 0) AS flowTotal,
+				IFNULL(t.speedIn, 0) AS speedIn,
+				IFNULL(t.speedOut, 0) AS speedOut,
+				IFNULL(t.speedTotal, 0) AS speedTotal,
+
+				IFNULL(t.packetIn, 0) AS packetIn,
+				IFNULL(t.packetOut, 0) AS packetOut,
+				IFNULL(t.packetTotal, 0) AS packetTotal,
+				IFNULL(t.packetInSpeed, 0) AS packetInSpeed,
+				IFNULL(t.packetOutSpeed, 0) AS packetOutSpeed,
+				IFNULL(t.packetTotalSpeed, 0) AS packetTotalSpeed,
+				
+				IFNULL(t.connectNumberIn, 0) AS connectNumberIn,
+				IFNULL(t.connectNumberOut, 0) AS connectNumberOut,
+				IFNULL(t.connectNumberTotal, 0) AS connectNumberTotal,
+				IFNULL(t.connectNumberInSpeed, 0) AS connectNumberInSpeed,
+				IFNULL(t.connectNumberOutSpeed, 0) AS connectNumberOutSpeed,
+				IFNULL(t.connectNumberTotalSpeed, 0) as connectNumberTotalSpeed,
+				
+				IFNULL(IFNULL(t.flowIn, 0) / IFNULL(SUM(ifnull(i.`IN_SPEED`, 0)*${condition.timeInterval}/8), 0), 0) AS flowInBwUsage,
+				IFNULL(IFNULL(t.flowOut, 0) / IFNULL(SUM(ifnull(i.`IN_SPEED`, 0)*${condition.timeInterval}/8), 0), 0) AS flowOutBwUsage,
+				CASE 
+				WHEN IFNULL(IFNULL(t.flowIn, 0) / IFNULL(SUM(ifnull(i.`IN_SPEED`, 0)*${condition.timeInterval}/8), 0), 0) >= IFNULL(IFNULL(t.flowOut, 0) / IFNULL(SUM(ifnull(i.`IN_SPEED`, 0)*${condition.timeInterval}/8), 0), 0) 
+				THEN IFNULL(IFNULL(t.flowIn, 0) / IFNULL(SUM(ifnull(i.`IN_SPEED`, 0)*${condition.timeInterval}/8), 0), 0) 
+				ELSE IFNULL(IFNULL(t.flowOut, 0) / IFNULL(SUM(ifnull(i.`IN_SPEED`, 0)*${condition.timeInterval}/8), 0), 0) END AS bwUsage,
+				
+				IFNULL(t.flowPctge, 0) AS flowPctge,
+				IFNULL(t.packetPctge, 0) AS packetPctge,
+				IFNULL(t.connectPctge, 0) AS connectPctge
+				
+			FROM
+				CONF_INTERFACE i
+			JOIN
+				CONF_DEVICE d
+			ON i.`DEVICE_ID`=d.`ID`
+			LEFT JOIN
+			(	
+				SELECT
+					ifId,
+					flowIn,
+					packetIn,
+					flowOut,
+					packetOut,
+					connectNumberIn,
+					connectNumberOut,
+					
+					SUM(flowIn+flowOut) AS flowTotal,
+					SUM(packetIn+packetOut) AS packetTotal,
+					SUM(connectNumberIn+connectNumberOut) AS connectNumberTotal,
+					
+					flowIn / ${condition.timeInterval} AS speedIn,
+					flowOut / ${condition.timeInterval} AS speedOut,
+					SUM(flowIn+flowOut) / ${condition.timeInterval} AS speedTotal,
+					SUM(flowIn+flowOut) / ${condition.wholeFlows} AS flowPctge,
+					
+					packetIn / ${condition.timeInterval} AS packetInSpeed,
+					packetOut / ${condition.timeInterval} AS packetOutSpeed,
+					SUM(packetIn+packetOut) / ${condition.timeInterval} AS packetTotalSpeed,
+					SUM(packetIn+packetOut) / ${condition.wholePackets} AS packetPctge,
+					
+					connectNumberIn / ${condition.timeInterval} AS connectNumberInSpeed,
+					connectNumberOut / ${condition.timeInterval} AS connectNumberOutSpeed,
+					SUM(connectNumberIn+connectNumberOut) / ${condition.timeInterval} AS connectNumberTotalSpeed,
+					SUM(connectNumberIn+connectNumberOut) / ${condition.wholeConnects} AS connectPctge
+					
+				FROM
+				(
+					SELECT 
+						IFNULL(flowIn, 0) AS flowIn, 
+						IFNULL(packetIn, 0) AS packetIn,
+						IFNULL(flowOut, 0) AS flowOut,
+						IFNULL(packetOut, 0) AS packetOut,
+						t1.if_in_id AS ifId,
+						IFNULL(connectNumberIn, 0) as connectNumberIn,
+						IFNULL(connectNumberOut, 0) as connectNumberOut
+					FROM
+					(
+					  SELECT 
+						SUM(OCTETS_TOTAL) AS flowIn, SUM(PACKET_TOTAL) AS packetIn, SUM(FLOW_TOTAL) AS connectNumberIn, IF_IN_ID 
+					  FROM 
+						ANA_IF_IN_BL_${condition.tableSuffix}
+					  WHERE acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime}
+					  GROUP BY IF_IN_ID
+					) t1 LEFT JOIN
+					(
+					  SELECT 
+						SUM(OCTETS_TOTAL) AS flowOut, SUM(PACKET_TOTAL) AS packetOut, IF_OUT_ID, SUM(FLOW_TOTAL) AS connectNumberOut
+					  FROM 
+						ANA_IF_OUT_BL_${condition.tableSuffix}
+					  WHERE acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime}
+					  GROUP BY IF_OUT_ID
+					) t2
+					ON t1.if_in_id=t2.if_out_id
+					GROUP BY t1.if_in_id
+					UNION 
+					SELECT 
+						IFNULL(flowIn, 0) AS flowIn, 
+						IFNULL(packetIn, 0) AS packetIn,
+						IFNULL(flowOut, 0) AS flowOut,
+						IFNULL(packetOut, 0) AS packetOut,
+						t2.if_out_id AS ifId,
+						IFNULL(connectNumberIn, 0) as connectNumberIn,
+						IFNULL(connectNumberOut, 0) as connectNumberOut
+					FROM
+					(
+					  SELECT 
+						SUM(OCTETS_TOTAL) AS flowIn, SUM(PACKET_TOTAL) AS packetIn, IF_IN_ID, SUM(FLOW_TOTAL) AS connectNumberIn
+					  FROM 
+						ANA_IF_IN_BL_${condition.tableSuffix}
+					  WHERE acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime} 
+					  GROUP BY IF_IN_ID
+					) t1 RIGHT JOIN
+					(
+					  SELECT 
+						SUM(OCTETS_TOTAL) AS flowOut, SUM(PACKET_TOTAL) AS packetOut, IF_OUT_ID, SUM(FLOW_TOTAL) AS connectNumberOut
+					  FROM 
+						ANA_IF_OUT_BL_${condition.tableSuffix}
+					  WHERE acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime} 
+					  GROUP BY IF_OUT_ID
+					) t2
+					ON t1.if_in_id=t2.if_out_id
+					GROUP BY t2.if_out_id
+				) t3
+				GROUP BY t3.ifId
+			) t
+			ON i.id=t.ifId
+			where 1=1
+			and d.resource_id is not null 
+			and d.active=1
+			and i.resource_interface_id is not null
+			AND i.`STATE` NOT IN (126, 127)
+			GROUP BY i.`ID`
+		) tall
+		<if test="condition!=null">
+			where 1=1
+			<if test="condition.ifName != null"> and (tall.ifName like concat('%',#{condition.ifName},'%') or tall.name like concat('%',#{condition.name},'%'))</if>
+			order by
+	 		<if test="condition.sort != null">tall.${condition.sort}</if>
+			<if test="condition.order != null"> ${condition.order} </if>
+		</if>
+	</select>
+	
+	<select id="getIfNetflowChartData" parameterType="com.mainsteam.stm.portal.netflow.bo.NetflowParamBo" resultType="com.mainsteam.stm.portal.netflow.bo.NetflowBo">
+		
+		SELECT * FROM
+		(
+			SELECT 
+				IFNULL(t.flowIn, 0) AS flowIn,
+				IFNULL(t.flowOut, 0) AS flowOut,
+				IFNULL(t.flowTotal, 0) AS flowTotal,
+				IFNULL(t.packetIn, 0) AS packetIn,
+				IFNULL(t.packetOut, 0) AS packetOut,
+				IFNULL(t.packetTotal, 0) AS packetTotal,
+				IFNULL(t.speedIn, 0) AS speedIn,
+				IFNULL(t.speedOut, 0) AS speedOut,
+				IFNULL(t.speedTotal, 0) AS speedTotal,
+				IFNULL(IFNULL(t.flowIn, 0) / IFNULL(SUM(ifnull(i.`IN_SPEED`, 0)*${timeInterval}/8), 0), 0) AS flowInBwUsage,
+				IFNULL(IFNULL(t.flowOut, 0) / IFNULL(SUM(ifnull(i.`IN_SPEED`, 0)*${timeInterval}/8), 0), 0) AS flowOutBwUsage,
+				CASE 
+				WHEN IFNULL(IFNULL(t.flowIn, 0) / IFNULL(SUM(ifnull(i.`IN_SPEED`, 0)*${timeInterval}/8), 0), 0) >= IFNULL(IFNULL(t.flowOut, 0) / IFNULL(SUM(ifnull(i.`IN_SPEED`, 0)*${timeInterval}/8), 0), 0) 
+				THEN IFNULL(IFNULL(t.flowIn, 0) / IFNULL(SUM(ifnull(i.`IN_SPEED`, 0)*${timeInterval}/8), 0), 0) 
+				ELSE IFNULL(IFNULL(t.flowOut, 0) / IFNULL(SUM(ifnull(i.`IN_SPEED`, 0)*${timeInterval}/8), 0), 0) END AS bwUsage,
+				IFNULL(t.flowPctge, 0) AS flowPctge,
+				acq_time
+			FROM
+			(
+				SELECT
+					acq_time,
+					
+					flowIn,
+					flowOut,
+					SUM(flowIn+flowOut) AS flowTotal,
+					flowIn / ${timeInterval} AS speedIn,
+					flowOut / ${timeInterval} AS speedOut,
+					SUM(flowIn+flowOut) / ${timeInterval} AS speedTotal,
+
+					packetIn,
+					packetOut,
+					ifnull(SUM(packetIn+packetOut), 0) AS packetTotal,
+					packetIn / ${timeInterval} as packetInSpeed,
+					packetOut / ${timeInterval} as packetOutSpeed,
+					ifnull(SUM(packetIn+packetOut), 0) / ${timeInterval} as packetTotalSpeed,
+					
+					ifnull(connectIn, 0) as connectNumberIn,
+					ifnull(connectOut, 0) as connectNumberOut,
+					ifnull(sum(ifnull(connectIn, 0)+ifnull(connectOut, 0)), 0) as connectNumberTotal,
+					ifnull(connectIn, 0) / ${timeInterval} as connectNumberInSpeed,
+					ifnull(connectOut, 0) / ${timeInterval} as connectNumberOutSpeed,
+					ifnull(sum(ifnull(connectIn, 0)+ifnull(connectOut, 0)) / ${timeInterval}, 0) as connectNumberTotalSpeed, 
+					
+					ifnull(SUM(flowIn+flowOut) / ${wholeFlows}, 0) AS flowPctge,
+					ifnull(SUM(packetIn+packetOut), 0) / ${wholePackets} as packetPctge,
+					ifnull(sum(ifnull(connectIn, 0)+ifnull(connectOut, 0)), 0) / ${wholeConnects} as connectPctge
+				FROM
+				(
+					SELECT 
+						IFNULL(flowIn, 0) AS flowIn, 
+						IFNULL(packetIn, 0) AS packetIn,
+						IFNULL(flowOut, 0) AS flowOut,
+						IFNULL(packetOut, 0) AS packetOut,
+						t1.acq_time,
+						ifnull(connectIn, 0) as connectIn,
+						ifnull(connectOut, 0) as connectOut 
+					FROM
+					(
+					  SELECT 
+						SUM(OCTETS_TOTAL) AS flowIn, SUM(PACKET_TOTAL) AS packetIn, ACQ_TIME, sum(flow_total) as connectIn 
+					  FROM 
+						ANA_IF_IN_BL_${tableSuffix}
+					  WHERE 
+						IF_IN_ID IN (${ifId}) AND ACQ_TIME <![CDATA[ > ]]> ${stime} and ACQ_TIME <![CDATA[ <= ]]> ${etime}
+					  GROUP BY ACQ_TIME
+					) t1 LEFT JOIN
+					(
+					  SELECT 
+						SUM(OCTETS_TOTAL) AS flowOut, SUM(PACKET_TOTAL) AS packetOut, ACQ_TIME, sum(flow_total) as connectOut 
+					  FROM 
+						ANA_IF_OUT_BL_${tableSuffix}
+					  WHERE 
+						IF_OUT_ID IN (${ifId}) AND ACQ_TIME <![CDATA[ > ]]> ${stime} and ACQ_TIME <![CDATA[ <= ]]> ${etime}
+					  GROUP BY ACQ_TIME
+					) t2
+					ON t1.acq_time=t2.acq_time
+					GROUP BY t1.acq_time
+					
+					UNION
+					
+					SELECT 
+						IFNULL(flowIn, 0) AS flowIn, 
+						IFNULL(packetIn, 0) AS packetIn,
+						IFNULL(flowOut, 0) AS flowOut,
+						IFNULL(packetOut, 0) AS packetOut,
+						t2.acq_time,
+						ifnull(connectIn, 0) as connectIn,
+						ifnull(connectOut, 0) as connectOut 
+					FROM
+					(
+					  SELECT 
+						SUM(OCTETS_TOTAL) AS flowIn, SUM(PACKET_TOTAL) AS packetIn, ACQ_TIME, sum(flow_total) as connectIn 
+					  FROM 
+						ANA_IF_IN_BL_${tableSuffix}
+					  WHERE 
+						IF_IN_ID IN (${ifId}) AND ACQ_TIME <![CDATA[ > ]]> ${stime} and ACQ_TIME <![CDATA[ <= ]]> ${etime}
+					  GROUP BY ACQ_TIME
+					) t1 RIGHT JOIN
+					(
+					  SELECT 
+						SUM(OCTETS_TOTAL) AS flowOut, SUM(PACKET_TOTAL) AS packetOut, ACQ_TIME, sum(flow_total) as connectOut 
+					  FROM 
+						ANA_IF_OUT_BL_${tableSuffix}
+					  WHERE 
+						IF_OUT_ID IN (${ifId}) AND ACQ_TIME <![CDATA[ > ]]> ${stime} and ACQ_TIME <![CDATA[ <= ]]> ${etime}
+					  GROUP BY ACQ_TIME
+					) t2
+					ON t1.acq_time=t2.acq_time
+					GROUP BY t2.acq_time
+					
+				) t3
+				GROUP BY t3.acq_time
+			) t
+			left join
+				CONF_INTERFACE i
+			on i.id in (${ifId}) 
+			where i.resource_interface_id is not null
+			and i.state not in (126, 127)
+			GROUP BY t.acq_time
+		) tall
+	</select>
+	
+</mapper>

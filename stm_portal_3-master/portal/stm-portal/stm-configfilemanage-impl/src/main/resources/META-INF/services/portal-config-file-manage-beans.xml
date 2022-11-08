@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="configScriptSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_CONFIG_SCRIPT"></constructor-arg>
+	</bean>
+	
+	<bean id="configScriptDirectorySeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_CONFIG_SCRIPT_DIRECTORY"></constructor-arg>
+	</bean>
+	
+	<bean id="configCustomGroupDao" class="com.mainsteam.stm.portal.config.dao.impl.ConfigCustomGroupDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+	</bean>
+
+	<bean id="configCustomGroupSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_PORTAL_CONFIG_CUSTOM_GROUP"></constructor-arg>
+	</bean>
+
+	<bean id="configCustomGroupApi" class="com.mainsteam.stm.portal.config.service.impl.ConfigCustomGroupImpl">
+		<property name="configCustomGroupDao" ref="configCustomGroupDao" />
+		<property name="configDeviceDao" ref="configDeviceDao" />
+		<property name="seq" ref="configCustomGroupSeq" />
+	</bean>
+
+	<bean id="configDeviceDao" class="com.mainsteam.stm.portal.config.dao.impl.ConfigDeviceDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+	</bean>
+
+	<bean id="configDeviceApi" class="com.mainsteam.stm.portal.config.service.impl.ConfigDeviceImpl">
+		<property name="configDeviceDao" ref="configDeviceDao" />
+		<property name="configCustomGroupDao" ref="configCustomGroupDao" />
+		<property name="configBackupLogDao" ref="configBackupLogDao" />
+		<property name="configWarnDao" ref="configWarnDao" />
+	</bean>
+	
+	<bean id="backupPlanSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_PORTAL_CONFIG_BACKUP_PLAN"></constructor-arg>
+	</bean>
+	
+	<bean id="backupPlanDao" class="com.mainsteam.stm.portal.config.dao.impl.BackupPlanDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+	</bean>
+	
+	<bean id="backupPlanApi" class="com.mainsteam.stm.portal.config.service.impl.BackupPlanImpl">
+		<property name="backupPlanDao" ref="backupPlanDao"></property>
+		<property name="seq" ref="backupPlanSeq" />
+		<property name="configEngine" ref="configEngine"></property>
+	</bean>
+	
+	<bean id="configWarnDao" class="com.mainsteam.stm.portal.config.dao.impl.ConfigWarnDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+	</bean>
+
+	<bean id="configWarnSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_PORTAL_CONFIG_WARN"></constructor-arg>
+	</bean>
+
+	<bean id="configWarnApi" class="com.mainsteam.stm.portal.config.service.impl.ConfigWarnImpl">
+		<property name="configWarnDao" ref="configWarnDao" />
+		<property name="configDeviceDao" ref="configDeviceDao" />
+		<property name="seq" ref="configWarnSeq" />
+	</bean>
+	
+	<bean id="configBackupLogDao" class="com.mainsteam.stm.portal.config.dao.impl.ConfigBackupLogDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+	</bean>
+	
+	<bean id="configScriptDao" class="com.mainsteam.stm.portal.config.dao.impl.ConfigScriptDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+	</bean>
+	
+	<bean id="configScriptDirectoryDao" class="com.mainsteam.stm.portal.config.dao.impl.ConfigScriptDirectoryDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+	</bean>
+
+	<bean id="configBackupLogApi" class="com.mainsteam.stm.portal.config.service.impl.ConfigBackupLogImpl">
+		<property name="configBackupLogDao" ref="configBackupLogDao" />
+	</bean>
+	
+	<bean id="configEngine" class="com.mainsteam.stm.portal.config.job.ConfigEngine">
+		<property name="scheduleManager" ref="scheduleManager"></property>
+	</bean>
+	
+	<bean id="configScriptApi" class="com.mainsteam.stm.portal.config.service.impl.ConfigScriptServiceImpl">
+		<property name="configScriptDao" ref="configScriptDao" />
+		<property name="seq" ref="configScriptSeq" />
+	</bean>
+	
+	<bean id="configScriptDirectoryApi" class="com.mainsteam.stm.portal.config.service.impl.ConfigScriptDirectoryServiceImpl">
+		<property name="configScriptDirectoryDao" ref="configScriptDirectoryDao" />
+		<property name="seq" ref="configScriptDirectorySeq" />
+	</bean>
+	
+	
+</beans>

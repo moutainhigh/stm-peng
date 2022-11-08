@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.instancelib.dao.InstanceDependenceRelationResultDAO">
+	
+	<sql id="relationResultColumn"> 
+		alarmEventId,resultType,resultValue
+	</sql>
+	<sql id="relationResultColumnValue">
+		#{alarmEventId}, #{resultType},#{resultValue}
+	</sql>
+	<sql id="relationTable">
+		 STM_INSTANCELIB_DEPEND_RESULT
+	</sql>
+	<sql id="selectSql">
+		select <include refid="relationResultColumn"/>
+		from   <include refid="relationTable"/>
+	</sql>
+	
+	<insert id="insertDependenceResult"  parameterType="com.mainsteam.stm.instancelib.dao.pojo.InstanceDependenceResultPO">
+	  insert into 
+		<include refid="relationTable"/> 
+		(<include refid="relationResultColumn"/>)
+		VALUES
+		(<include refid="relationResultColumnValue"/>) 
+	</insert>
+	<delete id="removeDependenceResultByAlarmEventId">
+		delete from
+		<include refid="relationTable"/>
+		where alarmEventId=#{alarmEventId}
+	</delete>
+	<select id="getDependenceResultByAlarmEventIdAndType" 
+	resultType="com.mainsteam.stm.instancelib.dao.pojo.InstanceDependenceResultPO">
+		<include refid="selectSql"/> where alarmEventId=#{alarmEventId} and resultType=#{resultType}
+	</select>
+
+</mapper>

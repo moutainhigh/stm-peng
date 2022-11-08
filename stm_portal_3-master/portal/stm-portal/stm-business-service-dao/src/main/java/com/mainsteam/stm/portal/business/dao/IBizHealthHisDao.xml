@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.portal.business.dao.IBizHealthHisDao">
+   
+   
+   
+   
+   
+  <select id="getBizStatus" resultType="int" parameterType="long" databaseId="mysql">
+		SELECT BIZ_STATUS FROM STM_BIZ_HEALTH_HIS
+		WHERE BIZ_ID = #{id} ORDER BY BIZ_CHANGE_TIME DESC,ID DESC LIMIT 1
+	</select>
+   
+   
+   
+   
+   
+  <select id="getBizStatus" resultType="int" parameterType="long" databaseId="oracle">
+		SELECT BIZ_STATUS FROM 
+		(SELECT * FROM STM_BIZ_HEALTH_HIS WHERE BIZ_ID = #{id} ORDER BY BIZ_CHANGE_TIME DESC,ID DESC) C
+		WHERE ROWNUM=1
+	</select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="getBizStatus" resultType="int" parameterType="long" databaseId="dm">
+		SELECT BIZ_STATUS FROM 
+		(SELECT * FROM STM_BIZ_HEALTH_HIS WHERE BIZ_ID = #{id} ORDER BY BIZ_CHANGE_TIME DESC,ID DESC) C
+		WHERE ROWNUM=1
+	</select>
+  <select id="getBizStatus" resultType="int" parameterType="long" databaseId="oscar">
+		SELECT BIZ_STATUS FROM 
+		(SELECT * FROM STM_BIZ_HEALTH_HIS WHERE BIZ_ID = #{id} ORDER BY BIZ_CHANGE_TIME DESC,ID DESC) C
+		WHERE ROWNUM=1
+	</select>
+   
+   
+   
+   
+   
+  <select id="getBizHealthHis" resultType="com.mainsteam.stm.portal.business.bo.BizHealthHisBo" parameterType="long" databaseId="mysql">
+		SELECT BIZ_STATUS as bizStatus,BIZ_HEALTH as bizHealth,BIZ_CHANGE_TIME as bizChangeTime FROM STM_BIZ_HEALTH_HIS
+		WHERE BIZ_ID = #{id} ORDER BY BIZ_CHANGE_TIME DESC,ID DESC LIMIT 1
+	</select>
+   
+   
+   
+   
+   
+  <select id="getBizHealthHis" resultType="com.mainsteam.stm.portal.business.bo.BizHealthHisBo" parameterType="long" databaseId="oracle">
+		SELECT BIZ_STATUS as bizStatus,BIZ_HEALTH as bizHealth,BIZ_CHANGE_TIME as bizChangeTime FROM
+		 (SELECT * FROM STM_BIZ_HEALTH_HIS WHERE BIZ_ID = #{id} ORDER BY BIZ_CHANGE_TIME DESC,ID DESC) C
+		WHERE ROWNUM=1
+	</select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="getBizHealthHis" resultType="com.mainsteam.stm.portal.business.bo.BizHealthHisBo" parameterType="long" databaseId="dm">
+		SELECT BIZ_STATUS as bizStatus,BIZ_HEALTH as bizHealth,BIZ_CHANGE_TIME as bizChangeTime FROM
+		 (SELECT * FROM STM_BIZ_HEALTH_HIS WHERE BIZ_ID = #{id} ORDER BY BIZ_CHANGE_TIME DESC,ID DESC) C
+		WHERE ROWNUM=1
+	</select>
+  <select id="getBizHealthHis" resultType="com.mainsteam.stm.portal.business.bo.BizHealthHisBo" parameterType="long" databaseId="oscar">
+		SELECT BIZ_STATUS as bizStatus,BIZ_HEALTH as bizHealth,BIZ_CHANGE_TIME as bizChangeTime FROM
+		 (SELECT * FROM STM_BIZ_HEALTH_HIS WHERE BIZ_ID = #{id} ORDER BY BIZ_CHANGE_TIME DESC,ID DESC) C
+		WHERE ROWNUM=1
+	</select>
+   
+   
+   
+   
+   
+  <insert id="insertHealthHis" parameterType="com.mainsteam.stm.portal.business.bo.BizHealthHisBo" databaseId="mysql">
+		INSERT INTO STM_BIZ_HEALTH_HIS(BIZ_ID,BIZ_HEALTH,BIZ_STATUS,BIZ_CHANGE_TIME)
+		VALUES(#{bizId},#{bizHealth},#{bizStatus},#{bizChangeTime})
+	</insert>
+   
+   
+   
+   
+   
+  <insert id="insertHealthHis" parameterType="com.mainsteam.stm.portal.business.bo.BizHealthHisBo" databaseId="oracle">
+		INSERT INTO STM_BIZ_HEALTH_HIS(ID,BIZ_ID,BIZ_HEALTH,BIZ_STATUS,BIZ_CHANGE_TIME)
+		VALUES(STM_BIZ_HEALTH_HIS_SEQ.Nextval,#{bizId},#{bizHealth},#{bizStatus},#{bizChangeTime})
+	</insert>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <insert id="insertHealthHis" parameterType="com.mainsteam.stm.portal.business.bo.BizHealthHisBo" databaseId="dm">
+		INSERT INTO STM_BIZ_HEALTH_HIS(ID,BIZ_ID,BIZ_HEALTH,BIZ_STATUS,BIZ_CHANGE_TIME)
+		VALUES(STM_BIZ_HEALTH_HIS_SEQ.Nextval,#{bizId},#{bizHealth},#{bizStatus},#{bizChangeTime})
+	</insert>
+  <insert id="insertHealthHis" parameterType="com.mainsteam.stm.portal.business.bo.BizHealthHisBo" databaseId="oscar">
+		INSERT INTO STM_BIZ_HEALTH_HIS(ID,BIZ_ID,BIZ_HEALTH,BIZ_STATUS,BIZ_CHANGE_TIME)
+		VALUES(STM_BIZ_HEALTH_HIS_SEQ.Nextval,#{bizId},#{bizHealth},#{bizStatus},#{bizChangeTime})
+	</insert>
+   
+   
+   
+   
+   
+  <delete id="deleteHealthHisByBizId" parameterType="long">
+		DELETE FROM STM_BIZ_HEALTH_HIS WHERE BIZ_ID = #{bizId}
+	</delete>
+   
+   
+   
+   
+   
+  <select id="getHealthByTimeScope" resultType="com.mainsteam.stm.portal.business.bo.BizHealthHisBo" parameterType="map">
+		SELECT BIZ_HEALTH as bizHealth,BIZ_CHANGE_TIME as bizChangeTime 
+		 FROM STM_BIZ_HEALTH_HIS WHERE BIZ_ID = #{id} AND BIZ_CHANGE_TIME BETWEEN #{startTime} AND #{endTime}
+		 ORDER BY BIZ_CHANGE_TIME
+	</select>
+   
+   
+   
+   
+   
+  <select id="getHealthFrontFirstScopeByStartTime" resultType="com.mainsteam.stm.portal.business.bo.BizHealthHisBo" parameterType="map" databaseId="mysql">
+		SELECT BIZ_HEALTH AS bizHealth 
+		 FROM STM_BIZ_HEALTH_HIS WHERE BIZ_ID = #{id} AND BIZ_CHANGE_TIME &lt; #{startTime}
+		 ORDER BY BIZ_CHANGE_TIME DESC  LIMIT 1
+	</select>
+   
+   
+   
+   
+   
+  <select id="getHealthFrontFirstScopeByStartTime" resultType="com.mainsteam.stm.portal.business.bo.BizHealthHisBo" parameterType="map" databaseId="oracle">
+	    SELECT BIZ_HEALTH AS bizHealth FROM (
+	    	SELECT * 
+	     	FROM STM_BIZ_HEALTH_HIS WHERE BIZ_ID = #{id} AND BIZ_CHANGE_TIME &lt; to_date(#{startTime},'yyyy-mm-dd hh24:mi:ss')
+	     	ORDER BY BIZ_CHANGE_TIME DESC 
+     	) WHERE ROWNUM=1
+	</select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="getHealthFrontFirstScopeByStartTime" resultType="com.mainsteam.stm.portal.business.bo.BizHealthHisBo" parameterType="map" databaseId="dm">
+	    SELECT BIZ_HEALTH AS bizHealth FROM (
+	    	SELECT * 
+	     	FROM STM_BIZ_HEALTH_HIS WHERE BIZ_ID = #{id} AND BIZ_CHANGE_TIME &lt; to_date(#{startTime},'yyyy-mm-dd hh24:mi:ss')
+	     	ORDER BY BIZ_CHANGE_TIME DESC 
+     	) WHERE ROWNUM=1
+	</select>
+  <select id="getHealthFrontFirstScopeByStartTime" resultType="com.mainsteam.stm.portal.business.bo.BizHealthHisBo" parameterType="map" databaseId="oscar">
+	    SELECT BIZ_HEALTH AS bizHealth FROM (
+	    	SELECT * 
+	     	FROM STM_BIZ_HEALTH_HIS WHERE BIZ_ID = #{id} AND BIZ_CHANGE_TIME &lt; to_date(#{startTime},'yyyy-mm-dd hh24:mi:ss')
+	     	ORDER BY BIZ_CHANGE_TIME DESC 
+     	) WHERE ROWNUM=1
+	</select>
+</mapper>

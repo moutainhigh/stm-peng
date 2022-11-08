@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.profilelib.dao.ProfileDAO">
+	 
+		<select id="getProfileInfoPO" 
+		resultType="com.mainsteam.stm.profilelib.po.ProfileInfoPO"
+		parameterType="com.mainsteam.stm.profilelib.po.ProfileInfoPO">
+		select 
+		PROFILE_ID as profileId, PROFILE_NAME as profileName, PROFILE_DESC as 
+		profileDesc, IS_USE as isUse, RESOURCE_ID as resourceId,PARENT_PROFILE_ID as parentProfileId,
+		 PROFILE_TYPE as profileType, COPY_PROFILE_ID as copyProfileId,UPDATE_USER 
+		as updateUser,UPDATE_USER_DOMAIN as updateUserDomain, UPDATE_TIME as updateTime,
+		DOMAIN_ID as domainId,RESOURCE_INSTANCE_ID as resourceInstanceId,create_user as createUser
+		from STM_PROFILELIB_MAIN
+		<trim prefix="where" prefixOverrides="and">
+			<if test="profileName != null"> and PROFILE_NAME =#{profileName}</if>
+			<if test="profileDesc != null"> and PROFILE_DESC = #{profileDesc}</if>
+			<if test="resourceId != null"> and RESOURCE_ID= #{resourceId}</if>
+			<if test="parentProfileId != null"> and  PARENT_PROFILE_ID=#{parentProfileId}</if>
+			<if test="profileType != null"> and PROFILE_TYPE=#{profileType}</if>
+			<if test="updateUser != null"> and UPDATE_USER=#{updateUser}</if>
+			<if test="updateUserDomain != null"> and UPDATE_USER_DOMAIN=#{updateUserDomain}</if>
+			<if test="updateTime != null"> and UPDATE_TIME=#{updateTime}</if>
+			<if test="domainId > 0"> and DOMAIN_ID=#{domainId}</if>
+			<if test="resourceInstanceId > 0"> and RESOURCE_INSTANCE_ID=#{resourceInstanceId}</if>
+		<!-- 	<if test="isUse != null"> and IS_USE=#{isUse}</if> -->
+		</trim>
+		and RESOURCE_ID != 'Layer2Link' and RESOURCE_ID != 'VMWareVCenter' ORDER BY PROFILE_ID ASC
+		</select>
+		
+		<select id="getProfilePoById" 
+		resultType="com.mainsteam.stm.profilelib.po.ProfileInfoPO"
+		parameterType="long"> 
+		select 
+		PROFILE_ID as profileId, 
+		PROFILE_NAME as profileName, 
+		PROFILE_DESC as profileDesc, 
+		IS_USE as isUse, 
+		RESOURCE_ID as resourceId,
+		PARENT_PROFILE_ID as parentProfileId, 
+		PROFILE_TYPE as profileType,
+		COPY_PROFILE_ID as copyProfileId,
+		UPDATE_USER as updateUser,
+		UPDATE_USER_DOMAIN as updateUserDomain, 
+		UPDATE_TIME as updateTime ,
+		DOMAIN_ID as domainId,
+		RESOURCE_INSTANCE_ID as resourceInstanceId,
+		create_user as createUser
+		from 
+		STM_PROFILELIB_MAIN where PROFILE_ID = #{profileId}  ORDER BY PROFILE_ID ASC</select>
+		
+		<select id="getProfilePoByIds" 
+		resultType="com.mainsteam.stm.profilelib.po.ProfileInfoPO"
+		parameterType="long"> 
+		select 
+		PROFILE_ID as profileId, 
+		PROFILE_NAME as profileName, 
+		PROFILE_DESC as profileDesc, 
+		IS_USE as isUse, 
+		RESOURCE_ID as resourceId,
+		PARENT_PROFILE_ID as parentProfileId, 
+		PROFILE_TYPE as profileType,
+		COPY_PROFILE_ID as copyProfileId,
+		UPDATE_USER as updateUser,
+		UPDATE_USER_DOMAIN as updateUserDomain, 
+		UPDATE_TIME as updateTime ,
+		DOMAIN_ID as domainId,
+		RESOURCE_INSTANCE_ID as resourceInstanceId,
+		create_user as createUser
+		from 
+		STM_PROFILELIB_MAIN where PROFILE_ID in
+		<foreach  item="item" index="index" collection="list" open="(" separator="," close=")">
+			 #{item} 
+		</foreach>  
+		ORDER BY PROFILE_ID ASC
+		</select>
+		
+		<select id="getAllProfilePos" 
+		resultType="com.mainsteam.stm.profilelib.po.ProfileInfoPO" >
+		select 
+		PROFILE_ID as profileId, 
+		PROFILE_NAME as profileName, 
+		PROFILE_DESC as profileDesc, 
+		IS_USE as isUse, 
+		RESOURCE_ID as resourceId,
+		PARENT_PROFILE_ID as parentProfileId, 
+		PROFILE_TYPE as profileType,
+		COPY_PROFILE_ID as copyProfileId,
+		UPDATE_USER as updateUser,
+		UPDATE_USER_DOMAIN as updateUserDomain, 
+		UPDATE_TIME as updateTime,
+		DOMAIN_ID as domainId ,
+		RESOURCE_INSTANCE_ID as resourceInstanceId,
+		create_user as createUser
+		from STM_PROFILELIB_MAIN ORDER BY PROFILE_ID ASC</select>
+	<select id="getProfileBasicInfoByResourceIds" resultType="com.mainsteam.stm.profilelib.po.ProfileInfoPO">
+	    select 
+		PROFILE_ID as profileId, 
+		PROFILE_NAME as profileName, 
+		PROFILE_DESC as profileDesc, 
+		IS_USE as isUse, 
+		RESOURCE_ID as resourceId,
+		PARENT_PROFILE_ID as parentProfileId, 
+		PROFILE_TYPE as profileType,
+		COPY_PROFILE_ID as copyProfileId,
+		UPDATE_USER as updateUser,
+		UPDATE_USER_DOMAIN as updateUserDomain, 
+		UPDATE_TIME as updateTime ,
+		DOMAIN_ID as domainId,
+		RESOURCE_INSTANCE_ID as resourceInstanceId,create_user as createUser
+		from STM_PROFILELIB_MAIN where   RESOURCE_ID in
+		<foreach  item="item" index="index" collection="resourceIds" open="(" separator="," close=")">
+			 #{item} 
+		</foreach> 
+		<if test="profileType != null and profileType !='ALL'"> and PROFILE_TYPE=#{profileType}</if>
+		ORDER BY PROFILE_ID ASC
+		</select>
+	<select id="getProfileBasicInfoByResourceId" resultType="com.mainsteam.stm.profilelib.po.ProfileInfoPO"
+	 parameterType="java.util.List"> 
+	    select 
+		PROFILE_ID as profileId, 
+		PROFILE_NAME as profileName, 
+		PROFILE_DESC as profileDesc, 
+		IS_USE as isUse, 
+		RESOURCE_ID as resourceId,
+		PARENT_PROFILE_ID as parentProfileId, 
+		PROFILE_TYPE as profileType,
+		COPY_PROFILE_ID as copyProfileId,
+		UPDATE_USER as updateUser,
+		UPDATE_USER_DOMAIN as updateUserDomain, 
+		UPDATE_TIME as updateTime ,
+		DOMAIN_ID as domainId,
+		RESOURCE_INSTANCE_ID as resourceInstanceId,create_user as createUser
+		from STM_PROFILELIB_MAIN where   RESOURCE_ID in
+		<foreach  item="item" index="index" collection="list" open="(" separator="," close=")">
+			 #{item} 
+		</foreach> 
+		ORDER BY PROFILE_ID ASC
+			</select>
+	<select id="getPersonalizeProfileBasicInfoByParentProfileId" resultType="com.mainsteam.stm.profilelib.po.ProfileInfoPO"
+	 parameterType="long"> 
+	    select 
+		PROFILE_ID as profileId, 
+		PROFILE_NAME as profileName, 
+		PROFILE_DESC as profileDesc, 
+		IS_USE as isUse, 
+		RESOURCE_ID as resourceId,
+		PARENT_PROFILE_ID as parentProfileId, 
+		PROFILE_TYPE as profileType,
+		COPY_PROFILE_ID as copyProfileId,
+		UPDATE_USER as updateUser,
+		UPDATE_USER_DOMAIN as updateUserDomain, 
+		UPDATE_TIME as updateTime ,
+		DOMAIN_ID as domainId,
+		RESOURCE_INSTANCE_ID as resourceInstanceId,create_user as createUser
+		from STM_PROFILELIB_MAIN where (PROFILE_ID = #{profileId} or PARENT_PROFILE_ID=#{profileId})  ORDER BY PROFILE_ID ASC
+		</select>
+	
+	 <insert id="insertProfile" 
+		parameterType="com.mainsteam.stm.profilelib.po.ProfileInfoPO">
+		insert into STM_PROFILELIB_MAIN
+		(PROFILE_ID, PROFILE_NAME, PROFILE_DESC, IS_USE, 
+		RESOURCE_ID,PARENT_PROFILE_ID,PROFILE_TYPE, 
+		COPY_PROFILE_ID,UPDATE_USER,UPDATE_USER_DOMAIN,UPDATE_TIME,DOMAIN_ID,RESOURCE_INSTANCE_ID,create_user) 
+		values ( #{profileId}, #{profileName}, #{profileDesc}, #{isUse}, 
+		#{resourceId}, #{parentProfileId}, #{profileType}, 
+		 #{copyProfileId}, #{updateUser}, #{updateUserDomain}, #{updateTime},#{domainId},#{resourceInstanceId},#{createUser}) </insert>
+    <update id="updateProfile" 
+		parameterType="com.mainsteam.stm.profilelib.po.ProfileInfoPO">
+		update  STM_PROFILELIB_MAIN
+		<set>
+			<if test="profileName != null"> PROFILE_NAME =#{profileName},</if>
+			<if test="profileDesc != null">  PROFILE_DESC = #{profileDesc},</if>
+			<if test="isUse != null"> IS_USE = #{isUse},</if>
+			<if test="resourceId != null"> RESOURCE_ID= #{resourceId},</if>
+			<if test="parentProfileId != null"> PARENT_PROFILE_ID=#{parentProfileId},</if>
+			<if test="copyProfileId > 0"> COPY_PROFILE_ID=#{copyProfileId}, </if>
+			<if test="updateUser != null"> UPDATE_USER=#{updateUser}, </if>
+			<if test="updateUserDomain != null"> UPDATE_USER_DOMAIN=#{updateUserDomain}, </if>
+			<if test="updateTime != null"> UPDATE_TIME=#{updateTime} ,</if>
+			<if test="domainId > 0"> DOMAIN_ID=#{domainId} ,</if>
+		</set>	
+	    where PROFILE_ID = #{profileId} </update>
+	    
+	 <update id="updateProfileStateByResourceId" parameterType="com.mainsteam.stm.profilelib.po.ProfileInfoPO">
+		update  STM_PROFILELIB_MAIN set IS_USE = #{isUse} where RESOURCE_ID = #{resourceId} and profile_type !='PERSONALIZE'
+	</update>
+	    
+	<update id="updateProfileStateByResourceIds" 
+		parameterType="com.mainsteam.stm.profilelib.po.ProfileInfoPO">
+		update  STM_PROFILELIB_MAIN set IS_USE = #{isUse}
+	    where RESOURCE_ID in <foreach item="item" 
+		index="index" collection="resourceIds" open="(" separator="," close=")"> 
+		#{item} </foreach> 
+	    </update> 
+	<delete id="removeProfileByProfileIds" parameterType="List"> 
+		delete from STM_PROFILELIB_MAIN where PROFILE_ID in <foreach item="item"
+		index="index" collection="list" open="(" separator="," close=")"> 
+		#{item} </foreach> </delete>
+	<delete id="removeProfileByProfileId" parameterType="long"> 
+		delete from STM_PROFILELIB_MAIN where PROFILE_ID = #{profileId}</delete>
+</mapper>

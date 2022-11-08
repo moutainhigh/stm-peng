@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.common.metric.dao.MetricAvailableDAO">
+	<insert id="addMetricAvailableData" parameterType="com.mainsteam.stm.common.metric.obj.MetricData" >
+	    INSERT INTO STM_METRIC_AVAILABLE(METRIC_ID,INSTANCE_ID,TIMELINE_ID,PROFILE_ID,METRIC_DATA,COLLECT_TIME)
+	    VALUES (#{metricId},#{resourceInstanceId},#{timelineId},#{profileId},#{metricData}, #{collectTime})
+	</insert>
+	<insert id="updateMetricAvailableData" parameterType="com.mainsteam.stm.common.metric.obj.MetricData">
+	    UPDATE  STM_METRIC_AVAILABLE
+	    SET TIMELINE_ID = #{timelineId},
+	    	PROFILE_ID = #{profileId},
+	    	METRIC_DATA = #{metricData},
+	    	COLLECT_TIME = #{collectTime}
+	    	WHERE INSTANCE_ID = #{resourceInstanceId} AND METRIC_ID = #{metricId}
+	</insert>
+	<select id="selectAvaMetricOne" resultType="int">
+		SELECT COUNT(*) FROM STM_METRIC_AVAILABLE WHERE
+			INSTANCE_ID=#{resourceInstanceId} and METRIC_ID=#{metricID}
+	</select>
+	<select id="getAllAvailable" resultType="com.mainsteam.stm.common.metric.obj.MetricDataPO">
+		SELECT INSTANCE_ID as resourceInstanceId, 
+			METRIC_ID as metricId FROM STM_METRIC_AVAILABLE
+	</select>
+	<select id="getMetricAvailableData" parameterType="Map" resultType="com.mainsteam.stm.common.metric.obj.MetricDataPO">
+		SELECT
+			INSTANCE_ID as resourceInstanceId, 
+			METRIC_ID as metricId,
+			TIMELINE_ID	as timelineId,
+		  	PROFILE_ID	as profileId, 
+			METRIC_DATA as metricData,
+			COLLECT_TIME as collectTime
+		FROM  STM_METRIC_AVAILABLE
+		WHERE INSTANCE_ID =#{instanceID} AND METRIC_ID= #{metricID}
+	</select>
+
+	<select id="getMetricAvailableDataBatch" parameterType="Map" resultType="com.mainsteam.stm.common.metric.obj.MetricDataPO">
+		SELECT
+		INSTANCE_ID as resourceInstanceId,
+		METRIC_ID as metricId,
+		TIMELINE_ID	as timelineId,
+		PROFILE_ID	as profileId,
+		METRIC_DATA as metricData,
+		COLLECT_TIME as collectTime
+		FROM  STM_METRIC_AVAILABLE
+		WHERE INSTANCE_ID =#{instanceID} AND METRIC_ID IN
+		<foreach collection="metricSet" open="(" separator="," close=")" item="metricId">
+			#{metricID}
+		</foreach>
+	</select>
+</mapper>

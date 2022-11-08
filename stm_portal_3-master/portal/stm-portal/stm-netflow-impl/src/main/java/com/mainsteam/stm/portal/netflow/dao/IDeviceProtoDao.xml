@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.portal.netflow.dao.IDeviceProtoDao">
+
+	<select id="getTotalProtoNetflowsOfDevice" resultType="com.mainsteam.stm.portal.netflow.bo.Whole" parameterType="com.mainsteam.stm.portal.netflow.bo.NetflowParamBo">
+	
+		select 
+			ifnull(sum(flowTotal), 0) as wholeFlows,
+			ifnull(sum(packetTotal), 0) as wholePackets,
+			ifnull(sum(connectTotal), 0) as wholeConnects
+		from
+		(
+			select 
+				a.id,
+				ifnull(t3.flowTotal, 0) as flowTotal,
+				ifnull(t3.packetTotal, 0) as packetTotal,
+				ifnull(t3.connectTotal, 0) as connectTotal
+			from
+				CONF_PROTOCOL a
+			left join
+			(
+				select 
+					sum(ifnull(t1.flowIn, 0) + ifnull(t2.flowOut, 0)) as flowTotal,
+					t1.proto as protoId,
+					sum(ifnull(t1.packetIn, 0) + ifnull(t2.packetOut, 0)) as packetTotal,
+					sum(ifnull(t1.connectNumberIn, 0) + ifnull(t2.connectNumberOut, 0)) as connectTotal
+				from
+				(
+					select 
+						ifnull(sum(octets_total), 0) as flowIn,  
+						proto,
+						ifnull(SUM(packet_total),0) AS packetIn, ifnull(SUM(FLOW_TOTAL),0) connectNumberIn
+					from 
+						ANA_IF_IN_APP_${tableSuffix} 
+					where 
+						router_ip in
+						<foreach collection="deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach> and acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} 
+					group by proto
+				) t1 left join
+				(
+					select 
+						ifnull(sum(octets_total), 0) as flowOut,  
+						proto,
+						ifnull(SUM(packet_total),0) AS packetOut, ifnull(SUM(FLOW_TOTAL),0) connectNumberOut
+					from 
+						ANA_IF_IN_APP_${tableSuffix} 
+					where 
+						router_ip in
+						<foreach collection="deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach> and acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} 
+					group by proto
+				) t2
+				on t1.proto=t2.proto
+				group by t1.proto
+				
+				union
+				
+				select 
+					sum(ifnull(t4.flowIn, 0) + ifnull(t5.flowOut, 0)) as flowTotal,
+					t5.proto as protoId,
+					sum(ifnull(t4.packetIn, 0) + ifnull(t5.packetOut, 0)) as packetTotal,
+					sum(ifnull(t4.connectNumberIn, 0) + ifnull(t5.connectNumberOut, 0)) as connectTotal
+				from
+				(
+					select 
+						ifnull(sum(octets_total), 0) as flowIn,  
+						proto,
+						ifnull(SUM(packet_total),0) AS packetIn, ifnull(SUM(FLOW_TOTAL),0) connectNumberIn
+					from 
+						ANA_IF_IN_APP_${tableSuffix} 
+					where 
+						router_ip in
+						<foreach collection="deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach> and acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} 
+					group by proto
+				) t4 left join
+				(
+					select 
+						ifnull(sum(octets_total), 0) as flowOut,  
+						proto,
+						ifnull(SUM(packet_total),0) AS packetOut, ifnull(SUM(FLOW_TOTAL),0) connectNumberOut
+					from 
+						ANA_IF_IN_APP_${tableSuffix} 
+					where 
+						router_ip in
+						<foreach collection="deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach> and acq_time <![CDATA[ > ]]> ${stime} and acq_time <![CDATA[ <= ]]> ${etime} 
+					group by proto
+				) t5
+				on t4.proto=t5.proto
+				group by t5.proto	
+		
+			) t3
+			on a.ID = t3.protoId
+			group by a.id
+		) tall
+
+	</select>
+
+	<select id="deviceProtoNetflowPageSelect" resultType="com.mainsteam.stm.portal.netflow.bo.NetflowBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+	
+		select * from
+		(
+			select 
+				a.NAME,
+				a.id as protoId,
+				ifnull(t3.flowIn, 0) as flowIn,
+				ifnull(t3.flowOut, 0) as flowOut,
+				ifnull(t3.flowTotal, 0) as flowTotal,
+				ifnull(t3.packetIn, 0) as packetIn,
+				ifnull(t3.packetOut, 0) as packetOut,
+				ifnull(t3.packetTotal, 0) as packetTotal,
+				ifnull(t3.speedIn, 0) as speedIn,
+				ifnull(t3.speedOut, 0) as speedOut,
+				ifnull(t3.speedTotal, 0) as speedTotal,
+				ifnull(flowPctge, 0) as flowPctge,ifnull(packetPctge, 0) as packetPctge,ifnull(connectPctge, 0) as connectPctge,
+				ifnull(packetInSpeed,0) packetInSpeed,ifnull(packetOutSpeed,0) packetOutSpeed,ifnull(packetTotalSpeed,0) packetTotalSpeed,
+				ifnull(connectNumberIn,0) connectNumberIn,ifnull(connectNumberOut,0) connectNumberOut,ifnull(connectNumberTotal,0) connectNumberTotal,
+				ifnull(connectNumberInSpeed,0) connectNumberInSpeed,ifnull(connectNumberOutSpeed,0) connectNumberOutSpeed,ifnull(connectNumberTotalSpeed,0) connectNumberTotalSpeed
+			from
+				CONF_PROTOCOL a
+			left join
+			(
+				select
+					t12.*,
+					sum(t12.speedIn+t12.speedOut) as speedTotal,
+					sum(t12.packetIn + t12.packetOut) as packetTotal,
+					sum(t12.flowIn+t12.flowOut) as flowTotal,
+					sum(t12.flowIn+t12.flowOut) / ${condition.wholeFlows} as flowPctge,
+					sum(t12.packetIn+t12.packetOut) / ${condition.wholePackets} as packetPctge,
+					sum(t12.connectNumberIn+t12.connectNumberOut) / ${condition.wholeConnects} as connectPctge
+				from
+				(
+					select 
+						ifnull(t1.flowIn, 0) as flowIn,
+						ifnull(t2.flowOut, 0) as flowOut,
+						ifnull(t1.packetIn, 0) as packetIn,
+						ifnull(t2.packetOut, 0) as packetOut,
+						ifnull(t1.flowIn, 0) / ${condition.timeInterval} as speedIn,
+						ifnull(t2.flowOut, 0) / ${condition.timeInterval} as speedOut,
+						t1.proto as protoId,
+						ifnull(t1.packetIn/${condition.timeInterval},0) packetInSpeed,ifnull(t2.packetOut/${condition.timeInterval},0) packetOutSpeed,ifnull((ifnull(t1.packetIn,0)+ifnull(t2.packetOut,0))/${condition.timeInterval},0) packetTotalSpeed,
+						ifnull(t1.connectNumberIn,0) AS connectNumberIn,ifnull(t2.connectNumberOut,0) AS connectNumberOut,ifnull(ifnull(t1.connectNumberIn,0)+ifnull(t2.connectNumberOut,0),0) AS connectNumberTotal,
+						ifnull(t1.connectNumberIn/${condition.timeInterval},0) AS connectNumberInSpeed,ifnull(t2.connectNumberOut/${condition.timeInterval},0) AS connectNumberOutSpeed,ifnull((ifnull(t1.connectNumberIn,0)+ifnull(t2.connectNumberOut,0))/${condition.timeInterval},0) AS connectNumberTotalSpeed
+					from
+						(
+							select 
+								ifnull(sum(octets_total), 0) as flowIn,  
+								ifnull(sum(packet_total), 0) as packetIn, proto,
+								ifnull(sum(FLOW_TOTAL),0) AS connectNumberIn
+							from 
+								ANA_IF_IN_APP_${condition.tableSuffix} 
+							where 
+								router_ip in
+						<foreach collection="condition.deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach> and acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime} 
+							group by proto
+						) t1 left join
+						(
+							select 
+								ifnull(sum(octets_total), 0) as flowOut,  
+								ifnull(sum(packet_total), 0) as packetOut, proto,
+								ifnull(sum(FLOW_TOTAL),0) AS connectNumberOut
+							from 
+								ANA_IF_IN_APP_${condition.tableSuffix} 
+							where 
+								router_ip in
+						<foreach collection="condition.deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach> and acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime} 
+							group by proto
+						) t2
+					on t1.proto=t2.proto
+					group by t1.proto
+				) t12
+				group by t12.protoId
+				
+				union
+				
+				select
+					t45.*,
+					sum(t45.speedIn+t45.speedOut) as speedTotal,
+					sum(t45.packetIn + t45.packetOut) as packetTotal,
+					sum(t45.flowIn+t45.flowOut) as flowTotal,
+					sum(t45.flowIn+t45.flowOut) / ${condition.wholeFlows} as flowPctge,
+					sum(t45.packetIn+t45.packetOut) / ${condition.wholePackets} as packetPctge,
+					sum(t45.connectNumberIn+t45.connectNumberOut) / ${condition.wholeConnects} as connectPctge
+				from
+				(
+					select 
+						ifnull(t4.flowIn, 0) as flowIn,
+						ifnull(t5.flowOut, 0) as flowOut,
+						ifnull(t4.packetIn, 0) as packetIn,
+						ifnull(t5.packetOut, 0) as packetOut,
+						ifnull(t4.flowIn, 0) / ${condition.timeInterval} as speedIn,
+						ifnull(t5.flowOut, 0) / ${condition.timeInterval} as speedOut,
+						t5.proto as protoId,
+						ifnull(t4.packetIn/${condition.timeInterval},0) packetInSpeed,ifnull(t5.packetOut/${condition.timeInterval},0) packetOutSpeed,ifnull((ifnull(t4.packetIn,0)+ifnull(t5.packetOut,0))/${condition.timeInterval},0) packetTotalSpeed,
+						ifnull(t4.connectNumberIn,0) AS connectNumberIn,ifnull(t5.connectNumberOut,0) AS connectNumberOut,ifnull(ifnull(t4.connectNumberIn,0)+ifnull(t5.connectNumberOut,0),0) AS connectNumberTotal,
+						ifnull(t4.connectNumberIn/${condition.timeInterval},0) AS connectNumberInSpeed,ifnull(t5.connectNumberOut/${condition.timeInterval},0) AS connectNumberOutSpeed,ifnull((ifnull(t4.connectNumberIn,0)+ifnull(t5.connectNumberOut,0))/${condition.timeInterval},0) AS connectNumberTotalSpeed
+					from
+						(
+							select 
+								ifnull(sum(octets_total), 0) as flowIn,  
+								ifnull(sum(packet_total), 0) as packetIn, proto,
+								ifnull(sum(FLOW_TOTAL),0) AS connectNumberIn
+							from 
+								ANA_IF_IN_APP_${condition.tableSuffix} 
+							where 
+								router_ip in
+						<foreach collection="condition.deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach> and acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime} 
+							group by proto
+						) t4 right join
+						(
+							select 
+								ifnull(sum(octets_total), 0) as flowOut,  
+								ifnull(sum(packet_total), 0) as packetOut, proto,
+								ifnull(sum(FLOW_TOTAL),0) AS connectNumberOut
+							from 
+								ANA_IF_IN_APP_${condition.tableSuffix} 
+							where 
+								router_ip in
+						<foreach collection="condition.deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach> and acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime} 
+							group by proto
+						) t5
+					on t4.proto=t5.proto
+					group by t5.proto
+				) t45
+				group by t45.protoId
+		
+			) t3
+			on a.ID = t3.protoId
+			group by a.name
+		) tall
+		group by tall.protoId
+		<if test="condition!=null">
+			order by
+	 		<if test="condition.sort != null">tall.${condition.sort}</if>
+			<if test="condition.order != null"> ${condition.order} </if>
+		</if>
+	</select>
+	
+	<select id="queryDeviceProtoNetflowOfTimepoint" parameterType="com.mainsteam.stm.portal.netflow.bo.NetflowParamBo" resultType="com.mainsteam.stm.portal.netflow.bo.NetflowBo">
+		
+		select * from
+		(
+			select 
+				ifnull(t3.flowIn, 0) as flowIn,
+				ifnull(t3.flowOut, 0) as flowOut,
+				ifnull(t3.flowTotal, 0) as flowTotal,
+				ifnull(t3.packetIn, 0) as packetIn,
+				ifnull(t3.packetOut, 0) as packetOut,
+				ifnull(t3.packetTotal, 0) as packetTotal,
+				ifnull(t3.speedIn, 0) as speedIn,
+				ifnull(t3.speedOut, 0) as speedOut,
+				ifnull(t3.speedTotal, 0) as speedTotal,
+				ifnull(flowPctge, 0) as flowPctge,
+				acq_time
+			from
+			(
+				select
+					t12.*,
+					sum(t12.speedIn+t12.speedOut) as speedTotal,
+					sum(t12.packetIn + t12.packetOut) as packetTotal,
+					sum(t12.flowIn+t12.flowOut) as flowTotal,
+					sum(t12.flowIn+t12.flowOut) / ${wholeFlows} as flowPctge
+				from
+				(
+					select 
+						ifnull(t1.flowIn, 0) as flowIn,
+						ifnull(t2.flowOut, 0) as flowOut,
+						ifnull(t1.packetIn, 0) as packetIn,
+						ifnull(t2.packetOut, 0) as packetOut,
+						ifnull(t1.flowIn, 0) / ${timeInterval} as speedIn,
+						ifnull(t2.flowOut, 0) / ${timeInterval} as speedOut,
+						t1.acq_time
+					from
+						(
+							select 
+								ifnull(sum(octets_total), 0) as flowIn,  
+								ifnull(sum(packet_total), 0) as packetIn, 
+								acq_time
+							from 
+								ANA_IF_IN_APP_${tableSuffix} 
+							where 
+								router_ip in
+						<foreach collection="deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach> and proto=${protoId} 
+								and acq_time in (${timeParam})
+							group by acq_time
+						) t1 left join
+						(
+							select 
+								ifnull(sum(octets_total), 0) as flowOut,  
+								ifnull(sum(packet_total), 0) as packetOut, 
+								acq_time
+							from 
+								ANA_IF_IN_APP_${tableSuffix} 
+							where 
+								router_ip in
+						<foreach collection="deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach> and proto=${protoId} 
+								and acq_time in (${timeParam})
+							group by acq_time
+						) t2
+					on t1.acq_time=t2.acq_time
+					group by t1.acq_time
+				) t12
+				group by t12.acq_time
+				
+				union
+				
+				select
+					t45.*,
+					sum(t45.speedIn+t45.speedOut) as speedTotal,
+					sum(t45.packetIn + t45.packetOut) as packetTotal,
+					sum(t45.flowIn+t45.flowOut) as flowTotal,
+					sum(t45.flowIn+t45.flowOut) / ${wholeFlows} as flowPctge
+				from
+				(
+					select 
+						ifnull(t4.flowIn, 0) as flowIn,
+						ifnull(t5.flowOut, 0) as flowOut,
+						ifnull(t4.packetIn, 0) as packetIn,
+						ifnull(t5.packetOut, 0) as packetOut,
+						ifnull(t4.flowIn, 0) / ${timeInterval} as speedIn,
+						ifnull(t5.flowOut, 0) / ${timeInterval} as speedOut,
+						t5.acq_time
+					from
+						(
+							select 
+								ifnull(sum(octets_total), 0) as flowIn,  
+								ifnull(sum(packet_total), 0) as packetIn, 
+								acq_time
+							from 
+								ANA_IF_IN_APP_${tableSuffix} 
+							where 
+								router_ip in
+						<foreach collection="deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach> and proto=${protoId} 
+								and acq_time in (${timeParam})
+							group by acq_time
+						) t4 right join
+						(
+							select 
+								ifnull(sum(octets_total), 0) as flowOut,  
+								ifnull(sum(packet_total), 0) as packetOut, 
+								acq_time
+							from 
+								ANA_IF_IN_APP_${tableSuffix} 
+							where 
+								router_ip in
+						<foreach collection="deviceIp" item="item" index="in" open="(" separator="," close=")">
+							#{item}
+						</foreach> and proto=${protoId} 
+								and acq_time in (${timeParam})
+							group by acq_time
+						) t5
+					on t4.acq_time=t5.acq_time
+					group by t5.acq_time
+				) t45
+				group by t45.acq_time		
+		
+			) t3
+			group by t3.acq_time
+		) tall
+		group by tall.acq_time
+		
+	</select>
+	
+</mapper>

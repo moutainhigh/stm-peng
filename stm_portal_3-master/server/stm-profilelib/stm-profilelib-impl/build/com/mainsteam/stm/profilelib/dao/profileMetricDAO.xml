@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.profilelib.dao.ProfileMetricDAO">
+	<insert id="insertMetric" 
+		parameterType="com.mainsteam.stm.profilelib.po.ProfileMetricPO"> insert
+		into STM_PROFILELIB_METRIC(MK_ID,PROFILE_ID, METRIC_ID,
+		DICT_FREQUENCY_ID, IS_USE,IS_ALARM,TIMELINE_ID,ALARM_REPEAT) values ( #{mkId}, #{profileId}, #{metricId}, 
+		#{dictFrequencyId}, #{isUse},#{isAlarm},#{timelineId},#{alarmRepeat}) </insert>
+	<delete id="removeMetricByProfileId" parameterType="long"> 
+		delete from STM_PROFILELIB_METRIC where PROFILE_ID = #{profileId}
+		</delete>
+	<delete id="removeMetricByTimelineId" parameterType="long"> 
+		delete from STM_PROFILELIB_METRIC where TIMELINE_ID = #{timelineId}
+	</delete>
+	<delete id="removeMetricByTimelineIds" parameterType="java.util.List"> 
+		delete from STM_PROFILELIB_METRIC where TIMELINE_ID in <foreach
+		item="item" index="index" collection="list" open="(" 
+		separator="," close=")"> #{item} </foreach> 
+	</delete>
+	<delete id="removeMetricByProfileIdAndMetricId"> 
+		delete from STM_PROFILELIB_METRIC where PROFILE_ID in <foreach
+		item="item" index="index" collection="profileIds" open="(" 
+		separator="," close=")"> #{item} </foreach> and METRIC_ID = #{metricId}
+	</delete>
+	<delete id="removeMetricByProfileIds" parameterType="java.util.List"> 
+		delete from STM_PROFILELIB_METRIC where PROFILE_ID in <foreach
+		item="item" index="index" collection="list" open="(" 
+		separator="," close=")"> #{item} </foreach></delete>
+	<update id="updateMetric" 
+		parameterType="com.mainsteam.stm.profilelib.po.ProfileMetricPO">
+		update STM_PROFILELIB_METRIC
+		<set>
+			<if test="dictFrequencyId != null"> DICT_FREQUENCY_ID = #{dictFrequencyId}, </if>
+			<if test="isUse != null">  IS_USE = #{isUse} ,</if>
+			<if test="timelineId > 0"> TIMELINE_ID = #{timelineId},</if>
+			<if test="isAlarm != null"> is_alarm = #{isAlarm},</if>
+			<if test="alarmRepeat > 0 "> alarm_repeat = #{alarmRepeat},</if>
+		</set>	
+		where PROFILE_ID = #{profileId} and METRIC_ID=#{metricId}
+		<choose>
+			<when test="timelineId > 0">
+				and TIMELINE_ID = #{timelineId}
+			</when>
+			 <otherwise>
+				 and (timeline_id = 0 or timeline_id is null)
+			 </otherwise>
+		</choose>
+	</update>
+	<update id="updateTimelineMetric" 
+		parameterType="com.mainsteam.stm.profilelib.po.ProfileMetricPO">
+		update STM_PROFILELIB_METRIC
+		<set>
+			<if test="dictFrequencyId != null"> DICT_FREQUENCY_ID = #{dictFrequencyId}, </if>
+			<if test="isUse != null">  IS_USE = #{isUse} ,</if>
+		<!--	<if test="timelineId > 0"> TIMELINE_ID = #{timelineId},</if> -->
+			<if test="isAlarm != null"> is_alarm = #{isAlarm},</if>
+			<if test="alarmRepeat > 0 "> alarm_repeat = #{alarmRepeat},</if>
+		</set>	
+		where PROFILE_ID = #{profileId} and METRIC_ID=#{metricId} and timeline_id =#{timelineId}
+	</update>
+	<select id="getMetricsByProfileId" 
+		resultType="com.mainsteam.stm.profilelib.po.ProfileMetricPO"
+		parameterType="long"> select MK_ID as mkId,PROFILE_ID as profileId, METRIC_ID as metricId, 
+		DICT_FREQUENCY_ID as dictFrequencyId, IS_USE as isUse ,TIMELINE_ID as timelineId,
+		IS_ALARM as isAlarm,ALARM_REPEAT as alarmRepeat
+		from STM_PROFILELIB_METRIC where PROFILE_ID = #{profileId} and (TIMELINE_ID is null or TIMELINE_ID=0)
+	</select>
+	<select id="getAllMetrics" resultType="com.mainsteam.stm.profilelib.po.ProfileMetricPO" >
+		select MK_ID as mkId,PROFILE_ID as profileId, METRIC_ID as metricId, 
+		DICT_FREQUENCY_ID as dictFrequencyId, IS_USE as isUse ,TIMELINE_ID as timelineId,
+		IS_ALARM as isAlarm,ALARM_REPEAT as alarmRepeat
+		from STM_PROFILELIB_METRIC
+	</select>
+	<select id="getMetricsByTimelineId" 
+		resultType="com.mainsteam.stm.profilelib.po.ProfileMetricPO"
+		parameterType="long"> select MK_ID as mkId,PROFILE_ID as profileId, METRIC_ID as metricId, 
+		DICT_FREQUENCY_ID as dictFrequencyId, IS_USE as isUse ,TIMELINE_ID as timelineId,
+		IS_ALARM as isAlarm,ALARM_REPEAT as alarmRepeat
+		from STM_PROFILELIB_METRIC where  TIMELINE_ID = #{timelineId}
+	</select>
+</mapper>

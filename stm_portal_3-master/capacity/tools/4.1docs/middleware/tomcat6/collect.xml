@@ -1,0 +1,868 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">
+    <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0">
+        <ChangePluginInitParameter pluginid="SshPlugin" parameterId="InstallPath" parameterProperty="isDisplay" propertyValue="TRUE"/>
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="InstallPath" parameterProperty="isDisplay" propertyValue="TRUE"/>
+        <ChangePluginInitParameter pluginid="SshPlugin" parameterId="port" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="SshPlugin" parameterId="username" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="SshPlugin" parameterId="password" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="WmiPlugin" parameterId="username" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="WmiPlugin" parameterId="password" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="port" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="username" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="password" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="userprompt" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="passprompt" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="opprompt" parameterProperty="mustInput" propertyValue="FALSE"/>
+    </GlobalMetricSetting>
+    <PluginClassAliasList>
+        <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+        <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+        <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+        <PluginClassAlias id="columnPasteProcessor" class="com.mainsteam.stm.plugin.common.ColumnPasteProcessor"/>
+        <PluginClassAlias id="RegularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+        <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+        <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+        <PluginClassAlias id="tableConverter" class="com.mainsteam.stm.plugin.common.TableResultSetConverter"/>
+        <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+        <PluginClassAlias id="ChangeRateProcessor" class="com.mainsteam.stm.plugin.common.ChangeRateProcessor"/>
+        <PluginClassAlias id="processConverter" class="com.mainsteam.stm.plugin.common.ProcessResultSetConverter"/>
+        <PluginClassAlias id="FormatProcessor" class="com.mainsteam.stm.plugin.common.FormatProcessor"/>
+        <PluginClassAlias id="memRateProcessor" class="com.mainsteam.stm.plugin.common.MemRateProcessor"/>
+        <PluginClassAlias id="rowFilterProcessor" class="com.mainsteam.stm.plugin.common.RowFilterProcessor"/>
+    </PluginClassAliasList>
+    <MetricPlugin metricid="cpuRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="CPU"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfOS_Processor  where name = '_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT SUM(CPU) AS cpuRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="Linux" value="LANG=en_US.utf8;top -b -n 3 -d 2 | grep -i &quot;cpu(s)&quot; | tail -n+3 | awk -F , '{if($4~/id/){printf (&quot;%0.2f&quot;,100-substr($4,1,length($4)-3));}}'"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;sar -u 1 2| awk 'BEGIN{idle=0;idloff=0;}{if($0~/idle/){for(i=1;i&lt;=NF;i++){if($i~/idle/)idloff=i;}}else if(NF&gt;1){idle=$idloff;}}END{syscpuload=100.00-idle;printf &quot;%.2f&quot;, syscpuload}'"/>
+            <Parameter type="" key="SunOS" value="vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+            <Parameter type="" key="AIX" value="vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+            <Parameter type="" key="SCO_SV" value="sar -u 1 2| awk 'BEGIN{idle=0;idloff=0;}{if($0~/idle/){for(i=1;i&lt;=NF;i++){if($i~/idle/)idloff=i;}}else if(NF&gt;1){idle=$idloff;}}END{syscpuload=100.00-idle;printf &quot;%.2f&quot;, syscpuload}'"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="cpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="Linux" value="LANG=en_US.utf8;top -b -n 3 -d 2 | grep -i &quot;cpu(s)&quot; | tail -n+3 | awk -F , '{if($4~/id/){printf (&quot;%0.2f&quot;,100-substr($4,1,length($4)-3));}}'"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;sar -u 1 2| awk 'BEGIN{idle=0;idloff=0;}{if($0~/idle/){for(i=1;i&lt;=NF;i++){if($i~/idle/)idloff=i;}}else if(NF&gt;1){idle=$idloff;}}END{syscpuload=100.00-idle;printf &quot;%.2f&quot;, syscpuload}'"/>
+            <Parameter type="" key="SunOS" value="vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+            <Parameter type="" key="AIX" value="vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+            <Parameter type="" key="SCO_SV" value="sar -u 1 2| awk 'BEGIN{idle=0;idloff=0;}{if($0~/idle/){for(i=1;i&lt;=NF;i++){if($i~/idle/)idloff=i;}}else if(NF&gt;1){idle=$idloff;}}END{syscpuload=100.00-idle;printf &quot;%.2f&quot;, syscpuload}'"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;vmstat 1 2 | awk 'BEGIN{id_flag=0;idl=0;}NR&gt;1{if($0~/id/){for(i=1;i&lt;=NF;i++){if($i~/id/)id_flag=i;}}idl=$id_flag;}END{printf &quot;%.2f&quot;, 100.00-idl}'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="memRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="Memory,totalMemSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select FreePhysicalMemory,TotalVisibleMEMorySize from Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (totalMemSize - Memory)/totalMemSize*100 AS memRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="memRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="Linux" value="LANG=en_US.utf8;cat /proc/meminfo | egrep '(^MemTotal|^MemFree|^Buffers|^Cached)' | awk '{if(NR==1){total=$2}else{free+=$2}};END {print free}'"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;vmstat 1 2 | awk 'BEGIN{flag_fre=0;memfree=0;}NR&gt;1{if($0~/fre/){for(i=1;i&lt;=NF;i++){if($i~/fre/)flag_fre=i;}}memfree=$flag_fre;}END{printf &quot;%.0f&quot;, memfree}'"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;sar -r 1 | awk 'BEGIN{memfree=0}{while(getline &gt;0){memfree=$2;}}END{printf &quot;%.0f&quot;,memfree*4}'"/>
+            <Parameter type="" key="SunOS" value="vmstat 1 2 | awk 'BEGIN{flag_fre=0;memfree=0;}NR&gt;1{if($0~/fre/){for(i=1;i&lt;=NF;i++){if($i~/fre/)flag_fre=i;}}memfree=$flag_fre;}END{printf &quot;%.0f&quot;, memfree}'"/>
+            <Parameter type="" key="AIX" value="svmon -G |egrep '(in use|memory)'|awk 'BEGIN{total=0;inused=0;}{if($1~/memory/){total=$2;}else{inused=$3;}}END{printf &quot;%.0f&quot;,(total-inused)*4}'"/>
+            <Parameter type="" key="SCO_SV" value="sar -r 1 | awk 'BEGIN{memfree=0}{while(getline &gt;0){memfree=$2;}}END{printf &quot;%.0f&quot;,memfree*4}'"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;vmstat 1 2 | awk 'BEGIN{flag_fre=0;memfree=0;}NR&gt;1{if($0~/fre/){for(i=1;i&lt;=NF;i++){if($i~/fre/)flag_fre=i;}}memfree=$flag_fre;}END{printf &quot;%.0f&quot;, memfree*4}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="ResourceProperty" key="totalMemSize" value="totalMemSize"/>
+                <Parameter type="" key="SELECT" value="SELECT (1-memRate/${totalMemSize})*100 as memRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="memRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="Linux" value="LANG=en_US.utf8;cat /proc/meminfo | egrep '(^MemTotal|^MemFree|^Buffers|^Cached)' | awk '{if(NR==1){total=$2}else{free+=$2}};END {print free}'"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;vmstat 1 2 | awk 'BEGIN{flag_fre=0;memfree=0;}NR&gt;1{if($0~/fre/){for(i=1;i&lt;=NF;i++){if($i~/fre/)flag_fre=i;}}memfree=$flag_fre;}END{printf &quot;%.0f&quot;, memfree}'"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;sar -r 1 | awk 'BEGIN{memfree=0}{while(getline &gt;0){memfree=$2;}}END{printf &quot;%.0f&quot;,memfree*4}'"/>
+            <Parameter type="" key="SunOS" value="vmstat 1 2 | awk 'BEGIN{flag_fre=0;memfree=0;}NR&gt;1{if($0~/fre/){for(i=1;i&lt;=NF;i++){if($i~/fre/)flag_fre=i;}}memfree=$flag_fre;}END{printf &quot;%.0f&quot;, memfree}'"/>
+            <Parameter type="" key="AIX" value="svmon -G |egrep '(in use|memory)'|awk 'BEGIN{total=0;inused=0;}{if($1~/memory/){total=$2;}else{inused=$3;}}END{printf &quot;%.0f&quot;,(total-inused)*4}'"/>
+            <Parameter type="" key="SCO_SV" value="sar -r 1 | awk 'BEGIN{memfree=0}{while(getline &gt;0){memfree=$2;}}END{printf &quot;%.0f&quot;,memfree*4}'"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;vmstat 1 2 | awk 'BEGIN{flag_fre=0;memfree=0;}NR&gt;1{if($0~/fre/){for(i=1;i&lt;=NF;i++){if($i~/fre/)flag_fre=i;}}memfree=$flag_fre;}END{printf &quot;%.0f&quot;, memfree*4}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="ResourceProperty" key="totalMemSize" value="totalMemSize"/>
+                <Parameter type="" key="SELECT" value="SELECT (1-memRate/${totalMemSize})*100 as memRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="availability" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="port"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=Server"/>
+            <Parameter type="" key="attributes" value="port"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="select (port !=null?'1':'0') as avail" key="SELECT"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="availableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="jvmFreeMemory" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="commit,used"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="java.lang:type=Memory"/>
+            <Parameter value="HeapMemoryUsage" key="attributes"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="committed=(\d+)[\S\s]*used=(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="select (commit-used) as free" key="SELECT"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="HeapMemoryUsage" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="commit,used"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="java.lang:type=Memory"/>
+            <Parameter value="HeapMemoryUsage" key="attributes"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="committed=(\d+)[\S\s]*used=(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="select (used/commit)*100 as HeapMemoryUsage" key="SELECT"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="jvmUsedMemory" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="used"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="java.lang:type=Memory"/>
+            <Parameter value="HeapMemoryUsage" key="attributes"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="used=(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="jvmTotalMemory" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="total"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="java.lang:type=Memory"/>
+            <Parameter value="HeapMemoryUsage" key="attributes"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="committed=(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="jvmMaxMemory" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="java.lang:type=Memory"/>
+            <Parameter value="HeapMemoryUsage" key="attributes"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="max=(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="NonHeapMemoryFree" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="commit,used"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="java.lang:type=Memory"/>
+            <Parameter value="NonHeapMemoryUsage" key="attributes"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="committed=(\d+)[\S\s]*used=(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="select (commit-used) as free" key="SELECT"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="NonHeapMemoryUsage" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="commit,used"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="java.lang:type=Memory"/>
+            <Parameter value="NonHeapMemoryUsage" key="attributes"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="committed=(\d+)[\S\s]*used=(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="select (used/commit)*100 as HeapMemoryUsage" key="SELECT"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="NonHeapMemoryUsed" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="used"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="java.lang:type=Memory"/>
+            <Parameter value="NonHeapMemoryUsage" key="attributes"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="used=(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="NonHeapMemoryTotal" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="total"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="java.lang:type=Memory"/>
+            <Parameter value="NonHeapMemoryUsage" key="attributes"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="committed=(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="NonHeapMemoryMax" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="java.lang:type=Memory"/>
+            <Parameter value="NonHeapMemoryUsage" key="attributes"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="max=(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="IP" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="IP"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="IP" value=""/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ServicePort" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="TomcatPort"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=Server"/>
+            <Parameter type="" key="attributes" value="port"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="jvmVersion" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="VmVersion,SpecVersion,VmVendor"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="java.lang:type=Runtime"/>
+            <Parameter type="" key="attributes" value="VmVersion,SpecVersion,VmVendor"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="select VmVersion"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="jvmVendor" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="VmVersion,SpecVersion,VmVendor"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="java.lang:type=Runtime"/>
+            <Parameter type="" key="attributes" value="VmVersion,SpecVersion,VmVendor"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="select VmVendor"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="OperatingSystem" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="java.lang:type=OperatingSystem"/>
+            <Parameter type="" key="attributes" value="Name"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="TotalActiveSessions" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="context,actives,rejecteds"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=Manager,*"/>
+            <Parameter type="" key="attributes" value="activeSessions,rejectedSessions"/>
+            <Parameter type="" key="multi" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="select sum(activeSessions) as activeSessions"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="TotalRejectSessions" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="context,actives,rejecteds"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=Manager,*"/>
+            <Parameter type="" key="attributes" value="activeSessions,rejectedSessions"/>
+            <Parameter type="" key="multi" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="select sum(rejecteds) as rejecteds"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="TotalBytesReceived" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="processId,bytesReceived,bytesSent,errorCount,maxTime,processingTime,requestCount"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=GlobalRequestProcessor,*"/>
+            <Parameter type="" key="attributes" value="bytesReceived,bytesSent,errorCount,maxTime,processingTime,requestCount"/>
+            <Parameter type="" key="multi" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="select sum(bytesReceived) as bytesReceived"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHG"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="TotalBytesSent" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="processId,bytesReceived,bytesSent,errorCount,maxTime,processingTime,requestCount"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=GlobalRequestProcessor,*"/>
+            <Parameter type="" key="attributes" value="bytesReceived,bytesSent,errorCount,maxTime,processingTime,requestCount"/>
+            <Parameter type="" key="multi" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="select sum(bytesSent) as bytesSent"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHG"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="TotalErrors" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="processId,bytesReceived,bytesSent,errorCount,maxTime,processingTime,requestCount"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=GlobalRequestProcessor,*"/>
+            <Parameter type="" key="attributes" value="bytesReceived,bytesSent,errorCount,maxTime,processingTime,requestCount"/>
+            <Parameter type="" key="multi" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="select sum(errorCount) as errorCount"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHG"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="maxProcessingTime" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="processId,bytesReceived,bytesSent,errorCount,maxTime,processingTime,requestCount"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=GlobalRequestProcessor,*"/>
+            <Parameter type="" key="attributes" value="bytesReceived,bytesSent,errorCount,maxTime,processingTime,requestCount"/>
+            <Parameter type="" key="multi" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="select sum(maxTime) as maxTime"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHG"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="processingTime" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="processId,bytesReceived,bytesSent,errorCount,maxTime,processingTime,requestCount"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=GlobalRequestProcessor,*"/>
+            <Parameter type="" key="attributes" value="bytesReceived,bytesSent,errorCount,maxTime,processingTime,requestCount"/>
+            <Parameter type="" key="multi" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="select sum(processingTime) as processingTime"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHG"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="TotalRequests" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="processId,bytesReceived,bytesSent,errorCount,maxTime,processingTime,requestCount"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=GlobalRequestProcessor,*"/>
+            <Parameter type="" key="attributes" value="bytesReceived,bytesSent,errorCount,maxTime,processingTime,requestCount"/>
+            <Parameter type="" key="multi" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="select sum(requestCount) as requestCount"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHG"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="currentThreadCount" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="threadId,currentThreadCount,currentThreadsBusy,maxThreads,connectionCount,maxConnections,running"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=ThreadPool,*"/>
+            <Parameter type="" key="attributes" value="currentThreadCount,currentThreadsBusy,maxThreads,connectionCount,maxConnections,running"/>
+            <Parameter type="" key="multi" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+        	<PluginDataHandler classKey="rowFilterProcessor">
+            	<Parameter type="" key="FilterColumn" value="running"/>
+            	<Parameter type="" key="RemoveValues" value="false"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="select sum(currentThreadCount) as currentThreadCount"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="currentThreadsBusy" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="threadId,currentThreadCount,currentThreadsBusy,maxThreads,connectionCount,maxConnections,running"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=ThreadPool,*"/>
+            <Parameter type="" key="attributes" value="currentThreadCount,currentThreadsBusy,maxThreads,connectionCount,maxConnections,running"/>
+            <Parameter type="" key="multi" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+        	<PluginDataHandler classKey="rowFilterProcessor">
+            	<Parameter type="" key="FilterColumn" value="running"/>
+            	<Parameter type="" key="RemoveValues" value="false"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="select sum(currentThreadsBusy) as currentThreadsBusy"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="maxThreads" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="threadId,currentThreadCount,currentThreadsBusy,maxThreads,connectionCount,maxConnections"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=ThreadPool,*"/>
+            <Parameter type="" key="attributes" value="currentThreadCount,currentThreadsBusy,maxThreads,connectionCount,maxConnections"/>
+            <Parameter type="" key="multi" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="select sum(maxThreads) as maxThreads"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="connectionCount" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="threadId,currentThreadCount,currentThreadsBusy,maxThreads,connectionCount,maxConnections"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=ThreadPool,*"/>
+            <Parameter type="" key="attributes" value="currentThreadCount,currentThreadsBusy,maxThreads,connectionCount,maxConnections"/>
+            <Parameter type="" key="multi" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="select sum(connectionCount) as connectionCount"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="maxConnections" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="threadId,currentThreadCount,currentThreadsBusy,maxThreads,connectionCount,maxConnections"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=ThreadPool,*"/>
+            <Parameter type="" key="attributes" value="currentThreadCount,currentThreadsBusy,maxThreads,connectionCount,maxConnections"/>
+            <Parameter type="" key="multi" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="select sum(maxConnections) as maxConnections"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="WebName" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="context"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=Manager,*"/>
+            <Parameter type="" key="attributes" value=""/>
+            <Parameter type="" key="multi" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="path=(\S+),"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="context"/>
+            <Parameter type="" key="ValueColumnTitle" value="context"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="WebState" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="context,stateName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=Manager,*"/>
+            <Parameter type="" key="attributes" value="stateName"/>
+            <Parameter type="" key="multi" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="path=(\S+),"/>
+                <Parameter type="" key="REGULAR" value="(.+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="stateName" value="STARTED,1;0"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="context"/>
+            <Parameter type="" key="ValueColumnTitle" value="stateName"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="WebName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="WebActiveSessions" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="context,activeSessions,expiredSessions,rejectedSessions,processingTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=Manager,*"/>
+            <Parameter type="" key="attributes" value="activeSessions,expiredSessions,rejectedSessions,processingTime"/>
+            <Parameter type="" key="multi" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="select context, activeSessions"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="path=(\S+),"/>
+                <Parameter type="" key="REGULAR" value="(.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="context"/>
+            <Parameter type="" key="ValueColumnTitle" value="activeSessions"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="WebName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="WebRejectSessions" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="context,activeSessions,expiredSessions,rejectedSessions,processingTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=Manager,*"/>
+            <Parameter type="" key="attributes" value="activeSessions,expiredSessions,rejectedSessions,processingTime"/>
+            <Parameter type="" key="multi" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="select context, rejectedSessions"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="path=(\S+),"/>
+                <Parameter type="" key="REGULAR" value="(.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="context"/>
+            <Parameter type="" key="ValueColumnTitle" value="rejectedSessions"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="WebName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="WebTotalSessions" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="context,activeSessions,expiredSessions,rejectedSessions,processingTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=Manager,*"/>
+            <Parameter type="" key="attributes" value="activeSessions,expiredSessions,rejectedSessions,processingTime"/>
+            <Parameter type="" key="multi" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="select context, (rejectedSessions+activeSessions+expiredSessions) as totalSessions"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="path=(\S+),"/>
+                <Parameter type="" key="REGULAR" value="(.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="context"/>
+            <Parameter type="" key="ValueColumnTitle" value="totalSessions"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="WebName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="WebProcessingTime" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="context,activeSessions,expiredSessions,rejectedSessions,processingTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=Manager,*"/>
+            <Parameter type="" key="attributes" value="activeSessions,expiredSessions,rejectedSessions,processingTime"/>
+            <Parameter type="" key="multi" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="select context, processingTime"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="path=(\S+),"/>
+                <Parameter type="" key="REGULAR" value="(.+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="context"/>
+            <Parameter type="" key="ValueColumnTitle" value="processingTime"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="WebName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="CacheAccessCount" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="context,accessCount,hitsCount"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=Cache,*"/>
+            <Parameter type="" key="attributes" value="accessCount,hitsCount"/>
+            <Parameter type="" key="multi" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="select context, accessCount"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="path=(\S+)"/>
+                <Parameter type="" key="REGULAR" value="(.+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHG"/>
+                <Parameter type="" key="COLUMNINDEX" value="context"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="context"/>
+            <Parameter type="" key="ValueColumnTitle" value="accessCount"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="WebName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="CacheHitCount" collectType="" pluginid="JMXTomcatPlugin">
+        <PluginResultMetaInfo columns="context,accessCount,hitsCount"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="objectName" value="Catalina:type=Cache,*"/>
+            <Parameter type="" key="attributes" value="accessCount,hitsCount"/>
+            <Parameter type="" key="multi" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="select context, hitsCount"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="path=(\S+)"/>
+                <Parameter type="" key="REGULAR" value="(.+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHG"/>
+                <Parameter type="" key="COLUMNINDEX" value="context"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="context"/>
+            <Parameter type="" key="ValueColumnTitle" value="hitsCount"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="WebName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="appCpuRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="tomcat_cpurate,cpuCore"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Thread where Name like 'java'"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select name from Win32_PerfFormattedData_PerfOS_Processor where name !='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(tomcat_cpurate))/count(cpuCore) as appCpuRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="tomcatUsedMemory" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="tomcat_used_memory"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name like 'java'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(tomcat_used_memory)) as tomcatUsedMemory"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="appMemRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="tomcat_used_memory,physical_total_memory"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name like 'java'"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::SELECT TotalVisibleMEMorySize FROM Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (100*sum(tomcat_used_memory)/physical_total_memory/1024) as tomcatMemoryRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="appMemRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="appMemRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="InstanceName" value="InstallPath"/>
+            <Parameter type="" key="GetUname" value="yes"/>
+            <Parameter type="" key="Linux"
+                       value="LANG=en_US.utf8;top -bS -d 1 -n 1 | grep ${InstanceName} | awk 'BEGIN{res=0;shr=0;real=0;tmp_res=0;tmp_shr=0;}{tmp_res=substr($6,1,length($6)-1);tmp_shr=substr($7,1,length($7)-1);if($6~/m|M/){res=res+tmp_res*1024;}else if($6~/g|G/){res=res+tmp_res*1024*1024;}else{res=res+tmp_res;};if($7~/m|M/){shr=shr+tmp_shr*1024}else if($7~/g|G/){shr=shr+tmp_shr*1024*1024}else{shr=shr+tmp_shr;};}END{real=res-shr;printf(&quot;%d&quot;,real);}'"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;ps -aux | egrep ${InstanceName} | egrep -v egrep | awk '{print $4}'"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;ps -eo 'vsz comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="SunOS" value="ps -eo 'pmem comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="AIX" value="ps auwwx |egrep ${InstanceName}|egrep -v egrep | awk '{print $4}'"/>
+            <Parameter type="" key="SCO_SV" value="ps -eo 'vsz comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="HP-UX"
+                       value="LANG=en_US.utf8;rm -f /tmp/topShellResult.log;top -s2 -d1 -P -n65535 -f /tmp/topShellResult.log;cat /tmp/topShellResult.log | egrep '${InstanceName}' | awk 'BEGIN{res_data=0;res_temp=0;}{res_temp=substr($9,1,length($9)-1);if($9~/K/){res_data=res_data+res_temp;}else if($9~/M/){res_data=res_data+res_temp*1024;}}END{printf (&quot;%d&quot;,res_data);}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="memRateProcessor">
+                <Parameter type="ResourceProperty" key="totalMemSize" value="totalMemSize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="appMemRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="appMemRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="InstanceName" value="InstallPath"/>
+            <Parameter type="" key="GetUname" value="yes"/>
+            <Parameter type="" key="Linux"
+                       value="LANG=en_US.utf8;top -bS -d 1 -n 1 | grep ${InstanceName} | awk 'BEGIN{res=0;shr=0;real=0;tmp_res=0;tmp_shr=0;}{tmp_res=substr($6,1,length($6)-1);tmp_shr=substr($7,1,length($7)-1);if($6~/m|M/){res=res+tmp_res*1024;}else if($6~/g|G/){res=res+tmp_res*1024*1024;}else{res=res+tmp_res;};if($7~/m|M/){shr=shr+tmp_shr*1024}else if($7~/g|G/){shr=shr+tmp_shr*1024*1024}else{shr=shr+tmp_shr;};}END{real=res-shr;printf(&quot;%d&quot;,real);}'"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;ps -aux | egrep ${InstanceName} | egrep -v egrep | awk '{print $4}'"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;ps -eo 'vsz comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="SunOS" value="ps -eo 'pmem comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="AIX" value="ps auwwx |egrep ${InstanceName}|egrep -v egrep | awk '{print $4}'"/>
+            <Parameter type="" key="SCO_SV" value="ps -eo 'vsz comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="HP-UX"
+                       value="LANG=en_US.utf8;rm -f /tmp/topShellResult.log;top -s2 -d1 -P -n65535 -f /tmp/topShellResult.log;cat /tmp/topShellResult.log | egrep '${InstanceName}' | awk 'BEGIN{res_data=0;res_temp=0;}{res_temp=substr($9,1,length($9)-1);if($9~/K/){res_data=res_data+res_temp;}else if($9~/M/){res_data=res_data+res_temp*1024;}}END{printf (&quot;%d&quot;,res_data);}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="memRateProcessor">
+                <Parameter type="ResourceProperty" key="totalMemSize" value="totalMemSize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="appCpuRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="appCpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="InstanceName" value="InstallPath"/>
+            <Parameter type="" key="Linux" value="LANG=en_US.utf8;top -bS -d 1 -n 1 | egrep ${InstanceName} | awk 'BEGIN{cpuUsage=0;}{if(cpuUsage&amp;lt;$9){cpuUsage=$9;}if(cpuUsage&gt;100){cpuUsage=99.8;}}END{printf(&amp;quot;%0.2f&amp;quot;,cpuUsage);}'"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;ps -aux | egrep ${InstanceName} | egrep -v egrep | awk '{print $3}'"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;ps -eo 'pcpu comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="SunOS" value="ps -eo 'pcpu comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="AIX" value="ps auwwx |egrep ${InstanceName}|egrep -v egrep | awk '{print $3}'"/>
+            <Parameter type="" key="SCO_SV" value="ps -eo 'pcpu comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;UNIX95= ps -eo 'pcpu comm args' |egrep ${InstanceName}|egrep -v egrep | awk '{print $1}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT sum(appCpuRate) as appCpuRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="appCpuRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="appCpuRate"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="InstanceName" value="InstallPath"/>
+            <Parameter type="" key="Linux" value="LANG=en_US.utf8;top -bS -d 1 -n 1 | egrep ${InstanceName} | awk 'BEGIN{cpuUsage=0;}{if(cpuUsage&amp;lt;$9){cpuUsage=$9;}if(cpuUsage&gt;100){cpuUsage=99.8;}}END{printf(&amp;quot;%0.2f&amp;quot;,cpuUsage);}'"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;ps -aux | egrep ${InstanceName} | egrep -v egrep | awk '{print $3}'"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;ps -eo 'pcpu comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="SunOS" value="ps -eo 'pcpu comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="AIX" value="ps auwwx |egrep ${InstanceName}|egrep -v egrep | awk '{print $3}'"/>
+            <Parameter type="" key="SCO_SV" value="ps -eo 'pcpu comm args' | egrep ${InstanceName} | egrep -v egrep | awk '{print $1}'"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;UNIX95= ps -eo 'pcpu comm args' |egrep ${InstanceName}|egrep -v egrep | awk '{print $1}'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT sum(appCpuRate) as appCpuRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="hostName" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::SELECT Name FROM Win32_ComputerSystem"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="hostName" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="hostName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="Linux" value="LANG=en_US.utf8;uname -n"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;uname -n"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;uname -n"/>
+            <Parameter type="" key="SunOS" value="uname -n"/>
+            <Parameter type="" key="AIX" value="uname -n"/>
+            <Parameter type="" key="SCO_SV" value="uname -n"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;uname -n"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="hostName" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="hostName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="Linux" value="LANG=en_US.utf8;uname -n"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;uname -n"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;uname -n"/>
+            <Parameter type="" key="SunOS" value="uname -n"/>
+            <Parameter type="" key="AIX" value="uname -n"/>
+            <Parameter type="" key="SCO_SV" value="uname -n"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;uname -n"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalMemSize" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="totalMemSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::SELECT TotalVisibleMEMorySize FROM Win32_OperatingSystem"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalMemSize" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="totalMemSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="Linux" value="LANG=en_US.utf8;cat /proc/meminfo |grep -i MemTotal |awk '{printf &quot;%d&quot;,$2}'"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;cat /var/run/dmesg.boot | grep -i &quot;real memory&quot; | awk '{printf &quot;%d&quot;,$4/1024}'"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;memsize|awk '{printf &quot;%d&quot;,$1/1024}'"/>
+            <Parameter type="" key="SunOS" value="prtconf|awk '/^Memory [Ss]ize/{printf &quot;%d&quot;,$3*1024}'"/>
+            <Parameter type="" key="AIX" value="/usr/sbin/prtconf -m 2&gt;/dev/null| awk '{printf &quot;%d&quot;,$3*1024}'"/>
+            <Parameter type="" key="SCO_SV" value="memsize|awk '{printf &quot;%d&quot;,$1/1024}'"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;grep Physical /var/adm/syslog/syslog.log 2&gt;/dev/null |awk 'BEGIN{pmemsize=0;}{for(i=1;i&lt;=NF;i++){if($i~/Physical:/){pmemsize=$(i+1)}}}END{if(pmemsize==0)exit 1;printf pmemsize}'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalMemSize" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="totalMemSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="Linux" value="LANG=en_US.utf8;cat /proc/meminfo |grep -i MemTotal |awk '{printf &quot;%d&quot;,$2}'"/>
+            <Parameter type="" key="FreeBSD" value="setenv LANG en_US.UTF-8;cat /var/run/dmesg.boot | grep -i &quot;real memory&quot; | awk '{printf &quot;%d&quot;,$4/1024}'"/>
+            <Parameter type="" key="UnixWare" value="LANG=en_US.UTF-8;memsize|awk '{printf &quot;%d&quot;,$1/1024}'"/>
+            <Parameter type="" key="SunOS" value="prtconf|awk '/^Memory [Ss]ize/{printf &quot;%d&quot;,$3*1024}'"/>
+            <Parameter type="" key="AIX" value="/usr/sbin/prtconf -m 2&gt;/dev/null| awk '{printf &quot;%d&quot;,$3*1024}'"/>
+            <Parameter type="" key="SCO_SV" value="memsize|awk '{printf &quot;%d&quot;,$1/1024}'"/>
+            <Parameter type="" key="HP-UX" value="LANG=en_US.utf8;grep Physical /var/adm/syslog/syslog.log 2&gt;/dev/null |awk 'BEGIN{pmemsize=0;}{for(i=1;i&lt;=NF;i++){if($i~/Physical:/){pmemsize=$(i+1)}}}END{if(pmemsize==0)exit 1;printf pmemsize}'"/>
+        </PluginParameter>
+    </MetricPlugin>
+</MetricPlugins>

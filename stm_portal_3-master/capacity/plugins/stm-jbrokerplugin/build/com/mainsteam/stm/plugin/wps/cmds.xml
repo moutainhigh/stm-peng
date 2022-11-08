@@ -1,0 +1,991 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<cmds pluginId="IBMWPS">
+    <!-- agent information start -->
+    <cmd id="chk_hostname">
+    <!--Name-->
+        <properties>
+            <property name="WMI"><![CDATA[select Name from Win32_ComputerSystem]]></property>
+            <property name="SSH">os.enc</property>
+        </properties>
+    </cmd>
+    <cmd id="chk_os">
+    <!--OperationSystem-->
+        <properties>
+            <property name="WMI">select Caption from Win32_OperatingSystem</property>
+            <property name="SSH">os.enc</property>
+        </properties>
+    </cmd>
+    <cmd id="chk_macaddress">
+    <!--OperationSystem-->
+        <properties>
+            <property name="WMI"><![CDATA[Select MACAddress from Win32_NetworkAdapter]]></property>
+            <property name="SSH">os.enc</property>
+        </properties>
+    </cmd>
+    <cmd id="chk_pmemcap">
+    <!--TotalMemSize-->
+        <properties>
+            <property name="WMI"><![CDATA[select TotalVisibleMemorySize from Win32_OperatingSystem]]></property>
+            <property name="SSH">os.enc</property>
+        </properties>
+    </cmd>
+    <cmd id="chk_cpurate">
+    <!--AppCPURate-->
+        <properties>
+            <property name="WMI">
+            <![CDATA[select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Process where Name like '%java%']]>
+            </property>
+            <property name="SSH">appinfo.enc</property>
+            <property name="param">.+java\b.*</property>
+        </properties>
+    </cmd>
+    <cmd id="chk_memrate">
+    <!--AppMEMRate-->
+        <properties>
+            <property name="WMI">
+            <![CDATA[select WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name like '%java%']]>
+            </property>
+            <property name="SSH">appinfo.enc</property>
+            <property name="param">.+java\b.*</property>
+        </properties>
+    </cmd>
+        
+    <!-- agent information end -->
+    
+    <!-- base info start -->
+    <!-- <cmd id="wps.ipAddress">
+        <properties>
+            <property name="classname" value="com.riil.mserver.plugin.wps.processor.BaseConnector"/>
+            <property name="key" value=""/>
+            <property name="objectname" value=""/>
+            <property name="attribute" value="" />
+            <property name="domain" value="base" />
+        </properties>
+    </cmd>
+    <cmd id="wps.port">
+        <properties>
+            <property name="classname" value="com.riil.mserver.plugin.wps.processor.BaseConnector"/>
+            <property name="key" value=""/>
+            <property name="objectname" value=""/>
+            <property name="attribute" value="" />
+            <property name="domain" value="base" />
+        </properties>
+    </cmd> -->
+    <!-- base info end -->
+    
+    
+    <!-- jmx init information start -->
+    <cmd id="wps.cell">
+    <!--CellName-->
+        <properties>
+            <property name="statement">
+            <![CDATA[SERVER]]>
+            </property>        
+            <property name="operation">
+                <![CDATA[getCellName]]>
+            </property>
+            <property name="mode">
+                <![CDATA[attribute]]>
+            </property>            
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.node">
+    <!--NodeName-->
+        <properties>
+            <property name="statement">
+            <![CDATA[SERVER]]>
+            </property>        
+            <property name="operation">
+                <![CDATA[getNodeName]]>
+            </property>
+            <property name="mode">
+                <![CDATA[attribute]]>
+            </property>            
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.pid">
+        <properties>
+            <property name="statement">
+            <![CDATA[SERVER]]>
+            </property>
+            <property name="operation">
+            <![CDATA[getPid]]>
+            </property>
+            <property name="mode">
+            <![CDATA[attribute]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.version">
+    <!--Version-->
+        <properties>
+            <property name="statement">
+            <![CDATA[SERVER]]>
+            </property> 
+            <property name="operation">
+                <![CDATA[getProductVersion]]>
+            </property>
+            <property name="mode">
+                <![CDATA[getter]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.serverName">
+    <!--Name-->
+        <properties>
+            <property name="statement">
+            <![CDATA[SERVER]]>
+            </property>        
+            <property name="operation">
+                <![CDATA[getName]]>
+            </property>
+            <property name="mode">
+                <![CDATA[attribute]]>
+            </property>            
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.displayName">
+    <!--Name-->
+        <properties>
+            <property name="statement">
+            <![CDATA[SERVER]]>
+            </property>        
+            <property name="operation">
+                <![CDATA[getName]]>
+            </property>
+            <property name="mode">
+                <![CDATA[attribute]]>
+            </property>            
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.serverStatus">
+        <!--Availability-->
+        <properties>
+            <property name="statement">
+            <![CDATA[SERVER]]>
+            </property>
+            <property name="operation">
+            <![CDATA[getState]]>
+            </property>
+            <property name="mode">
+            <![CDATA[attribute]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <!-- jmx init information end -->
+    
+    <!-- pmi information -->
+    
+    <cmd id="wps.systemUptime">
+        <!--UsedJvmMemSize-->
+        <properties>
+            <property name="statement">
+            <![CDATA[PMI]]>
+            </property>         
+            <property name="operation">
+                <![CDATA[jvmRuntimeModule]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[jvmRuntimeModule]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[UpTime]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.usedMemory">
+        <!--UsedJvmMemSize-->
+        <properties>
+            <property name="statement">
+            <![CDATA[PMI]]>
+            </property>         
+            <property name="operation">
+                <![CDATA[jvmRuntimeModule]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[jvmRuntimeModule]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[UsedMemory]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.heapSize">
+        <!--TotalJvmMemSize-->
+        <properties>
+            <property name="statement">
+            <![CDATA[PMI]]>
+            </property>         
+            <property name="operation">
+                <![CDATA[jvmRuntimeModule]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[jvmRuntimeModule]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[HeapSize]]>
+            </property>
+        </properties>
+    </cmd>
+    <cmd id="wps.jvmmemrate">
+    <!--JvmMEMRate-->
+        <properties>
+            <property name="statement">
+            <![CDATA[PMI]]>
+            </property>         
+            <property name="operation">
+                <![CDATA[jvmRuntimeModule]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[jvmRuntimeModule]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[UsedMemory]]>
+            </property>
+            <property name="filterValue2">
+                <![CDATA[HeapSize]]>
+            </property>
+            <property name="method">
+                <![CDATA[Division]]>
+            </property>            
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.avgWaitTime">
+        <!--AvgWaitTime-->
+        <properties>
+            <property name="statement">
+            <![CDATA[PMI]]>
+            </property>         
+            <property name="operation">
+                <![CDATA[connectionPoolModule]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[connectionPoolModule]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[WaitTime]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.onlineUsers">
+        <!--OnlineUserCount-->
+        <properties>
+            <property name="statement">
+            <![CDATA[PMI]]>
+            </property>         
+            <property name="operation">
+                <![CDATA[servletSessionsModule]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[servletSessionsModule]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[LiveCount]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.currentConnUser">
+        <!--CurConnUserCount-->
+        <properties>
+            <property name="statement">
+            <![CDATA[PMI]]>
+            </property>         
+            <property name="operation">
+                <![CDATA[servletSessionsModule]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[servletSessionsModule]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[ActiveCount]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <!-- pmi information -->
+    
+    <!-- ldap information start-->
+    
+    <cmd id="wps.ldapIp">
+        <!--LDAPIPAddress-->
+        <properties>
+            <property name="statement">
+            <![CDATA[CONFIG]]>
+            </property>
+            <property name="operation">
+            <![CDATA[LDAPUserRegistry]]>
+            </property>
+            <property name="field">
+                <![CDATA[LDAPUserRegistry.hosts[host]]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[LDAPUserRegistry.hosts[host]]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[host]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.ldapPort">
+        <!--LDAPPort-->
+        <properties>
+            <property name="statement">
+            <![CDATA[CONFIG]]>
+            </property>
+            <property name="operation">
+            <![CDATA[LDAPUserRegistry]]>
+            </property>
+            <property name="field">
+                <![CDATA[LDAPUserRegistry.hosts[port]]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[LDAPUserRegistry.hosts[port]]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[port]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <!-- <cmd id="wps.ldapAvail">
+        <properties>
+            <property name="classname" value="com.riil.mserver.plugin.wps.processor.LdapConnector"/>
+
+            <property name="key" value="available"/>
+            <property name="objectname" value=""/>
+            <property name="attribute" value="LDAPUserRegistry" />
+            <property name="domain" value="nd" />
+        </properties>
+    </cmd> -->
+    
+    <!-- ldap information start-->
+    
+    <!-- jvm information start-->
+    <cmd id="wps.jvmMaxSize">
+        <!--MaxJvmMemSize-->
+        <properties>
+            <property name="statement">
+            <![CDATA[CONFIG]]>
+            </property>         
+            <property name="operation">
+                <![CDATA[JavaVirtualMachine]]>
+            </property>
+            <property name="field">
+                <![CDATA[JavaVirtualMachine[maximumHeapSize]]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[JavaVirtualMachine[maximumHeapSize]]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[maximumHeapSize]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.jvmMinSize">
+        <!--MinJvmMemSize-->
+        <properties>
+            <property name="statement">
+            <![CDATA[CONFIG]]>
+            </property>         
+            <property name="operation">
+                <![CDATA[JavaVirtualMachine]]>
+            </property>
+            <property name="field">
+                <![CDATA[JavaVirtualMachine[initialHeapSize]]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[JavaVirtualMachine[initialHeapSize]]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[initialHeapSize]]>
+            </property>
+        </properties>
+    </cmd>
+    
+	<cmd id="wps.home">
+        <!--Id-->
+        <properties>
+            <property name="statement">
+            <![CDATA[CONFIG]]>
+            </property>
+            <property name="operation">
+            <![CDATA[VariableMap]]>
+            </property>
+            <property name="index">
+                <![CDATA[VariableMap[value]]]>
+            </property>
+            <property name="field">
+                <![CDATA[VariableMap[value]]]>
+            </property>     
+            <property name="filterKey">
+                <![CDATA[symbolicName]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[WPS_HOME]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <!-- <cmd id="wps.home">
+        <properties>
+            <property name="classname" value="com.riil.mserver.plugin.wps.processor.JVMConnector"/>
+            <property name="objectname" value="major"/>
+            <property name="parentNode" value="VariableMap"/>
+            <property name="childNode" value="entries"/>
+            <property name="key" value="WAS_INSTALL_ROOT"/>
+            <property name="attribute" value="var" />
+            <property name="domain" value="nd" />
+        </properties>
+    </cmd> -->
+    
+    <!-- app information start -->
+    <cmd id="wps.numberWebApp">
+        <!--NumberOfWebApplication-->
+        <properties>
+            <property name="statement">
+            <![CDATA[J2EENAMEQUERY]]>
+            </property>
+            <property name="field">
+            <![CDATA[J2EEName]]>
+            </property>
+            <property name="index">
+                <![CDATA[J2EEName]]>
+            </property>                        
+            <property name="filterKey">
+                <![CDATA[type]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[WebModule]]>
+            </property>
+        </properties>
+    </cmd>
+    <!-- app information end -->
+    
+    <!-- jvm information end-->
+    
+    <!-- Child resources -->
+    <!-- Data sources start -->
+    
+    <cmd id="wps.datasource.freePoolSize">
+        <!--FreePoolSize-->
+        <properties>
+            <property name="statement">
+            <![CDATA[PMI]]>
+            </property>         
+            <property name="operation">
+                <![CDATA[connectionPoolModule]]>
+            </property>
+            <property name="subname">
+                <![CDATA[datasource]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[connectionPoolModule]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[FreePoolSize]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.datasource.connPoolSize">
+        <!--ConnPoolSize-->
+        <properties>
+            <property name="statement">
+            <![CDATA[PMI]]>
+            </property>         
+            <property name="operation">
+                <![CDATA[connectionPoolModule]]>
+            </property>
+            <property name="subname">
+                <![CDATA[datasource]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[connectionPoolModule]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[PoolSize]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.datasource.id">
+        <!--Id-->
+        <properties>
+            <property name="statement">
+            <![CDATA[CONFIG]]>
+            </property>
+            <property name="operation">
+            <![CDATA[DataSource]]>
+            </property>
+            <property name="index">
+                <![CDATA[DataSource[_Websphere_Config_Data_Id]]]>
+            </property>
+            <property name="field">
+                <![CDATA[DataSource[_Websphere_Config_Data_Id]]]>
+            </property>     
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.provider.name">
+        <!--ProvideName-->
+        <properties>
+            <property name="statement">
+            <![CDATA[CONFIG]]>
+            </property>
+            <property name="operation">
+            <![CDATA[DataSource]]>
+            </property>
+            <property name="index">
+                <![CDATA[DataSource[_Websphere_Config_Data_Id]]]>
+            </property>
+            <property name="field">
+                <![CDATA[DataSource[PARENT_NAME]]]>
+            </property>     
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.jndi.name">
+        <!--JNDIName-->
+        <properties>
+            <property name="statement">
+            <![CDATA[CONFIG]]>
+            </property>
+            <property name="operation">
+            <![CDATA[DataSource]]>
+            </property>
+            <property name="index">
+                <![CDATA[DataSource[_Websphere_Config_Data_Id]]]>
+            </property>
+            <property name="field">
+                <![CDATA[DataSource[jndiName]]]>
+            </property>     
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.datasource.type">
+        <!--Type-->
+        <properties>
+            <property name="statement">
+            <![CDATA[CONFIG]]>
+            </property>
+            <property name="operation">
+            <![CDATA[DataSource]]>
+            </property>
+            <property name="index">
+                <![CDATA[DataSource[_Websphere_Config_Data_Id]]]>
+            </property>
+            <property name="field">
+                <![CDATA[DataSource[_Websphere_Config_Data_Type]]]>
+            </property>     
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.pool.available">
+        <!--Availability-->
+        <properties>
+            <property name="statement">
+            <![CDATA[JDBC]]>
+            </property>
+            <property name="dependon">
+                <![CDATA[DataSource[_Websphere_Config_Data_Id]]]>
+            </property>            
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.datasource.maxconn">
+        <!--MaxConnCount-->
+        <properties>
+            <property name="statement">
+            <![CDATA[CONFIG]]>
+            </property>
+            <property name="operation">
+            <![CDATA[DataSource]]>
+            </property>
+            <property name="index">
+                <![CDATA[DataSource[_Websphere_Config_Data_Id]]]>
+            </property>
+            <property name="field">
+                <![CDATA[DataSource.connectionPool[maxConnections]]]>
+            </property>
+        </properties>  
+    </cmd>
+    
+    <cmd id="wps.datasource.minconn">
+        <!--MinConnCount-->
+        <properties>
+            <property name="statement">
+            <![CDATA[CONFIG]]>
+            </property>
+            <property name="operation">
+            <![CDATA[DataSource]]>
+            </property>
+            <property name="index">
+                <![CDATA[DataSource[_Websphere_Config_Data_Id]]]>
+            </property>
+            <property name="field">
+                <![CDATA[DataSource.connectionPool[minConnections]]]>
+            </property>
+        </properties>  
+    </cmd>
+    
+    <cmd id="wps.datasource.waittime">
+        <!--AvgConnWaitTime-->
+        <properties>
+            <property name="statement">
+            <![CDATA[PMI]]>
+            </property>         
+            <property name="operation">
+                <![CDATA[connectionPoolModule]]>
+            </property>
+            <property name="subname">
+                <![CDATA[datasource]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[connectionPoolModule]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[WaitTime]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.datasource.maxutil">
+        <!--MaxUtilRatio-->
+        <properties>
+            <property name="statement">
+            <![CDATA[PMI]]>
+            </property>         
+            <property name="operation">
+                <![CDATA[connectionPoolModule]]>
+            </property>
+            <property name="subname">
+                <![CDATA[datasource]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[connectionPoolModule]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[PercentMaxed]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.datasource.usedutil">
+        <!--UsedUtilRatio-->
+        <properties>
+            <property name="statement">
+            <![CDATA[PMI]]>
+            </property>         
+            <property name="operation">
+                <![CDATA[connectionPoolModule]]>
+            </property>
+            <property name="subname">
+                <![CDATA[datasource]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[connectionPoolModule]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[PercentUsed]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <!-- Data sources end -->
+    
+    <!-- Portlet start -->
+    
+    <cmd id="wps.portlet.portletId">
+        <!--Name-->
+        <properties>
+            <property name="statement">
+            <![CDATA[PortletName]]>
+            </property>
+            <property name="field">
+            <![CDATA[J2EEName]]>
+            </property>
+            <property name="index">
+                <![CDATA[J2EEName]]>
+            </property>                        
+            <property name="filterKey">
+                <![CDATA[j2eeType]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[WebModule]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    
+    <cmd id="wps.portlet.name">
+        <!--Name-->
+        <properties>
+            <property name="statement">
+            <![CDATA[PortletName]]>
+            </property>
+            <property name="field">
+            <![CDATA[J2EEName]]>
+            </property>
+            <property name="index">
+                <![CDATA[J2EEName]]>
+            </property>                        
+            <property name="filterKey">
+                <![CDATA[j2eeType]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[WebModule]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.portlet.appname">
+        <!--AppName-->
+        <properties>
+            <property name="statement">
+            <![CDATA[PortletName]]>
+            </property>
+            <property name="field">
+            <![CDATA[J2EEApplication]]>
+            </property>
+            <property name="index">
+                <![CDATA[J2EEName]]>
+            </property>                        
+            <property name="filterKey">
+                <![CDATA[j2eeType]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[WebModule]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.portlet.currRequestCount">
+        <!--CurRequestCount-->
+        <properties>
+            <property name="statement">
+            <![CDATA[PMI]]>
+            </property>         
+            <property name="operation">
+                <![CDATA[webAppModule]]>
+            </property>
+            <property name="subname">
+                <![CDATA[portlet]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[webAppModule]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[ConcurrentRequests]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.portlet.currErrorCount">
+        <!--CurErrorCount-->
+        <properties>
+            <property name="statement">
+            <![CDATA[PMI]]>
+            </property>         
+            <property name="operation">
+                <![CDATA[webAppModule]]>
+            </property>
+            <property name="subname">
+                <![CDATA[portlet]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[webAppModule]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[ErrorCount]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.portlet.responseTime">
+        <!--ResponseTime-->
+        <properties>
+            <property name="statement">
+            <![CDATA[PMI]]>
+            </property>         
+            <property name="operation">
+                <![CDATA[webAppModule]]>
+            </property>
+            <property name="subname">
+                <![CDATA[portlet]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[webAppModule]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[ServiceTime]]>
+            </property>
+        </properties>
+    </cmd>
+    <!-- Portlet end -->
+    
+    <!-- Web App start -->
+    
+    <cmd id="wps.webapp.j2eeWarName">
+        <!--J2EEName-->
+        <properties>
+            <property name="statement">
+            <![CDATA[J2EENAMEQUERY]]>
+            </property>
+            <property name="field">
+            <![CDATA[J2EEName]]>
+            </property>
+            <property name="index">
+                <![CDATA[J2EEName]]>
+            </property>                        
+            <property name="filterKey">
+                <![CDATA[type]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[WebModule]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.webapp.activeSessionCount">
+        <!--ActiveSessionCount-->
+        <properties>
+            <property name="statement">
+            <![CDATA[PMI]]>
+            </property>         
+            <property name="operation">
+                <![CDATA[servletSessionsModule]]>
+            </property>
+            <property name="subname">
+                <![CDATA[webapp]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[servletSessionsModule]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[ActiveCount]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.webapp.liveSessionCount">
+        <!--LiveSessionCount-->
+        <properties>
+            <property name="statement">
+            <![CDATA[PMI]]>
+            </property>         
+            <property name="operation">
+                <![CDATA[servletSessionsModule]]>
+            </property>
+            <property name="subname">
+                <![CDATA[webapp]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[servletSessionsModule]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[LiveCount]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.webapp.noExistSessionCount">
+        <!--NonExistSessionCount-->
+        <properties>
+            <property name="statement">
+            <![CDATA[PMI]]>
+            </property>         
+            <property name="operation">
+                <![CDATA[servletSessionsModule]]>
+            </property>
+            <property name="subname">
+                <![CDATA[webapp]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[servletSessionsModule]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[ActivateNonExistSessionCount]]>
+            </property>
+        </properties>
+    </cmd>
+    
+    <cmd id="wps.webapp.appAvailability">
+        <!--Availability-->
+        <properties>
+            <property name="statement">
+            <![CDATA[MBeanQuery]]>
+            </property>         
+            <property name="index">
+                <![CDATA[J2EEName]]>
+            </property>
+            <property name="filterKey">
+                <![CDATA[type]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[WebModule]]>
+            </property>            
+        </properties>
+    </cmd>
+    
+    <!-- <cmd id="wps.webapp.maxAllowSessionCount">
+        <properties>
+            <property name="statement">
+            <![CDATA[CONFIG]]>
+            </property>         
+            <property name="operation">
+                <![CDATA[TuningParams]]>
+            </property>
+            <property name="field">
+                <![CDATA[TuningParams[maxInMemorySessionCount]]]>
+            </property>            
+            <property name="filterKey">
+                <![CDATA[TuningParams[maxInMemorySessionCount]]]>
+            </property>
+            <property name="filterValue">
+                <![CDATA[maxInMemorySessionCount]]>
+            </property>
+        </properties>
+    
+    
+        <properties>
+            <property name="classname" value="com.riil.mserver.plugin.wps.processor.AppConnector"/>
+            <property name="objectname" value="webapp"/>
+            <property name="parentNode" value="[webappName]"/>
+            <property name="childNode" value="maxInMemorySessionCount"/>
+            <property name="key" value="maxInMemorySessionCount"/>
+            <property name="attribute" value="" />
+            <property name="domain" value="base" />
+        </properties>
+    </cmd> -->
+    
+    <!-- <cmd id="wps.webapp.SessionUtilRatio">
+        <properties>
+            <property name="classname" value="com.riil.mserver.plugin.wps.processor.PMIConnector"/>
+            <property name="objectname" value="webapp"/>
+            <property name="parentNode" value="servletSessionsModule"/>
+            <property name="childNode" value="ActiveCount"/>
+            <property name="key" value="SessionUtilRatio"/>
+            <property name="attribute" value="" />
+            <property name="domain" value="base" />
+        </properties>
+    </cmd> -->
+    
+    <!-- Web App end -->
+    
+    <!-- child resources -->
+</cmds>

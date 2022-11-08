@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.profilelib.dao.AlarmRuleMainDAO">
+	<resultMap id="alarmRuleMain" type="com.mainsteam.stm.profilelib.po.AlarmRuleMainPO">
+		<result column="ID" property="id"></result>
+		<result column="NAME" property="name"></result>
+		<result column="USERID" property="userId"></result>
+		<result column="PROFILEID" property="profileId"></result>
+		<result column="PROFILETYPE" property="profileType"></result>
+	</resultMap>
+	<sql id="conditionSql">
+		where 
+		<trim prefixOverrides="and">
+			<if test="id >=0 ">and ID = #{id}</if>
+			<if test="name != null">and NAME = #{name}</if>
+			<if test="userId != null">and USERID = #{userId}</if>
+			<if test="profileId >=0 ">and PROFILEID = #{profileId}</if>
+			<if test="profileType != null">and PROFILETYPE = #{profileType}</if>
+		</trim>
+	</sql>
+	<insert id="insert" parameterType="com.mainsteam.stm.profilelib.po.AlarmRuleMainPO">
+		insert into STM_ALARMRULE_MAIN (ID,NAME,USERID,PROFILEID,PROFILETYPE) values (#{id},#{name},#{userId},#{profileId},#{profileType})
+	</insert>
+	<update id="update" parameterType="com.mainsteam.stm.profilelib.po.AlarmRuleMainPO">
+		update STM_ALARMRULE_MAIN set NAME = #{name} where ID = #{id}
+	</update>
+	<delete id="delete" parameterType="com.mainsteam.stm.profilelib.po.AlarmRuleMainPO">
+		delete from STM_ALARMRULE_MAIN <include refid="conditionSql"/>
+	</delete>
+	<select id="get" parameterType="com.mainsteam.stm.profilelib.po.AlarmRuleMainPO" resultMap="alarmRuleMain">
+		select ID,NAME,USERID,PROFILEID,PROFILETYPE from STM_ALARMRULE_MAIN <include refid="conditionSql"/>
+	</select>
+	
+</mapper>

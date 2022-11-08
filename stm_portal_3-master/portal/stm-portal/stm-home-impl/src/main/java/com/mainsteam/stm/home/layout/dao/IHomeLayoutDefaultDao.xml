@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mainsteam.stm.home.layout.dao.IHomeLayoutDefaultDao" >
+
+    <resultMap id="ResultMap" type="com.mainsteam.stm.home.layout.bo.HomeLayoutDefaultBo" >
+        <id column="USER_ID" property="userId" jdbcType="BIGINT" />
+        <result column="DEFAULT_LAYOUT_ID" property="defaultLayoutId" jdbcType="BIGINT" />
+    </resultMap>
+
+    <sql id="Column_List" >
+        USER_ID, DEFAULT_LAYOUT_ID
+    </sql>
+
+    <select id="getByUserId" resultMap="ResultMap" parameterType="java.lang.Long" >
+        SELECT <include refid="Column_List" />
+        FROM STM_HOME_LAYOUT_DEFAULT
+        WHERE USER_ID = #{userId,jdbcType=BIGINT}
+    </select>
+
+    <insert id="insert" parameterType="com.mainsteam.stm.home.layout.bo.HomeLayoutDefaultBo" >
+        INSERT INTO STM_HOME_LAYOUT_DEFAULT (<include refid="Column_List" />)
+        VALUES (#{userId,jdbcType=BIGINT}, #{defaultLayoutId,jdbcType=BIGINT})
+    </insert>
+
+    <update id="update" parameterType="com.mainsteam.stm.home.layout.bo.HomeLayoutDefaultBo" >
+        UPDATE STM_HOME_LAYOUT_DEFAULT
+        SET DEFAULT_LAYOUT_ID = #{defaultLayoutId,jdbcType=BIGINT}
+        WHERE USER_ID = #{userId,jdbcType=BIGINT}
+    </update>
+	
+	<delete id="delete" parameterType="java.lang.Long">
+		DELETE FROM STM_HOME_LAYOUT_DEFAULT
+		WHERE USER_ID = #{userId,jdbcType=BIGINT}
+	</delete>
+</mapper>

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.mainsteam.stm.portal.extendedplatform.resourceprofile.dao.ProfileDao">
+	
+	<sql id="profilepoColumn">
+		PROFILE_ID
+		as profileId,
+		PROFILE_NAME as profileName,
+		PROFILE_DESC as profileDesc,
+		IS_USE as isUse,
+		RESOURCE_ID as resourceId,
+		PARENT_PROFILE_ID as parentProfileId,
+		PROFILE_TYPE as
+		profileType,
+		COPY_PROFILE_ID as copyProfileId,
+		UPDATE_USER as updateUser,
+		UPDATE_USER_DOMAIN as
+		updateUserDomain,
+		UPDATE_TIME as updateTime,
+		DOMAIN_ID as domainId,
+		RESOURCE_INSTANCE_ID as
+		resourceInstanceId,
+		create_user as createUser
+	</sql>
+	
+	<select id="queryAllParentProfiles" resultType="com.mainsteam.stm.profilelib.po.ProfileInfoPO">
+		select <include refid="profilepoColumn"></include> 
+		from stm_profilelib_main
+		where parent_profile_id is null  AND profile_type='DEFAULT'
+	</select>
+
+	<select id="queryProfileInfoPOsByResourceId" resultType="com.mainsteam.stm.profilelib.po.ProfileInfoPO"
+		parameterType="string">
+		select  <include refid="profilepoColumn"></include> 
+		from stm_profilelib_main
+		where ((resource_id = #{resourceId} AND profile_type='DEFAULT') OR
+		parent_profile_id = (SELECT profile_id FROM stm_profilelib_main WHERE
+		resource_id = #{resourceId} AND profile_type='DEFAULT'))  AND profile_type='DEFAULT'
+	</select>
+
+	<select id="queryMetricsByProfile" resultType="com.mainsteam.stm.profilelib.po.ProfileMetricPO"
+		parameterType="long"> 
+		select 
+			MK_ID as mkId,
+			PROFILE_ID as profileId, 
+			METRIC_ID as metricId,
+			DICT_FREQUENCY_ID as dictFrequencyId, 
+			IS_USE as isUse ,
+			TIMELINE_ID as timelineId,
+			IS_ALARM as isAlarm,
+			ALARM_REPEAT as alarmRepeat
+		from
+			STM_PROFILELIB_METRIC where PROFILE_ID = #{profileId} and (TIMELINE_ID is null or TIMELINE_ID=0)
+	</select>
+
+	<select id="queryProfileInfoById" resultType="com.mainsteam.stm.profilelib.po.ProfileInfoPO"
+		parameterType="long">
+		select  <include refid="profilepoColumn"></include> 
+		from stm_profilelib_main
+		where PROFILE_ID = #{profileId} OR parent_profile_id = #{profileId} 
+	</select>
+	
+	<select id="queryProfilInfoByResourceId" resultType="com.mainsteam.stm.profilelib.po.ProfileInfoPO"
+		parameterType="string">
+		select  <include refid="profilepoColumn"></include> 
+		from stm_profilelib_main
+		where RESOURCE_ID like CONCAT(#{resourceId},'%')
+	</select>
+
+	<select id="queryProfileInstanceRelByResourceId" parameterType="string" resultType="com.mainsteam.stm.portal.extendedplatform.resourceprofile.po.ProfileInstancePo">
+		SELECT pi.instance_id instanceId,pi.parent_instance_id parentInstanceId,p.profile_id profileId,p.profile_name profileName FROM stm_profilelib_instance pi LEFT JOIN stm_profilelib_main p on p.profile_id = pi.profile_id WHERE pi.profile_id in (SELECT profile_id FROM stm_profilelib_main WHERE resource_id LIKE concat(#{resourceId},'%'))
+	</select>
+	<select id="queryProfileInstanceLastRelByResourceId" parameterType="string" resultType="com.mainsteam.stm.portal.extendedplatform.resourceprofile.po.ProfileInstancePo">
+		SELECT pi.instanceId instanceId,pi.parent_instanceId parentInstanceId,p.profile_id profileId,p.profile_name profileName FROM stm_profilelib_instance_last pi LEFT JOIN stm_profilelib_main p on p.profile_id = pi.last_profileId WHERE pi.last_profileId in (SELECT profile_id FROM stm_profilelib_main WHERE resource_id LIKE concat(#{resourceId},'%'))
+	</select>
+	
+	<select id="queryProfileInstanceRel" parameterType="long" resultType="com.mainsteam.stm.portal.extendedplatform.resourceprofile.po.ProfileInstancePo">
+		SELECT pi.instance_id instanceId,pi.parent_instance_id parentInstanceId,p.profile_id profileId,p.profile_name profileName FROM stm_profilelib_instance pi LEFT JOIN stm_profilelib_main p on p.profile_id = pi.profile_id WHERE pi.profile_id  in (SELECT profile_id FROM stm_profilelib_main WHERE profile_id = #{profileId} or parent_profile_id = #{profileId})
+	</select>
+	<select id="queryProfileInstanceLastRel" parameterType="long" resultType="com.mainsteam.stm.portal.extendedplatform.resourceprofile.po.ProfileInstancePo">
+		SELECT pi.instanceId instanceId,pi.parent_instanceId parentInstanceId,p.profile_id profileId,p.profile_name profileName FROM stm_profilelib_instance_last pi LEFT JOIN stm_profilelib_main p on p.profile_id = pi.last_profileId WHERE pi.last_profileId  in (SELECT profile_id FROM stm_profilelib_main WHERE profile_id = #{profileId} or parent_profile_id = #{profileId})
+	</select>
+	
+	
+	<delete id="deleteProfileInstanceRel" parameterType="long">
+		DELETE FROM stm_profilelib_instance WHERE profile_id in (SELECT profile_id FROM stm_profilelib_main WHERE profile_id = #{profileId} or parent_profile_id = #{profileId})
+	</delete>
+	
+	<delete id="deleteProfileInstanceLastRel" parameterType="long">
+		DELETE FROM stm_profilelib_instance_last WHERE last_profileId in (SELECT profile_id FROM stm_profilelib_main WHERE profile_id = #{profileId} or parent_profile_id = #{profileId})
+	</delete>
+	
+	<delete id="deleteProfileInstanceRelByResourceId" parameterType="string">
+		DELETE FROM stm_profilelib_instance WHERE profile_id in (SELECT profile_id FROM stm_profilelib_main WHERE resource_id LIKE concat(#{resourceId},'%'))
+	</delete>
+	
+	<delete id="deleteProfileInstanceLastRelByResourceId" parameterType="string">
+		DELETE FROM stm_profilelib_instance_last WHERE last_profileId in (SELECT profile_id FROM stm_profilelib_main WHERE resource_id LIKE concat(#{resourceId},'%'))
+	</delete>
+	
+	
+</mapper>

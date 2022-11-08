@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.portal.threed.dao.IUrlDao">
+	<insert id="add3DInfo" parameterType="com.mainsteam.stm.portal.threed.bo.UrlBo">
+		INSERT INTO STM_3D_URL(IP,STATUS) VALUES(#{ip},#{status})
+	</insert>
+
+	<update id="update" parameterType="com.mainsteam.stm.portal.threed.bo.UrlBo">
+		UPDATE STM_3D_URL
+		<set>
+			<if test="ip != null">
+				IP = #{ip},
+			</if>
+			 <if test="port > 0 ">
+				PORT = #{port},
+			</if> 
+			<if test="status != null">
+				STATUS = #{status},
+			</if>
+			<if test="nodeTree != null">
+				NODE_TREE = #{nodeTree},
+			</if>
+			<if test="productInfo != null">
+				PRODUCT_INFO = #{productInfo}
+			</if>
+		</set>
+	</update>
+
+	<select id="get3DInfo" resultType="com.mainsteam.stm.portal.threed.bo.UrlBo">
+		SELECT IP AS IP,STATUS AS STATUS,PORT AS
+		PORT,ADMIN_PATH AS ADMINPATH,HOME_PATH AS HOMEPATH,PRODUCT_INFO AS PRODUCTINFO,NODE_TREE AS NODETREE,
+		WEBSERVICE_PATH AS WEBSERVICEPATH,PICTURE_PATH AS PICTUREPATH FROM STM_3D_URL
+	</select>
+
+</mapper>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.topo.dao.MapLineDao">
+	<!--用于查询地图链路详情 begin-->
+	<select id="findByInstanceIds" parameterType="java.util.Map" resultType="com.mainsteam.stm.topo.bo.MapLineBo">
+      SELECT * FROM STM_TOPO_MAP_LINE WHERE id = (SELECT MAX(id) id FROM STM_TOPO_MAP_LINE WHERE instanceId IN
+      <foreach collection="instanceIds" item="item" index="index" open="(" separator="," close=")">  
+         #{item}  
+      </foreach>
+      )
+    </select>
+    <select id="getLinks" parameterType="map" resultType="com.mainsteam.stm.topo.bo.MapLineBo">
+		select * from STM_TOPO_MAP_LINE where instanceId is not null
+	</select>
+    <!--用于查询地图链路详情 end-->
+	<insert id="add" parameterType="com.mainsteam.stm.topo.bo.MapLineBo">
+		insert into STM_TOPO_MAP_LINE
+			(id,fromId,toId,attr,mapid,instanceId)
+		values
+			(#{id},#{fromId},#{toId},#{attr},#{mapid},#{instanceId})
+	</insert>
+	<select id="getLines" parameterType="map" resultType="com.mainsteam.stm.topo.bo.MapLineBo">
+		select * from STM_TOPO_MAP_LINE where mapid=#{mapid}
+	</select>
+	<select id="isExsisted" parameterType="com.mainsteam.stm.topo.bo.MapLineBo" resultType="int">
+		select count(id) from STM_TOPO_MAP_LINE
+		<where>
+			(fromId=#{fromId} and toId=#{toId})
+			or
+			(fromId=#{toId} and toId=#{fromId})
+		</where>
+	</select>
+	<delete id="remove" parameterType="map">
+		delete from STM_TOPO_MAP_LINE
+		where 
+		id=#{id}
+	</delete>
+	<select id="getLineById" parameterType="map" resultType="com.mainsteam.stm.topo.bo.MapLineBo">
+		select * from STM_TOPO_MAP_LINE where id=#{id}
+	</select>
+	<update id="updateLink" parameterType="com.mainsteam.stm.topo.bo.MapLineBo">
+		update STM_TOPO_MAP_LINE
+		<set>
+			instanceId=#{instanceId}
+		</set>
+		<where>
+			id=#{id}
+		</where>
+	</update>
+	<update id="unbindLink" parameterType="map">
+		update STM_TOPO_MAP_LINE
+		<set>
+			instanceId=null
+		</set>
+		<where>
+			id=#{id}
+		</where>
+	</update>
+</mapper>

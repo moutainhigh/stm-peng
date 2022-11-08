@@ -1,0 +1,468 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	
+	<devicetypeinfo devicetype="AS_ORACLE" ismulticoltype="true" majortype="middleware" minortype="OracleAS" manufacturer="Oracle" devicetype_zh="Oracle Application Server">
+		
+		<devicetypes>
+		</devicetypes>
+		
+		<!-- 该设备类型定义的命令，用于合并命令执行 -->
+		<commands>
+			<command coltype="INNER_PROC" comid="getServerName" command="com.qwserv.itm.pal.appmdl.oracleas.OracleASCollectorUtil.getServerName"/>
+			<command coltype="INNER_PROC" comid="getInstallDirectory" command="com.qwserv.itm.pal.appmdl.oracleas.OracleASCollectorUtil.getInstallDirectory"/>
+			<command coltype="INNER_PROC" comid="getServerVersion" command="com.qwserv.itm.pal.appmdl.oracleas.OracleASCollectorUtil.getServerVersion"/>
+			<!--<command coltype="INNER_PROC" comid="getAvailability" command="com.qwserv.itm.pal.appmdl.oracleas.OracleASCollectorUtil.getAvailability"/>-->
+			<command coltype="INNER_PROC" comid="getOc4jAvailability" command="com.qwserv.itm.pal.appmdl.oracleas.OracleASCollectorUtil.getOc4jAvailability"/>
+			<command coltype="INNER_PROC" comid="getJvmMemRate" command="com.qwserv.itm.pal.appmdl.oracleas.OracleASCollectorUtil.getJvmMemRate"/>
+			<command coltype="INNER_PROC" comid="getFreeJDBCConnCnt" command="com.qwserv.itm.pal.appmdl.oracleas.OracleASCollectorUtil.getFreeJDBCConnCnt"/>
+			<command coltype="INNER_PROC" comid="getOpendJDBCConnCnt" command="com.qwserv.itm.pal.appmdl.oracleas.OracleASCollectorUtil.getOpendJDBCConnCnt"/>
+			<command coltype="INNER_PROC" comid="getJDBCConnCnt" command="com.qwserv.itm.pal.appmdl.oracleas.OracleASCollectorUtil.getJDBCConnCnt"/>
+			<command coltype="INNER_PROC" comid="getActiveTxCnt" command="com.qwserv.itm.pal.appmdl.oracleas.OracleASCollectorUtil.getActiveTxCnt"/>
+			<command coltype="INNER_PROC" comid="getCommitTxCnt" command="com.qwserv.itm.pal.appmdl.oracleas.OracleASCollectorUtil.getCommitTxCnt"/>
+			<command coltype="INNER_PROC" comid="getRollbackTxCnt" command="com.qwserv.itm.pal.appmdl.oracleas.OracleASCollectorUtil.getRollbackTxCnt"/>
+			<command coltype="INNER_PROC" comid="getTotalMem" command="com.qwserv.itm.pal.appmdl.oracleas.OracleASCollectorUtil.getTotalMem"/>
+			<command coltype="INNER_PROC" comid="getHeapUtilRatio" command="com.qwserv.itm.pal.appmdl.oracleas.OracleASCollectorUtil.getHeapUtilRatio"/>
+			<command coltype="INNER_PROC" comid="getActiveHandlerCnt" command="com.qwserv.itm.pal.appmdl.oracleas.OracleASCollectorUtil.getActiveHandlerCnt"/>
+			<command coltype="INNER_PROC" comid="getActiveConnCnt" command="com.qwserv.itm.pal.appmdl.oracleas.OracleASCollectorUtil.getActiveConnCnt"/>
+			<command coltype="INNER_PROC" comid="getConnPoolNames" command="com.qwserv.itm.pal.appmdl.oracleas.OracleASCollectorUtil.getConnPoolNames"/>
+			<command coltype="INNER_PROC" comid="getConnPoolSizes" command="com.qwserv.itm.pal.appmdl.oracleas.OracleASCollectorUtil.getConnPoolSizes"/>
+			<command coltype="INNER_PROC" comid="getThreedPoolNames" command="com.qwserv.itm.pal.appmdl.oracleas.OracleASCollectorUtil.getThreedPoolNames"/>
+			<command coltype="INNER_PROC" comid="getThreedPoolSizes" command="com.qwserv.itm.pal.appmdl.oracleas.OracleASCollectorUtil.getThreedPoolSizes"/>
+			<command coltype="WMI" comid="wmi_chk_hostname" command="root\cimv2::select Name from Win32_ComputerSystem"/>
+			<command coltype="WMI" comid="wmi_chk_pmemcap" command="root\cimv2::SELECT TotalPhysicalMemory FROM Win32_ComputerSystem"/>
+			<command coltype="WMI" comid="wmi_chk_cpurate" command="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Process where Name like '%javaw%'"/>
+			<command coltype="WMI" comid="wmi_chk_memrate" command="root\cimv2::select WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name like '%javaw%'"/>
+			<command coltype="WMI" comid="wmi_chk_os" command="root\cimv2::select Caption from Win32_OperatingSystem"/>
+			<command coltype="WMI" comid="wmi_chk_sysinfo" command="root\cimv2::select description from Win32_OperatingSystem"/>
+			<command coltype="WMI" comid="wmi_chk_osversion" command="root\cimv2::select version from Win32_OperatingSystem"/>
+			
+			<command coltype="CLI" comid="chk_common" command="/tmp/os.sh"/>
+			<command coltype="CLI" comid="chk_physicalrate" command="/tmp/appinfo.sh javaw"/>
+		</commands>
+		
+		<!-- 描述该类设备的所有指标采集,一行对应一个指标 -->
+		<resources>
+			<!-- 服务器可用性 -->
+			<resource kpiid="A7Availability" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getOc4jAvailability" select="" merge="" deal=""/>
+				</collects>
+				<!--
+				<translations>
+					<translation source="1" dest="可用"/>
+					<translation source="0" dest="不可用"/>
+				</translations>-->
+				
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7Availability" field="value" fieldtype="" willalert="y"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.contains(&quot;不可用&quot;)" alertdesc5="服务器不可用"
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- 系统可管理内存 -->
+			<resource kpiid="A7totalMemSize" coltype="WMI" value="$d1/1024/1024/1024" valuetype="Float" unit="GB">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="wmi_chk_pmemcap" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7totalMemSize" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 系统可管理内存-->
+			<resource kpiid="A7totalMemSize" coltype="CLI" value="$d1/1024" valuetype="Float" unit="GB">
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;memsize&gt;(\w+)&lt;/memsize&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_A7totalMemSize" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 主机名称 -->
+			<resource kpiid="A7HostName" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="wmi_chk_hostname" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7HostName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 主机名称 -->
+			<resource kpiid="A7HostName" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;hostname&gt;(\w+)&lt;/hostname&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_A7HostName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 操作系统 -->
+			<resource kpiid="A7OperationSystem" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="wmi_chk_os" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7OperationSystem" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 操作系统 -->
+			<resource kpiid="A7OperationSystem" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;os&gt;([\s\S]*)&lt;/os&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_A7OperationSystem" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 操作系统版本 -->
+			<resource kpiid="A7OSVersion" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="wmi_chk_osversion" select="(.+)" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7OSVersion" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 操作系统版本 -->
+			<resource kpiid="A7OSVersion" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;osversion&gt;([\s\S]*)&lt;/osversion&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_A7OSVersion" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 主机说明 -->
+			<resource kpiid="A7SysInfo" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="wmi_chk_sysinfo" select="(.*)" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7SysInfo" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 主机说明 -->
+			<resource kpiid="A7SysInfo" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;systeminfo&gt;([\s\S]*)&lt;/systeminfo&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_A7SysInfo" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 安装路径 -->
+			<resource kpiid="A7InstallDirectory" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getInstallDirectory" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7InstallDirectory" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- Oracle AS名称 -->
+			<resource kpiid="A7ServerName" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getServerName" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7ServerName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- Oracle AS版本 -->
+			<resource kpiid="A7Version" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getServerVersion" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7Version" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- Oracle AS 内存利用率 -->
+			<resource kpiid="A7MEMRate" coltype="WMI" value="$d1*100/$d2" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="wmi_chk_memrate" select="" merge="sum" deal=""/>
+					<collect exeorder="20" comid="wmi_chk_pmemcap" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7MEMRate" field="value" fieldtype="" willalert="y"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>=80"
+					alertdesc3="内存利用率超过${trigervalue1}%，当前值为${value}%" alertexp4="${value}>=90" alertdesc4="内存利用率超过${trigervalue1}%，当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- Oracle AS 内存利用率 -->
+			<resource kpiid="A7MEMRate" coltype="CLI" value="" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="chk_physicalrate" select="&lt;get_appmemrate&gt;([\s\S]*)&lt;/get_appmemrate&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_d_A7MEMRate" field="value" fieldtype="" willalert="y"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>=80"
+					alertdesc3="内存利用率超过${trigervalue1}%，当前值为${value}%" alertexp4="${value}>=90" alertdesc4="内存利用率超过${trigervalue1}%，当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- Oracle AS JVM内存利用率 -->
+			<resource kpiid="A7JVMMEMRate" coltype="INNER_PROC" value="" valuetype="Integer" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getJvmMemRate" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7JVMMEMRate" field="value" fieldtype="" willalert="y"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>=80"
+					alertdesc3="JVM内存利用率超过${trigervalue1}%，当前值为${value}%" alertexp4="${value}>=90" alertdesc4="JVM内存利用率超过${trigervalue1}%，当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- Oracle AS CPU利用率 -->
+			<resource kpiid="A7CPURate" coltype="WMI" value="" valuetype="Integer" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="wmi_chk_cpurate" select="" merge="sum" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7CPURate" field="value" fieldtype="" willalert="y"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>=60"
+					alertdesc3="CPU利用率超过${trigervalue1}%，当前值为${value}%" alertexp4="${value}>=80" alertdesc4="CPU利用率超过${trigervalue1}%，当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- Oracle AS CPU利用率 -->
+			<resource kpiid="A7CPURate" coltype="CLI" value="" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="chk_physicalrate" select="&lt;get_appcpurate&gt;([\s\S]*)&lt;/get_appcpurate&gt;" merge="" deal=""/>
+				</collects>
+				<kpipolicy table="res_d_A7CPURate" field="value" fieldtype="" willalert="y"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}>=60"
+					alertdesc3="CPU利用率超过${trigervalue1}%，当前值为${value}%" alertexp4="${value}>=80" alertdesc4="CPU利用率超过${trigervalue1}%，当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/> 
+			</resource>
+			
+			<!-- 堆使用量 -->
+			<resource kpiid="A7HeapUtilRatio" coltype="INNER_PROC" value="" valuetype="Integer" unit="MB">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getHeapUtilRatio" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7HeapUtilRatio" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			<!-- JTA活动事务数 -->
+			<resource kpiid="A7ActiveTxCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getActiveTxCnt" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7ActiveTxCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- JTA提交事务数 -->
+			<resource kpiid="A7CommitTxCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getCommitTxCnt" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7CommitTxCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 空闲的JDBC连接数 -->
+			<resource kpiid="A7FreeJdbcConnCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getFreeJDBCConnCnt" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7FreeJdbcConnCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- JTA回退事务数 -->
+			<resource kpiid="A7RollbackTxCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getRollbackTxCnt" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7RollbackTxCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- JMS活动句柄数 -->
+			<resource kpiid="A7ActiveHandlerCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getActiveHandlerCnt" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7ActiveHandlerCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 打开的JDBC连接数 -->
+			<resource kpiid="A7OpenedJdbcConnCnt" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getOpendJDBCConnCnt" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7OpenedJdbcConnCnt" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- JMS活动连接数 -->
+			<resource kpiid="A7ActiveConnCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getActiveConnCnt" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7ActiveConnCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- OC4J使用内存容量 -->
+			<resource kpiid="A7UsedMemSize" coltype="INNER_PROC" value="" valuetype="Integer" unit="MB">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getTotalMem" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7UsedMemSize" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 总JDBC连接数 -->
+			<resource kpiid="A7JdbcConnCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getJDBCConnCnt" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7JdbcConnCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 连接池名称 -->
+			<resource kpiid="A7JdbcPoolName" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getConnPoolNames" select="($key)" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7JdbcPoolName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 连接池大小 -->
+			<resource kpiid="A7JdbcPoolSize" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getConnPoolSizes" select="$key=(\d+)" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7JdbcPoolSize" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 线程池名称 -->
+			<resource kpiid="A7ThreedPoolName" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getThreedPoolNames" select="($key)" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7ThreedPoolName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 连接池大小 -->
+			<resource kpiid="A7ThreedPoolSize" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="getThreedPoolSizes" select="$key=(\d+)" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_d_A7ThreedPoolSize" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+		</resources>
+	</devicetypeinfo>
+</root>

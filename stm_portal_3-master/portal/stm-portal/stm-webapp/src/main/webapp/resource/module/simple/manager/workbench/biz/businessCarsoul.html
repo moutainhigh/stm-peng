@@ -1,0 +1,374 @@
+<script type="text/javascript" src="third/canvas/Sizer.js"></script>
+<script type="text/javascript" src="third/canvas/Util.js"></script>
+<script type="text/javascript" src="third/canvas/TextArea.js"></script>
+<script type="text/javascript" src="third/canvas/new-canvas/canvas.js"></script>
+<script type="text/javascript" src="third/canvas/physics.js"></script>
+<script type="text/javascript" src="third/canvas/resourcejs/AllEdit.js"></script>
+<link rel="stylesheet" type="text/css" href="third/carousel/css/carousel.css" />
+<script type="text/javascript" src="third/canvas/jquery-mousewheel-3.1.12/jquery.mousewheel.js"></script>
+<script type="text/javascript" src="third/carousel/js/jquery.carousel.min.js"></script>
+<script type="text/javascript" src="module/business-service/js/business_service_draw.js"></script>
+
+<style>
+/* #carousel svg{top:8px!important;left:1px!important;} */
+#carousel{text-align:left;}
+#carousel > div{overflow:hidden;}
+</style>
+<!--style="position: absolute;bottom:41px;left:17.5%;"-->
+  <div style="height: 100%;">
+    <ul id="carousel" style="position: relative;top: 30px;left: 50%;margin-left: -435px;"></ul>
+  </div>
+<script type="text/javascript">
+(function(_$){
+    _$.fn.canvas = function(){
+        return new Canvas(_$(this)[0]);
+    }
+	})(jQuery);
+    $(function(){
+        var frontdbl = false;
+        var old;
+        var format = {};
+        var canvasFmt = {};
+        var  skin = null;
+        //针对ie9以下视窗控制
+        var vw = 800,vh = 450,first_canvas = null;
+        //获取当前皮肤
+        oc.util.ajax({
+            url: oc.resource.getUrl('system/skin/getCurrentSkin.htm'),
+            data:null,
+            async:false,
+            successMsg:null,
+            success: function(result){
+            	 skin = result;
+            }
+        });
+        //请求业务服务数据
+        oc.util.ajax({
+            url: oc.resource.getUrl('portal/business/service/getAllViewBiz.htm'),
+            data:null,
+            successMsg:null,
+            success: function(data){
+                var carousel = $("#carousel");
+                var data = eval(data).data;
+                if(data.length > 0){
+	                for(var i in data){
+	                
+	                    var li = $("<li/>");
+	                    var img = $("<img />").attr("src","themes/"+((skin == null || skin.data == 'undefined') ? "default" : skin.data)+"/images/comm/table/biz_canvas.png").attr("serviceId",data[i].id);
+	                    img.appendTo(li);
+	                    li.appendTo(carousel);
+	                    format[data[i].id] = data[i];
+	                }
+	                var carousel = $('#carousel').carousel({
+	                    width: 870,
+	                    self_top:52,
+	                    self_width:350,
+	                    self_height:250,
+	                    horizontalRadius:270,
+	                    verticalRadius:15,
+	                    resize:false,
+	                    mouseScroll:false,
+	                    mouseDrag:true,
+	                    scaleRatio:0.4,
+	                    scrollbar:false,
+	                    tooltip:true,
+	                    mouseWheel:true,
+	                    mouseWheelReverse:true,
+	                    itemMove:function(t,w,h){
+	                    	//canvasFmt[t.data("serviceId")] && canvasFmt[t.data("serviceId")].raphael.setSize(w,h);
+	                    	if(canvasFmt[t.data("serviceId")]){
+                        		if(oSimple.isIeAndVersionLt9()){
+                        			//var _c = canvasFmt[t.data("serviceId")];
+                        			//_c.raphael.setSize(w,h);
+                        			
+                        		}else{
+                        			canvasFmt[t.data("serviceId")].raphael.setSize(w,h);
+                        		}
+                        		
+                        	}
+	                    },
+	                    itemClick:function(t,o){
+	                    	//如果当前点击的对象的z-index是最大的，说明它是最上层元素
+	                         var zIndex=[];
+	                         $('#carousel > div').each(function(){
+	                        	 zIndex.push($(this).css('zIndex')); 
+	                         });
+	                         zIndex.pop()
+	                         var maxIndex = Math.max.apply(Math,zIndex);                         
+	                        if($(t).hasClass("click") && $(t).parent().css('zIndex') == maxIndex){
+	                        	var obj = format[$(t).data("serviceId")];
+	                        	$('#alertPageContainer').load('module/simple/manager/workbench/biz/businessWindow.html',function(){
+    								$('#businessSvg').load(oc.resource.getUrl('resource/module/business-service/buz/business.html'),function(){
+    									oc.resource.loadScript('resource/module/business-service/buz/business.js',
+    					                        function(){
+    					                            new businessTopo({
+    					                                bizId:obj.id,
+    					                                showControlPanel:false
+    				                            });
+    				                    });
+    									
+    								});
+    								$('#ywxt').find('.pop_title').text($(t).siblings('span').text());
+    							});
+	                        		
+	                        }
+	                    }
+		                });
+	                
+		                setTimeout(function(){
+		                	webkitFont();
+		               	 	$('#carousel').show();
+		                },100);
+		                
+		                var imgs = carousel.Z;
+		                
+		                for(var i=0;i<imgs.length;i++){
+		                	var obj = format[imgs[i].data("serviceId")];
+		                	
+		                	//添加svg元素
+		                    imgs[i].attr({draggable:false});
+		                    imgs[i].parent().find("span").html(obj.name)
+			                    .attr("class",statusFormatter(obj.status))
+			                    .after("<div class='rectDiv' style='width:350px;height:270px;'/>");
+		                }
+		                //oSimple.initAdapt();
+                }else{
+                	carousel.parent().html('<div class="table-dataRemind">暂无业务视图!</div>');
+                }
+               
+            }
+	    });
+        function statusFormatter(value){
+        	var appendCss = '';//' simple-light';
+            if(!value){
+               // return "light-ico graylight"+appendCss;
+                return "light-ico greenlight"+appendCss;
+            }else if(value ==3){
+                return "light-ico redlight"+appendCss;
+            }else if(value ==2){
+                return "light-ico orangelight"+appendCss;
+            }else if(value ==1){
+                return "light-ico yellowlight"+appendCss;
+            }else if(value ==0){
+                return "light-ico greenlight"+appendCss;
+            }
+               
+        }
+     
+        var oSimple = {
+        		initAdapt : function (){
+        			 for(var key in canvasFmt){
+                		 if(this.isIeAndVersionLt9()){
+                			 var  _c = canvasFmt[key];
+                			 if(key  == first_canvas){
+                				 _c.setViewBox(0,0,vw + 250,vh + 100);	 
+                			 }else{
+                				 _c.setViewBox(0,0,vw,vh);
+                			 }
+                         }else{
+                        	 this.autoAdapt(canvasFmt[key]);
+                         }
+                     }
+        		},
+        		ie8:function(){
+        			for(var m in canvas.containers){
+            	 		var ctype = (canvas.containers[m].data()&&canvas.containers[m].data().type)||"";
+   		                if(ctype=="unit" || ctype=="service" || ctype=="businessUse" || ctype=="support" ||ctype=="ConTainer"){
+   		                    var conSup=canvas.containers[m];
+   		                 	conSup.handler.attr({"stroke-width":0.2});
+   		                 	if(conSup.rects && conSup.rects.length>0){
+	   		                 	for(var n=0;n<conSup.rects.length;n++){
+			   		                 conSup.rects[n].attr({"stroke-width":0.2});
+	   		                 	}
+   		                 	}
+   		                }  
+   		            }
+        		},
+        		 //自适应快照尺寸
+        		autoAdapt:function(canvas){
+        			edit = new Edit(canvas);
+                	var unit,service,app,physics;
+            		for(var i in canvas.topContainers){
+            			var con = canvas.topContainers[i];
+            			switch(con.data.type){
+            				case "unit":
+            					unit = con;
+            					break;
+            				case "service":
+            					service = con;
+            					break;
+            				case "app":
+            					app = con;
+            					break;
+            				case "physics":
+            					physics = con;
+            					break;
+            				default :
+            					edit.hide();
+            					break;
+            			}
+            		}
+            		
+            		var _dom = $(canvas.dom);
+            		
+            		var dom_height = unit.w / (_dom.width()/ this.findMaxDom());
+            		
+            		
+            		edit.C.raphael.setSize(unit.w,dom_height);
+            		
+            		var old_new = (physics.y+physics.h)/dom_height,width = unit.w -5;
+            		
+            		
+            		var textWidth = edit.C.raphael.width*.14;
+            		
+            		this.findLane(canvas,edit,this.getLaneEdit);
+            		
+            		unit.click();
+            		
+            		edit.edit({x:textWidth,y:1,x1:width,y1:unit.h/old_new});
+            		
+        			service.click();
+            		edit.edit({x:textWidth,y:unit.y+unit.h,x1:width,y1:unit.y+unit.h+service.h/old_new});
+            		
+            		app.click();
+            		edit.edit({x:textWidth,y:service.y+service.h,x1:width,y1:service.y+service.h+app.h/old_new});
+            		
+            		physics.click();
+            		edit.edit({x:textWidth,y:app.y+app.h,x1:width,y1:app.y+app.h+physics.h/old_new});
+            		
+            		
+            		edit.hide();
+            		this.hideChdEdit(unit);
+            		this.hideChdEdit(service);
+            		this.hideChdEdit(app);
+            		this.hideChdEdit(physics);
+        		},
+        		getLaneEdit : function(bbox,_this,unit,service,app,physics){
+					_this.con.texts[0].ry = (bbox.y1-bbox.y)/2 ;
+					_this.con.rects[0].attr({height:bbox.y1-bbox.y,width:bbox.x1});
+					_this.con.rects[1].attr({height:bbox.y1-bbox.y});
+					_this.con.setBBox(bbox);
+					unit.drag(0,0,unit.x,unit.y);
+					service.drag(0,0,service.x,unit.y+unit.h);
+					app.drag(0,0,app.x,service.y+service.h);
+					physics.drag(0,0,physics.x,app.y+app.h);
+					
+				},
+				//判断浏览器是否是ie9 以下版本
+				isIeAndVersionLt9 : function() {
+			
+				var  browser = $.browser;
+				return (browser.msie && parseInt(browser.version) < 9);
+		 
+				},
+				findMaxDom : function(){
+					var divs = $("#carousel .rectDiv");
+		        	var max_height = 0;
+		        	$.each(divs,function(i,e){
+		        		var _div = $(e)
+		        		if(_div.height() > max_height){
+		        			max_height = _div.height();
+		        		}
+		        	})
+		        	
+		        	if(max_height < 250){
+		        		max_height = 250;
+		        	}
+		        	return max_height;
+				},
+				//找到泳道，全局引用
+				findLane:function(canvas,edit,fn){
+					var unit,service,app,physics;
+					for(var i in canvas.topContainers){
+						var con = canvas.topContainers[i];
+						if(con.data.type=="unit"){
+							unit = con;
+						}else if(con.data.type=="service"){
+							service = con;
+						}else if(con.data.type=="app"){
+							app = con;
+						}else if(con.data.type=="physics"){
+							physics = con;
+						}else{
+							break;
+						}
+						con.click = function(){
+							if(edit){
+								edit.setCon(this);
+								//没使用的编辑点
+					            var unuse = ["lt","tr","r","rb","bl","l","t"];
+					            for(var i=0;i<unuse.length;i++){
+					            	edit.P[unuse[i]].hide();
+					            }
+								edit.edit = function(bbox){
+									fn(bbox,this,unit,service,app,physics);
+								};
+							}
+						}
+						//不让拖动
+						con.proxyDrag = function(dx,dy,x,y){}
+					}
+				},
+				  /**
+		        	隐藏子容器编辑框，重写子容器拖拽函数
+		        	params C 单指泳道
+		        **/
+		        hideChdEdit :  function(C){
+		        	if(C != null && C.containers!= null){
+		        		for(var chd in C.containers){
+		        			var con = C.C.containers[chd]
+		        			con.proxyDrag = function(dx,dy,x,y){}
+		        		}
+		        	}
+		        },
+		        /**
+		        *快照弹出自适应
+		        */
+		        adapt:function(canvas){
+		    		edit = new Edit(canvas);
+		    		var unit,service,app,physics;
+		    		for(var i in canvas.topContainers){
+		    			var con = canvas.topContainers[i];
+		    			switch(con.data.type){
+		    				case "unit":
+		    					unit = con;
+		    					break;
+		    				case "service":
+		    					service = con;
+		    					break;
+		    				case "app":
+		    					app = con;
+		    					break;
+		    				case "physics":
+		    					physics = con;
+		    					break;
+		    				default :
+		    					break;
+		    			}
+		    		}
+		    		//宽度自适应
+		    		var editWidth = $(edit.C.dom).width()-18,editHeight = $(edit.C.dom).height()-5;
+					edit.C.raphael.setSize(editWidth,editHeight);
+		    		var old_new = (physics.y+physics.h)/($(edit.C.dom).height()-5),width = $(edit.C.dom).width()-5;
+		    		var textWidth = edit.C.raphael.width*.16;
+		    		
+		    		this.findLane(canvas,edit,this.getLaneEdit);
+		    		
+		    		unit.click();
+		    		edit.edit({x:textWidth,y:1,x1:width,y1:unit.h/old_new});
+		    		service.click();
+		    		edit.edit({x:textWidth,y:unit.y+unit.h,x1:width,y1:unit.y+unit.h+service.h/old_new});
+		    		app.click();
+		    		edit.edit({x:textWidth,y:service.y+service.h,x1:width,y1:service.y+service.h+app.h/old_new});
+		    		physics.click();
+		    		edit.edit({x:textWidth,y:app.y+app.h,x1:width,y1:app.y+app.h+physics.h/old_new});
+		    		edit.hide();
+		    		
+		    	}
+        }
+     
+      
+     
+      
+    })
+</script>

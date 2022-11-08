@@ -1,0 +1,929 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<root> 
+  <!-- 
+	devicetype:			设备类型名称
+	ismulticoltype:		是否允许采集方式多选
+	majortype:			主要分类（可以理解为设备类型）
+	minortype:			次要分类
+	manufacturer:		厂商
+	devicetype_zh:		设备类型中文描述
+	 -->  
+  <devicetypeinfo devicetype="AIX" ismulticoltype="true" majortype="host" minortype="AIXs" manufacturer="" devicetype_zh="AIX"> 
+    <!-- 用于定位设备为该类设备的多个sysoid标识，如果snmp采集为sysoid，如果其他方式自行定义 -->  
+    <devicetypes/>  
+    <!-- 该设备类型定义的命令，用于合并命令执行 -->  
+    <commands> 
+      <!-- coltype:采集方式，comid：命令ID，command：命令 -->  
+      <command coltype="CLI" comid="uptime" command="uptime"/>  
+      <!--连续运行时间 -->  
+      <command coltype="CLI" comid="systemInfo" command="uname -a"/>  
+      <!--主机说明 -->  
+      <command coltype="CLI" comid="operationSystem" command="uname -s"/>  
+      <!--主机操作系统 -->  
+      <command coltype="CLI" comid="macAddress" command="entstat ent0 |grep Hardware"/>  
+      <!--MAC地址 -->  
+      <command coltype="CLI" comid="osVersion" command="oslevel"/>  
+      <!--操作系统版本 -->  
+      <command coltype="CLI" comid="systemSp" command="oslevel -r"/>  
+      <!--系统SP -->  
+      <command coltype="CLI" comid="numberOfProcess" command="ps -ef |wc -l"/>  
+      <!--进程数 -->  
+      <command coltype="CLI" comid="numberOfThread" command="ps -eo 'stat thcount'"/>  
+      <!--进程线程数 -->  
+      <command coltype="CLI" comid="numberOfCurrentUser" command="who |wc -l"/>  
+      <!--当前在线用户数 -->  
+      <command coltype="CLI" comid="pagingSpaceSize" command="lsps -s"/>  
+      <!--Paging Space大小 -->  
+      <command coltype="CLI" comid="CotainedTopoNodeIP" command="ifconfig -a | grep -w inet |grep -v 127.0.0.1"/>  
+      <!--主机IP地址 -->  
+      <command coltype="CLI" comid="numberOfCPU" command="sar -u -P ALL 1 2 | sed -n '/verage/,$p'|grep -v -|awk '{if(NR==1){print $2}else{print $1}}'| wc -l"/>  
+      <!--内存总容量 -->  
+      <command coltype="CLI" comid="totalMemSize" command="/usr/sbin/prtconf -m"/>  
+      <!--内存总容量 -->  
+      <command coltype="CLI" comid="numberOfHardDisk" command="iostat |grep hdisk"/>  
+      <!--硬盘个数 -->  
+      <command coltype="CLI" comid="totalHardDiskSpace" command="iostat |grep hdisk |awk '{cmd=&quot;lsattr -El &quot;$1&quot; |grep size_in_mb|awk '\''{print $2}'\''&quot;;system(cmd)}'"/>  
+      <!--硬盘总容量 -->  
+      <command coltype="CLI" comid="numberOfNIC" command="lsdev -Cc adapter|grep -v 'lo irlan0 sit0'|grep -E 'ent|Ethernet|Base-TX|EtherChannel'"/>  
+      <!--网络端口个数 -->  
+      <command coltype="CLI" comid="name" command="hostname"/>  
+      <!--主机名 -->  
+      <command coltype="CLI" comid="numberOfFileSystem" command="df -k"/>  
+      <!--分区个数 -->  
+      <command coltype="CLI" comid="cpuWioTimeRate" command="sar -u 1 2 | tail -l | grep Average |awk '{print $4}'"/>  
+      <!--CPU等待io时间比 -->  
+      <command coltype="CLI" comid="cpuRate" command="mpstat 1 2 |grep ALL|awk '{print $15}'"/>  
+      <!--CPU平均利用率 -->  
+      <command coltype="CLI" comid="cpuUsrModeRate" command="mpstat 1 2 |grep ALL|awk '{print $12}'"/>  
+      <!--CPU用户模式百分比 -->  
+      <command coltype="CLI" comid="cpuSysModeRate" command="mpstat 1 2 |grep ALL|awk '{print $13}'"/>  
+      <!--CPU系统模式百分比 -->  
+      <command coltype="CLI" comid="freeMem" command="vmstat 1 1 |grep -E -v 'System|-|r'|awk '{print $4}'"/>  
+      <!--可使用内存容量 -->  
+      <command coltype="CLI" comid="memCacheWrite" command="sar -b 1 2 |grep Average |awk '{print $7}'"/>  
+      <!--内存写缓存命中率 -->  
+      <command coltype="CLI" comid="memCacheRead" command="sar -b 1 2 |grep Average |awk '{print $4}'"/>  
+      <!--内存读缓存命中率 -->  
+      <command coltype="CLI" comid="memPageInRate" command="vmstat 1 1 |grep -E -v 'System|-|r'|awk '{print $6}'"/>  
+      <!--内存页面调进速率 -->  
+      <command coltype="CLI" comid="memPageOutRate" command="vmstat 1 1 |grep -E -v 'System|-|r'|awk '{print $7}'"/>  
+      <!--内存页面调出速率 -->  
+      <command coltype="CLI" comid="hdReadRate" command="iostat -d 1 2|grep hdisk|awk '{print $5}'"/>  
+      <!--硬盘平均读速率 -->  
+      <command coltype="CLI" comid="hdWriteRate" command="iostat -d 1 2|grep hdisk|awk '{print $6}'"/>  
+      <!--硬盘平均写速率 -->  
+      <command coltype="CLI" comid="hdOperation" command="iostat -x -k -t"/>  
+      <!--硬盘操作信息 -->  
+      <command coltype="CLI" comid="pageFaultRate" command=" sar 1 1"/>  
+      <!--内存错页率 -->  
+      <command coltype="CLI" comid="totalFSSpace" command="df -k |grep -v Filesystem |awk '{print $2}'"/>  
+      <!--分区总容量 -->  
+      <command coltype="CLI" comid="freeFSSpace" command="df -k |grep -v Filesystem |awk '{print $3}'"/>  
+      <!--分区总使用容量 -->  
+      <command coltype="CLI" comid="pagingSpaceUtilRatio" command="lsps -s|awk '{print $2}'"/>  
+      <!--Paging Space利用率 -->  
+      <command coltype="CLI" comid="currentTime" command="date &quot;+%Y-%m-%d %H:%M:%S&quot;"/>  
+      <!-- 系统当前时间 -->  
+      <!--cpu子资源 -->  
+      <command coltype="CLI" comid="cpuInfo" command="sar -u -P ALL 1 2 2&gt;/dev/null| sed -n '/verage/,$p'|grep -v -|awk '{if(NR==1){print $2}else{print $1}}'"/>  
+      <!--CPU ID-->  
+      <command coltype="CLI" comid="cpuModel" command="message=`/usr/sbin/lscfg -lproc\* | grep proc|awk '{print $1}'`;lsattr -El &quot;$message&quot;"/>  
+      <!--CPU型号 -->  
+      <command coltype="CLI" comid="cpuMulcpuRate" command="sar -u -P ALL 1 2 | sed -n '/verage/,$p'|grep -v -"/>  
+      <!--CPU平均利用率 -->  
+      <!--端口子资源 -->  
+      <command coltype="CLI" comid="ifName" command="lsdev -Cc adapter|grep -v 'lo irlan0 sit0'|grep -E 'ent|Ethernet|Base-TX|EtherChannel'|awk '{print $1}'"/>  
+      <!--端口名称 -->  
+      <command coltype="CLI" comid="ifInfo" command="netstat -v $childid|grep -E 'Device Type|Media Speed Running|Hardware Address|Link Status'"/>  
+      <!--端口属性 -->  
+      <command coltype="CLI" comid="ifTransmitReceive" command="netstat -v ent0|sed -n '9,13'p"/>  
+      <!--端口性能 -->  
+      <command coltype="CLI" comid="ifIPAddress" command="lsdev -Cc adapter|grep $childid|awk '{cmd=&quot;lsdev -Cc if|grep &quot;$3&quot;|grep -i \&quot;Available\&quot;|awk '\''{print $1}'\''&quot;;system(cmd)}'|awk '{cmd=&quot;ifconfig &quot;$1;system(cmd)}'|grep -i &quot;inet&quot;|awk '{print $2}'"/>  
+      <!--端口IP地址 -->  
+      <command coltype="CLI" comid="RXTX" command="lsdev -Cc adapter|grep $childid|awk '{cmd=&quot;lsdev -Cc if|grep &quot;$3&quot;|grep -i \&quot;Available\&quot;|awk '\''{print $1}'\''&quot;;system(cmd)}'|awk '{cmd=&quot;netstat -ni | sed -n '\''2,$p'\'' | awk '\''{if($4 ~ /^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/){print $1,$2,$3,$4,$5,$6,$7,$8,$9}}'\''|grep &quot;$1;system(cmd)}'"/>  
+      <!-- 端口RX\TX -->  
+      <!--分区子资源 -->  
+      <command coltype="CLI" comid="fileSysInfo" command="df -k"/>  
+      <!--分区详细信息 -->  
+      <!--硬盘子资源 -->  
+      <command coltype="CLI" comid="hardDiskName" command="iostat -d|grep -E -v 'System|Disks|cd'|awk '{print $1}'"/>  
+      <!--硬盘名称 -->  
+      <command coltype="CLI" comid="hardDiskInfo" command="lsattr -El $childid"/>  
+      <!--硬盘详细信息 -->  
+      <command coltype="CLI" comid="hardDiskPerf" command="iostat -d"/>  
+      <!--硬盘性能信息 -->  
+      <command coltype="CLI" comid="hardDiskIONum" command="iostat| sed -n '/isks:/,$p' | sed -n '2,$p' | awk '{print $1,$4}'"/>  
+      <!--硬盘IO次数 -->  
+      <command coltype="CLI" comid="hardDiskIOSize" command="iostat| sed -n '/isks:/,$p' | sed -n '2,$p' | awk '{print $1,$3}'"/>  
+      <!--硬盘IO字节数 -->  
+      <!-- 文件子资源 -->  
+      <command coltype="CLI" comid="fileInfo" command="ls -al $childid"/>  
+      <command coltype="CLI" comid="fileInfo" command="ls -al $childid"/>  
+      <command coltype="CLI" comid="fileNum" command="ls $childid | wc -l"/>  
+      <!-- 文件数量 -->  
+      <command coltype="CLI" comid="fileIsExist" command="test -r $childid ;echo $?| awk '{print 1-$1}' "/>  
+      <!-- 文件是否存在 -->  
+      <!-- inode子资源 -->  
+      <command coltype="CLI" comid="inodeInfo" command="df -i | grep -v Filesystem"/>  
+      <!--进程子资源 -->  
+      <command coltype="CLI" comid="processInfo" command="ps -eo pid,ruser,pcpu,pmem,args|grep -v %CPU"/>  
+      <!--进程详细信息 -->  
+      <command coltype="INNER_PROC" comid="testAvail" command="com.qwserv.itm.pfl.resource.util.TestConnection.testAvail"/>  
+      <!-- 测试是否可连接 -->  
+      <command coltype="INNER_PROC" comid="testPing" command="com.qwserv.itm.pfl.resource.util.TestConnection.testPing"/>  
+      <!-- 测试是否可ping --> 
+      
+       <!-- 进程工具 -->  
+      <command coltype="CLI" comid="processTool" command="ps -eo pid,user,rss,vsz,pcpu,pmem,s,stime,comm |grep -vi PID| sort +0n| awk '{print $1,$2,$3,$4,$5,$6,$7,$8,$9}'"> 
+        <columns> 
+          <column key="$1" value="processId"/>   
+          <column key="$2" value="userName"/>  
+          <column key="$3" value="processPhysicalMem"/>  
+          <column key="$4" value="processVirtualMap"/>  
+          <column key="$5" value="procMulCpuRate"/> 
+		  <column key="$6" value="procMulMemRate"/> 
+		  <column key="$7" value="procMulStat"/> 
+		  <column key="$8" value="procMulStime"/> 
+		  <column key="$9" value="processCommand"/> 
+        </columns> 
+      </command>
+
+	  <!--netstat工具-->
+	  <command coltype="CLI" comid="netstatTool" command="netstat -at | sed -n '3,$p'|awk '{print $1,$4,$5,$6}'"> 
+        <columns> 
+          <column key="$1" value="proto"/>    
+          <column key="$4" value="localAddress"/>  
+          <column key="$5" value="foreignAddress"/> 
+		  <column key="$6" value="state"/> 
+        </columns> 
+      </command>
+      
+    </commands>  
+    <!-- 描述该类设备的所有指标采集,一行对应一个指标 -->  
+    <!-- kpiid的命名规范：长度不超过20，命名规范，前两位为模块标识，分别以以下字符打头， N（网络）、H（主机）、D（数据库）、M（中间件）、A（应用）；第二位为数字，由模块内部进行标识定义-->  
+    <resources> 
+      <!-- 主机在线可用性，snmpping\icmp ping都不通则不可用，否则可用 -->  
+      <resource kpiid="Availability" coltype="INNER_PROC" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="testAvail" select="" merge="" deal=""/> 
+        </collects>  
+        <translations> 
+          <translation source="-1" dest="不可用"/>  
+          <translation source="0" dest="可用"/> 
+        </translations>  
+        <kpipolicy table="res_d_Availability" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="设备连接正常" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.contains(&quot;不可用&quot;)" alertdesc5="设备连接失败" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!-- 设备ICMP Ping 丢包率 
+      <resource kpiid="H1PingLostRate" coltype="INNER_PROC" value="" valuetype="Float" unit="%"> 
+        <collects> 
+          <collect exeorder="10" comid="testPing" select="lost\t(\d+)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1PingLostRate" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1" storefactor="1"/> 
+      </resource>  -->  
+      <!-- 设备Ping时延 -->  
+      <resource kpiid="H1PingResponseTime" coltype="INNER_PROC" value="" valuetype="Integer" unit="毫秒"> 
+        <collects> 
+          <collect exeorder="10" comid="testPing" select="delay\t([\-\d]+)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ResponseTime" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1" storefactor="1"/> 
+      </resource>  
+      <!--连续运行时间 -->  
+      <resource kpiid="H1sysUpTime" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="uptime" select="up\s*([^,]+[,]*[^,]*),\s*\d+\s*user" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1sysUpTime" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="0"/> 
+      </resource>  
+      <!-- 系统当前时间 -->  
+      <resource kpiid="H1CurrentTime" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="currentTime" select="" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1CurrentTime" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="15" storefactor="0"/> 
+      </resource>  
+      <!--主机说明 -->  
+      <resource kpiid="H1systemInfo" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="systemInfo" select="" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1systemInfo" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="0"/> 
+      </resource>  
+      <!--主机操作系统
+      <resource kpiid="H1operationSystem" coltype="CLI" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="operationSystem" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_H1operationSystem" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="0"/>
+				
+			</resource>   -->  
+      <!--MAC地址 -->  
+      <resource kpiid="H1macAddress" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="macAddress" select="Hardware Address:\s+(.+)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1macAddress" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="60" storefactor="1"/> 
+      </resource>  
+      <!--操作系统版本 -->  
+      <resource kpiid="H1osVersion" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="osVersion" select="" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1osVersion" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="0"/> 
+      </resource>  
+      <!--进程数 -->  
+      <resource kpiid="H1numOfProcess" coltype="CLI" value="" valuetype="Integer" unit="个"> 
+        <collects> 
+          <collect exeorder="10" comid="numberOfProcess" select="" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1numOfProcess" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="15" storefactor="1"/> 
+      </resource>  
+      <!--僵死进程数 -->  
+      <resource kpiid="H1numOfZombieProcess" coltype="CLI" value="" valuetype="Integer" unit="个"> 
+        <collects> 
+          <collect exeorder="10" comid="numberOfThread" select="(Z)" merge="count" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1numOfZombieProcess" field="value" fieldtype="" willalert="n" alertexp1="${value}&lt;=3" alertdesc1="僵死进程数恢复正常，当前值为${value}个。" alertexp2="" alertdesc2="" alertexp3="${value}&gt;=3" alertdesc3="僵死进程数大于等于${trigervalue1}个，当前值为${value}个。" alertexp4="${value}&gt;=5" alertdesc4="僵死进程数大于等于${trigervalue1}个，当前值为${value}个。" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--线程数 -->  
+      <resource kpiid="H1numberOfThread" coltype="CLI" value="" valuetype="Integer" unit="个"> 
+        <collects> 
+          <collect exeorder="10" comid="numberOfThread" select="(\d+)" merge="sum" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1numberOfThread" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="15" storefactor="1"/> 
+      </resource>  
+      <!--当前在线用户数 -->  
+      <resource kpiid="H1numOfCurrentUser" coltype="CLI" value="" valuetype="Integer" unit="个"> 
+        <collects> 
+          <collect exeorder="10" comid="numberOfCurrentUser" select="(\d+)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1numOfCurrentUser" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="60" storefactor="1"/> 
+      </resource>  
+      <!--Paging Space总大小 -->  
+      <resource kpiid="H1totalPSSize" coltype="CLI" value="" valuetype="Float" unit="MB"> 
+        <collects> 
+          <collect exeorder="10" comid="pagingSpaceSize" select="(\d+)MB\s+" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1totalPSSize" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="${value}!=${oldvalue}" alertdesc2="换页空间总容量发生变化，从${oldvalue}MB变更为${value}MB。" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!--Paging Space已用大小 -->  
+      <resource kpiid="H1usedPSSize" coltype="CLI" value="$d1*$d2/100" valuetype="Float" unit="MB"> 
+        <collects> 
+          <collect exeorder="10" comid="pagingSpaceSize" select="(\d+)MB\s+(\d+)%" merge="" deal=""/>
+           
+        </collects>  
+        <kpipolicy table="res_d_H1usedPSSize" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="60" storefactor="1"/> 
+      </resource>  
+      <!--主机的所有IP地址 -->  
+      <resource kpiid="H1allIpAddress" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="CotainedTopoNodeIP" select="inet\s(\d+\.+\d+\.\d+\.\d+)\s" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1allIpAddress" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="60" storefactor="1"/> 
+      </resource>  
+      <!--分区总容量 -->  
+      <resource kpiid="H1totalFSSpace" coltype="CLI" value="$d1/1024/1024" valuetype="Float" unit="GB"> 
+        <collects> 
+          <collect exeorder="10" comid="totalFSSpace" select="(\d+)" merge="sum" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1totalFSSpace" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="${value}!=${oldvalue}" alertdesc2="分区总容量发生变化，从${oldvalue}GB变更为${value}GB。" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!--分区总可用容量 -->  
+      <resource kpiid="H1freeFSSpace" coltype="CLI" value="$d1/1024/1024" valuetype="Float" unit="GB"> 
+        <collects> 
+          <collect exeorder="10" comid="freeFSSpace" select="(\d+)" merge="sum" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1freeFSSpace" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--CPU个数 -->  
+      <resource kpiid="H1cpuNum" coltype="CLI" value="" valuetype="Integer" unit="个"> 
+        <collects> 
+          <collect exeorder="10" comid="numberOfCPU" select="" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1cpuNum" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="${value}!=${oldvalue}" alertdesc2="CPU个数发生变化，从${oldvalue}个变更为${value}个。" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!--内存总容量 -->  
+      <resource kpiid="H1totalMemSize" coltype="CLI" value="$d1/1024" valuetype="Integer" unit="GB"> 
+        <collects> 
+          <collect exeorder="10" comid="totalMemSize" select="Memory Size:\s+(\d+)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1totalMemSize" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="${value}!=${oldvalue}" alertdesc2="内存总容量发生变化，从${oldvalue}MB变更为${value}MB。" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!--硬盘个数 -->  
+      <resource kpiid="H1numOfHardDisk" coltype="CLI" value="" valuetype="Integer" unit="个"> 
+        <collects> 
+          <collect exeorder="10" comid="numberOfHardDisk" select="" merge="count" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1numOfHardDisk" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="${value}!=${oldvalue}" alertdesc2="硬盘个数发生变化，从${oldvalue}个变更为${value}个。" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!--硬盘总容量 -->  
+      <resource kpiid="H1totalHardDiskSpace" coltype="CLI" value="$d1/1024" valuetype="Float" unit="GB"> 
+        <collects> 
+          <collect exeorder="10" comid="totalHardDiskSpace" select="(\d+)" merge="sum" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1totalHardDiskSpace" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="${value}!=${oldvalue}" alertdesc2="硬盘总容量发生变化，从${oldvalue}GB变更为${value}GB。" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!--网络端口个数 -->  
+      <resource kpiid="H1ifNum" coltype="CLI" value="" valuetype="Integer" unit="个"> 
+        <collects> 
+          <collect exeorder="10" comid="numberOfNIC" select="" merge="count" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifNum" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="${value}!=${oldvalue}" alertdesc2="网络端口个数发生变化，从${oldvalue}个变更为${value}个。" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!--主机名 -->  
+      <resource kpiid="H1hostName" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="name" select="" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1hostName" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="!&quot;${value}&quot;.equals(&quot;${oldvalue}&quot;)" alertdesc2="主机名发生变化，从${oldvalue}变更为${value}。" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!--分区个数 -->  
+      <resource kpiid="H1numOfFileSystem" coltype="CLI" value="" valuetype="Integer" unit="个"> 
+        <collects> 
+          <collect exeorder="10" comid="numberOfFileSystem" select="\d+%\s+\d+\s+\d+%\s+(\S+)" merge="count" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1numOfFileSystem" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="${value}!=${oldvalue}" alertdesc2="分区个数发生变化，从${oldvalue}个变更为${value}个。" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!--CPU平均利用率 -->  
+      <resource kpiid="H1cpuUsage" coltype="CLI" value="100-($d1/2)" valuetype="Float" unit="%"> 
+        <collects> 
+          <collect exeorder="10" comid="cpuRate" select="(\d+)" merge="sum" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1cpuUsage" field="value" fieldtype="" willalert="y" alertexp1="${value}&lt;80" alertdesc1="CPU平均利用率恢复正常，当前值为${value}%。" alertexp2="" alertdesc2="" alertexp3="${value}&gt;=80" alertdesc3="CPU平均利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp4="${value}&gt;=90" alertdesc4="CPU平均利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--CPU平均负载(15分钟) -->  
+      <resource kpiid="H1cpuLoad15m" coltype="CLI" value="" valuetype="Float" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="uptime" select="load average:\s*\d+\.\d+,.+,(.+)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1cpuLoad15m" field="value" fieldtype="" willalert="y" alertexp1="${value}&lt;5" alertdesc1="CPU平均负载（15分钟）恢复正常，当前值为${value}个。" alertexp2="" alertdesc2="" alertexp3="${value}&gt;=5" alertdesc3="CPU平均负载（15分钟）大于等于${trigervalue1}个，当前值为${value}个。" alertexp4="${value}&gt;=10" alertdesc4="CPU平均负载（15分钟）大于等于${trigervalue1}个，当前值为${value}个。" alertexp5="" alertdesc5="" alertcontin="1" circle="15" storefactor="1"/> 
+      </resource>  
+      <!--CPU平均负载(5分钟) -->  
+      <resource kpiid="H1cpuLoad5m" coltype="CLI" value="" valuetype="Float" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="uptime" select="load average:\s*\d+\.\d+,(.+)," merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1cpuLoad5m" field="value" fieldtype="" willalert="y" alertexp1="${value}&lt;5" alertdesc1="CPU平均负载（5分钟）恢复正常，当前值为${value}个。" alertexp2="" alertdesc2="" alertexp3="${value}&gt;=5" alertdesc3="CPU平均负载（5分钟）大于等于${trigervalue1}个，当前值为${value}个。" alertexp4="${value}&gt;=10" alertdesc4="CPU平均负载（5分钟）大于等于${trigervalue1}个，当前值为${value}个。" alertexp5="" alertdesc5="" alertcontin="1" circle="15" storefactor="1"/> 
+      </resource>  
+      <!--CPU平均负载(1分钟) -->  
+      <resource kpiid="H1cpuLoad1m" coltype="CLI" value="" valuetype="Float" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="uptime" select="load average:\s*(\d+\.\d+)," merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1cpuLoad1m" field="value" fieldtype="" willalert="y" alertexp1="${value}&lt;5" alertdesc1="CPU平均负载（1分钟）恢复正常，当前值为${value}个。" alertexp2="" alertdesc2="" alertexp3="${value}&gt;=5" alertdesc3="CPU平均负载（1分钟）大于等于${trigervalue1}个，当前值为${value}个。" alertexp4="${value}&gt;=10" alertdesc4="CPU平均负载（1分钟）大于等于${trigervalue1}个，当前值为${value}个。" alertexp5="" alertdesc5="" alertcontin="1" circle="15" storefactor="1"/> 
+      </resource>  
+      <!--CPU用户模式百分比 -->  
+      <resource kpiid="H1cpuUserModeTimePer" coltype="CLI" value="" valuetype="Float" unit="%"> 
+        <collects> 
+          <collect exeorder="10" comid="cpuUsrModeRate" select="(\d+)" merge="avg" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1cpuUserModeTimePer" field="value" fieldtype="" willalert="y" alertexp1="${value}&lt;50" alertdesc1="CPU用户模式百分比恢复正常，当前值为${value}%。" alertexp2="" alertdesc2="" alertexp3="${value}&gt;=50" alertdesc3="CPU用户模式百分比大于等于${trigervalue1}%，当前值为${value}%。" alertexp4="${value}&gt;=80" alertdesc4="CPU用户模式百分比大于等于${trigervalue1}%，当前值为${value}%。" alertexp5="" alertdesc5="" alertcontin="1" circle="15" storefactor="1"/> 
+      </resource>  
+      <!--CPU空闲时间百分比 -->  
+      <resource kpiid="H1cpuIdleTimePer" coltype="CLI" value="" valuetype="Float" unit="%"> 
+        <collects> 
+          <collect exeorder="10" comid="cpuRate" select="(\d+)" merge="avg" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1cpuIdleTimePer" field="value" fieldtype="" willalert="y" alertexp1="${value}&gt;30" alertdesc1="CPU空闲时间百分比恢复正常，当前值为${value}%。" alertexp2="" alertdesc2="" alertexp3="${value}&lt;30" alertdesc3="CPU空闲时间百分比小于等于${trigervalue1}%，当前值为${value}%。" alertexp4="${value}&lt;10" alertdesc4="CPU空闲时间百分比小于等于${trigervalue1}%，当前值为${value}%。" alertexp5="" alertdesc5="" alertcontin="1" circle="15" storefactor="1"/> 
+      </resource>  
+      <!--CPU系统模式百分比 -->  
+      <resource kpiid="H1cpuSysModeTimePer" coltype="CLI" value="" valuetype="Float" unit="%"> 
+        <collects> 
+          <collect exeorder="10" comid="cpuSysModeRate" select="(\d+)" merge="avg" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1cpuSysModeTimePer" field="value" fieldtype="" willalert="y" alertexp1="${value}&lt;50" alertdesc1="CPU系统模式百分比恢复正常，当前值为${value}%。" alertexp2="" alertdesc2="" alertexp3="${value}&gt;=50" alertdesc3="CPU系统模式百分比大于等于${trigervalue1}%，当前值为${value}%。" alertexp4="${value}&gt;=80" alertdesc4="CPU系统模式百分比大于等于${trigervalue1}%，当前值为${value}%。" alertexp5="" alertdesc5="" alertcontin="1" circle="15" storefactor="1"/> 
+      </resource>  
+      <!--CPU等待io时间比 -->  
+      <resource kpiid="H1cpuWioTimeRate" coltype="CLI" value="" valuetype="Float" unit="%"> 
+        <collects> 
+          <collect exeorder="10" comid="cpuWioTimeRate" select="(\d+)" merge="avg" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1cpuWioTimeRate" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="15" storefactor="1"/> 
+      </resource>  
+      <!--内存利用率 -->  
+      <resource kpiid="H1memUsage" coltype="CLI" value="(($d1-4*$d2/1024)/$d1)*100" valuetype="Float" unit="%"> 
+        <collects> 
+          <collect exeorder="10" comid="totalMemSize" select="(\d+)\s+MB" merge="" deal=""/>  
+          <collect exeorder="20" comid="freeMem" select="(\d+)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1memUsage" field="value" fieldtype="" willalert="y" alertexp1="${value}&lt;80" alertdesc1="内存利用率恢复正常，当前值为${value}%。" alertexp2="" alertdesc2="" alertexp3="${value}&gt;=80" alertdesc3="内存利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp4="${value}&gt;=90" alertdesc4="内存利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--内存写缓存命中率 -->  
+      <resource kpiid="H1memCacheWrite" coltype="CLI" value="" valuetype="Float" unit="%"> 
+        <collects> 
+          <collect exeorder="10" comid="memCacheWrite" select="" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1memCacheWrite" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--内存读缓存命中率 -->  
+      <resource kpiid="H1memCacheRead" coltype="CLI" value="" valuetype="Float" unit="%"> 
+        <collects> 
+          <collect exeorder="10" comid="memCacheRead" select="" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1memCacheRead" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--内存页面调进速率 -->  
+      <resource kpiid="H1memPageInRate" coltype="CLI" value="" valuetype="Float" unit="页/秒"> 
+        <collects> 
+          <collect exeorder="10" comid="memPageInRate" select="(\d+)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1memPageInRate" field="value" fieldtype="" willalert="y" alertexp1="${value}&lt;2000" alertdesc1="内存页面调进速率恢复正常，当前值为${value} 页/秒。" alertexp2="" alertdesc2="" alertexp3="${value}&gt;=2000" alertdesc3="内存页面调进速率大于等于${trigervalue1} 页/秒，当前值为${value} 页/秒。" alertexp4="${value}&gt;=3000" alertdesc4="内存页面调进速率大于等于${trigervalue1} 页/秒，当前值为${value} 页/秒。" alertexp5="" alertdesc5="" alertcontin="1" circle="15" storefactor="1"/> 
+      </resource>  
+      <!--内存页面调出速率 -->  
+      <resource kpiid="H1memPageOutRate" coltype="CLI" value="" valuetype="Float" unit="页/秒"> 
+        <collects> 
+          <collect exeorder="10" comid="memPageOutRate" select="(\d+)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1memPageOutRate" field="value" fieldtype="" willalert="y" alertexp1="${value}&lt;2000" alertdesc1="内存页面调进速率恢复正常，当前值为${value} 页/秒。" alertexp2="" alertdesc2="" alertexp3="${value}&gt;=2000" alertdesc3="内存页面调进速率大于等于${trigervalue1} 页/秒，当前值为${value} 页/秒。" alertexp4="${value}&gt;=3000" alertdesc4="内存页面调进速率大于等于${trigervalue1} 页/秒，当前值为${value} 页/秒。" alertexp5="" alertdesc5="" alertcontin="1" circle="15" storefactor="1"/> 
+      </resource>  
+      <!--硬盘平均写速率 -->  
+      <resource kpiid="H1hdWriteSpeed" coltype="CLI" value="" valuetype="Float" unit="KB/s"> 
+        <collects> 
+          <collect exeorder="10" comid="hdWriteRate" select="([\d]{0,2}[\.]{0,1}\d+)" merge="avg" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1hdWriteSpeed" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="15" storefactor="1"/> 
+      </resource>  
+      <!--硬盘平均读速率 -->  
+      <resource kpiid="H1hdReadSpeed" coltype="CLI" value="" valuetype="Float" unit="KB/s"> 
+        <collects> 
+          <collect exeorder="10" comid="hdReadRate" select="([\d]{0,2}[\.]{0,1}\d+)" merge="avg" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1hdReadSpeed" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="15" storefactor="1"/> 
+      </resource>  
+      <!--主机总可用内存容量 -->  
+      <resource kpiid="H1memPoolFree" coltype="CLI" value="4*$d1/1024/1024" valuetype="Float" unit="GB"> 
+        <collects> 
+          <collect exeorder="10" comid="freeMem" select="(\d+)" merge="avg" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1memPoolFree" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--内存错页率 -->  
+      <!--resource kpiid="H1pageFaultRate" coltype="CLI" value="" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="pageFaultRate" select="\s+\d+\.\d+\s+\d+\.\d+\s+\d+\.\d+\s+\d+\.\d+\s+\d+\.\d+\s+\d+\.\d+\s+\d+\.\d+\s+\d+\.\d+\s+(\d+\.\d+)\s+" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_H1pageFaultRate" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="${value}>80" alertdesc4="" alertexp5="${value}>90" alertdesc5=""
+					alertcontin="1"  circle="5" storefactor="1"/>
+				
+			</resource-->  
+      <!--内存页交换速率 -->  
+      <resource kpiid="H1swapSpaceRate" coltype="CLI" value="$d1+$d2" valuetype="Float" unit="页/秒"> 
+        <collects> 
+          <collect exeorder="10" comid="memPageInRate" select="(\d+)" merge="" deal=""/>  
+          <collect exeorder="20" comid="memPageOutRate" select="(\d+)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1swapSpaceRate" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--Paging Space利用率 -->  
+      <resource kpiid="H1pagingSpaceRatio" coltype="CLI" value="" valuetype="Float" unit="%"> 
+        <collects> 
+          <collect exeorder="10" comid="pagingSpaceUtilRatio" select="(\d+)%" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1pagingSpaceRatio" field="value" fieldtype="" willalert="y" alertexp1="${value}&lt;80" alertdesc1="换页空间利用率恢复正常，当前值为${value}%。" alertexp2="" alertdesc2="" alertexp3="${value}&gt;=80" alertdesc3="换页空间利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp4="${value}&gt;=90" alertdesc4="换页空间利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--系统SP -->  
+      <resource kpiid="H1osSP" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="systemSp" select="" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1osSP" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!-- CPU子资源 -->  
+      <!--CPU ID   -->
+      <resource kpiid="H1cpuId" coltype="CLI" value="" valuetype="Integer" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="cpuInfo" select="($key)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1cpuId" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>   
+      <!--CPU名称 -->  
+      <resource kpiid="H1cpuName" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="cpuInfo" select="($key)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1cpuName" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!--CPU型号 -->  
+      <resource kpiid="H1cpuModel" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="cpuModel" select="type\s+(.+)\s+Processor\s+" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1cpuModel" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!--CPU频率 -->  
+      <resource kpiid="H1cpuSpeed" coltype="CLI" value="$d1/1024/1024/1024" valuetype="Float" unit="GHz"> 
+        <collects> 
+          <collect exeorder="10" comid="cpuModel" select="frequency\s+(\d+)\s+" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1cpuSpeed" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!--CPU利用率 -->  
+      <resource kpiid="H1cpuMulCpuRate" coltype="CLI" value="100-$d1" valuetype="Float" unit="%"> 
+        <collects> 
+          <collect exeorder="10" comid="cpuMulcpuRate" select="\s+$key\s+\d+\s+\d+\s+\d+\s+(\d+)\s+[\d\.]+" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1cpuMulCpuRate" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--子CPU用户模式百分比 -->  
+      <resource kpiid="H1cpuMulUserTimePer" coltype="CLI" value="" valuetype="Float" unit="%"> 
+        <collects> 
+          <collect exeorder="10" comid="cpuMulcpuRate" select="\s+$key\s+(\d+)\s+\d+\s+\d+\s+\d+\s+[\d\.]+" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1cpuMulUserTimePer" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--子CPU系统模式百分比 -->  
+      <resource kpiid="H1cpuMulSysTimePer" coltype="CLI" value="" valuetype="Float" unit="%"> 
+        <collects> 
+          <collect exeorder="10" comid="cpuMulcpuRate" select="\s+$key\s+\d+\s+(\d+)\s+\d+\s+\d+\s+[\d\.]+" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1cpuMulSysTimePer" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--子CPU等待IO时间比率 -->  
+      <resource kpiid="H1cpuMulWioTimePer" coltype="CLI" value="" valuetype="Float" unit="%"> 
+        <collects> 
+          <collect exeorder="10" comid="cpuMulcpuRate" select="\s+$key\s+\d+\s+\d+\s+(\d+)\s+\d+\s+[\d\.]+" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1cpuMulWioTimePer" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--端口子资源 -->  
+      <!--端口ID  
+      <resource kpiid="H1ifID" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="ifName" select="($key)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifID" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>   -->
+      <!--端口名称 -->  
+      <resource kpiid="H1ifName" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="ifName" select="($key)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifName" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!--端口类型 -->  
+      <resource kpiid="H1ifType" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="ifInfo" select="Device\sType:\s(.+) " merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifType" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!--端口IP地址 -->  
+      <resource kpiid="H1ifIPAddress" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="ifIPAddress" select="" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifIPAddress" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!--MAC地址 -->  
+      <resource kpiid="H1ifMAC" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="ifInfo" select="Hardware\sAddress:\s+(.+)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifMAC" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!-- MTU -->  
+      <resource kpiid="H1ifMTU" coltype="CLI" value="" valuetype="Integer" unit="Byte"> 
+        <collects> 
+          <collect exeorder="10" comid="RXTX" select="\S+\s(\S+)\s\S+\s\S+\s\S+\s\S+\s\S+\s\S+" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifMTU" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!-- 操作状态 -->  
+      <resource kpiid="H1ifOperStatus" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="ifInfo" select="Link\s+Status :\s+(.+)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifOperStatus" field="value" fieldtype="" willalert="n" alertexp1="&quot;${value}&quot;.contains(&quot;up&quot;)" alertdesc1="${childname}端口操作状态打开" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.contains(&quot;down&quot;)" alertdesc5="${childname}端口操作状态关闭" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!-- 管理状态 -->  
+      <resource kpiid="H1ifAdminStatus" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="ifInfo" select="Link\s+Status :\s+(.+)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifAdminStatus" field="value" fieldtype="" willalert="n" alertexp1="&quot;${value}&quot;.contains(&quot;up&quot;)" alertdesc1="${childname}端口管理状态打开" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.contains(&quot;down&quot;)" alertdesc5="${childname}端口管理状态关闭" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--端口带宽 -->  
+      <resource kpiid="H1ifBandWidth" coltype="CLI" value="$d1/1024/1024" valuetype="Integer" unit="bps"> 
+        <collects> 
+          <collect exeorder="10" comid="ifInfo" select="Media\s+Speed\s+Running:\s+(.+)\s+Mbps\s+" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifBandWidth" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!--接收速率 -->  
+      <resource kpiid="H1ifInOctetsSpeed" coltype="CLI" value="$d1*8" valuetype="Float" unit="bps"> 
+        <collects> 
+          <collect exeorder="10" comid="ifTransmitReceive" select="Bytes:\s+\d+\s+Bytes:\s+(\d+)\s+" merge="" deal="round_chgv"/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifInOctetsSpeed" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--发送速率 -->  
+      <resource kpiid="H1ifOutOctetsSpeed" coltype="CLI" value="$d1*8" valuetype="Float" unit="bps"> 
+        <collects> 
+          <collect exeorder="10" comid="ifTransmitReceive" select="Bytes:\s+(\d+)\s+Bytes:\s+\d+\s+" merge="" deal="round_chgv"/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifOutOctetsSpeed" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--接收利用率 -->  
+      <resource kpiid="H1ifInSpeedUtil" coltype="CLI" value="(($d1*8/1000/1000)/$H1ifBandwidth)*100" valuetype="Float" unit="%"> 
+        <collects> 
+          <collect exeorder="10" comid="ifTransmitReceive" select="Bytes:\s+\d+\s+Bytes:\s+(\d+)\s+" merge="" deal="round_chgv"/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifInSpeedUtil" field="value" fieldtype="" willalert="y" alertexp1="${value}&lt;80" alertdesc1="${childname}接收利用率恢复正常，当前值为${value}%。" alertexp2="" alertdesc2="" alertexp3="${value}&gt;=80" alertdesc3="${childname}接收利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp4="${value}&gt;=90" alertdesc4="${childname}接收利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--发送利用率 -->  
+      <resource kpiid="H1ifOutSpeedUtil" coltype="CLI" value="(($d1*8/1000/1000)/$H1ifBandwidth)*100" valuetype="Float" unit="%"> 
+        <collects> 
+          <collect exeorder="10" comid="ifTransmitReceive" select="Bytes:\s+(\d+)\s+Bytes:\s+\d+\s+" merge="" deal="round_chgv"/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifOutSpeedUtil" field="value" fieldtype="" willalert="y" alertexp1="${value}&lt;80" alertdesc1="${childname}发送利用率恢复正常，当前值为${value}%。" alertexp2="" alertdesc2="" alertexp3="${value}&gt;=80" alertdesc3="${childname}发送利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp4="${value}&gt;=90" alertdesc4="${childname}发送利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--端口带宽利用率 -->  
+      <resource kpiid="H1ifBandWidthUtil" coltype="CLI" value="($d1+$d2)*8/1000/1000/$H1ifBandwidth*100" valuetype="Float" unit="%"> 
+        <collects> 
+          <collect exeorder="10" comid="ifTransmitReceive" select="Bytes:\s+\d+\s+Bytes:\s+(\d+)\s+" merge="" deal="round_chgv"/>  
+          <collect exeorder="20" comid="ifTransmitReceive" select="Bytes:\s+(\d+)\s+Bytes:\s+\d+\s+" merge="" deal="round_chgv"/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifBandWidthUtil" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--接收的错包数 -->  
+      <resource kpiid="H1ifInErrors" coltype="CLI" value="" valuetype="Integer" unit="包"> 
+        <collects> 
+          <collect exeorder="10" comid="ifTransmitReceive" select="Receive\s+Errors:\s+(\d+)\s+" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifInErrors" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="15" storefactor="0"/> 
+      </resource>  
+      <!--发送的错包数 -->  
+      <resource kpiid="H1ifOutErrors" coltype="CLI" value="" valuetype="Integer" unit="包"> 
+        <collects> 
+          <collect exeorder="10" comid="ifTransmitReceive" select="Transmit\s+Errors:\s+(\d+)\s+" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifOutErrors" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="15" storefactor="0"/> 
+      </resource>  
+      <!--接收的丢包数 -->  
+      <resource kpiid="H1ifInDiscards" coltype="CLI" value="" valuetype="Integer" unit="包"> 
+        <collects> 
+          <collect exeorder="10" comid="ifTransmitReceive" select="Packets\s+Dropped:\s+\d+\s+Packets\s+Dropped:\s+(\d+)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_ifInDiscards" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="15" storefactor="0"/> 
+      </resource>  
+      <!--发送的丢包数 -->  
+      <resource kpiid="H1ifOutDiscards" coltype="CLI" value="" valuetype="Integer" unit="包"> 
+        <collects> 
+          <collect exeorder="10" comid="ifTransmitReceive" select="Packets\s+Dropped:\s+(\d+)\s+Packets\s+Dropped:\s+\d+" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_ifOutDiscards" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="15" storefactor="0"/> 
+      </resource>  
+      <resource kpiid="H1ifRX" coltype="CLI" value="" valuetype="Integer" unit="包"> 
+        <collects> 
+          <collect exeorder="10" comid="RXTX" select="\S+\s\S+\s\S+\s(\S+)\s\S+\s\S+\s\S+\s\S+" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifRX" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <resource kpiid="H1ifRXChange" coltype="CLI" value="" valuetype="Integer" unit="包"> 
+        <collects> 
+          <collect exeorder="10" comid="RXTX" select="\S+\s\S+\s\S+\s(\S+)\s\S+\s\S+\s\S+\s\S+" merge="" deal="round_chg"/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifRXChange" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <resource kpiid="H1ifRXRate" coltype="CLI" value="" valuetype="Float" unit="包/秒"> 
+        <collects> 
+          <collect exeorder="10" comid="RXTX" select="\S+\s\S+\s\S+\s(\S+)\s\S+\s\S+\s\S+\s\S+" merge="" deal="round_chgv"/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifRXRate" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <resource kpiid="H1ifTX" coltype="CLI" value="" valuetype="Integer" unit="包"> 
+        <collects> 
+          <collect exeorder="10" comid="RXTX" select="\S+\s\S+\s\S+\s\S+\s(\S+)\s\S+\s\S+\s\S+" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifTX" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <resource kpiid="H1ifTXChange" coltype="CLI" value="" valuetype="Integer" unit="包"> 
+        <collects> 
+          <collect exeorder="10" comid="RXTX" select="\S+\s\S+\s\S+\s\S+\s(\S+)\s\S+\s\S+\s\S+" merge="" deal="round_chg"/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifTXChange" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <resource kpiid="H1ifTXRate" coltype="CLI" value="" valuetype="Float" unit="包/秒"> 
+        <collects> 
+          <collect exeorder="10" comid="RXTX" select="\S+\s\S+\s\S+\s\S+\s(\S+)\s\S+\s\S+\s\S+" merge="" deal="round_chgv"/> 
+        </collects>  
+        <kpipolicy table="res_d_H1ifTXRate" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--分区子资源 -->  
+      <!--分区名称 -->  
+      <resource kpiid="H1fileSysName" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="fileSysInfo" select="\d+%\s+\d+\s+\d+%\s*($key)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1fileSysName" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!--分区容量 -->  
+      <resource kpiid="H1fileSysTotalSize" coltype="CLI" value="$d1/1024/1024" valuetype="Float" unit="GB"> 
+        <collects> 
+          <collect exeorder="10" comid="fileSysInfo" select="(\d+)\s+\d+\s+\d+%\s+\d+\s+\d+%\s+$key[^/]" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1fileSysTotalSize" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!--分区总可用容量 -->  
+      <resource kpiid="H1fileSysFreeSize" coltype="CLI" value="$d1/1024/1024" valuetype="Float" unit="GB"> 
+        <collects> 
+          <collect exeorder="10" comid="fileSysInfo" select="\d+\s+(\d+)\s+\d+%\s+\d+\s+\d+%\s+$key[^/]" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1fileSysFreeSize" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="60" storefactor="1"/> 
+      </resource>  
+      <!--分区利用率 -->  
+      <resource kpiid="H1fileSysRate" coltype="CLI" value="" valuetype="Float" unit="%"> 
+        <collects> 
+          <collect exeorder="10" comid="fileSysInfo" select="\d+\s+\d+\s+(\d+)%\s+\d+\s+\d+%\s+$key[^/]" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1fileSysRate" field="value" fieldtype="" willalert="y" alertexp1="${value}&lt;80" alertdesc1="${childname}分区空间利用率恢复正常，当前值为${value}%。" alertexp2="" alertdesc2="" alertexp3="${value}&gt;=80" alertdesc3="${childname}分区空间利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp4="${value}&gt;=90" alertdesc4="${childname}分区空间利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp5="" alertdesc5="" alertcontin="1" circle="60" storefactor="1"/> 
+      </resource>  
+      <!--硬盘子资源 -->  
+      <!--硬盘名称 -->  
+      <resource kpiid="H1hardDiskName" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="hardDiskName" select="($key)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1hardDiskName" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!--硬盘容量 -->  
+      <resource kpiid="H1hardDiskTotalSize" coltype="CLI" value="$d1/1024" valuetype="Float" unit="GB"> 
+        <collects> 
+          <collect exeorder="10" comid="hardDiskInfo" select="size_in_mb\s+(\d+)\s+" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1hardDiskTotalSize" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!--硬盘读速率 -->  
+      <resource kpiid="H1hdChdReadSpeed" coltype="CLI" value="" valuetype="Float" unit="KB/s"> 
+        <collects> 
+          <collect exeorder="10" comid="hardDiskPerf" select="$key\s+[\d\.]+\s+[\d\.]+\s+[\d\.]+\s+(\d+)\s+\d+" merge="" deal="chgv"/> 
+        </collects>  
+        <kpipolicy table="res_d_H1hdChdReadSpeed" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--硬盘写速率 -->  
+      <resource kpiid="H1hdChdWriteSpeed" coltype="CLI" value="" valuetype="Float" unit="KB/s"> 
+        <collects> 
+          <collect exeorder="10" comid="hardDiskPerf" select="$key\s+[\d\.]+\s+[\d\.]+\s+[\d\.]+\s+\d+\s+(\d+)" merge="" deal="chgv"/> 
+        </collects>  
+        <kpipolicy table="res_d_H1hdChdWriteSpeed" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!-- 硬盘IO次数 -->  
+      <resource kpiid="H1hardDiskIONum" coltype="CLI" value="" valuetype="Float" unit="次/秒"> 
+        <collects> 
+          <collect exeorder="10" comid="hardDiskIONum" select="$key\s*([\d\.]+)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1hardDiskIONum" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!-- 硬盘IO字节数 -->  
+      <resource kpiid="H1hardDiskIOSize" coltype="CLI" value="" valuetype="Float" unit="KB/s"> 
+        <collects> 
+          <collect exeorder="10" comid="hardDiskIOSize" select="$key\s*([\d\.]+)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1hardDiskIOSize" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="1"/> 
+      </resource>  
+      <!-- 文件子资源 -->  
+      <!--文件名称 
+      <resource kpiid="H1fileName" coltype="MANUAL_INPUT" value="" valuetype="String" unit=""> 
+        <collects/>  
+        <kpipolicy table="res_d_H1fileName" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="60" storefactor="1"/> 
+      </resource>   --> 
+      <!--最近修改时间 
+      <resource kpiid="H1lastChangeTime" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="fileInfo" select="\S+\s+\d+\s+\S+\s+\S+\s+\d+\s+(\S+\s+\S+\s+\S+)\s+$key" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1lastChangeTime" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="60" storefactor="1"/> 
+      </resource>  -->  
+      <!--文件大小  
+      <resource kpiid="H1fileSize" coltype="CLI" value="" valuetype="Integer" unit="Byte"> 
+        <collects> 
+          <collect exeorder="10" comid="fileInfo" select="\S+\s+\d+\s+\S+\s+\S+\s+(\d+)\s+\S+\s+\S+\s+\S+\s+$key" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1fileSize" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="60" storefactor="1"/> 
+      </resource>  --> 
+      <!--文件增长率 
+      <resource kpiid="H1fileGrowth" coltype="CLI" value="(($d1-$d1.old)*100)/$d1" valuetype="Integer" unit="%"> 
+        <collects> 
+          <collect exeorder="10" comid="fileInfo" select="\S+\s+\d+\s+\S+\s+\S+\s+(\d+)\s+\S+\s+\S+\s+\S+\s+$key" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1fileGrowth" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="60" storefactor="1"/> 
+      </resource>  -->  
+      <!--文件数量 
+      <resource kpiid="H1fileNum" coltype="CLI" value="" valuetype="Integer" unit="个"> 
+        <collects> 
+          <collect exeorder="10" comid="fileNum" select="" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1fileNum" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="60" storefactor="1"/> 
+      </resource>  -->  
+      <!--文件是否存在
+      <resource kpiid="H1fileIsExist" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="fileIsExist" select="" merge="" deal=""/> 
+        </collects>  
+        <translations> 
+          <translation source="1" dest="存在"/>  
+          <translation source="0" dest="不存在"/> 
+        </translations>  
+        <kpipolicy table="res_d_H1fileIsExist" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="60" storefactor="1"/> 
+      </resource>   -->  
+      <!-- inode子资源 -->  
+      <!-- 文件系统 -->  
+      <resource kpiid="H1inodeFileSystem" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="inodeInfo" select="($key)\s+\d+\s+\d+\s+\d+%\s+\d+\s+\d+%\s+\S+" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1inodeFileSystem" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!-- 挂载点 -->  
+      <resource kpiid="H1inodeMount" coltype="CLI" value="" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="inodeInfo" select="$key\s+\d+\s+\d+\s+\d+%\s+\d+\s+\d+%\s+(\S+)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1inodeMount" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!-- 使用量 -->  
+      <resource kpiid="H1inodeUsed" coltype="CLI" value="" valuetype="Integer" unit="个"> 
+        <collects> 
+          <collect exeorder="10" comid="inodeInfo" select="$key\s+\d+\s+\d+\s+\d+%\s+(\d+)\s+\d+%\s+\S+" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1inodeUsed" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!-- 使用率 -->  
+      <resource kpiid="H1inodeUsedRate" coltype="CLI" value="" valuetype="Float" unit="%"> 
+        <collects> 
+          <collect exeorder="10" comid="inodeInfo" select="$key\s+\d+\s+\d+\s+\d+%\s+\d+\s+(\d+)%\s+\S+" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1inodeUsedRate" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--进程子资源 -->  
+      <!--进程子资源 -->  
+      <!--进程ID -->  
+      <resource kpiid="H1processId" coltype="CLI" value="(pid),command" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="processInfo" select="(\d+)\s+\S+\s+[\d\.]+\s+[\d\.]+\s+$key" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1processId" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="15" storefactor="1"/> 
+      </resource>  
+      <!--进程名称 -->  
+      <resource kpiid="H1processCommand" coltype="CLI" value="pid,(command)" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="processInfo" select="(\d+)\s+\S+\s+[\d\.]+\s+[\d\.]+\s+$key" merge="" deal=""/> 
+        </collects> 
+        <kpipolicy table="res_d_H1processName" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="15" storefactor="1"/> 
+      </resource> 
+       
+      <!--用户名 -->  
+      <resource kpiid="H1userName" coltype="CLI" value="pid,(user),command" valuetype="String" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="processInfo" select="(\d+)\s+(\S+)\s+[\d\.]+\s+[\d\.]+\s+$key" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1userName" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="15" storefactor="1"/> 
+      </resource>  
+      <!--进程CPU平均利用率 -->  
+      <resource kpiid="H1procMulCpuRate" coltype="CLI" value="pid,(cpuRate),command" valuetype="Float" unit="%"> 
+        <collects> 
+          <collect exeorder="10" comid="processInfo" select="(\d+)\s+\S+\s+([\d\.]+)\s+[\d\.]+\s+$key" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1procMulCpuRate" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--进程内存平均利用率 -->  
+      <resource kpiid="H1procMulMemRate" coltype="CLI" value="pid,(memRate),command" valuetype="Float" unit="%"> 
+        <collects> 
+          <collect exeorder="10" comid="processInfo" select="(\d+)\s+\S+\s+[\d\.]+\s+([\d\.]+)\s+$key" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1procMulMemRate" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>  
+      <!--进程可用性  -->
+      <resource kpiid="H1processAvail" coltype="CLI" value="pid,(avail),command" valuetype="Integer" unit="个"> 
+        <collects> 
+          <collect exeorder="10" comid="processInfo" select="(\d+)\s+(\S+)\s+[\d\.]+\s+[\d\.]+\s+$key" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1procAvail" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="${value}==0" alertdesc5="${childname}进程不存在" alertcontin="1" circle="5" storefactor="1"/> 
+      </resource>
+    
+    
+     <!-- 进程工具 -->  
+      <resource kpiid="H1fullProcess" coltype="CLI" value="" valuetype="IMME" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="processTool" select="(\d+)\s(\S+)\s(\d+)\s(\d+)\s(\d+\.\d+)\s(\d+\.\d+)\s(\S+)\s(\S+)\s(.+)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1processTool" field="value" fieldtype="" willalert="y" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="5" storefactor="0"/> 
+      </resource> 
+	  
+	  <!--netstat工具-->
+	  <resource kpiid="H1netstat" coltype="CLI" value="" valuetype="IMME" unit=""> 
+        <collects> 
+          <collect exeorder="10" comid="netstatTool" select="(\w+)\s+([\w*]+:\S+)\s+(\S+:\S+)\s+(.*)" merge="" deal=""/> 
+        </collects>  
+        <kpipolicy table="res_d_H1netstatTool" field="value" fieldtype="" willalert="n" alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5="" alertcontin="1" circle="1440" storefactor="0"/> 
+      </resource>
+	</resources> 
+  </devicetypeinfo> 
+</root>

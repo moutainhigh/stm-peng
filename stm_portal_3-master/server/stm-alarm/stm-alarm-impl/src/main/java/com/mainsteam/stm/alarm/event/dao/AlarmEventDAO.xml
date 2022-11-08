@@ -1,0 +1,559 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.alarm.event.dao.AlarmEventDAO">
+
+	<insert id="addAlarmEvent" parameterType="com.mainsteam.stm.alarm.po.AlarmEventPO">
+		INSERT INTO STM_ALARM_EVENT(EVENT_ID,SOURCE_ID,source_name,source_ip,ITSM_DATA,sys_id,RECOVER_KEY,content,ALARM_LEVEL,
+		collection_time,HANDLE_TYPE,RECOVERED,ext0,ext1,ext2,ext3,ext4,ext5,ext6,ext7,ext8,ext9)
+		VALUES
+		(#{eventID},#{sourceID},#{sourceName},#{sourceIP},#{itsmJsonData},#{sysID},#{recoverKey},#{content},#{level},#{collectionTime},
+		#{handleType},#{recovered},#{ext0},#{ext1},#{ext2},#{ext3},#{ext4},#{ext5},#{ext6},#{ext7},#{ext8},#{ext9})
+	</insert>
+
+	<insert id="addAlarmEventForMysql"  parameterType="com.mainsteam.stm.alarm.po.AlarmEventPO" >
+		INSERT INTO STM_ALARM_EVENT(EVENT_ID,SOURCE_ID,source_name,source_ip,ITSM_DATA,sys_id,RECOVER_KEY,content,ALARM_LEVEL,
+		collection_time,HANDLE_TYPE,RECOVERED,ext0,ext1,ext2,ext3,ext4,ext5,ext6,ext7,ext8,ext9)
+		VALUES
+		(#{eventID},#{sourceID},#{sourceName},#{sourceIP},#{itsmJsonData},#{sysID},#{recoverKey},#{content},#{level},#{collectionTime},
+		#{handleType},#{recovered},#{ext0},#{ext1},#{ext2},#{ext3},#{ext4},#{ext5},#{ext6},#{ext7},#{ext8},#{ext9})
+		ON DUPLICATE KEY
+		UPDATE ITSM_DATA=#{itsmJsonData},source_ip=#{sourceIP},content=#{content},collection_time=#{collectionTime},
+		recovered=#{recovered},alarm_level=#{level},recovered=#{recovered},handle_type=#{handleType},
+		event_id=#{eventID}
+	</insert>
+
+	<insert id="addAlarmEventForOracle" parameterType="com.mainsteam.stm.alarm.po.AlarmEventPO" >
+		merge INTO stm_alarm_event event using
+		(select #{eventID} as event_id, #{sourceID} as source_id, #{sourceName} as source_name, #{sourceIP} as source_ip, #{itsmJsonData} as itsm_data,
+		#{sysID} as sys_id ,#{recoverKey} as recover_key, #{content} as content, #{level} as alarm_level, #{collectionTime} as collection_time,
+		#{handleType} as handle_type, #{recovered} as recovered, #{ext0} as ext0, #{ext1} as ext1, #{ext2} as ext2,
+		#{ext3} as ext3, #{ext4} as ext4, #{ext5} as ext5, #{ext6} as ext6, #{ext7} as ext7, #{ext8} as ext8, #{ext9} as ext9  from dual) tmp
+		ON (event.RECOVER_KEY=tmp.recover_key AND event.sys_id=tmp.sys_id)
+		WHEN MATCHED THEN
+		UPDATE SET event.ITSM_DATA=#{itsmJsonData}, event.source_ip=#{sourceIP}, event.content=#{content}, event.collection_time=#{collectionTime},
+		event.recovered=#{recovered}, event.alarm_level=#{level},event.handle_type=#{handleType},event.event_id=#{eventID}
+		WHEN NOT MATCHED THEN
+		INSERT (event.EVENT_ID,event.SOURCE_ID,event.source_name,event.source_ip,event.ITSM_DATA,event.sys_id,event.RECOVER_KEY,event.content,event.ALARM_LEVEL,
+		event.collection_time,event.HANDLE_TYPE,event.RECOVERED,event.ext0,event.ext1,event.ext2,event.ext3,event.ext4,event.ext5,event.ext6,event.ext7,event.ext8,
+		event.ext9)
+		VALUES
+		(tmp.event_id,tmp.source_id,tmp.source_name,tmp.source_ip,tmp.itsm_data, tmp.sys_id, tmp.recover_key, tmp.content, tmp.alarm_level,tmp.collection_time,
+		tmp.handle_type,tmp.recovered,tmp.ext0, tmp.ext1, tmp.ext2, tmp.ext3, tmp.ext4, tmp.ext5, tmp.ext6, tmp.ext7, tmp.ext8, tmp.ext9)
+	</insert>
+
+	<delete id="deleteAlarmEvent" parameterType="map">
+		DELETE FROM stm_alarm_event WHERE RECOVER_KEY=#{recoveryKey} AND SYS_ID=#{sysModuleEnum}
+	</delete>
+
+	<insert id="addAlarmEventDetail" parameterType="com.mainsteam.stm.alarm.obj.AlarmEventDetail">
+		INSERT INTO STM_ALARM_DETAIL(EVENT_ID,EVENT_CONTENT,RECOVERY_KEY,ALARM_LEVEL,COLLECTION_TIME,SNAPSHOT_RESULT,SYS_ID)
+		VALUES (#{eventId},#{content},#{recoveryKey},#{level},#{collectionTime},#{snapshotResult},#{sysModuleEnum})
+	</insert>
+
+	<delete id="deleteAlarmEventDetail" parameterType="map">
+		DELETE FROM stm_alarm_detail WHERE recovery_key=#{recoveryKey} AND sys_id=#{sysModuleEnum}
+	</delete>
+
+	<sql id="stm_alarm_detail_rows">
+		event_id as eventId,
+		event_content as content,
+		collection_time as collectionTime,
+		alarm_level as "level",
+		recovery_key as recoveryKey,
+		snapshot_result as snapshotResult,
+		sys_id as sysModuleEnum
+	</sql>
+
+	<select id="queryAlarmHistory" resultType="com.mainsteam.stm.alarm.obj.AlarmEventDetail" parameterType="map">
+		SELECT <include refid="stm_alarm_detail_rows"></include>
+		from stm_alarm_detail
+		WHERE recovery_key=#{recoveryKey} AND sys_id=#{sysModuleEnum} ORDER BY collection_time DESC
+	</select>
+
+	<delete id="deleteAlarmEventByInstanceId">
+		DELETE FROM  STM_ALARM_EVENT
+		WHERE
+		<if test="sourceId !=null">
+			SOURCE_ID=#{sourceId}
+		</if>
+		<if test="ext8 !=null">
+			EXT8=#{ext8}
+		</if>
+	</delete>
+
+	<update id="updateAlarmEventExt" parameterType="com.mainsteam.stm.alarm.po.AlarmEventPO">
+		UPDATE STM_ALARM_EVENT SET ext1=#{ext1},ext2=#{ext2},ext3=#{ext3},ext4=#{ext4},ext5=#{ext5},ext6=#{ext6},ext7=#{ext7},ext8=#{ext8} WHERE event_id=#{eventID}
+	</update>
+	<update id="updateItsmData" parameterType="map">
+		UPDATE STM_ALARM_EVENT SET ITSM_DATA=#{itsmJsonData,javaType=String} WHERE EVENT_ID=#{eventID}
+	</update>
+
+	<update id="updateAlarmEventHandleType" parameterType="map">
+		UPDATE STM_ALARM_EVENT
+		SET HANDLE_TYPE=#{handleType}
+		WHERE EVENT_ID =#{eventID}
+	</update>
+
+	<update id="recoverAlarmEvent" parameterType="com.mainsteam.stm.alarm.po.AlarmEventPO">
+		UPDATE STM_ALARM_EVENT
+		SET  RECOVERED=1,collection_time=#{collectionTime},HANDLE_TYPE=#{handleType}
+		WHERE RECOVERED=0 AND RECOVER_KEY =#{recoverKey}
+	</update>
+
+	<update id="deleteAlarmEventBySourceID" parameterType="java.util.Map">
+		UPDATE STM_ALARM_EVENT SET collection_time=#{updateTime},HANDLE_TYPE=#{handleType}
+		WHERE
+		<if test="sourceID !=null">
+			SOURCE_ID=#{sourceID}
+		</if>
+		<if test="ext8 !=null">
+			EXT8=#{ext8}
+		</if>
+	</update>
+
+	<update id="recoverAlarmEventByRecoverKey" parameterType="java.util.Map">
+		UPDATE STM_ALARM_EVENT
+		SET  RECOVERED=1,collection_time=#{updateTime},HANDLE_TYPE=#{handleType}
+		WHERE RECOVERED=0 AND RECOVER_KEY =#{recoverKey} AND HANDLE_TYPE != 'DELETE'
+	</update>
+
+	<update id="recoverDeletedAlarmEventBySourceID" >
+		UPDATE stm_alarm_event SET HANDLE_TYPE= (CASE WHEN RECOVERED=0 THEN 'NONE' ELSE 'AUTO' END)
+		WHERE HANDLE_TYPE='DELETE'
+		AND
+	  	<if test="sourceId !=null">
+			SOURCE_ID=#{sourceId}
+		</if>
+		<if test="ext8 !=null">
+			EXT8=#{ext8}
+		</if>
+	</update>
+
+	<update id="updateAlarmEventExtForNotRecover" parameterType="com.mainsteam.stm.alarm.po.AlarmEventPO">
+		UPDATE STM_ALARM_EVENT SET ext1=#{ext1},ext2=#{ext2},ext3=#{ext3},ext4=#{ext4},ext5=#{ext5},ext6=#{ext6},ext7=#{ext7},ext8=#{ext8} WHERE event_id=#{eventID}
+	</update>
+	<update id="updateAlarmEventExtForRecovered" parameterType="com.mainsteam.stm.alarm.po.AlarmEventPO">
+		UPDATE STM_ALARM_EVENT_RECOVER SET ext1=#{ext1},ext2=#{ext2},ext3=#{ext3},ext4=#{ext4},ext5=#{ext5},ext6=#{ext6},ext7=#{ext7},ext8=#{ext8} WHERE event_id=#{eventID}
+	</update>
+
+	<update id="updateAlarmEvent" parameterType="java.util.Map">
+		UPDATE stm_alarm_event
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="parameterSet.ext1 !=null">
+				ext1=#{parameterSet.ext1},
+			</if>
+			<if test="parameterSet.ext2 !=null">
+				ext2=#{parameterSet.ext2},
+			</if>
+			<if test="parameterSet.ext3 !=null">
+				ext3=#{parameterSet.ext3},
+			</if>
+			<if test="parameterSet.ext4 !=null">
+				ext4=#{parameterSet.ext4},
+			</if>
+			<if test="parameterSet.ext5 !=null">
+				ext5=#{parameterSet.ext5},
+			</if>
+			<if test="parameterSet.ext6 !=null">
+				ext6=#{parameterSet.ext6},
+			</if>
+			<if test="parameterSet.ext7 !=null">
+				ext7=#{parameterSet.ext7},
+			</if>
+			<if test="parameterSet.ext8 !=null">
+				ext8=#{parameterSet.ext8},
+			</if>
+			<if test="parameterSet.recovered !=null">
+				RECOVERED=#{parameterSet.recovered},
+			</if>
+			<if test="parameterSet.collectionTime !=null">
+				collection_time=#{parameterSet.collectionTime},
+			</if>
+			<if test="parameterSet.handleType !=null">
+				HANDLE_TYPE=#{parameterSet.handleType},
+			</if>
+			<if test="parameterSet.itsmJsonData !=null">
+				ITSM_DATA=#{parameterSet.itsmJsonData,javaType=String}
+			</if>
+		</trim>
+		<where>
+			<if test="parameterWhere.eventID !=0">
+				EVENT_ID=#{parameterWhere.eventID}
+			</if>
+			<if test="parameterWhere.sourceID !=null">
+				AND SOURCE_ID=#{parameterWhere.sourceID}
+			</if>
+			<if test="parameterWhere.recovered !=null">
+				AND RECOVERED=#{parameterWhere.recovered}
+			</if>
+			<if test="parameterWhere.handleType !=null">
+				AND HANDLE_TYPE=#{parameterWhere.handleType}
+			</if>
+			<if test="parameterWhere.ext8 !=null">
+				AND EXT8=#{parameterWhere.ext8}
+			</if>
+			<if test="parameterWhere.recoverKey !=null">
+				AND RECOVER_KEY =#{parameterWhere.recoverKey}
+			</if>
+		</where>
+	</update>
+
+	<sql id="AlarmEventAlias">
+		EVENT_ID as eventID,
+		source_id as sourceID,
+		SOURCE_NAME as sourceName,
+		SOURCE_IP as sourceIP,
+		ITSM_DATA as itsmJsonData,
+		SYS_ID as sysID,
+		RECOVER_KEY as recoverKey,
+		content,
+		ALARM_LEVEL as "level",
+		collection_time	as collectionTime,
+		HANDLE_TYPE as handleType,
+		RECOVERED as recovered,
+		ext0,ext1,ext2,ext3,ext4,ext5,ext6,ext7,ext8,ext9
+	</sql>
+
+	<select id="getAlarmEvent" resultType="com.mainsteam.stm.alarm.po.AlarmEventPO">
+		SELECT <include refid="AlarmEventAlias"/>
+		FROM STM_ALARM_EVENT
+		WHERE EVENT_ID=#{eventID}
+	</select>
+
+
+	<select id="countAlarmEvent" parameterType="Map" resultType="Integer">
+		SELECT COUNT(1)
+		FROM STM_ALARM_EVENT
+		WHERE  SYS_ID=#{sysModule} AND HANDLE_TYPE !='DELETE'
+		<if test="isRecovered!=null">AND RECOVERED = #{isRecovered}</if>
+		<if test="level!=null">
+			AND  ALARM_LEVEL IN <foreach collection="level" open="(" item="item" separator="," close=")" >#{item}</foreach>
+		</if>
+		<if test="start!=null">AND collection_time &gt;= #{start}</if>
+		<if test="end!=null">AND collection_time &lt;= #{end}</if>
+		<if test="sourceIDes!=null">
+			AND (EXT8 IN
+			<foreach collection="sourceIDes" index="index" open="(" item="sourceID" separator="," close=")" >
+				#{sourceID}<if test="index%900>898">) OR EXT8 IN ('-1'</if>
+			</foreach>)
+		</if>
+	</select>
+
+
+	<select id="findAlarmEventDeprecated"  parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" resultType="com.mainsteam.stm.alarm.po.AlarmEventPO">
+		SELECT <include refid="AlarmEventAlias"/>
+		FROM STM_ALARM_EVENT
+		WHERE 1=1
+		<if test="condition.recovered!=null">AND RECOVERED = #{condition.recovered}</if>
+		<if test="condition.sysIDes!=null">AND SYS_ID IN
+			<foreach item="sysID" collection="condition.sysIDes" open="(" close=")" separator=",">#{sysID}</foreach>
+		</if>
+
+		<if test="condition.states !=null"> AND ALARM_LEVEL in (<foreach item="state" separator="," collection="condition.states">#{state}</foreach>)</if>
+		<if test="condition.start !=null"> AND collection_time &gt;= #{condition.start}</if>
+		<if test="condition.end !=null"> AND collection_time &lt;= #{condition.end}</if>
+		<!-- 				<if test="condition.handleTypes !=null">AND HANDLE_TYPE in (<foreach item="item" separator="," collection="condition.handleTypes">#{item}</foreach>)</if> -->
+		<if test="condition.ext0 !=null"> AND ext1=#{condition.ext0}</if>
+		<if test="condition.ext1 !=null"> AND ext1=#{condition.ext1}</if>
+		<if test="condition.ext2 !=null"> AND ext2=#{condition.ext2}</if>
+		<if test="condition.ext3 !=null"> AND ext3=#{condition.ext3}</if>
+		<if test="condition.ext4 !=null"> AND ext4=#{condition.ext4}</if>
+		<if test="condition.likeSourceIP!=null"> AND SOURCE_IP like CONCAT(CONCAT('%',#{condition.likeSourceIP}),'%')</if>
+		<if test="condition.likeSourceName!=null"> AND SOURCE_NAME like CONCAT(CONCAT('%',#{condition.likeSourceName}),'%')</if>
+		<if test="condition.likeSourceIpOrName!=null">
+			AND (SOURCE_NAME like CONCAT(CONCAT('%',#{condition.likeSourceIpOrName}),'%') or SOURCE_IP like CONCAT(CONCAT('%',#{condition.likeSourceIpOrName}),'%'))
+		</if>
+		<if test="condition.sourceIDes != null">
+			AND (SOURCE_ID IN
+			<foreach item="sourceID" index="index"  collection="condition.sourceIDes" open="(" close=")" separator=",">
+				#{sourceID}<if test="index%900>898">) OR SOURCE_ID IN ('-1'</if>
+			</foreach>
+			)
+		</if>
+		<if test="condition.orderFieldes!=null">
+			ORDER BY <foreach  item="orderField" collection="condition.orderFieldes" separator=",">${orderField}</foreach>
+			<if test="condition.orderASC">ASC</if>
+			<if test="!condition.orderASC">DESC</if>
+		</if>
+	</select>
+
+	<select id="findAlarmEvent"  parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" resultType="com.mainsteam.stm.alarm.po.AlarmEventPO">
+		SELECT     A.EVENT_ID as eventID,   source_id as sourceID,   SOURCE_NAME as sourceName,   SOURCE_IP as sourceIP,   ITSM_DATA as itsmJsonData,
+		SYS_ID as sysID,   RECOVER_KEY as recoverKey,   content,   ALARM_LEVEL as "level",   collection_time as collectionTime,   HANDLE_TYPE as handleType,
+		RECOVERED as recovered,
+		ext0,ext1,ext2,ext3,ext4,ext5,ext6,ext7,ext8,ext9
+		FROM (
+		<foreach item="filter" collection="condition.filters" open="(" close=")" separator=" )UNION ALL( ">
+			SELECT EVENT_ID FROM STM_ALARM_EVENT
+			WHERE HANDLE_TYPE !='DELETE'
+			<if test="filter.recovered!=null">AND RECOVERED = #{filter.recovered}</if>
+			<if test="filter.sysID!=null">and SYS_ID =#{filter.sysID}</if>
+			<if test="filter.states!=null">AND ALARM_LEVEL in (<foreach item="state" separator="," collection="filter.states">#{state}</foreach>)</if>
+			<if test="filter.start !=null"> AND collection_time &gt;= #{filter.start}</if>
+			<if test="filter.end !=null"> AND collection_time &lt;= #{filter.end}</if>
+			<if test="filter.ext0 !=null"> AND ext1=#{filter.ext0}</if>
+			<if test="filter.ext1 !=null"> AND ext1=#{filter.ext1}</if>
+			<if test="filter.ext2 !=null"> AND ext2=#{filter.ext2}</if>
+			<if test="filter.ext3 !=null"> AND ext3=#{filter.ext3}</if>
+			<if test="filter.ext4 !=null"> AND ext4=#{filter.ext4}</if>
+			<if test="filter.sourceIDes != null">
+				AND ( EXT8 IN
+				<foreach item="sourceID" index="index"  collection="filter.sourceIDes" open="(" close=")" separator=",">
+					#{sourceID}<if test="index%900>898">) OR EXT8 IN ('-1'</if>
+				</foreach>)
+			</if>
+			<if test="filter.likeSourceIP!=null"> AND SOURCE_IP like CONCAT(CONCAT('%',#{filter.likeSourceIP}),'%')</if>
+			<if test="filter.likeSourceName!=null"> AND SOURCE_NAME like CONCAT(CONCAT('%',#{filter.likeSourceName}),'%')</if>
+			<if test="filter.likeSourceIpOrName!=null">
+				AND (SOURCE_NAME like CONCAT(CONCAT('%',#{filter.likeSourceIpOrName}),'%') or SOURCE_IP like CONCAT(CONCAT('%',#{filter.likeSourceIpOrName}),'%'))
+			</if>
+		</foreach>
+		) A
+		LEFT JOIN  STM_ALARM_EVENT B ON A.EVENT_ID = B.EVENT_ID
+		<if test="condition.orderFieldes!=null">
+		ORDER BY
+		<foreach  item="orderField" collection="condition.orderFieldes" separator=",">${orderField}
+			<if test="condition.orderASC"> ASC</if>
+			<if test="!condition.orderASC"> DESC</if>
+		</foreach>
+		</if>
+
+	</select>
+
+	<select id="findTotalAlarmReport" parameterType="com.mainsteam.stm.alarm.event.report.InstanceAlarmEventReportQuery"
+			resultType="com.mainsteam.stm.alarm.event.dao.TotleAlarmReportObj">
+		SELECT SUM(cnt) cnt,alarmLevel AS "LEVEL",source_id as sourceID,SUM(notCover) notCover,SUM(cover) cover FROM(
+			(
+				SELECT COUNT(1) AS cnt,SOURCE_ID,alarmDetail.ALARM_LEVEL AS alarmLevel, COUNT(1) AS notCover,0 AS cover
+				FROM STM_ALARM_EVENT alarmEvent LEFT JOIN STM_ALARM_DETAIL alarmDetail
+				on alarmEvent.RECOVER_KEY = alarmDetail.RECOVERY_KEY AND alarmEvent.SYS_ID=alarmDetail.SYS_ID
+				WHERE
+				RECOVERED=0
+				AND HANDLE_TYPE NOT IN ('CONFIRM','DELETE')
+				AND (SOURCE_ID IN
+				<foreach item="sourceID" index="index"  collection="instanceIDes" open="(" close=")" separator=",">
+					#{sourceID}<if test="index%900>898">) OR SOURCE_ID IN ('-1'</if>
+				</foreach>)
+				<if test="timePeriods!=null">
+					AND
+					<foreach open="(" close=")" item="period" collection="timePeriods" separator=" OR ">
+						alarmDetail.collection_time BETWEEN #{period.startTime} and #{period.endTime}
+					</foreach>
+				</if>
+				GROUP BY alarmDetail.ALARM_LEVEL,SOURCE_ID
+			)
+		UNION ALL
+			(
+				SELECT COUNT(1) AS cnt,SOURCE_ID,alarmDetail.ALARM_LEVEL AS alarmLevel,0 AS  notCover,COUNT(1) AS cover
+				FROM STM_ALARM_EVENT alarmEvent LEFT JOIN STM_ALARM_DETAIL alarmDetail
+				on alarmEvent.RECOVER_KEY = alarmDetail.RECOVERY_KEY AND alarmEvent.SYS_ID=alarmDetail.SYS_ID
+				WHERE
+				RECOVERED=1
+				AND alarmDetail.ALARM_LEVEL!='NORMAL'
+				AND HANDLE_TYPE NOT IN ('CONFIRM','DELETE')
+				AND (SOURCE_ID IN
+				<foreach item="sourceID" index="index"  collection="instanceIDes" open="(" close=")" separator=",">
+					#{sourceID}<if test="index%900>898">) OR SOURCE_ID IN ('-1'</if>
+				</foreach>)
+				<if test="timePeriods!=null">
+					AND
+					<foreach open="(" close=")" item="period" collection="timePeriods" separator=" OR ">
+						alarmDetail.collection_time BETWEEN #{period.startTime} and #{period.endTime}
+					</foreach>
+				</if>
+				GROUP BY alarmDetail.ALARM_LEVEL,SOURCE_ID
+			)
+		) AE GROUP BY AE.alarmLevel,SOURCE_ID
+	</select>
+
+	<select id="findTotleAlarmDetail"  resultType="com.mainsteam.stm.alarm.po.AlarmEventPO">
+		SELECT
+		detail.EVENT_ID as eventID,
+		source_id as sourceID,
+		SOURCE_NAME as sourceName,
+		SOURCE_IP as sourceIP,
+		detail.EVENT_CONTENT as content,
+		detail.ALARM_LEVEL as "level",
+		detail.collection_time	as collectionTime,
+		RECOVERED as recovered
+		FROM
+		STM_ALARM_EVENT alarm, stm_alarm_detail detail
+		WHERE
+		alarm.RECOVER_KEY=detail.RECOVERY_KEY AND alarm.SYS_ID=detail.SYS_ID
+		AND
+		HANDLE_TYPE NOT IN ('CONFIRM','DELETE')
+		<if test="instanceIDes != null">
+			AND	 (SOURCE_ID IN
+			<foreach item="sourceID" index="index"  collection="instanceIDes" open="(" close=")" separator=",">
+				#{sourceID}<if test="index%900>898">) OR SOURCE_ID IN ('-1'</if>
+			</foreach>)
+		</if>
+		<if test="timePeriods!=null">
+			AND
+			<foreach open="(" close=")" item="period" collection="timePeriods" separator=" OR ">
+				detail.collection_time BETWEEN #{period.startTime} and #{period.endTime}
+			</foreach>
+		</if>
+		order by detail.collection_time desc
+	</select>
+
+	<select id="previewAlarmEvent"  parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" resultType="com.mainsteam.stm.alarm.po.AlarmEventPO">
+
+		SELECT B.EVENT_ID as eventID, source_id as sourceID, SOURCE_NAME as sourceName, SOURCE_IP as sourceIP, SYS_ID as sysID, content , ALARM_LEVEL as "level",
+		collection_time as collectionTime, HANDLE_TYPE as handleType, RECOVERED as recovered,ext8
+		FROM (
+		<foreach item="filter" collection="condition.filters" open="(" close=")" separator=" )UNION ALL( ">
+			SELECT EVENT_ID FROM STM_ALARM_EVENT
+			WHERE HANDLE_TYPE !='DELETE'
+			<if test="filter.recovered!=null">AND RECOVERED = #{filter.recovered}</if>
+			<if test="filter.sysID!=null">and SYS_ID =#{filter.sysID}</if>
+			<if test="filter.start !=null"> AND collection_time &gt;= #{filter.start}</if>
+			<if test="filter.end !=null"> AND collection_time &lt;= #{filter.end}</if>
+			<if test="filter.sourceIDes != null">
+				AND ( EXT8 IN
+				<foreach item="sourceID" index="index"  collection="filter.sourceIDes" open="(" close=")" separator=",">
+					#{sourceID}<if test="index%900>898">) OR EXT8 IN ('-1'</if>
+				</foreach>)
+			</if>
+
+		</foreach>
+		) A
+		LEFT JOIN  STM_ALARM_EVENT B ON A.EVENT_ID = B.EVENT_ID  ORDER BY COLLECTION_TIME DESC
+	</select>
+
+	<select id="queryAlarmEvent"  parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" resultType="com.mainsteam.stm.alarm.po.AlarmEventPO">
+		SELECT     A.EVENT_ID as eventID,   source_id as sourceID,   SOURCE_NAME as sourceName,   SOURCE_IP as sourceIP,   ITSM_DATA as itsmJsonData,
+		SYS_ID as sysID,   RECOVER_KEY as recoverKey,   content,   ALARM_LEVEL as "level",  collection_time as collectionTime,   HANDLE_TYPE as handleType,
+		RECOVERED as recovered, ext0,ext1,ext2,ext3,ext4,ext5,ext6,ext7,ext8,ext9
+		FROM (
+		<foreach item="filter" collection="condition.filters" open="(" close=")" separator=" )UNION ALL( ">
+			SELECT EVENT_ID FROM STM_ALARM_EVENT
+			WHERE
+			HANDLE_TYPE !='DELETE'
+			<if test="filter.recovered!=null">AND RECOVERED = #{filter.recovered}</if>
+			<if test="filter.sysID!=null">and SYS_ID =#{filter.sysID}</if>
+			<if test="filter.states!=null">AND ALARM_LEVEL in (<foreach item="state" separator="," collection="filter.states">#{state}</foreach>)</if>
+			<if test="filter.start !=null"> AND collection_time &gt;= #{filter.start}</if>
+			<if test="filter.end !=null"> AND collection_time &lt;= #{filter.end}</if>
+			<if test="filter.ext0 !=null"> AND ext1=#{filter.ext0}</if>
+			<if test="filter.ext1 !=null"> AND ext1=#{filter.ext1}</if>
+			<if test="filter.ext2 !=null"> AND ext2=#{filter.ext2}</if>
+			<if test="filter.ext3 !=null"> AND ext3=#{filter.ext3}</if>
+			<if test="filter.ext4 !=null"> AND ext4=#{filter.ext4}</if>
+			<if test="filter.sourceIDes != null">
+				AND ( EXT8 IN
+				<foreach item="sourceID" index="index"  collection="filter.sourceIDes" open="(" close=")" separator=",">
+					#{sourceID}<if test="index%900>898">) OR EXT8 IN ('-1'</if>
+				</foreach>)
+			</if>
+			<if test="filter.likeSourceIP!=null"> AND SOURCE_IP like CONCAT(CONCAT('%',#{filter.likeSourceIP}),'%')</if>
+			<if test="filter.likeSourceName!=null"> AND SOURCE_NAME like CONCAT(CONCAT('%',#{filter.likeSourceName}),'%')</if>
+			<if test="filter.likeSourceIpOrName!=null">
+				AND (SOURCE_NAME like CONCAT(CONCAT('%',#{filter.likeSourceIpOrName}),'%') or SOURCE_IP like CONCAT(CONCAT('%',#{filter.likeSourceIpOrName}),'%'))
+			</if>
+		</foreach>
+		) A
+		LEFT JOIN  STM_ALARM_EVENT B ON A.EVENT_ID = B.EVENT_ID
+		<if test="condition.orderCollections!=null">
+			ORDER BY
+			<foreach index="key" item="value" collection="condition.orderCollections" separator=",">
+				${key} ${value}
+			</foreach>
+		</if>
+	</select>
+
+	<select id="exportAlarmEventRecovered"  parameterType="com.mainsteam.stm.alarm.query.AlarmEventQuery2" resultType="com.mainsteam.stm.alarm.po.AlarmEventPO">
+
+		SELECT TT.EVENT_ID AS eventID, TT.SOURCE_NAME AS sourceName, TT.SOURCE_IP AS sourceIP,
+		TT.SYS_ID AS sysID, TT.ALARM_LEVEL as "level", TT.content AS content, TT.collection_time AS recoveryTime,
+		DETAIL.COLLECTION_TIME AS collectionTime, TT.ext0 AS ext0
+		FROM (
+		SELECT   A.EVENT_ID as EVENT_ID, SOURCE_NAME, SOURCE_IP, SYS_ID, RECOVER_KEY, content, ALARM_LEVEL, collection_time, ext0
+		FROM (
+		<foreach item="filter" collection="condition.filters" open="(" close=")" separator=" )UNION ALL( ">
+			SELECT EVENT_ID FROM STM_ALARM_EVENT
+			WHERE
+			HANDLE_TYPE !='DELETE'
+			<if test="filter.recovered!=null">AND RECOVERED = #{filter.recovered}</if>
+			<if test="filter.sysID!=null">and SYS_ID =#{filter.sysID}</if>
+			<if test="filter.states!=null">AND ALARM_LEVEL in (<foreach item="state" separator="," collection="filter.states">#{state}</foreach>)</if>
+			<if test="filter.start !=null"> AND collection_time &gt;= #{filter.start}</if>
+			<if test="filter.end !=null"> AND collection_time &lt;= #{filter.end}</if>
+			<if test="filter.ext0 !=null"> AND ext1=#{filter.ext0}</if>
+			<if test="filter.ext1 !=null"> AND ext1=#{filter.ext1}</if>
+			<if test="filter.ext2 !=null"> AND ext2=#{filter.ext2}</if>
+			<if test="filter.ext3 !=null"> AND ext3=#{filter.ext3}</if>
+			<if test="filter.ext4 !=null"> AND ext4=#{filter.ext4}</if>
+			<if test="filter.sourceIDes != null">
+				AND ( EXT8 IN
+				<foreach item="sourceID" index="index"  collection="filter.sourceIDes" open="(" close=")" separator=",">
+					#{sourceID}<if test="index%900>898">) OR EXT8 IN ('-1'</if>
+				</foreach>)
+			</if>
+			<if test="filter.likeSourceIP!=null"> AND SOURCE_IP like CONCAT(CONCAT('%',#{filter.likeSourceIP}),'%')</if>
+			<if test="filter.likeSourceName!=null"> AND SOURCE_NAME like CONCAT(CONCAT('%',#{filter.likeSourceName}),'%')</if>
+			<if test="filter.likeSourceIpOrName!=null">
+				AND (SOURCE_NAME like CONCAT(CONCAT('%',#{filter.likeSourceIpOrName}),'%') or SOURCE_IP like CONCAT(CONCAT('%',#{filter.likeSourceIpOrName}),'%'))
+			</if>
+		</foreach>
+		) A
+		LEFT JOIN  STM_ALARM_EVENT B ON A.EVENT_ID = B.EVENT_ID
+		) TT, stm_alarm_detail DETAIL
+		WHERE
+			DETAIL.EVENT_ID=(SELECT MAX(EVENT_ID) FROM STM_ALARM_DETAIL WHERE SYS_ID=TT.SYS_ID
+			AND RECOVERY_KEY=TT.RECOVER_KEY AND ALARM_LEVEL !='NORMAL')
+		AND
+			TT.SYS_ID = DETAIL.SYS_ID AND TT.RECOVER_KEY=DETAIL.RECOVERY_KEY
+		<if test="condition.orderCollections!=null">
+			ORDER BY
+			<foreach index="key" item="value" collection="condition.orderCollections" separator=",">
+				TT.${key} ${value}
+			</foreach>
+		</if>
+	</select>
+
+	<select id="exportAlarmEventUnrecovered"  parameterType="com.mainsteam.stm.alarm.query.AlarmEventQuery2" resultType="com.mainsteam.stm.alarm.po.AlarmEventPO">
+		SELECT   A.EVENT_ID as eventID,  SOURCE_NAME as sourceName,  SOURCE_IP as sourceIP, content,  ALARM_LEVEL as "level", collection_time as collectionTime, ext0
+		FROM (
+		<foreach item="filter" collection="condition.filters" open="(" close=")" separator=" )UNION ALL( ">
+			SELECT EVENT_ID FROM STM_ALARM_EVENT
+			WHERE
+			HANDLE_TYPE !='DELETE'
+			<if test="filter.recovered!=null">AND RECOVERED = #{filter.recovered}</if>
+			<if test="filter.sysID!=null">and SYS_ID =#{filter.sysID}</if>
+			<if test="filter.states!=null">AND ALARM_LEVEL in (<foreach item="state" separator="," collection="filter.states">#{state}</foreach>)</if>
+			<if test="filter.start !=null"> AND collection_time &gt;= #{filter.start}</if>
+			<if test="filter.end !=null"> AND collection_time &lt;= #{filter.end}</if>
+			<if test="filter.ext0 !=null"> AND ext1=#{filter.ext0}</if>
+			<if test="filter.ext1 !=null"> AND ext1=#{filter.ext1}</if>
+			<if test="filter.ext2 !=null"> AND ext2=#{filter.ext2}</if>
+			<if test="filter.ext3 !=null"> AND ext3=#{filter.ext3}</if>
+			<if test="filter.ext4 !=null"> AND ext4=#{filter.ext4}</if>
+			<if test="filter.sourceIDes != null">
+				AND ( EXT8 IN
+				<foreach item="sourceID" index="index"  collection="filter.sourceIDes" open="(" close=")" separator=",">
+					#{sourceID}<if test="index%900>898">) OR EXT8 IN ('-1'</if>
+				</foreach>)
+			</if>
+			<if test="filter.likeSourceIP!=null"> AND SOURCE_IP like CONCAT(CONCAT('%',#{filter.likeSourceIP}),'%')</if>
+			<if test="filter.likeSourceName!=null"> AND SOURCE_NAME like CONCAT(CONCAT('%',#{filter.likeSourceName}),'%')</if>
+			<if test="filter.likeSourceIpOrName!=null">
+				AND (SOURCE_NAME like CONCAT(CONCAT('%',#{filter.likeSourceIpOrName}),'%') or SOURCE_IP like CONCAT(CONCAT('%',#{filter.likeSourceIpOrName}),'%'))
+			</if>
+		</foreach>
+		) A
+		LEFT JOIN  STM_ALARM_EVENT B ON A.EVENT_ID = B.EVENT_ID
+		<if test="condition.orderCollections!=null">
+			ORDER BY
+			<foreach index="key" item="value" collection="condition.orderCollections" separator=",">
+				${key} ${value}
+			</foreach>
+		</if>
+	</select>
+
+
+
+</mapper>

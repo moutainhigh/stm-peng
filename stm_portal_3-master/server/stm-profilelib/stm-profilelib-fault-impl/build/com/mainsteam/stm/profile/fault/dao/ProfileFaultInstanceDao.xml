@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.profile.fault.dao.ProfileFaultInstanceDao">
+	<sql id="profileFaultInstanceAlias">
+		profile_id as profileId,
+		instance_id as instanceId
+	</sql>
+
+	<select id="selectInstanceByProfile" parameterType="long" resultType="com.mainsteam.stm.profilelib.fault.obj.ProfileFaultInstance">
+		select <include refid="profileFaultInstanceAlias"></include> from stm_profilelib_fault_instance where profile_id = #{profileId}
+	</select>
+<!-- 	<insert id="insertProfileInstance" parameterType="list"> -->
+<!-- 		INSERT INTO stm_profilelib_fault_instance (profile_id,instance_id) VALUES  -->
+<!-- 		<foreach collection="list" item="item" index="index" separator="," >  -->
+<!-- 			(#{item.profileId},#{item.instanceId}) -->
+<!-- 		</foreach> -->
+<!-- 	</insert> -->
+
+	<insert id="insertProfileInstance" parameterType="com.mainsteam.stm.profilelib.fault.obj.ProfileFaultInstance">
+		INSERT INTO stm_profilelib_fault_instance (profile_id,instance_id) VALUES (#{profileId},#{instanceId})
+	</insert>
+	
+	<delete id="deleteAllProfileInstance" parameterType="long">
+		DELETE FROM stm_profilelib_fault_instance where profile_id =#{profileId}
+		
+	</delete>
+</mapper>

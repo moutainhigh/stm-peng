@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.platform.system.config.dao.ISystemConfigDao">
+
+    <select id="get" parameterType="long" resultType="com.mainsteam.stm.platform.system.config.bean.SystemConfigBo">
+        SELECT 
+	        sc.ID AS "id",
+	        sc.CONTENT AS "content",
+	        sc.DESCRIPTION AS "description"
+	    FROM
+	        STM_SYS_CONFIG sc
+		where
+			sc.ID = #{id}
+    </select>
+    <insert id="insert" parameterType="com.mainsteam.stm.platform.system.config.bean.SystemConfigBo">
+        INSERT INTO STM_SYS_CONFIG  (ID, CONTENT, DESCRIPTION) VALUES (#{id,jdbcType=NUMERIC},#{content,jdbcType=VARCHAR},#{description,jdbcType=VARCHAR})
+    </insert>
+    
+    <update id="update" parameterType="com.mainsteam.stm.platform.system.config.bean.SystemConfigBo">
+        UPDATE STM_SYS_CONFIG
+        <set>
+            <if test="content!=null">CONTENT = #{content,jdbcType=VARCHAR},</if>
+            <if test="description!=null">DESCRIPTION = #{description,jdbcType=VARCHAR}</if>
+        </set>
+		where id = #{id,jdbcType=NUMERIC}
+    </update>
+	
+</mapper>

@@ -1,0 +1,249 @@
+<div id="oc_module_config_warn_config" style="height:100%">
+	<div id="config_warn_config_accordion_div" class="easyui-accordion oc-window-rightmenu" style="height:100%">
+		<div title="常规信息" class="config_warn_basic">
+	  		<div id="warnBasicFormDiv">
+		   		<form class="oc-form warnBasicForm col1 h-pad-mar">
+		   		<input type="hidden" id="id" name="id"/>
+			    <table class="tab-border" style=" width:100%;">
+		     		<tbody>
+			      		<tr class="form-group h-pad-mar">
+					       <td class="td-bgcolor">告警名称</td>
+					       <td><div><input autocomplete="off" type="text" name="name" required="required"/></div></td>
+			      		</tr>
+			      		<tr class="form-group h-pad-mar config-basic-add-hidden-group" style="display:none;">
+			       			<td class="td-bgcolor">创建人</td>
+			       			<td><div><span name="entryUserName"/></div></td>
+			      		</tr>
+			      		<tr class="form-group h-pad-mar config-basic-add-hidden-group" style="display:none;">
+			       			<td class="td-bgcolor">修改人</td>
+			       			<td><div><span name="updateUserName"/></div></td>
+			      		</tr>
+			      		<tr class="form-group h-pad-mar config-basic-add-hidden-group" style="display:none;">
+			       			<td class="td-bgcolor">创建时间</td>
+			       			<td><div><span name="entryDateTime"/></div></td>
+			      		</tr>
+			      		<tr class="form-group h-pad-mar config-basic-add-hidden-group" style="display:none;">
+			       			<td class="td-bgcolor">修改时间</td>
+			       			<td><div><span name="updateDateTime"/></div></td>
+			      		</tr>
+			     	</tbody>
+		    	</table>
+		   		</form>
+	  		</div>
+		</div>
+		<div title="资源选择" class="config_warn_resource">
+			<div id="warnResourceFormDiv">
+				<form class="oc-form col1 h-pad-mar">
+					<div style="text-align:left;" class="form-group h-pad-mar window-hbg">
+						<div>
+							<input name="nameOrIpAddress" placeholder="输入设备名称或IP地址" type='text'/>
+							<a href='javascript:void(0);' id='searchByNameOrIpAddressBtn' class='easyui-linkbutton' data-options="iconCls:'icon-search'"/>
+							<span style="position:relative; left:225px; top:1px;">使用当前告警的设备:&nbsp;&nbsp;&nbsp;&nbsp;
+							</span>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div id="pickGrid" style="height:290px;"></div>
+		</div>
+		<div title="告警规则" class="config_warn_rule">
+			<div id="alarmRules" style="width: 100%; height: 100%;">
+				<div id="alarmRulesDatagrid" class="oc-datagrid" style="height: 100%;"></div>
+			</div>
+		</div>
+   	</div>
+</div>
+<script type="text/javascript">
+(function($){
+	//命名空间
+	oc.ns('oc.module.config.warn.config');
+	oc.module.config.warn.config = {
+		open:function(type,id,row){
+			open(type,id,row);
+		},
+		save:function(type,id,configDatagrid,addWarnWin){
+			var name=$("input[name='name']").val(),data={};
+			if(name == null || name == undefined || name.trim() == ''){
+				alert('请输入名称');
+				return;
+			}
+			if(type=="edit") data.id=id;
+			data.name=name;
+			data.configWarnResourceBos=getConfigWarnResourceBos();
+			data.configWarnRuleBos=getConfigWarnRuleBos();
+			oc.util.ajax({
+				url: oc.resource.getUrl('portal/config/warn/config/'+(type=="edit"?"updateWarn.htm":"addWarn.htm")),
+				data:{data:JSON.stringify(data)},
+				successMsg:null,
+				success:function(responseData){
+					var result = eval(responseData);
+					if(responseData.code && responseData.code==201){
+						alert('告警名称已存在!');
+						return;
+					}else if(responseData.code==200){
+						addWarnWin.dialog('close');
+						configDatagrid.reLoad();
+						alert('保存成功');
+					}else if(responseData.code==299){alert(responseData.data)}
+				}
+			});
+		}
+	}
+	
+	var pickGrid = null ,datagrid = null, user = oc.index.getUser();
+	
+	function open(type,id,row){
+		if(type=="edit"){//编辑时
+			$("#id").val(id);
+			$("input[name='name']").val(row.name);
+			$("span[name='entryUserName']").text(row.entryUserName);
+			$("span[name='updateUserName']").text(row.updateUserName||"");
+			$("span[name='entryDateTime']").text(formartTime(row.entryDateTime));
+			$("span[name='updateDateTime']").text(formartTime(row.updateDateTime));
+			$(".config-basic-add-hidden-group").each(function(e){
+				$(this).is(":hidden")?$(this).show():"";
+			});
+		}
+		var warnConfigDiv = $('#c_module_config_warn_config');
+		var warnConfigAccordion = warnConfigDiv.find('.oc-window-rightmenu').accordion({
+			fit:true
+		});
+		
+		//type为add时资源选择处理
+		var $ipAddress = $('[name=nameOrIpAddress]');
+		$ipAddress.bind('keypress',function(event){
+	            if(event.keyCode == 13) {
+	            	queryResource();
+	            	return false;
+	            }
+        });
+		var columns=[[
+		 	         {field:'id',title:'id',checkbox:true,sortable:true},
+			         {field:'intanceName',title:'设备名称',width:80},
+			         {field:'ipAddress',title:'ip地址',sortable:true,width:80},
+			         {field:'resourceTypeId',title:'资源类型',sortable:true,width:80}
+		         ]];
+		var cfg = type=="add"?{
+			selector:"#pickGrid",
+			leftColumns:columns,
+			rightColumns:columns,
+			isInteractive:true,
+			leftUrl:oc.resource.getUrl('portal/config/warn/config/getLeftResourceInstanceList.htm')
+		}:{
+			selector:"#pickGrid",
+			leftColumns:columns,
+			rightColumns:columns,
+			isInteractive:true,
+			leftUrl:oc.resource.getUrl('portal/config/warn/config/getLeftResourceInstanceList.htm?id='+id),
+			rightUrl:oc.resource.getUrl('portal/config/warn/config/getRightResourceInstanceList.htm?id='+id)
+		};
+		pickGrid = oc.ui.pickgrid(cfg);
+		var searchBtn = $("#searchByNameOrIpAddressBtn").on('click',function(e){
+				queryResource();
+		});
+		
+		function queryResource(){
+			oc.util.ajax({
+				url: oc.resource.getUrl('portal/config/warn/config/getLeftResourceInstanceList.htm'),
+				data:{id:id?id:0,searchKey:$ipAddress.val()},
+				successMsg:null,
+				success:function(data){
+					pickGrid.loadData('left',data);
+				}
+			});
+		}
+		
+		var div=$('#alarmRules').attr('id',oc.util.generateId());
+		var datagridDiv=div.find('#alarmRulesDatagrid');
+		var toolbar = [];
+		if(user.systemUser==true){
+			toolbar.push({
+				text:'添加',
+				iconCls:'fa fa-plus',
+				onClick:function(){
+					oc.resource.loadScript('resource/module/config-file/warn/config/js/addAlarmRule.js?t='+new Date(),function(){
+						oc.module.config.warn.config.alarm.open(datagrid);
+					});
+				}
+			},{
+				text:'删除',
+				iconCls:'fa fa-trash-o',
+				onClick:function(){
+					var userSelected = datagridDiv.datagrid('getSelections');
+					if(null == userSelected || 0==userSelected.length){
+						alert('请选择一个告警规则！');
+					}else{
+						oc.ui.confirm('是否删除该告警规则！',function(){
+							 var item = datagridDiv.datagrid('getRows'),index;
+					    	 if(item){
+					    		 for(var i=item.length-1; i >= 0; i--){
+					    			 for(var m=0;m<userSelected.length;m++){
+					    				 if(item[i].userId == userSelected[m].userId){
+						    				 index = datagridDiv.datagrid('getRowIndex', item[i]);
+									    	 datagridDiv.datagrid('deleteRow',index)
+						    				 break;
+					    				 }
+					    			 }
+					    		 }
+					    	 }
+						},function(){});
+					}
+				}
+			});
+		}
+		datagrid = oc.ui.datagrid({
+			selector:datagridDiv,
+			url:oc.resource.getUrl('portal/config/warn/config/getWarnRulesById.htm?id='+(id?id:0)),
+			octoolbar:{
+				right:toolbar
+			},
+			columns:[[
+		         {field:'userId',title:'userId',checkbox:true,sortable:true},
+		         {field:'userName',title:'接收人员',width:60,align:'center'},
+		         {field:'sendWayChoice',title:'告警方式',align:'center',width:50,formatter:sendWayFormat}
+		     ]]
+		});
+		function sendWayFormat(value,row,rowIndex){
+			return '<input type="checkbox" id="checkboxMessage'+row.userId+'" name="message" '+(row.message==1?"checked":"")+' style="vertical-align:middle;">&nbsp;<a>短信</a>&nbsp;&nbsp;&nbsp;&nbsp;'
+					+'<input type="checkbox" id="checkboxEmail'+row.userId+'" name="email" '+(row.email==1?"checked":"")+' style="vertical-align:middle;">&nbsp;<a>邮件</a>&nbsp;&nbsp;&nbsp;&nbsp;'
+					+'<input type="checkbox" id="checkboxAlert'+row.userId+'" name="alert" '+(row.alert==1?"checked":"")+' style="vertical-align:middle;">&nbsp;<a>Alert</a>';
+		}
+	}
+	
+	function getConfigWarnResourceBos(){
+		var configWarnResourceBos = [],rows = pickGrid.getRightRows();
+		for(var i=0;i<pickGrid.getRightRows().length;i++){
+			configWarnResourceBos.push({
+				resourceId:rows[i].id
+			});
+		}
+		return configWarnResourceBos;
+	}
+	
+	function getConfigWarnRuleBos(){
+		var item = datagrid.selector.datagrid('getRows'),index;
+		var configWarnRules = [];
+   	 	if(item){
+	   		for(var i=item.length-1; i >= 0; i--){
+	   			var ConfigWarnResourceBo = {
+		   				userId:item[i].userId,
+		   				message:$("#checkboxMessage"+item[i].userId).is(":checked")?1:0,
+		   				email:$("#checkboxEmail"+item[i].userId).is(":checked")?1:0,
+		   				alert:$("#checkboxAlert"+item[i].userId).is(":checked")?1:0
+		   			};
+	   			configWarnRules.push(ConfigWarnResourceBo);
+	   		}
+   	 	}
+   	 	return configWarnRules;
+	}
+	function formartTime(value){
+		if(value == undefined||value == "") 
+			return "";
+		var unixTimestamp = new Date(value),hours = unixTimestamp.getHours();
+		if(0==hours)
+ 			return unixTimestamp.toLocaleString().replace('12:',"0:");
+ 		else
+     	 	return unixTimestamp.toLocaleString();
+	}
+})(jQuery);
+</script>

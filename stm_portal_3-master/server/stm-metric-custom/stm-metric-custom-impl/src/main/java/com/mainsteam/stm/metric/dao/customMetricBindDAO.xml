@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.metric.dao.CustomMetricBindDAO">
+
+	<sql id="customMetricBindColumn"> 
+		instanceId,metricId,pluginId
+	</sql>
+	<sql id="customMetricBindColumnValue">
+		#{instanceId},#{metricId},#{pluginId}
+	</sql>
+	<sql id="table">
+		STM_CUSTOM_METRIC_BIND
+	</sql>
+	<sql id="selectSql">
+		select <include refid="customMetricBindColumn"/>
+		from   <include refid="table"/>
+	</sql>
+	
+	<select id="getAllCustomMetricBinds" resultType="com.mainsteam.stm.metric.dao.pojo.CustomMetricBindDO">
+	   <include refid="selectSql"/>
+	</select>
+	
+	<insert id="insertMetricBind" 
+		parameterType="com.mainsteam.stm.metric.dao.pojo.CustomMetricBindDO">
+		insert into <include refid="table"/>
+		(<include refid="customMetricBindColumn"/>) 
+		values(<include refid="customMetricBindColumnValue"/>) 
+	</insert>
+	<!-- <update id="updateMetricCollect" 
+		parameterType="com.mainsteam.stm.metric.po.CustomMetricBindDO">
+		update <include refid="table"/> 
+		<set>
+			<if test="metricId != null">  metricId= #{metricId},</if>
+			<if test="pluginId != null"> pluginId=#{pluginId}, </if>
+			<if test="paramKey != null"> param_key = #{paramKey},</if>
+			<if test="paramType != null"> param_type=#{paramType},</if>
+			<if test="paramValue != null">  param_value =#{paramValue},</if>
+			<if test="order > 0">  order= #{order},</if>
+		</set>	
+		where id = #{MetricCollectId} 
+	</update> -->
+	
+    <delete id="removeMetricBindbyInstanceId"> 
+		delete from <include refid="table"/> where instanceId = #{instanceId}
+    </delete>
+    
+	<delete id="removeMetricBindbyDO" parameterType="com.mainsteam.stm.metric.dao.pojo.CustomMetricBindDO">
+		delete from <include refid="table"/>
+	   <trim prefix="where" prefixOverrides="and">
+			<if test="metricId != null"> and metricId= #{metricId}</if>
+			<if test="pluginId != null"> and pluginId=#{pluginId} </if>
+			<if test="instanceId > 0">  and instanceId = #{instanceId} </if>
+	   </trim>
+	</delete>
+	
+	<select id="getCustomMetricBindByInstanceId" 
+		resultType="com.mainsteam.stm.metric.dao.pojo.CustomMetricBindDO"
+		parameterType="long"> 
+		<include refid="selectSql"/> where instanceId = #{instanceId} 
+	</select>
+	<select id="getCustomMetricBindByMetricId" 
+		resultType="com.mainsteam.stm.metric.dao.pojo.CustomMetricBindDO"
+		parameterType="string"> 
+		<include refid="selectSql"/> where metricId = #{metricId} 
+	</select>
+	<select id="getCustomMetricBindByMetricIds" 
+		resultType="com.mainsteam.stm.metric.dao.pojo.CustomMetricBindDO"
+		parameterType="string"> 
+		<include refid="selectSql"/> where metricId in 
+		<foreach collection="list" index="index" item="item" open="(" separator="," close=")">#{item}</foreach>
+	</select>
+	<select id="getCustomMetricBindByMetricIdAndPluginId" 
+		resultType="com.mainsteam.stm.metric.dao.pojo.CustomMetricBindDO"
+		parameterType="com.mainsteam.stm.metric.dao.pojo.CustomMetricBindDO">
+		<include refid="selectSql"/> where metricId = #{metricId} and pluginId=#{pluginId}
+	</select>
+	<select id="getCustomMetricBindByNodeGroupId" 
+		resultType="com.mainsteam.stm.metric.dao.pojo.CustomMetricBindDO"
+		parameterType="int"> 
+		select bind.instanceId,bind.metricId,bind.pluginId from STM_CUSTOM_METRIC_BIND bind,STM_INSTANCELIB_RESOURCE_MAIN rlib where bind.instanceId = rlib.instanceid and rlib.DiscoverNode=#{nodeGroupId} and rlib.LifeState='MONITORED'
+	</select>
+	<select id="getCustomMetricBindByInstanceIds" 
+		resultType="com.mainsteam.stm.metric.dao.pojo.CustomMetricBindDO">
+		<include refid="selectSql"/> where instanceId in 
+		<foreach collection="list" index="index" item="item" open="(" separator="," close=")">#{item}</foreach>
+	</select>
+ </mapper>

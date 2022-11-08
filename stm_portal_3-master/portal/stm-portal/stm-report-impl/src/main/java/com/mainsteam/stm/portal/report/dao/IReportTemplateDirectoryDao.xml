@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.portal.report.dao.IReportTemplateDirectoryDao">
+	
+	<insert id="insert" parameterType="com.mainsteam.stm.portal.report.po.ReportTemplateDirectoryPo">
+	    insert into STM_REP_TEMP_DIR(
+	    		 REP_TEMP_DIR_ID
+		    	,REP_TEMP_ID
+		    	,REP_TEMP_DIR_NAME
+		    	,REP_TEMP_DIR_IS_DETAIL
+		    	,REP_TEMP_DIR_RESOURCE
+		    	,REP_TEMP_DIR_TOPN_COUNT
+		    	,REP_TEMP_DIR_TYPE
+		    	,REP_TEMP_DIR_DEADLY
+		    	,REP_TEMP_DIR_SERIOUS
+		    	,REP_TEMP_DIR_WARNING
+		    	,REP_TEMP_DIR_CATEGORY_ID
+		    	,REP_TEMP_DIR_SUB_RESOURCE_ID
+		    	,REP_TEMP_DIR_METRIC_TYPE
+	    	) values (
+	    		#{reportTemplateDirectoryId}
+	    		,#{reportTemplateId}
+	    		,#{reportTemplateDirectoryName}
+	    		,#{reportTemplateDirectoryIsDetail}
+	    		,#{reportTemplateDirectoryResource}
+	    		,#{reportTemplateDirectoryTopnCount}
+	    		,#{reportTemplateDirectoryType}
+	    		,#{reportTemplateDirectoryDeadly}
+	    		,#{reportTemplateDirectorySerious}
+	    		,#{reportTemplateDirectoryWarning}
+	    		,#{reportTemplateDirectoryCategoryId}
+	    		,#{reportTemplateDirectorySubResourceId}
+	    		,#{reportTemplateDirectoryMetricValueType}
+			)
+	</insert>
+	
+	<select id="selectDirectoryIdByTemplateId" resultType="long" parameterType="long">
+		select REP_TEMP_DIR_ID
+			from STM_REP_TEMP_DIR
+		 	where REP_TEMP_ID = #{reportTemplateId}
+	</select>
+	
+	<delete id="del">
+		delete from STM_REP_TEMP_DIR where  REP_TEMP_DIR_ID = #{reportTemplateDirectoryId}
+	</delete>
+	
+	<select id="select" resultMap="ReportTemplateDirectoryMap" parameterType="com.mainsteam.stm.portal.report.po.ReportTemplateDirectoryPo">
+		select  
+				REP_TEMP_DIR_ID
+				,REP_TEMP_ID
+		    	,REP_TEMP_DIR_NAME
+		    	,REP_TEMP_DIR_IS_DETAIL
+		    	,REP_TEMP_DIR_RESOURCE
+		    	,REP_TEMP_DIR_TOPN_COUNT
+		    	,REP_TEMP_DIR_TYPE
+		    	,REP_TEMP_DIR_DEADLY
+		    	,REP_TEMP_DIR_SERIOUS
+		    	,REP_TEMP_DIR_WARNING
+		    	,REP_TEMP_DIR_CATEGORY_ID
+		    	,REP_TEMP_DIR_SUB_RESOURCE_ID
+		    	,REP_TEMP_DIR_METRIC_TYPE
+			from STM_REP_TEMP_DIR where REP_TEMP_ID = #{reportTemplateId}
+	</select>
+	
+	<select id="update" parameterType="com.mainsteam.stm.portal.report.po.ReportTemplateDirectoryPo">
+		update  STM_REP_TEMP_DIR set
+		    	REP_TEMP_DIR_NAME = #{reportTemplateDirectoryName}
+		    	,REP_TEMP_DIR_IS_DETAIL = #{reportTemplateDirectoryIsDetail}
+		    	,REP_TEMP_DIR_RESOURCE = #{reportTemplateDirectoryResource}
+		    	,REP_TEMP_DIR_TOPN_COUNT = #{reportTemplateDirectoryTopnCount}
+		    	,REP_TEMP_DIR_TYPE = #{reportTemplateDirectoryType}
+		    	,REP_TEMP_DIR_DEADLY = #{reportTemplateDirectoryDeadly}
+		    	,REP_TEMP_DIR_SERIOUS = #{reportTemplateDirectorySerious}
+		    	,REP_TEMP_DIR_WARNING = #{reportTemplateDirectoryWarning}
+		    	,REP_TEMP_DIR_CATEGORY_ID = #{reportTemplateDirectoryCategoryId}
+		    	,REP_TEMP_DIR_SUB_RESOURCE_ID = #{reportTemplateDirectorySubResourceId}
+		    	,REP_TEMP_DIR_METRIC_TYPE = #{reportTemplateDirectoryMetricValueType}
+			 where REP_TEMP_DIR_ID = #{reportTemplateDirectoryId}
+	</select>
+	
+	<select id="selectTemplateIdByTemplateId" resultType="long" parameterType="long">
+		SELECT DISTINCT REP_TEMP_ID FROM STM_REP_TEMP_DIR WHERE REP_TEMP_DIR_ID IN
+			(SELECT REP_TEMP_DIR_ID FROM STM_REP_TEMP_DIR_INSTANCE WHERE INSTANCE_ID in
+		 <foreach item="ids" index="index" collection="array" open="(" separator="," close=")">  
+  			#{ids}
+ 		 </foreach> )
+	</select>
+	
+	<resultMap type="com.mainsteam.stm.portal.report.po.ReportTemplateDirectoryPo" id="ReportTemplateDirectoryMap">
+		<id property="reportTemplateDirectoryId" column="REP_TEMP_DIR_ID" />
+		<result property="reportTemplateId" column="REP_TEMP_ID" />
+		<result property="reportTemplateDirectoryName" column="REP_TEMP_DIR_NAME" />
+		<result property="reportTemplateDirectoryIsDetail" column="REP_TEMP_DIR_IS_DETAIL" />
+		<result property="reportTemplateDirectoryResource" column="REP_TEMP_DIR_RESOURCE" />
+		<result property="reportTemplateDirectoryTopnCount" column="REP_TEMP_DIR_TOPN_COUNT" />
+		<result property="reportTemplateDirectoryType" column="REP_TEMP_DIR_TYPE" />
+		<result property="reportTemplateDirectoryDeadly" column="REP_TEMP_DIR_DEADLY" />
+		<result property="reportTemplateDirectorySerious" column="REP_TEMP_DIR_SERIOUS" />
+		<result property="reportTemplateDirectoryWarning" column="REP_TEMP_DIR_WARNING" />
+		<result property="reportTemplateDirectoryCategoryId" column="REP_TEMP_DIR_CATEGORY_ID" />
+		<result property="reportTemplateDirectorySubResourceId" column="REP_TEMP_DIR_SUB_RESOURCE_ID" />
+		<result property="reportTemplateDirectoryMetricValueType" column="REP_TEMP_DIR_METRIC_TYPE" />
+	</resultMap>
+	
+</mapper>

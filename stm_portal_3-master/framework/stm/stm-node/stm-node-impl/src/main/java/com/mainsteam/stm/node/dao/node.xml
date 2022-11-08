@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.node.dao.pojo.NodeDAO">
+	<insert id="insert"  parameterType="com.mainsteam.stm.node.dao.pojo.NodeDO">
+	    insert into STM_NODE(ID,NAME,IP,PORT,FUNC,GROUPID,PRIORITY,ALIVE,INSTALLPATH,UPDATETIME,DESCRIPTION) VALUES (#{id},#{name},#{ip},#{port},#{func},#{groupId},#{priority},#{alive},#{installPath},#{updateTime},#{description})
+	</insert>
+	<update id="update" parameterType="com.mainsteam.stm.node.dao.pojo.NodeDO">
+		update STM_NODE
+		<set>
+			<if test="name != null">NAME = #{name},</if>	
+			<if test="ip != null">IP = #{ip},</if>	
+			<if test="port != null">PORT = #{port},</if>	
+			<if test="groupId != null">GROUPID = #{groupId},</if>	
+			<if test="priority != null">PRIORITY = #{priority},</if>	
+			<if test="installPath != null">INSTALLPATH = #{installPath},</if>
+			<if test="alive != null">ALIVE = #{alive},</if>
+			<if test="updateTime != null">UPDATETIME = #{updateTime},</if>
+			<if test="description != null">DESCRIPTION = #{description},</if>	
+		</set>
+		where ID = #{id}
+	</update>
+	<delete id="delete" parameterType="int">
+		delete from STM_NODE where ID = #{id}
+	</delete>
+	<delete id="deleteChildNodes" parameterType="int">
+		delete from STM_NODE where GROUPID in (select ID from STM_NODE_GROUP where PARENTID = #{parentId})
+	</delete>
+	<select id="selectById" parameterType="int" resultType="com.mainsteam.stm.node.dao.pojo.NodeDO">
+		select ID,NAME,IP,PORT,FUNC,GROUPID,PRIORITY,ALIVE,INSTALLPATH,STARTUPTIME,DESCRIPTION from STM_NODE where ID = #{id}
+	</select>
+	<select id="selectByExample" parameterType="com.mainsteam.stm.node.dao.pojo.NodeDO"  resultType="com.mainsteam.stm.node.dao.pojo.NodeDO">
+		select ID,NAME,IP,PORT,FUNC,GROUPID,PRIORITY,ALIVE,INSTALLPATH,STARTUPTIME,DESCRIPTION from STM_NODE
+		<where>
+			<if test="name != null">NAME = #{name}</if>	
+			<if test="ip != null">and IP = #{ip}</if>	
+			<if test="port != null">and PORT = #{port}</if>	
+			<if test="func != null">and FUNC = #{func}</if>	
+			<if test="groupId != null">and GROUPID = #{groupId}</if>	
+			<if test="priority != null">and PRIORITY = #{priority}</if>	
+			<if test="alive != null">ALIVE = #{alive}</if>	
+		</where>
+	</select>
+	<select id="selectFuncByGroup" parameterType="int" resultType="string">
+		select distinct FUNC from STM_NODE where GROUPID = #{value}
+	</select>
+	<select id="selectNodeCount" resultType="int">
+		select count(ID) as c from STM_NODE
+	</select>
+	<select id="selectMaxUpdateTime" resultType="long">
+		select max(UPDATETIME) as UPDATETIME from STM_NODE
+	</select>
+	<update id="updateStartupTime" parameterType="com.mainsteam.stm.node.dao.pojo.NodeDO">
+		update STM_NODE set STARTUPTIME = #{startupTime} where ID = #{id}
+	</update>
+	<insert id="insertDomain" parameterType="long">
+	    insert into STM_SYS_DOMAIN_DCS_REL(DOMAIN_ID,DCS_ID,IS_CHECKED) VALUES (1,#{nodeId},1)
+	</insert>
+</mapper>

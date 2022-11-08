@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.system.scriptmanage.dao.IScriptManageDao">
+	
+	<insert id="insert" parameterType="com.mainsteam.stm.system.scriptmanage.bo.ScriptManage" >
+	    insert into stm_sys_script_manage
+	    (SCRIPT_ID,DSTM_NAME,DISCRIPTION,FILE_SIZE_NUM,UPDATE_TIME,SCRIPT_TYPE,UPDATE_USER_ID,FILE_ID)
+	    values 
+	    (#{scriptId},#{docName}, #{discription}, #{fileSizeNum}, #{updateTime}, #{scriptTypeCode}, #{userId}, #{fileId})
+	</insert>
+	
+	
+	<select id="pageSelect"  resultType="com.mainsteam.stm.system.scriptmanage.bo.ScriptManage" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" >
+	    select
+	    SCRIPT_ID as scriptId,
+	    DSTM_NAME as docName,
+	    DISCRIPTION as discription,
+	    FILE_SIZE_NUM as fileSizeNum,
+	    UPDATE_TIME as updateTime,
+	    SCRIPT_TYPE as scriptTypeCode,
+	    UPDATE_USER_ID as userId,
+	    FILE_ID as fileId
+	    from stm_sys_script_manage where 1=1
+	    <if test="condition.scriptTypeCode > 0"> and SCRIPT_TYPE = #{condition.scriptTypeCode} </if>
+	</select>
+	
+	<select id="selectBydocName"  resultType="com.mainsteam.stm.system.scriptmanage.bo.ScriptManage" parameterType="java.lang.String" >
+	    select
+	    SCRIPT_ID as scriptId,
+	    DSTM_NAME as docName,
+	    DISCRIPTION as discription,
+	    FILE_SIZE_NUM as fileSizeNum,
+	    UPDATE_TIME as updateTime,
+	    SCRIPT_TYPE as scriptTypeCode,
+	    UPDATE_USER_ID as userId,
+	    FILE_ID as fileId
+	    from stm_sys_script_manage where DSTM_NAME = #{docName}
+	</select>
+	
+	<select id="selectByScriptManage"  resultType="com.mainsteam.stm.system.scriptmanage.bo.ScriptManage" parameterType="com.mainsteam.stm.system.scriptmanage.bo.ScriptManage" >
+	    select
+	    SCRIPT_ID as scriptId,
+	    DSTM_NAME as docName,
+	    DISCRIPTION as discription,
+	    FILE_SIZE_NUM as fileSizeNum,
+	    UPDATE_TIME as updateTime,
+	    SCRIPT_TYPE as scriptTypeCode,
+	    UPDATE_USER_ID as userId,
+	    FILE_ID as fileId
+	    from stm_sys_script_manage where 1=1
+	    <if test="docName != null">and DSTM_NAME = #{docName} </if>
+	    <if test="scriptTypeCode >0">and SCRIPT_TYPE = #{scriptTypeCode} </if>
+	</select>
+	
+	<select id="selectByscriptId"  resultType="com.mainsteam.stm.system.scriptmanage.bo.ScriptManage" parameterType="long" >
+	    select
+	    SCRIPT_ID as scriptId,
+	    DSTM_NAME as docName,
+	    DISCRIPTION as discription,
+	    FILE_SIZE_NUM as fileSizeNum,
+	    UPDATE_TIME as updateTime,
+	    SCRIPT_TYPE as scriptTypeCode,
+	    UPDATE_USER_ID as userId,
+	    FILE_ID as fileId
+	    from stm_sys_script_manage where SCRIPT_ID = #{scriptId}
+	</select>
+	
+	<select id="selectAllByscriptTypeCode"  resultType="com.mainsteam.stm.system.scriptmanage.bo.ScriptManage" parameterType="int" >
+	    select
+	    SCRIPT_ID as scriptId,
+	    DSTM_NAME as docName,
+	    DISCRIPTION as discription,
+	    FILE_SIZE_NUM as fileSizeNum,
+	    UPDATE_TIME as updateTime,
+	    SCRIPT_TYPE as scriptTypeCode,
+	    UPDATE_USER_ID as userId,
+	    FILE_ID as fileId
+	    from stm_sys_script_manage where SCRIPT_TYPE = #{scriptTypeCode}
+	</select>
+	
+	<update id="update" parameterType="com.mainsteam.stm.system.scriptmanage.bo.ScriptManage">
+		update stm_sys_script_manage
+		<set>
+			<if test="docName != null"> DSTM_NAME = #{docName}, </if>
+			<if test="discription != null"> DISCRIPTION = #{discription}, </if>
+			<if test="fileSizeNum != null"> FILE_SIZE_NUM = #{fileSizeNum}, </if>
+			<if test="updateTime != null"> UPDATE_TIME = #{updateTime}, </if>
+			<if test="scriptTypeCode >0"> SCRIPT_TYPE = #{scriptTypeCode}, </if>
+			<if test="userId != null"> UPDATE_USER_ID = #{userId}, </if>
+			<if test="fileId != null"> FILE_ID = #{fileId}, </if>
+		</set>
+		where SCRIPT_ID=#{scriptId}
+	</update>
+	
+	<delete id="delete" >
+		delete from stm_sys_script_manage where SCRIPT_ID in
+		<foreach item="scriptId" index="index" collection="array" open="(" separator="," close=")">
+			#{scriptId}
+		</foreach>
+	</delete>
+	
+</mapper>

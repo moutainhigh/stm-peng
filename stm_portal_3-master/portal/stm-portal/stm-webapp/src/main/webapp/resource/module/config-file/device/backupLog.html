@@ -1,0 +1,58 @@
+<div id="oc_module_config_device_backuplog_main">
+	<div style="height: 100%;">
+		<div class="oc_module_config_device_backuplog_datagrid"></div>
+	</div>
+</div>
+<script type="text/javascript">
+$(function(){
+	function open(id){
+		var mainDiv=$('#oc_module_config_device_backuplog_main').attr('id',oc.util.generateId()).panel({
+			fit:true,
+			isOcAutoWidth:true
+		}),
+		datagridDiv=mainDiv.find('.oc_module_config_device_backuplog_datagrid');
+		var datagrid=null;
+		var _dialog = $('<div class="oc-dialog-float"/>');
+		datagrid=oc.ui.datagrid({
+			selector:datagridDiv,
+			url:oc.resource.getUrl('portal/config/backup/log/getPage.htm?resourceId='+id+"&all=true"),
+			columns:[[
+		         {field:'id',title:'-',checkbox:true,width:20},
+		         {field:'backupState',title:'备份状态',sortable:true,width:25,formatter:function(value,row,index){
+					if(null==value) return "";
+					else if(0==value) return "未备份";
+					else if(1==value) return "备份成功";
+					else if(2==value) return "<span class='oc-pointer-operate' title='原因：执行脚本错误'>备份失败</span>";
+		         }},
+		         {field:'backupTime',title:'备份时间',sortable:true,width:30,formatter:function(value){
+		        	  var datetime = new Date();
+		        	    datetime.setTime(value);
+		        	    var year = datetime.getFullYear();
+		        	    var month = datetime.getMonth() + 1 < 10 ? "0" + (datetime.getMonth() + 1) : datetime.getMonth() + 1;
+		        	    var date = datetime.getDate() < 10 ? "0" + datetime.getDate() : datetime.getDate();
+		        	    var hour = datetime.getHours()< 10 ? "0" + datetime.getHours() : datetime.getHours();
+		        	    var minute = datetime.getMinutes()< 10 ? "0" + datetime.getMinutes() : datetime.getMinutes();
+		        	    var second = datetime.getSeconds()< 10 ? "0" + datetime.getSeconds() : datetime.getSeconds();
+	   	 			if(value == undefined||value == "" || value==null){
+	   	 			return "";
+	   	 			} else{
+	   	 				return year + "-" + month + "-" + date+" "+hour+":"+minute+":"+second;
+	   	 			}
+		         }},
+		         {field:'fileName',title:'文件名称',sortable:true,width:50},
+		         {field:'backupType',title:'备份方式',sortable:true, width:25,formatter:function(value){
+					if(null==value) return "";
+					else if(0==value) return "系统备份";
+					else if(1==value) return "手动备份";
+		         }}
+		     ]]
+		});
+	}
+	oc.ns('oc.module.config.device.backuplog');
+	oc.module.config.device.backuplog = {
+		open:function(id){
+			return open(id);
+		}
+	}
+});
+</script>

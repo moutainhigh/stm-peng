@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Plugin version="1.0" id="WASPlugin" name="WASPlugin"
+	class="com.mainsteam.stm.plugin.was.WASPluginSession" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../schema/Plugin.xsd">
+	<!-- 最大活动session 数 -->
+	<MaxActiveSession>1</MaxActiveSession>
+	<!-- 最大空闲session 数 -->
+	<MaxidleSession>0</MaxidleSession>
+	<!-- session TTL -->
+	<SessionTTL>10000</SessionTTL>
+	<!-- 对象缓存的超时时间 -->
+	<ObjectCacheTimeout>30000</ObjectCacheTimeout>
+
+	<!-- 插件初始化参数，发现资源用 -->
+	<PluginInitParameters>
+
+		<parameter id="snmpGrpBox" boxStyle="GroupBox" name="WAS连接信息"
+			displayOrder="1" isEdit="false" isDisplay="true" isSessionKey="false">
+			<DefaultValue />
+			<HelpInfo>WAS连接信息</HelpInfo>
+		</parameter>
+
+		<!-- boxStyle输入框类型;displayOrder用于发现页面上输入项的显示顺序;isEdit可编辑;isDisplay可显示;isSessionKey区分采集会话 -->
+		<parameter id="IP" boxStyle="IPField" name="IP地址"
+			displayOrder="1" isEdit="true" isDisplay="true" isSessionKey="true"
+			mustInput="true">
+			<!-- 默认值 -->
+			<DefaultValue></DefaultValue>
+			<!-- 帮助信息 -->
+			<HelpInfo>待发现机器的IP地址</HelpInfo>
+			<errorInfo>请输入正确的IP地址，如：192.168.1.1</errorInfo>
+		</parameter>
+
+		<!-- valueValidate校验输入内容合法性 -->
+		<parameter id="WASPort" boxStyle="Input" valueValidate="/^([0-9]|[1-9]\d|[1-9]\d{2}|[1-9]\d{3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/"
+			name="Server SOAP端口" displayOrder="2" isEdit="true" isDisplay="true"
+			mustInput="true" isSessionKey="true">
+			<DefaultValue>8880</DefaultValue>
+			<HelpInfo>WAS 端口</HelpInfo>
+			<errorInfo>请输入整数</errorInfo>
+		</parameter>
+
+		<parameter id="WASDeployType" boxStyle="OptionBox" name="WAS部署方式"
+			displayOrder="3" isEdit="true" isDisplay="true" mustInput="true">
+			<DefaultValue>Base</DefaultValue>
+			<!-- radiobox和下拉框都有可选值 -->
+			<SupportValues>
+				<SupportValue>
+					<!-- 可选值的名称和值 -->
+					<Name>Base</Name>
+					<Value>Base</Value>
+					<!-- 显示某组 -->
+					<ShowGroup></ShowGroup>
+					<!-- 隐藏某组 -->
+					<HideGroup>ndgroup</HideGroup>
+				</SupportValue>
+				<SupportValue>
+					<Name>Network Deployment</Name>
+					<Value>ND</Value>
+					<ShowGroup>ndgroup</ShowGroup>
+					<HideGroup></HideGroup>
+				</SupportValue>
+			</SupportValues>
+			<HelpInfo>WAS部署方式</HelpInfo>
+		</parameter>
+
+		<!-- group分组用于显示和隐藏分组; -->
+		<parameter group="ndgroup" id="WASAppDmgrIp" boxStyle="IPField" mustInput="true"
+			name="DMGR IP地址" displayOrder="4" isEdit="true" isDisplay="true">
+			<HelpInfo>DMGR IP地址</HelpInfo>
+			<errorInfo>请输入正确的IP地址</errorInfo>
+		</parameter>
+		<parameter group="ndgroup" id="WASAppDmgrPort" boxStyle="Input" mustInput="true"
+			valueValidate="/^([0-9]|[1-9]\d|[1-9]\d{2}|[1-9]\d{3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/" name="DMGR SOAP端口" displayOrder="5" isEdit="true"
+			isDisplay="true">
+			<DefaultValue>8879</DefaultValue>
+			<HelpInfo>DMGR SOAP端口</HelpInfo>
+			<errorInfo>请输入整数</errorInfo>
+		</parameter>
+
+		<parameter id="WASIsSecurity" boxStyle="RadioBox" name="启用安全控制"
+			displayOrder="6" isEdit="true" isDisplay="true">
+			<DefaultValue>0</DefaultValue>
+			<SupportValues>
+				<SupportValue>
+					<Name>启用</Name>
+					<Value>1</Value>
+					<ShowGroup>securityGroup</ShowGroup>
+				</SupportValue>
+				<SupportValue>
+					<Name>不启用</Name>
+					<Value>0</Value>
+					<HideGroup>securityGroup</HideGroup>
+				</SupportValue>
+			</SupportValues>
+			<HelpInfo>是否启用安全控制</HelpInfo>
+		</parameter>
+
+		<parameter group="securityGroup" id="WASUsername" boxStyle="Input" mustInput="true"
+			name="用户名" displayOrder="7" isEdit="true" isDisplay="true">
+			<HelpInfo>用户名</HelpInfo>
+		</parameter>
+		<parameter group="securityGroup" id="WASPassword" boxStyle="Input" mustInput="true"
+			name="密码" displayOrder="8" isEdit="true" isDisplay="true" isPassword="true" isSessionKey="true">
+			<HelpInfo>密码</HelpInfo>
+		</parameter>
+		<parameter group="securityGroup" id="WASKeyStorePath" boxStyle="Input" mustInput="true"
+			name="证书KeyStore文件路径" displayOrder="9" isEdit="true" isDisplay="true">
+			<HelpInfo>KeyStore证书文件地址, 如：D:\ClientKeyFile.jks</HelpInfo>
+		</parameter>
+		<parameter group="securityGroup" id="WASKeyStorePassword" boxStyle="Input" mustInput="true"
+			name="证书KeyStore密码" displayOrder="10" isEdit="true" isDisplay="true" isPassword="true" isSessionKey="true">
+			<DefaultValue>WebAS</DefaultValue>
+			<HelpInfo>KeyStore证书密码</HelpInfo>
+		</parameter>
+		<parameter group="securityGroup" id="WASTrustStorePath" boxStyle="Input" mustInput="true"
+			name="证书TrustStore文件路径" displayOrder="11" isEdit="true" isDisplay="true">
+			<HelpInfo>TrustStore证书文件地址, 如：D:\ClientTrustFile.jks</HelpInfo>
+		</parameter>
+		<parameter group="securityGroup" id="WASTrustStorePassword" boxStyle="Input" mustInput="true"
+			name="证书TrustStore密码" displayOrder="12" isEdit="true" isDisplay="true" isPassword="true" isSessionKey="true">
+			<DefaultValue>WebAS</DefaultValue>
+			<HelpInfo>TrustStore证书密码</HelpInfo>
+		</parameter>
+
+	</PluginInitParameters>
+</Plugin>

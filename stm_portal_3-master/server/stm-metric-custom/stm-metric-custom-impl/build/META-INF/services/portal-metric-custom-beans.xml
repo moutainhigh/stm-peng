@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                    http://www.springframework.org/schema/context
+                    http://www.springframework.org/schema/context/spring-context-2.5.xsd
+                    ">
+                    
+     <bean id="customMetricBindDAO" class="com.mainsteam.stm.metric.dao.impl.CustomMetricBindDAOImpl">
+     	<property name="session" ref="sqlSession"></property>
+     	<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+     </bean>
+     
+     <bean id="customMetricCollectDAO" class="com.mainsteam.stm.metric.dao.impl.CustomMetricCollectDAOImpl">
+     	<property name="session" ref="sqlSession"></property>
+     	<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+     </bean>
+     
+     <bean id="customMetricDAO" class="com.mainsteam.stm.metric.dao.impl.CustomMetricDAOImpl">
+     	<property name="session" ref="sqlSession"></property>
+     	<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+     </bean>
+     
+     <bean id="customMetricThresholdDAO" class="com.mainsteam.stm.metric.dao.impl.CustomMetricThresholdDAOImpl">
+     	<property name="session" ref="sqlSession"></property>
+     	<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+     </bean>
+	
+	 <bean id="customMetricDataWayDAO" class="com.mainsteam.stm.metric.dao.impl.CustomMetricDataWayDAOImpl">
+     	<property name="session" ref="sqlSession"></property>
+     	<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+     </bean>
+	
+     <bean id="customMetricChangeDAO" class="com.mainsteam.stm.metric.dao.impl.CustomMetricChangeDAOImpl">
+     	<property name="session" ref="sqlSession"></property>
+     	<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+     </bean>	
+     <bean id="customMetricChangeResultDAO" class="com.mainsteam.stm.metric.dao.impl.CustomMetricChangeResultDAOImpl">
+     	<property name="session" ref="sqlSession"></property>
+     	<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+     </bean>	
+     
+     <bean id="customMetricService" class="com.mainsteam.stm.metric.service.impl.CustomMetricServiceImpl" init-method="start">
+     	<property name="customMetricBindDAO" ref="customMetricBindDAO"></property>
+     	<property name="customMetricCollectDAO" ref="customMetricCollectDAO"></property>
+     	<property name="customMetricDAO" ref="customMetricDAO"></property>
+     	<property name="customMetricThresholdDAO" ref="customMetricThresholdDAO"></property>
+     	<property name="customMetricDataWayDAO" ref="customMetricDataWayDAO"></property>
+     	<property name="metricSeq" ref="metricSeq"></property>
+     	<property name="metricCollectSeq" ref="metricCollectSeq"></property>
+		<property name="changeSeq" ref="metricChangeSeq"></property>
+		<property name="changeDAO" ref="customMetricChangeDAO"></property>
+		<property name="customMetricAlarmManager" ref="customMetricAlarmManager"></property>
+		<property name="customMetricMonitorManager" ref="customMetricMonitorManager"></property>
+		<property name="customResourceCancelManager" ref="customResourceCancelManager"></property>
+     </bean>
+	
+	<bean id="customMetricQueryService" class="com.mainsteam.stm.common.metric.CustomMetricQueryService">
+     	<property name="customMetricBindDAO" ref="customMetricBindDAO"></property>
+     	<property name="customMetricCollectDAO" ref="customMetricCollectDAO"></property>
+     	<property name="customMetricDAO" ref="customMetricDAO"></property>
+		<property name="profileService" ref="profileService"></property>
+		<property name="dataWayDAO" ref="customMetricDataWayDAO"></property>
+     </bean>
+	
+     <bean id="customMetricChangeService" class="com.mainsteam.stm.metric.service.impl.CustomMetricChangeServiceImpl">
+     	<property name="changeDAO" ref="customMetricChangeDAO"></property>
+     	<property name="changeResultDAO" ref="customMetricChangeResultDAO"></property>
+		<property name="changeSeq" ref="metricChangeSeq"></property>
+     </bean>
+     
+     <bean id="customMetricAlarmManager" class="com.mainsteam.stm.metric.interceptor.impl.CustomMetricAlarmManagerImpl">
+     </bean>
+     <bean id="customMetricMonitorManager" class="com.mainsteam.stm.metric.interceptor.impl.CustomMetricMonitorManagerImpl">
+     </bean>
+     <bean id="customResourceCancelManager" class="com.mainsteam.stm.metric.interceptor.impl.CustomResourceCancelManagerImpl">
+     </bean>
+     
+     <bean id="customMetricChangeRegisterLoad" class="com.mainsteam.stm.metric.interceptor.CustomMetricChangeRegisterLoad">
+     	<property name="customMetricAlarmManager" ref="customMetricAlarmManager"></property>
+     	<property name="customMetricMonitorManager" ref="customMetricMonitorManager"></property>
+		<property name="customResourceCancelManager" ref="customResourceCancelManager"></property>
+     </bean>
+      
+     <bean id="metricSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="stm_custom_metric_collect"></constructor-arg>
+	 </bean>
+	 
+	 <bean id="metricCollectSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="stm_custom_metric_main"></constructor-arg>
+	 </bean>
+	
+	 <bean id="metricChangeSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="stm_custom_metric_change"></constructor-arg>
+	 </bean>
+	
+	 <bean id="removeCustomMetricInterceptor" class="com.mainsteam.stm.metric.service.impl.interceptor.InstancelibInterceptorRemoveImpl">
+		<property name="customMetricService" ref="customMetricService"></property>
+		<property name="bindDAO" ref="customMetricBindDAO"></property>
+		<property name="instanceService" ref="resourceInstanceService"></property>
+	</bean>
+	
+	<bean id="instancelibInterceptorStateChangeImpl" class="com.mainsteam.stm.metric.service.impl.interceptor.InstancelibInterceptorStateChangeImpl">
+		<property name="instanceService" ref="resourceInstanceService"></property>
+		<property name="changeDAO" ref="customMetricChangeDAO"></property>
+		<property name="bindDAO" ref="customMetricBindDAO"></property>
+		<property name="changeSeq" ref="metricChangeSeq"></property>
+	</bean>	
+	
+	<!-- <bean id="alarmChangeTest" class = "com.mainsteam.stm.metric.test.Alarm_Change_Test">
+	</bean>
+	
+	<bean id="metricChangeTest" class = "com.mainsteam.stm.metric.test.Metric_Change_Test">
+	</bean>
+	
+	<bean id="resourceChangeTest" class = "com.mainsteam.stm.metric.test.Resource_Change_Test">
+	</bean> -->
+</beans>

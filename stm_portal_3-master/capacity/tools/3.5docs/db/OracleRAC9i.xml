@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root> <import src="OracleRAC.xml" />
+	<!-- 
+	devicetype:			设备类型名称
+	ismulticoltype:		是否允许采集方式多选
+	majortype:			主要分类（可以理解为设备类型）
+	minortype:			次要分类
+	manufacturer:		厂商
+	devicetype_zh:		设备类型中文描述
+	 -->
+	<devicetypeinfo devicetype="OracleRAC9i" ismulticoltype="true" majortype="database" minortype="oracle" manufacturer="" devicetype_zh="OracleRAC9i数据库">
+		
+		<!-- 用于定位设备为该类设备的多个sysoid标识，如果snmp采集为sysoid，如果其他方式自行定义 -->
+		<devicetypes>
+		</devicetypes>
+		
+		<!-- 该设备类型定义的命令，用于合并命令执行 -->
+		<commands>
+			<!-- coltype:采集方式，comid：命令ID，command：命令 -->
+			<command coltype="JDBC" comid="dataBaseSize" command="select round(data1+data2+data4) database_size from (select sum(bytes)/1024/1024 data1 from dba_data_files) a,(select sum(bytes)/1024/1024 data2 from dba_temp_files) b,(select sum(bytes*members)/1024/1024 data4 from v$log) d"/><!--数据库大小 -->			
+			
+			</commands>
+		<!-- 描述该类设备的所有指标采集,一行对应一个指标 -->
+		<!-- kpiid的命名规范：长度不超过20，命名规范，前两位为模块标识，分别以以下字符打头， N（网络）、H（主机）、D（数据库）、M（中间件）、A（应用）；第二位为数字，由模块内部进行标识定义-->
+		<resources>			
+			<resource kpiid="D1dataBaseSize" coltype="JDBC" value="" valuetype="Float" unit="MB">
+				<collects>
+					<collect exeorder="10" comid="dataBaseSize" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1dataBaseSize" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="0"/>
+				
+			</resource>	
+			
+		</resources>
+	</devicetypeinfo>
+</root>

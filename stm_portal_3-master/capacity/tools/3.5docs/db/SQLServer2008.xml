@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root> <import src="SQLServer.xml" />
+	<!-- 
+	devicetype:			设备类型名称
+	ismulticoltype:		是否允许采集方式多选
+	majortype:			主要分类（可以理解为设备类型）
+	minortype:			次要分类
+	manufacturer:		厂商
+	devicetype_zh:		设备类型中文描述
+	 -->
+	<devicetypeinfo devicetype="SQLServer2008" ismulticoltype="true" majortype="database" minortype="SQLServers" manufacturer="Microsoft" devicetype_zh="SQLServer2008数据库">
+		
+		<!-- 用于定位设备为该类设备的多个sysoid标识，如果snmp采集为sysoid，如果其他方式自行定义 -->
+		<devicetypes>
+		</devicetypes>
+		
+		<!-- 该设备类型定义的命令，用于合并命令执行 -->
+		<commands>
+			<!-- coltype:采集方式，comid：命令ID，command：命令 -->
+
+			<command coltype="JDBC" comid="memorytarget" command="select cntr_value/1024 from master.dbo.sysperfinfo where counter_name='Target Server Memory(KB)'"/><!--目标服务器内存-->			
+			<command coltype="JDBC" comid="CacheHitRate" command="select (100*(1.0*aa.cntr_value/bb.cntr_value)) as rate from (select object_name,counter_name,instance_name,cntr_value from master.dbo.sysperfinfo where instance_name='_Total' and object_name like '%Plan Cache%' and counter_name='Cache Hit Ratio') aa,(select object_name,counter_name,instance_name,cntr_value from master.dbo.sysperfinfo where instance_name='_Total' and object_name like '%Plan Cache%' and counter_name='Cache Hit Ratio base' and cntr_value !=0) bb"/><!--高速缓存命中率 -->	
+		</commands>
+		
+		<!-- 描述该类设备的所有指标采集,一行对应一个指标 -->
+		<!-- kpiid的命名规范：长度不超过20，命名规范，前两位为模块标识，分别以以下字符打头， N（网络）、H（主机）、D（数据库）、M（中间件）、A（应用）；第二位为数字，由模块内部进行标识定义-->
+		<resources>
+		
+			<!--目标服务器内存-->
+			<resource kpiid="D1TargServerMem" coltype="JDBC" value="" valuetype="Integer" unit="KB">
+				<collects>
+					<collect exeorder="10" comid="memorytarget" select="Target Server Memory \(KB\)\s*\t(\d+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_D1TargServerMem" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="1440" storefactor="1"/>
+				
+			</resource>	
+			
+			<!--高速缓存命中率-->
+			<resource kpiid="D1bufferCacheHitRate" coltype="JDBC" value="" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="CacheHitRate" select="" merge="" deal=""/>
+				</collects>						
+				<kpipolicy table="res_d_D1bufferCacheHitRate" field="value" fieldtype="" willalert="y"
+					alertexp1="${value}>60%" alertdesc1="高速缓存命中率恢复正常，当前值为${value}%。" alertexp2="" alertdesc2="" alertexp3="${value}&lt;=60%"
+					alertdesc3="高速缓存命中率小于等于${trigervalue1}，当前值为${value}%。" alertexp4="${value}&lt;=50%" alertdesc4="高速缓存命中率小于等于${trigervalue1}，当前值为${value}%。" alertexp5="" alertdesc5=""
+					alertcontin="1" circle="5" storefactor="1"/>				
+			</resource>																											 																													                        																												
+		</resources>
+	</devicetypeinfo>
+</root>

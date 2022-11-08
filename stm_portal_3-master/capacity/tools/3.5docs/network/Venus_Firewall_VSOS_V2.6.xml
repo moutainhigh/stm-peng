@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root> <import src="public_network.xml" />
+	<!-- 
+	devicetype:			设备类型名称
+	ismulticoltype:		是否允许采集方式多选
+	majortype:			主要分类（可以理解为设备类型）
+	minortype:			次要分类
+	manufacturer:		厂商
+	devicetype_zh:		设备类型中文描述
+	 -->
+	<devicetypeinfo devicetype="Venus_Firewall_VSOS_V2.6" ismulticoltype="true" majortype="network" minortype="Firewall" manufacturer="Venus" devicetype_zh="Venus防火墙 VSOS V2.6">
+		
+		<!-- 用于定位设备为该类设备的多个sysoid标识，如果snmp采集为sysoid，如果其他方式自行定义 -->
+		<devicetypes>
+			<devicetype sysoid="1.3.6.1.4.1.15227.1.3.2"/>
+		</devicetypes>
+		
+		<!-- 该设备类型定义的命令，用于合并命令执行 -->
+		<commands>
+			<!-- coltype:采集方式，comid：命令ID，command：命令 -->
+			
+			<command coltype="SNMP" comid="cpuUsage"     command="1.3.6.1.4.1.15227.1.3.1.1.1.0"/>  <!--CPU平均利用率-->
+			<command coltype="SNMP" comid="memInfo"  	 command=".1.3.6.1.4.1.15227.1.3.1.1.2.0"/>
+			<command coltype="SNMP" comid="numberOfTCP"  command="1.3.6.1.4.1.15227.1.3.1.1.3"/>   <!--TCP端口连接数-->
+
+
+			
+		</commands>
+		
+		<!-- 描述该类设备的所有指标采集,一行对应一个指标 -->
+		<resources>
+					
+			<!-- CPU平均利用率 -->
+			<resource kpiid="N1cpuUsage" coltype="SNMP" value="" valuetype="Float" unit="%">		
+				<collects>				
+					<collect exeorder="10" comid="cpuUsage" select="([\d]{0,3}[\.]{0,1}\d+)%" merge="max" deal=""/>
+				</collects>
+			
+				
+				<kpipolicy table="res_d_N1cpuUsage" field="value" fieldtype="" willalert="y"
+					alertexp1="${value}&lt;85" alertdesc1="CPU平均利用率恢复正常，当前值为${value}%。" alertexp2="" alertdesc2="" alertexp3="${value}>=85"
+					alertdesc3="CPU平均利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp4="${value}>=95" alertdesc4="CPU平均利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp5="" alertdesc5=""
+					alertcontin="1"   circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 内存利用率 -->
+			<resource kpiid="N1memUsage" coltype="SNMP" value="$d1*100/$d2" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="memInfo" select="(\d+)\s*used" merge="" deal=""/>
+					<collect exeorder="20" comid="memInfo" select="(\d+)\s*total" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1memUsage" field="value" fieldtype="" willalert="y"
+					alertexp1="${value}&lt;85" alertdesc1="内存利用率恢复正常，当前值为${value}%。" alertexp2="" alertdesc2="" alertexp3="${value}>=85"
+					alertdesc3="内存利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp4="${value}>=95" alertdesc4="内存利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp5="" alertdesc5=""
+					alertcontin="1"   circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 内存总容量 -->
+			<resource kpiid="N1totalMemSize" coltype="SNMP" value="" valuetype="Integer" unit="KByte">
+				<collects>
+					<collect exeorder="10" comid="memInfo" select="(\d+)\s*total" merge="" deal=""/>						
+				</collects>
+				
+				<kpipolicy table="res_d_N1totalMemSize" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="1"/>
+					
+			</resource>			
+			
+			<!-- 内存池占用容量 -->
+			<resource kpiid="N1memPoolUsed" coltype="SNMP" value="" valuetype="Float" unit="KByte">
+				<collects>	
+					<collect exeorder="10" comid="memInfo" select="(\d+)\s*used" merge="" deal=""/>		
+				</collects>
+				
+				<kpipolicy table="res_d_N1memPoolUsed" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="30" storefactor="1"/>	
+			</resource> 
+			
+			<!-- 内存池可用容量 -->
+			<resource kpiid="N1memPoolFree" coltype="SNMP" value="" valuetype="Float" unit="KByte">
+				<collects>
+					<collect exeorder="10" comid="memInfo" select="(\d+)\s*free" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1memPoolFree" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="30" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- TCP端口连接数 -->
+			<resource kpiid="N1tcpCurrEstab" coltype="SNMP" value="" valuetype="Integer" unit="">
+				<collects>
+					<collect exeorder="10" comid="numberOfTCP" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1tcpCurrEstab" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			
+		
+			
+		</resources>
+	</devicetypeinfo>
+</root>

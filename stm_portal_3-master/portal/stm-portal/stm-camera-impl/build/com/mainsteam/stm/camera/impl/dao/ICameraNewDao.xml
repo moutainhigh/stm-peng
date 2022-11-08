@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.camera.impl.dao.ICameraNewDao">
+    <select id="selectPageForCamera" resultType="com.mainsteam.stm.camera.bo.CameraBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="mysql">
+        select * from (
+        select
+        m.INSTANCEID id,
+        m.INSTANCESHOWNAME showName,
+        (select
+        group_concat(concat(concat(s.METRIC_ID,'-'),s.STATE)) as me
+        from STM_METRIC_STATE s where s.INSTANCE_ID = m.INSTANCEID
+        and s.METRIC_ID in
+        <foreach collection="condition.metricIds" index="index" item="metricId" open="("
+                 separator="," close=")">
+            #{metricId}
+        </foreach>
+        ) AS  metricStatus,
+        <if test="condition.orderMetric != null and condition.orderMetric != ''">
+            <if test="condition.orderMetric != 'showName' and condition.orderMetric != 'devIP' and condition.orderMetric != 'monitorType' and condition.orderMetric != 'lastCollectTime'">
+                (select  concat(concat(s.METRIC_ID,'-'),s.STATE)
+                from STM_METRIC_STATE s
+                where s.INSTANCE_ID = m.INSTANCEID
+                and s.STATE in
+                <foreach collection="condition.states" index="index" item="state" open="("
+                         separator="," close=")">
+                    #{state}
+                </foreach>
+                and s.METRIC_ID =  #{condition.orderMetric}
+                ) AS  orderStr,
+            </if>
+        </if>
+        ms.STATE AS availability,
+        (SELECT  prop.PROPVALUE FROM STM_INSTANCELIB_PROP_VALUE prop where prop.INSTANCEID = m.INSTANCEID and prop.PROPKEY ='cameraType') AS monitorType,
+        (SELECT mi.METRIC_DATA FROM STM_METRIC_INFO mi where mi.METRIC_ID = 'devIP' and mi.INSTANCE_ID = m.INSTANCEID ) AS devIP,
+        (SELECT mi.METRIC_DATA FROM STM_METRIC_INFO mi where mi.METRIC_ID = 'collectTime' and mi.INSTANCE_ID = m.INSTANCEID ) AS lastCollectTime
+        from STM_INSTANCELIB_RESOURCE_MAIN m join STM_METRIC_STATE ms on m.INSTANCEID = ms.INSTANCE_ID
+        where m.CATEGORYID = 'SurveillanceCamera'
+        and m.LIFESTATE = #{condition.liftState}
+        and ms.METRIC_ID = 'availability'
+        ) table_alias where 1=1
+        <if test="condition.statusFlag == 'ALL'">
+            and availability in
+            <foreach collection="condition.availabilityStates" index="index" item="state" open="("
+                     separator="," close=")">
+                #{state}
+            </foreach>
+        </if>
+        <if test="condition.onlineFlag != null and condition.statusFlag != 'ALL'">
+            <if test="condition.statusFlag == 'NORMAL' and (condition.onlineFlag == 'ALL' or condition.onlineFlag == 'NORMAL')">
+                and availability = 'NORMAL' and metricStatus not like '%SERIOUS%' and metricStatus not like '%WARN%'
+            </if>
+            <if test="condition.statusFlag == 'CRITICAL' ">
+                <if test="condition.onlineFlag == 'ALL'">
+                    and availability = 'CRITICAL'
+                    or (metricStatus is null or metricStatus like '%SERIOUS%'
+                    or  metricStatus like '%WARN%')
+                </if>
+                <if test="condition.onlineFlag == 'NORMAL'">
+                    and availability = 'NORMAL' and (metricStatus like '%SERIOUS%' or metricStatus like '%WARN%')
+                </if>
+                <if test="condition.onlineFlag == 'CRITICAL'">
+                    and availability = 'CRITICAL'
+                </if>
+            </if>
+        </if>
+        <if test="condition.filtrateStr != null and condition.filtrateStr != '' ">
+            and showName like concat(concat('%',#{condition.filtrateStr}),'%') or devIP like concat(concat('%',#{condition.filtrateStr}),'%')
+        </if>
+    </select>
+
+
+
+    <select id="selectPageForCamera" resultType="com.mainsteam.stm.camera.bo.CameraBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oracle">
+        select * from (
+        select
+            m.INSTANCEID id,
+            m.INSTANCESHOWNAME showName,
+            (select
+                TO_CHAR(WM_CONCAT(concat(concat(s.METRIC_ID,'-'),s.STATE))) as me
+                from STM_METRIC_STATE s where s.INSTANCE_ID = m.INSTANCEID
+                and s.METRIC_ID in
+                    <foreach collection="condition.metricIds" index="index" item="metricId" open="("
+                             separator="," close=")">
+                        #{metricId}
+                    </foreach>
+             ) AS  metricStatus,
+            <if test="condition.orderMetric != null and condition.orderMetric != ''">
+                <if test="condition.orderMetric != 'showName' and condition.orderMetric != 'devIP' and condition.orderMetric != 'monitorType' and condition.orderMetric != 'lastCollectTime'">
+                    (select  TO_CHAR(WM_CONCAT(concat(concat(s.METRIC_ID,'-'),s.STATE)))
+                    from STM_METRIC_STATE s
+                    where s.INSTANCE_ID = m.INSTANCEID
+                    and s.STATE in
+                    <foreach collection="condition.states" index="index" item="state" open="("
+                             separator="," close=")">
+                        #{state}
+                    </foreach>
+                    and s.METRIC_ID =  #{condition.orderMetric}
+                    ) AS  orderStr,
+                </if>
+            </if>
+             ms.STATE AS availability,
+            (SELECT  prop.PROPVALUE FROM STM_INSTANCELIB_PROP_VALUE prop where prop.INSTANCEID = m.INSTANCEID and prop.PROPKEY ='cameraType') AS monitorType,
+            (SELECT TO_CHAR(mi.METRIC_DATA) FROM STM_METRIC_INFO mi where mi.METRIC_ID = 'devIP' and mi.INSTANCE_ID = m.INSTANCEID ) AS devIP,
+            (SELECT TO_CHAR(mi.METRIC_DATA) FROM STM_METRIC_INFO mi where mi.METRIC_ID = 'collectTime' and mi.INSTANCE_ID = m.INSTANCEID ) AS lastCollectTime
+        from STM_INSTANCELIB_RESOURCE_MAIN m join STM_METRIC_STATE ms on m.INSTANCEID = ms.INSTANCE_ID
+        where m.CATEGORYID = 'SurveillanceCamera'
+        and m.LIFESTATE = #{condition.liftState}
+        and ms.METRIC_ID = 'availability'
+       <!-- <if test="condition.orderMetric != null and condition.orderMetric != ''">
+            <if test="condition.orderMetric == 'showName' or condition.orderMetric == 'devIP' or condition.orderMetric == 'monitorType' or condition.orderMetric == 'lastCollectTime'">
+                ORDER BY concat(concat(#{condition.orderMetric},' ') ,#{condition.order} )
+            </if>
+            <if test="condition.orderMetric != 'showName' and condition.orderMetric != 'devIP' and condition.orderMetric != 'monitorType' and condition.orderMetric != 'lastCollectTime'">
+                ORDER BY orderStr #{condition.order}
+            </if>
+        </if>-->
+        ) table_alias where 1=1
+        <if test="condition.statusFlag == 'ALL'">
+            and availability in
+            <foreach collection="condition.availabilityStates" index="index" item="state" open="("
+                     separator="," close=")">
+                #{state}
+            </foreach>
+        </if>
+        <if test="condition.onlineFlag != null and condition.statusFlag != 'ALL'">
+            <if test="condition.statusFlag == 'NORMAL' and (condition.onlineFlag == 'ALL' or condition.onlineFlag == 'NORMAL')">
+                and availability = 'NORMAL' and metricStatus not like '%SERIOUS%' and metricStatus not like '%WARN%'
+            </if>
+            <if test="condition.statusFlag == 'CRITICAL' ">
+                <if test="condition.onlineFlag == 'ALL'">
+                    and availability = 'CRITICAL'
+                    or (metricStatus is null or INSTR(metricStatus, 'SERIOUS') > 0
+                    or INSTR(metricStatus, 'WARN') > 0 )
+                </if>
+                <if test="condition.onlineFlag == 'NORMAL'">
+                    and availability = 'NORMAL' and (metricStatus like '%SERIOUS%' or metricStatus like '%WARN%')
+                </if>
+                <if test="condition.onlineFlag == 'CRITICAL'">
+                    and availability = 'CRITICAL'
+                </if>
+            </if>
+        </if>
+        <if test="condition.filtrateStr != null and condition.filtrateStr != '' ">
+            and (INSTR(showName, #{condition.filtrateStr}) > 0 or INSTR(devIP, #{condition.filtrateStr}) > 0)
+        </if>
+    </select>
+
+    <select id="selectPageForCamera" resultType="com.mainsteam.stm.camera.bo.CameraBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="dm">
+        select * from (
+        select
+        m.INSTANCEID id,
+        m.INSTANCESHOWNAME showName,
+        (select
+        TO_CHAR(WM_CONCAT(concat(concat(s.METRIC_ID,'-'),s.STATE))) as me
+        from STM_METRIC_STATE s where s.INSTANCE_ID = m.INSTANCEID
+        and s.METRIC_ID in
+        <foreach collection="condition.metricIds" index="index" item="metricId" open="("
+                 separator="," close=")">
+            #{metricId}
+        </foreach>
+        ) AS  metricStatus,
+        <if test="condition.orderMetric != null and condition.orderMetric != ''">
+            <if test="condition.orderMetric != 'showName' and condition.orderMetric != 'devIP' and condition.orderMetric != 'monitorType' and condition.orderMetric != 'lastCollectTime'">
+                (select  TO_CHAR(WM_CONCAT(concat(concat(s.METRIC_ID,'-'),s.STATE)))
+                from STM_METRIC_STATE s
+                where s.INSTANCE_ID = m.INSTANCEID
+                and s.STATE in
+                <foreach collection="condition.states" index="index" item="state" open="("
+                         separator="," close=")">
+                    #{state}
+                </foreach>
+                and s.METRIC_ID =  #{condition.orderMetric}
+                ) AS  orderStr,
+            </if>
+        </if>
+        ms.STATE AS availability,
+        (SELECT  prop.PROPVALUE FROM STM_INSTANCELIB_PROP_VALUE prop where prop.INSTANCEID = m.INSTANCEID and prop.PROPKEY ='cameraType') AS monitorType,
+        (SELECT TO_CHAR(mi.METRIC_DATA) FROM STM_METRIC_INFO mi where mi.METRIC_ID = 'devIP' and mi.INSTANCE_ID = m.INSTANCEID ) AS devIP,
+        (SELECT TO_CHAR(mi.METRIC_DATA) FROM STM_METRIC_INFO mi where mi.METRIC_ID = 'collectTime' and mi.INSTANCE_ID = m.INSTANCEID ) AS lastCollectTime
+        from STM_INSTANCELIB_RESOURCE_MAIN m join STM_METRIC_STATE ms on m.INSTANCEID = ms.INSTANCE_ID
+        where m.CATEGORYID = 'SurveillanceCamera'
+        and m.LIFESTATE = #{condition.liftState}
+        and ms.METRIC_ID = 'availability'
+        <!-- <if test="condition.orderMetric != null and condition.orderMetric != ''">
+             <if test="condition.orderMetric == 'showName' or condition.orderMetric == 'devIP' or condition.orderMetric == 'monitorType' or condition.orderMetric == 'lastCollectTime'">
+                 ORDER BY concat(concat(#{condition.orderMetric},' ') ,#{condition.order} )
+             </if>
+             <if test="condition.orderMetric != 'showName' and condition.orderMetric != 'devIP' and condition.orderMetric != 'monitorType' and condition.orderMetric != 'lastCollectTime'">
+                 ORDER BY orderStr #{condition.order}
+             </if>
+         </if>-->
+        ) table_alias where 1=1
+        <if test="condition.statusFlag == 'ALL'">
+            and availability in
+            <foreach collection="condition.availabilityStates" index="index" item="state" open="("
+                     separator="," close=")">
+                #{state}
+            </foreach>
+        </if>
+        <if test="condition.onlineFlag != null and condition.statusFlag != 'ALL'">
+            <if test="condition.statusFlag == 'NORMAL' and (condition.onlineFlag == 'ALL' or condition.onlineFlag == 'NORMAL')">
+                and availability = 'NORMAL' and metricStatus not like '%SERIOUS%' and metricStatus not like '%WARN%'
+            </if>
+            <if test="condition.statusFlag == 'CRITICAL' ">
+                <if test="condition.onlineFlag == 'ALL'">
+                    and availability = 'CRITICAL'
+                    or (metricStatus is null or INSTR(metricStatus, 'SERIOUS') > 0
+                    or INSTR(metricStatus, 'WARN') > 0 )
+                </if>
+                <if test="condition.onlineFlag == 'NORMAL'">
+                    and availability = 'NORMAL' and (metricStatus like '%SERIOUS%' or metricStatus like '%WARN%')
+                </if>
+                <if test="condition.onlineFlag == 'CRITICAL'">
+                    and availability = 'CRITICAL'
+                </if>
+            </if>
+        </if>
+        <if test="condition.filtrateStr != null and condition.filtrateStr != '' ">
+            and (INSTR(showName, #{condition.filtrateStr}) > 0 or INSTR(devIP, #{condition.filtrateStr}) > 0)
+        </if>
+    </select>
+
+
+    <select id="getOfflineNumber" resultType="com.mainsteam.stm.camera.bo.CameraBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page"  databaseId="oracle">
+        select * from (
+        select
+        m.INSTANCEID id,
+        m.INSTANCESHOWNAME showName,
+        (select
+        TO_CHAR(WM_CONCAT(concat(concat(s.METRIC_ID,'-'),s.STATE))) as me
+        from STM_METRIC_STATE s where s.INSTANCE_ID = m.INSTANCEID
+        and s.METRIC_ID in
+        <foreach collection="condition.metricIds" index="index" item="metricId" open="("
+                 separator="," close=")">
+            #{metricId}
+        </foreach>
+        ) AS  metricStatus,
+        (SELECT mi.METRIC_DATA FROM STM_METRIC_INFO mi where mi.METRIC_ID = 'devIP' and mi.INSTANCE_ID = m.INSTANCEID ) AS devIP,
+        ms.STATE AS availability
+        from STM_INSTANCELIB_RESOURCE_MAIN m join STM_METRIC_STATE ms on m.INSTANCEID = ms.INSTANCE_ID
+        where m.CATEGORYID = 'SurveillanceCamera'
+        and m.LIFESTATE = #{condition.liftState}
+        and ms.METRIC_ID = 'availability'
+        ) table_alias where 1=1
+        <if test="condition.onlineFlag == 'NORMAL'">
+            and availability = 'NORMAL' and  (INSTR(metricStatus, 'SERIOUS') > 0 or INSTR(metricStatus, 'WARN') > 0 )
+        </if>
+        <if test="condition.onlineFlag == 'CRITICAL'">
+            and availability = 'CRITICAL'
+        </if>
+        <if test="condition.filtrateStr != null and condition.filtrateStr != '' ">
+            and (INSTR(showName, #{condition.filtrateStr}) > 0 or INSTR(devIP, #{condition.filtrateStr}) > 0)
+        </if>
+    </select>
+
+    <select id="getOfflineNumber" resultType="com.mainsteam.stm.camera.bo.CameraBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page"  databaseId="dm">
+        select * from (
+        select
+        m.INSTANCEID id,
+        m.INSTANCESHOWNAME showName,
+        (select
+        TO_CHAR(WM_CONCAT(concat(concat(s.METRIC_ID,'-'),s.STATE))) as me
+        from STM_METRIC_STATE s where s.INSTANCE_ID = m.INSTANCEID
+        and s.METRIC_ID in
+        <foreach collection="condition.metricIds" index="index" item="metricId" open="("
+                 separator="," close=")">
+            #{metricId}
+        </foreach>
+        ) AS  metricStatus,
+        (SELECT mi.METRIC_DATA FROM STM_METRIC_INFO mi where mi.METRIC_ID = 'devIP' and mi.INSTANCE_ID = m.INSTANCEID ) AS devIP,
+        ms.STATE AS availability
+        from STM_INSTANCELIB_RESOURCE_MAIN m join STM_METRIC_STATE ms on m.INSTANCEID = ms.INSTANCE_ID
+        where m.CATEGORYID = 'SurveillanceCamera'
+        and m.LIFESTATE = #{condition.liftState}
+        and ms.METRIC_ID = 'availability'
+        ) table_alias where 1=1
+        <if test="condition.onlineFlag == 'NORMAL'">
+            and availability = 'NORMAL' and  (INSTR(metricStatus, 'SERIOUS') > 0 or INSTR(metricStatus, 'WARN') > 0 )
+        </if>
+        <if test="condition.onlineFlag == 'CRITICAL'">
+            and availability = 'CRITICAL'
+        </if>
+        <if test="condition.filtrateStr != null and condition.filtrateStr != '' ">
+            and (INSTR(showName, #{condition.filtrateStr}) > 0 or INSTR(devIP, #{condition.filtrateStr}) > 0)
+        </if>
+    </select>
+
+
+    <select id="getOfflineNumber" resultType="com.mainsteam.stm.camera.bo.CameraBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page"  databaseId="mysql">
+        select * from (
+        select
+        m.INSTANCEID id,
+        m.INSTANCESHOWNAME showName,
+        (select
+        group_concat(concat(concat(s.METRIC_ID,'-'),s.STATE)) as me
+        from STM_METRIC_STATE s where s.INSTANCE_ID = m.INSTANCEID
+        and s.METRIC_ID in
+        <foreach collection="condition.metricIds" index="index" item="metricId" open="("
+                 separator="," close=")">
+            #{metricId}
+        </foreach>
+        ) AS  metricStatus,
+        (SELECT mi.METRIC_DATA FROM STM_METRIC_INFO mi where mi.METRIC_ID = 'devIP' and mi.INSTANCE_ID = m.INSTANCEID ) AS devIP,
+        ms.STATE AS availability
+        from STM_INSTANCELIB_RESOURCE_MAIN m join STM_METRIC_STATE ms on m.INSTANCEID = ms.INSTANCE_ID
+        where m.CATEGORYID = 'SurveillanceCamera'
+        and m.LIFESTATE = #{condition.liftState}
+        and ms.METRIC_ID = 'availability'
+        ) table_alias where 1=1
+        <if test="condition.onlineFlag == 'NORMAL'">
+            and availability = 'NORMAL' and  metricStatus like '%SERIOUS%' or metricStatus like '%WARN%'
+        </if>
+        <if test="condition.onlineFlag == 'CRITICAL'">
+            and availability = 'CRITICAL'
+        </if>
+        <if test="condition.filtrateStr != null and condition.filtrateStr != '' ">
+            and showName like concat(concat('%',#{condition.filtrateStr}),'%') or devIP like concat(concat('%',#{condition.filtrateStr}),'%')
+        </if>
+    </select>
+
+</mapper>

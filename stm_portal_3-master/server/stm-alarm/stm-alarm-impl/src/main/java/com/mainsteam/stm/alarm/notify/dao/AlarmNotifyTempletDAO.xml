@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.alarm.notify.dao.AlarmNotifyTempletDAO">
+	
+	<insert id="addTemplet"  parameterType="com.mainsteam.stm.alarm.obj.AlarmNotifyTemplet">
+	    INSERT INTO STM_ALARM_NOTIFY_TEMPLET(TMP_ID,CONTENT,LANGUAGE,PROVIDER,SYS_ID ,UPDATE_TIME)
+	    VALUES (#{tmpID},#{content},#{language},#{provider},#{sysID},#{updateTime})
+	</insert>
+	
+	<insert id="addTempletParamter"  parameterType="com.mainsteam.stm.alarm.obj.AlarmNotifyTempletParamter">
+	    INSERT INTO STM_ALARM_NOTIFY_TEMPLET_PARAM(TMP_ID,NAME,`DESC`,PROVIDER,SYS_ID)
+	    VALUES (#{tmpID},#{name},#{desc},#{provider},#{sysID})
+	</insert>
+	
+	<sql id="AlarmNotifyAlias">
+		TMP_ID as tmpID,
+		CONTENT as content,
+		LANGUAGE as language,
+		SYS_ID as sysID,
+		UPDATE_TIME as updateTime
+	</sql>
+	
+	<sql id="AlarmNotifyParamterAlias">
+		ANTP.TMP_ID as tmpID,
+		ANTP.NAME as name,
+		ANTP.DESC as 'desc',
+		ANTP.PROVIDER as provider,
+		ANTP.SYS_ID as sysID
+	</sql>
+
+	<select id="findTempletBySysID" parameterType="map" resultType="com.mainsteam.stm.alarm.obj.AlarmNotifyTemplet">
+		SELECT <include refid="AlarmNotifyAlias"/>
+		FROM STM_ALARM_NOTIFY_TEMPLET
+		WHERE 
+			SYS_ID=#{sysID} and PROVIDER=#{provider}
+	</select>
+	
+	<select id="findTempletParamterByTempID" resultType="com.mainsteam.stm.alarm.obj.AlarmNotifyTempletParamter">
+		SELECT <include refid="AlarmNotifyParamterAlias"/>
+		FROM STM_ALARM_NOTIFY_TEMPLET_PARAM ANTP
+		WHERE 
+			ANTP.TMP_ID=#{tmpID}
+	</select>
+	
+</mapper>

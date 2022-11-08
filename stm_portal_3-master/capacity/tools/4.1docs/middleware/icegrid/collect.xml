@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">
+    <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0">
+
+        <ChangePluginInitParameter pluginid="WmiPlugin" parameterId="username" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="WmiPlugin" parameterId="password" parameterProperty="mustInput" propertyValue="FALSE"/>
+
+    </GlobalMetricSetting>
+    <PluginClassAliasList>
+        <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+        <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+        <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+        <PluginClassAlias id="regularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+        <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+    </PluginClassAliasList>
+    <MetricPlugin metricid="Name" collectType="" pluginid="IceGridPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="getGridName"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="Availability" collectType="" pluginid="IceGridPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="getGridAvailability"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="CPU"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfOS_Processor where name = '_Total'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="memRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="FreeMemSize,TotalMemSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select FreePhysicalMemory,TotalVisibleMemorySize from Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (TotalMemSize-FreeMemSize)/TotalMemSize*100 AS memRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="appCpuRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="chk_cpurate_wmi,cpuCore"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Thread where Name like 'icegridnode%'"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select name from Win32_PerfFormattedData_PerfOS_Processor where name !='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(chk_cpurate_wmi))/count(cpuCore) as appCpuRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="appMemRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="Memory,totalMemSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name like 'icegridnode%'"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::SELECT TotalVisibleMemorySize FROM Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (100*sum(Memory)/totalMemSize/1024) as appMemRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="GridLoadAvg" collectType="" pluginid="IceGridPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="getGridCpuRate"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ip" collectType="" pluginid="IcmpPlugin">
+        <PluginResultMetaInfo columns="ip,isAlive,ResponseTime,Name"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ip"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="responseTime" collectType="" pluginid="IcmpPlugin">
+        <PluginResultMetaInfo columns="ip,isAlive,ResponseTime,Name"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ResponseTime"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <!-- Registry -->
+    <MetricPlugin metricid="RegistryName" collectType="" pluginid="IceGridPlugin">
+        <PluginResultMetaInfo columns="RegistryName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="getAllRegistryNames"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="RegistryName"/>
+            <Parameter type="" key="ValueColumnTitle" value="RegistryName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="RegistryAvailability" collectType="" pluginid="IceGridPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" value="RegistryName" key="PARA"/>
+            <Parameter type="" key="COMMAND" value="getRegistryAvailability"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="RegistryHostname" collectType="" pluginid="IceGridPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" value="RegistryName" key="PARA"/>
+            <Parameter type="" key="COMMAND" value="getRegistryHostname"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <!-- Node -->
+    <MetricPlugin metricid="NodeName" collectType="" pluginid="IceGridPlugin">
+        <PluginResultMetaInfo columns="NodeName"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="getAllNodeNames"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="NodeName"/>
+            <Parameter type="" key="ValueColumnTitle" value="NodeName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="NodeAvailability" collectType="" pluginid="IceGridPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" value="NodeName" key="PARA"/>
+            <Parameter type="" key="COMMAND" value="getNodeAvailability"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="NodeHostname" collectType="" pluginid="IceGridPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" value="NodeName" key="PARA"/>
+            <Parameter type="" key="COMMAND" value="getNodeHostname"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="NodeOS" collectType="" pluginid="IceGridPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" value="NodeName" key="PARA"/>
+            <Parameter type="" key="COMMAND" value="getNodeOperatingSystem"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="NodeMachineType" collectType="" pluginid="IceGridPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" value="NodeName" key="PARA"/>
+            <Parameter type="" key="COMMAND" value="getNodeMachineType"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="NodeLoadAvg1" collectType="" pluginid="IceGridPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" value="NodeName" key="PARA"/>
+            <Parameter type="" key="COMMAND" value="getNodeLoadAvg1"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="NodeLoadAvg5" collectType="" pluginid="IceGridPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" value="NodeName" key="PARA"/>
+            <Parameter type="" key="COMMAND" value="getNodeLoadAvg5"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="NodeLoadAvg15" collectType="" pluginid="IceGridPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" value="NodeName" key="PARA"/>
+            <Parameter type="" key="COMMAND" value="getNodeLoadAvg15"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <!-- Server -->
+    <MetricPlugin metricid="ServerId" collectType="" pluginid="IceGridPlugin">
+        <PluginResultMetaInfo columns="ServerId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="getAllServerIds"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="ServerId"/>
+            <Parameter type="" key="ValueColumnTitle" value="ServerId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ServerAvailability" collectType="" pluginid="IceGridPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" value="ServerId" key="PARA"/>
+            <Parameter type="" key="COMMAND" value="getServerAvailability"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ServerState" collectType="" pluginid="IceGridPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" value="ServerId" key="PARA"/>
+            <Parameter type="" key="COMMAND" value="getServerState"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ServerPid" collectType="" pluginid="IceGridPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" value="ServerId" key="PARA"/>
+            <Parameter type="" key="COMMAND" value="getServerPid"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ServerApplication" collectType="" pluginid="IceGridPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" value="ServerId" key="PARA"/>
+            <Parameter type="" key="COMMAND" value="getServerApplication"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ServerNode" collectType="" pluginid="IceGridPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" value="ServerId" key="PARA"/>
+            <Parameter type="" key="COMMAND" value="getServerNode"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ServerActivation" collectType="" pluginid="IceGridPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="ResourceProperty" value="ServerId" key="PARA"/>
+            <Parameter type="" key="COMMAND" value="getServerActivation"/>
+        </PluginParameter>
+    </MetricPlugin>
+</MetricPlugins>

@@ -1,0 +1,88 @@
+<div id="login-active-div" style="margin-left:100px;margin-top:40px;position: relative; top: -1px;">
+	<div class="active-bg-top"></div>
+	<div class="ipu-dwon-posi" style="margin-top:30px">
+		<a style="color: #F60; font-weight: bold;" id="downloadFile">下载模板文件</a>
+		<form class="oc-form" id="uploadLicenseForm" method="post" enctype="multipart/form-data"
+			  encoding="multipart/form-data">
+			<!-- <input id="chooseFile" name="licenseFile" style="width: 300px; float: left;" type="file" />  -->
+			<input type="text" id="showLicenseFilePath" style="width: 260px; float: left;" class="oc-checkbox-locate">
+			<a href="javascript:void(0);" class="file-button locate-left" id="chooseFile">选择<input class="file-button-file"
+																								   type="file" name="licenseFile" id="choiceLicenseFile"></a>
+			<a id="importBtn" href="javascript:void(0);">导入</a>
+		</form>
+	</div>
+	<div class="active-bg-mid">
+		<div style="text-align: left;">
+			<span class="tit-active">激活MainSteam</span>
+			<span class="ico ico-cancel license-close-locate" id="closeLicenseActive"></span>
+		</div>
+		<div>
+			<ul class="pos-dwon">
+				<li style="font-weight: bold;color:#fff; margin-bottom:5px;">您可以申请并上传新的授权文件，步骤如下：</li>
+				<li>1. 从本系统下载模板文件。</li>
+				<li>2. 将MainSteam模板文件发送给本公司服务人员。</li>
+				<li>
+					<div>3. 导入新授权文件到本系统。</div>
+				</li>
+			</ul>
+		</div>
+	</div>
+	<div class="active-bg-but"></div>
+</div>
+
+<script type="text/javascript">
+	$(function () {
+		$("#chooseFile").linkbutton("RenderLB", {
+			iconCls: 'icon-file',
+			onClick: function (event) {
+				if (event.target.tagName == 'SPAN') {
+					$("#choiceLicenseFile").get(0).click();
+				}
+			}
+		});
+
+		$("#choiceLicenseFile").change(function () {
+			var value = $("#choiceLicenseFile").val();
+			$("#showLicenseFilePath").val(value.substr(value.lastIndexOf("\\") + 1));
+			//	$("#showLicenseFilePath").val($("#choiceLicenseFile").val());
+		});
+		$("#importBtn").linkbutton('RenderLB', {
+			iconCls: 'icon-import',
+			onClick: function () {
+				var fileName = $("#choiceLicenseFile").val();
+				if (fileName && fileName != "") {
+					if (fileName.substring(fileName.lastIndexOf(".")) == ".steam") {
+						$("#uploadLicenseForm").ajaxSubmit({
+							url: oc.resource.getUrl('system/license/importLicense.htm'),
+							timeout: 3000,
+							iframe: true,
+							success: function (responseText, statusText, xhr, $form) {
+								if (statusText == "success") {
+									alert("Lisense文件导入成功！");
+									window.location.href = oc.resource.getUrl("login.html");
+								} else {
+									alert("License文件导入失败，请重试！");
+								}
+							}
+						});
+					} else {
+						alert("请选择正确的License文件！");
+					}
+				} else {
+					alert("请选择License文件！");
+				}
+			}
+		});
+
+		$("#downloadFile").click(function () {
+			window.location.href = oc.resource.getUrl('system/license/getDatFile.htm');
+		});
+		$("#downloadFile2").click(function () {
+			window.location.href = oc.resource.getUrl('system/license/getDatFile.htm');
+		});
+
+		$("#closeLicenseActive").click(function () {
+			window.location.href = oc.resource.getUrl("login.html");
+		});
+	});
+</script>

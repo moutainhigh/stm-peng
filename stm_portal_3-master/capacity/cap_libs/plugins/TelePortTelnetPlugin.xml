@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Plugin version="1.0" id="TelePortTelnetPlugin" name="TelePortTelnetPlugin" 
+	class="com.mainsteam.stm.plugin.telnet.TelnetSession"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:noNamespaceSchemaLocation="../schema/Plugin.xsd">
+	<MaxActiveSession>1</MaxActiveSession>
+	<MaxidleSession>0</MaxidleSession>
+	<SessionTTL>10000</SessionTTL>
+	<ObjectCacheTimeout>30000</ObjectCacheTimeout>
+	<PluginInitParameters>
+        <parameter id="TelnetGrpBox" boxStyle="GroupBox" name="端对端链路信息"
+			displayOrder="2" isEdit="false" isDisplay="true" isSessionKey="false">
+			<DefaultValue />
+			<HelpInfo>端对端链路信息</HelpInfo>
+		</parameter>
+        
+		<parameter id="IP" boxStyle="IPField" name="源端IP" displayOrder="3" valueValidate="/^([0,1]?\d{0,2}|2[0-4]\d|25[0-5])\.([0,1]?\d{0,2}|2[0-4]\d|25[0-5])\.([0,1]?\d{0,2}|2[0-4]\d|25[0-5])\.([0,1]?\d{0,2}|2[0-4]\d|25[0-5])$/"
+			isEdit="true" isDisplay="true" isSessionKey="true" mustInput="true">
+			<DefaultValue></DefaultValue>
+			<HelpInfo>待发现机器的IP地址</HelpInfo>
+			<errorInfo>请输入正确的IP格式，例如192.168.0.1</errorInfo>
+		</parameter>
+		<parameter id="port" boxStyle="Input" valueValidate="/^([0-9]|[1-9]\d|[1-9]\d{2}|[1-9]\d{3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/" 
+			name="TELNET 端口" displayOrder="4" isEdit="true" 
+			isDisplay="true" mustInput="true" isSessionKey="true">
+			<DefaultValue>23</DefaultValue>
+			<HelpInfo>TELNET 端口</HelpInfo>
+			<errorInfo>请输入整数</errorInfo>
+		</parameter>
+	    <parameter isEdit="false" id="Tprotocol" boxStyle="OptionBox" isDisplay="true" displayOrder="5" 
+			name="传输协议" isSessionKey="false" mustInput="true">
+			<DefaultValue>tcp</DefaultValue>
+			<SupportValues>
+				<SupportValue>
+					<Name>tcp</Name>
+					<Value>tcp</Value>
+				</SupportValue>
+				<SupportValue>
+					<Name>udp</Name>
+					<Value>udp</Value>
+				</SupportValue>
+			</SupportValues>
+			<HelpInfo>传输协议</HelpInfo>
+		</parameter>
+		<parameter id="username" boxStyle="Input" name="用户名" displayOrder="6" 
+			isEdit="true" isDisplay="true" isSessionKey="true" type="user" mustInput="false">
+			<DefaultValue></DefaultValue>
+			<HelpInfo>待发现机器的用户名</HelpInfo>
+		</parameter>
+		<parameter id="password" boxStyle="Input" name="密码" displayOrder="7" 
+			isEdit="true" isDisplay="true" isSessionKey="true" type="passsword" isPassword="true" mustInput="false">
+			<DefaultValue></DefaultValue>
+			<HelpInfo>待发现机器的密码</HelpInfo>
+		</parameter>
+		<parameter id="remoteIP" boxStyle="IPField" name="目的端IP地址"
+			displayOrder="11"
+			valueValidate="/^([0,1]?\d{0,2}|2[0-4]\d|25[0-5])\.([0,1]?\d{0,2}|2[0-4]\d|25[0-5])\.([0,1]?\d{0,2}|2[0-4]\d|25[0-5])\.([0,1]?\d{0,2}|2[0-4]\d|25[0-5])$/"
+			isEdit="true" isDisplay="true" isSessionKey="false" mustInput="true">
+			<DefaultValue></DefaultValue>
+			<HelpInfo>目标机器的IP地址</HelpInfo>
+			<errorInfo>请输入正确的IP格式，例如192.168.0.1</errorInfo>
+		</parameter>
+	    <parameter id="remotePort" boxStyle="Input" valueValidate="/^([0-9]|[1-9]\d|[1-9]\d{2}|[1-9]\d{3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/"
+                   name="目的端端口" displayOrder="12" isEdit="true" isDisplay="true"
+                   mustInput="true" isSessionKey="false">
+            <DefaultValue></DefaultValue>
+            <HelpInfo>比如SSH端口，默认为22</HelpInfo>
+            <errorInfo>请输入整数</errorInfo>
+        </parameter>
+		<parameter id="userprompt" boxStyle="Input" name="用户名提示" displayOrder="8" 
+			isEdit="true" isDisplay="true" isSessionKey="false" mustInput="true">
+			<DefaultValue>login:</DefaultValue>
+			<HelpInfo>用户名提示(U):</HelpInfo>
+		</parameter>
+		<parameter id="passprompt" boxStyle="Input" name="密码提示" displayOrder="9" 
+			isEdit="true" isDisplay="true" isSessionKey="false" mustInput="true">
+			<DefaultValue>Password:</DefaultValue>
+			<HelpInfo>密码提示(P):</HelpInfo>
+		</parameter>
+		<parameter id="opprompt" boxStyle="Input" name="命令提示" displayOrder="10" 
+			isEdit="true" isDisplay="true" isSessionKey="false" mustInput="true">
+			<DefaultValue>#</DefaultValue>
+			<HelpInfo>命令提示(C):</HelpInfo>
+		</parameter>
+	    <parameter id="hostType" name="主机类型" 
+			displayOrder="0" isEdit="true" isDisplay="false"  mustInput="true" boxStyle="OptionBox"
+			isSessionKey="true">
+			<DefaultValue>Linux</DefaultValue>
+			<SupportValues>
+				<SupportValue>
+					<Name>Linux</Name>
+					<Value>Linux</Value>
+				</SupportValue>
+				<SupportValue>
+					<Name>AIX</Name>
+					<Value>AIX</Value>
+				</SupportValue>
+				<SupportValue>
+					<Name>FreeBSD</Name>
+					<Value>FreeBSD</Value>
+				</SupportValue>
+				<SupportValue>
+					<Name>HPUX</Name>
+					<Value>HP-UX</Value>
+				</SupportValue>
+				<SupportValue>
+					<Name>Openserver</Name>
+					<Value>SCO_SV</Value>
+				</SupportValue>
+				<SupportValue>
+					<Name>SCO Unixware</Name>
+					<Value>Unixware</Value>
+				</SupportValue>
+				<SupportValue>
+					<Name>Solaris</Name>
+					<Value>SunOS</Value>
+				</SupportValue>
+				<SupportValue>
+					<Name>NeoKylin</Name>
+					<Value>Linux</Value>
+				</SupportValue>
+			</SupportValues>
+			<HelpInfo>主机类型</HelpInfo>
+		</parameter>
+	</PluginInitParameters>
+</Plugin>

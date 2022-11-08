@@ -1,0 +1,614 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">  
+  <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0"/>  
+  <PluginClassAliasList> 
+    <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+    <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+    <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+    <PluginClassAlias id="columnPasteProcessor" class="com.mainsteam.stm.plugin.common.ColumnPasteProcessor"/>
+    <PluginClassAlias id="RegularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+    <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+    <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+    <PluginClassAlias id="tableConverter" class="com.mainsteam.stm.plugin.common.TableResultSetConverter"/>
+    <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+    <PluginClassAlias id="ChangeRateProcessor" class="com.mainsteam.stm.plugin.common.ChangeRateProcessor"/>
+    <PluginClassAlias id="rowFilterProcessor" class="com.mainsteam.stm.plugin.common.RowFilterProcessor"/>
+    <PluginClassAlias id="FormatProcessor" class="com.mainsteam.stm.plugin.common.FormatProcessor"/>
+  </PluginClassAliasList>
+  <!-- 主板生产日期 -->
+  <MetricPlugin metricid="BoardMfgDate" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="model"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="fru"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Board\s+Mfg\s+Date\s+\:\s+(.+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter value="select first(model) as model" key="SELECT"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin> 
+  <!-- 主板制造商 -->
+  <MetricPlugin metricid="BoardMfg" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="model"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="fru"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Board\s+Mfg\s+:\s+(.+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter value="select first(model) as model" key="SELECT"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin> 
+  <!-- 主板型号 -->
+  <MetricPlugin metricid="BoardProduct" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="model"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="fru"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Board\s+Product\s+:\s+(.+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter value="select first(model) as model" key="SELECT"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin> 
+  <!-- 主板序列号 -->
+  <MetricPlugin metricid="BoardSerial" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="model"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="fru"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Board\s+Serial\s+:\s+(.+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter value="select first(model) as model" key="SELECT"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin> 
+  <!-- 主板零部件号 -->
+  <MetricPlugin metricid="BoardPartNumber" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="model"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="fru"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Board\s+Part\s+Number\s+:\s+(.+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter value="select first(model) as model" key="SELECT"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin> 
+  <!-- 产品制造商 -->
+  <MetricPlugin metricid="ProductManu" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="model"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="fru"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Product\s+Manufacturer\s+:\s+(.+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter value="select first(model) as model" key="SELECT"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin> 
+  <!-- 产品名称 -->
+  <MetricPlugin metricid="ProductName" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="model"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="fru"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Product\s+Name\s+:\s+(.+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter value="select first(model) as model" key="SELECT"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin> 
+  <!-- 产品零部件号 -->
+  <MetricPlugin metricid="ProductPart" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="model"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="fru"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Product\s+Part\s+Number\s+\S+(.+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter value="select first(model) as model" key="SELECT"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin> 
+  <!-- 产品序列号 -->
+  <MetricPlugin metricid="ProductSerial" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="model"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="fru"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Product\s+Serial\s+\S+\s+(.+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter value="select first(model) as model" key="SELECT"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin> 
+  <!-- 底层电源信息 -->
+  <MetricPlugin metricid="ChassisPower" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter key="command" value="chassis power status"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Chassis\s+Power\s+is\s+(\S+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="" value="on,打开;关闭"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>
+  <!-- 系统电源状态 -->
+  <MetricPlugin metricid="PowerSystem" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter key="command" value="chassis status"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="System\s+Power\s+\S+\s+(\S+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="" value="on,1;0"/> 
+      </PluginDataHandler>
+    <PluginDataHandler classKey="availableConverter"/> 
+    </PluginDataHandlers> 
+  </MetricPlugin>
+  <!-- 电源过载 -->
+  <MetricPlugin metricid="PowerOverload" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter key="command" value="chassis status"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Power\s+Overload\s+\S+\s+(\S+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="" value="false,正常;过载"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin>
+  <!-- 电源锁启用状态 -->
+  <MetricPlugin metricid="PowerInterlock" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter key="command" value="chassis status"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Power\s+Interlock\s+\S+\s+(\S+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="" value="inactive,未激活;激活"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin>
+  <!-- 主电源故障 -->
+  <MetricPlugin metricid="MainPowerFault" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter key="command" value="chassis status"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Main\s+Power\s+Fault\s+\S+\s+(\S+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="" value="false,正常;有错误"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin>
+  <!-- 控制电源错误 -->
+  <MetricPlugin metricid="PowerControl" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter key="command" value="chassis status"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Power\s+Control\s+Fault\s+\S+\s+(\S+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="" value="false,正常;有错误"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin>
+  <!-- 电源恢复策略 -->
+  <MetricPlugin metricid="PowerRestore" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter key="command" value="chassis status"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Power\s+Restore\s+Policy\s+\S+\s+(\S+)"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin>
+  <!-- 机箱入侵检测 -->
+  <MetricPlugin metricid="ChassisIntrusion" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter key="command" value="chassis status"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Chassis\s+Intrusion\s+\S+\s+(\S+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="" value="inactive,未激活;激活"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin>
+  <!-- 前面板锁定 -->
+  <MetricPlugin metricid="FrontPanel" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter key="command" value="chassis status"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Front-Panel\s+Lockout\s+\S+\s+(\S+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="" value="inactive,未激活;激活"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin>
+  <!-- 驱动错误 -->
+  <MetricPlugin metricid="DriveFault" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter key="command" value="chassis status"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Drive\s+Fault\s+\S+\s+(\S+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="" value="false,正常;有错误"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin>
+  <!-- 风扇错误 -->
+  <MetricPlugin metricid="FanFault" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter key="command" value="chassis status"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Cooling/Fan\s+Fault\s+\S+\s+(\S+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="" value="false,正常;有错误"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin>
+  <!-- 机箱温度 -->
+  <MetricPlugin metricid="AmbientTemp" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter key="command" value="sdr type Temperature"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Ambient\s+Temp\s+\|\s+\S+\s+\|\s+\S+\s+\|\s+\S+\s+\|\s+(\S+)\s+degrees\s+C"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>
+  <!-- power -->
+  <MetricPlugin metricid="powerIndex" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="powerIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="sdr type 'Power Supply'"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="(Power\s+\S+\s+\d+)"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="powerIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="powerIndex"/> 
+    </PluginDataConverter>
+  </MetricPlugin>
+  <MetricPlugin metricid="powerStatus" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="powerStatus"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="sdr type 'Power Supply'"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="ResourceProperty" key="powerIndex" value="powerIndex"/>  
+        <Parameter type="" key="REGULAR" value="${powerIndex}\s+\|\s+\S+\s+\|\s+(\S+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="powerStatus" value="ok,1;0"/> 
+      </PluginDataHandler>
+    </PluginDataHandlers> 
+  </MetricPlugin>
+  <!-- processor -->
+  <MetricPlugin metricid="processorIndex" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="processorIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="sdr elist all"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="(CPU\s*\d+)\s+\|\s+\S+\s+\|\s+ok"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="processorIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="processorIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>
+  <MetricPlugin metricid="processorStatus" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="processorStatus"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="sdr elist all"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="ResourceProperty" key="processorIndex" value="processorIndex"/>  
+        <Parameter type="" key="REGULAR" value="${processorIndex}\s+\|\s+\S+\s+\|\s+ok"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="processorStatus" value="ok,1;0"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin> 
+  <MetricPlugin metricid="processorState" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="processorState"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="sdr elist all"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="ResourceProperty" key="processorIndex" value="processorIndex"/>  
+        <Parameter type="" key="REGULAR" value="${processorIndex}\s+\|\s+\S+\s+\|\s+ok\s+\|\s+\S+\s+\|[\s*&amp;&amp;[^\r\n]](.*)"/> 
+      </PluginDataHandler> 
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="processorState" value="Presence detected,1;0"/> 
+      </PluginDataHandler>
+    </PluginDataHandlers> 
+  </MetricPlugin> 
+  <!-- fan -->
+   <MetricPlugin metricid="fanIndex" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="fanIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="sdr type Fan"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="(Fan\s+\S+)\s+Tach"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="fanIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="fanIndex"/> 
+    </PluginDataConverter>
+  </MetricPlugin>
+  <MetricPlugin metricid="fanStatus" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="fanStatus"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="sdr type Fan"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="ResourceProperty" key="fanIndex" value="fanIndex"/>  
+        <Parameter type="" key="REGULAR" value="${fanIndex}\s+Tach\s+\|\s+\S+\s+\|\s+(\S+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="fanStatus" value="ok,1;0"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>
+  <MetricPlugin metricid="fanSpeed" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="fanIndex,fanSpeed"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="sdr type Fan"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter">
+      	<Parameter type="ResourceProperty" key="fanIndex" value="fanIndex"/> 
+        <Parameter type="" key="REGULAR" value="(${fanIndex})\s+Tach\s+\|\s+\S+\s+\|\s+\S+\s+\|\s+\S+\s+\|\s+(\S+)"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="fanIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="fanSpeed"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="fanIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>
+  <!-- DIMM -->
+  <MetricPlugin metricid="DIMMIndex" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="DIMMIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="sdr elist all"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="(DIMM\s+\d+)\s+\|\s+[BC][\S+\d+]\S+"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="DIMMIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="DIMMIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin> 
+  <MetricPlugin metricid="DIMMStatus" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="DIMMStatus"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="sdr elist all"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="ResourceProperty" key="DIMMIndex" value="DIMMIndex"/>  
+        <Parameter type="" key="REGULAR" value="${DIMMIndex}\s+\|\s+[BC][\S+\d+]\S+\s+\|\s+(\S+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="DIMMStatus" value="ok,1;0"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="DIMMState" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="DIMMState"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="sdr elist all"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="ResourceProperty" key="DIMMIndex" value="DIMMIndex"/>  
+        <Parameter type="" key="REGULAR" value="${DIMMIndex}\s+\|\s+[BC][\S+\d+]\S+\s+\|\s+\S+\s+\|\s+\S+\s+\|[\s*&amp;&amp;[^\r\n]](.*)"/> 
+      </PluginDataHandler> 
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="DIMMState" value="Presence Detected,1;0"/> 
+      </PluginDataHandler>
+    </PluginDataHandlers> 
+  </MetricPlugin>
+  <!-- Drive -->
+  <MetricPlugin metricid="diskIndex" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="diskIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="sdr type 'Drive Slot / Bay'"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="(Drive\s*\d+)"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="diskIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="diskIndex"/>  
+    </PluginDataConverter> 
+  </MetricPlugin> 
+  <MetricPlugin metricid="diskStatus" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="diskStatus"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="sdr type 'Drive Slot / Bay'"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter">
+      	<Parameter type="ResourceProperty" key="diskIndex" value="diskIndex"/>
+        <Parameter type="" key="REGULAR" value="${diskIndex}\s+\|\s+\S+\s+\|\s+(\S+)"/> 
+      </PluginDataHandler>
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="diskStatus" value="ok,1;0"/> 
+      </PluginDataHandler>
+    </PluginDataHandlers>  
+  </MetricPlugin>
+  <MetricPlugin metricid="diskState" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="diskState"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="sdr type 'Drive Slot / Bay'"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="ResourceProperty" key="diskIndex" value="diskIndex"/>  
+        <Parameter type="" key="REGULAR" value="${diskIndex}\s+\|\s+\S+\s+\|\s+\S+\s+\|\s+\S+\s+\|(.+)"/> 
+      </PluginDataHandler> 
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="diskState" value=" Drive Present,1;0"/> 
+      </PluginDataHandler>
+    </PluginDataHandlers> 
+  </MetricPlugin>
+  <!-- PCI -->
+  <MetricPlugin metricid="cardIndex" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="cardIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="sdr type 'Slot / Connector'"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="(PCI\s+\d+)"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers>  
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="cardIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="cardIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>
+  <MetricPlugin metricid="cardStatus" collectType="" pluginid="IpmiPlugin"> 
+    <PluginResultMetaInfo columns="cardStatus"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter key="tool" value="ipmitool"/>  
+      <Parameter type="" key="command" value="sdr type 'Slot / Connector'"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="ResourceProperty" key="cardIndex" value="cardIndex"/>  
+        <Parameter type="" key="REGULAR" value="${cardIndex}\s+\|+\s+\S+\s+\|+\s+(\S+)"/> 
+      </PluginDataHandler>  
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="cardStatus" value="ok,1;0"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+</MetricPlugins>

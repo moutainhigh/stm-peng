@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.portal.vm.dao.IVmResourceTreeDao">
+	<insert id="insert" parameterType="com.mainsteam.stm.portal.vm.po.VmResourceTreePo">
+		INSERT INTO STM_VM_RESOURCETREE (
+			UUID,
+			PUUID,
+			VMTYPE,
+			VMNAME,
+			VMFULLNAME,
+			RESOURCEID,
+			VCENTERUUID,
+			DATACENTERUUID,
+			CLUSTERUUID,
+			HOSTUUID,
+			INSTANCEID,
+			RESOURCEPOOL
+		) VALUES (
+			#{uuid},
+			#{puuid},
+			#{vmtype},
+			#{vmname},
+			#{vmfullname},
+			#{resourceid},
+			#{vcenteruuid},
+			#{datacenteruuid},
+			#{clusteruuid},
+			#{hostuuid},
+			#{instanceid},
+			#{resourcepool}
+		)
+	</insert>
+	<select id="selectByUuid" resultType="com.mainsteam.stm.portal.vm.po.VmResourceTreePo" parameterType="java.lang.String">
+		SELECT UUID,
+			   PUUID,
+			   VMTYPE,
+			   VMNAME,
+			   VMFULLNAME,
+			   RESOURCEID,
+			   VCENTERUUID,
+			   DATACENTERUUID,
+			   CLUSTERUUID,
+			   HOSTUUID,
+			   INSTANCEID,
+			   RESOURCEPOOL
+	 	  FROM stm_vm_resourcetree a
+		 WHERE a.UUID = #{uuid}
+	</select>
+	
+	<select id="selectByPuuid" resultType="com.mainsteam.stm.portal.vm.po.VmResourceTreePo" parameterType="java.lang.String">
+		SELECT UUID,
+			   PUUID,
+			   VMTYPE,
+			   VMNAME,
+			   VMFULLNAME,
+			   RESOURCEID,
+			   VCENTERUUID,
+			   DATACENTERUUID,
+			   CLUSTERUUID,
+			   HOSTUUID,
+			   INSTANCEID,
+			   RESOURCEPOOL
+	 	  FROM stm_vm_resourcetree a
+		 WHERE a.PUUID = #{puuid}
+	</select>
+	<select id="selectByInstanceId" resultType="com.mainsteam.stm.portal.vm.po.VmResourceTreePo" parameterType="long">
+		SELECT UUID,
+			   PUUID,
+			   VMTYPE,
+			   VMNAME,
+			   VMFULLNAME,
+			   RESOURCEID,
+			   VCENTERUUID,
+			   DATACENTERUUID,
+			   CLUSTERUUID,
+			   HOSTUUID,
+			   INSTANCEID,
+			   RESOURCEPOOL
+	 	  FROM stm_vm_resourcetree a
+		 WHERE a.INSTANCEID = #{instanceid}
+	</select>
+    <!-- 根据资源ID查询VmTree对象 -->
+	<select id="selectByResourceId" resultType="com.mainsteam.stm.portal.vm.po.VmResourceTreePo" parameterType="list">
+		SELECT UUID, PUUID, VMTYPE, VMNAME, VMFULLNAME, RESOURCEID,
+			   VCENTERUUID, DATACENTERUUID, CLUSTERUUID, HOSTUUID, INSTANCEID, RESOURCEPOOL
+		FROM STM_VM_RESOURCETREE A
+		<where>
+			<foreach collection="list" open="A.RESOURCEID IN (" close=")" separator="," index="index" item="resourceId">
+				#{resourceId}			
+			</foreach>
+		</where>
+	</select>
+	
+	<select id="selectVCenterByInstanceId" resultType="com.mainsteam.stm.portal.vm.po.VmResourceTreePo" parameterType="long">
+		SELECT UUID,
+			   PUUID,
+			   VMTYPE,
+			   VMNAME,
+			   VMFULLNAME,
+			   RESOURCEID,
+			   VCENTERUUID,
+			   DATACENTERUUID,
+			   CLUSTERUUID,
+			   HOSTUUID,
+			   INSTANCEID ,
+			   RESOURCEPOOL
+		 FROM stm_vm_resourcetree a
+		WHERE (a.INSTANCEID = #{instanceid} AND a.RESOURCEID IN ('VMWareVCenter','VMWareVCenter5.5','VMWareVCenter6','VMWareVCenter6.5')) 
+		   OR a.UUID IN (SELECT VCENTERUUID FROM stm_vm_resourcetree b WHERE b.INSTANCEID = #{instanceid})
+	</select>
+	<select id="selectDatacenterByInstanceId" resultType="com.mainsteam.stm.portal.vm.po.VmResourceTreePo" parameterType="long">
+		SELECT UUID,
+			   PUUID,
+			   VMTYPE,
+			   VMNAME,
+			   VMFULLNAME,
+			   RESOURCEID,
+			   VCENTERUUID,
+			   DATACENTERUUID,
+			   CLUSTERUUID,
+			   HOSTUUID,
+			   INSTANCEID ,
+			   RESOURCEPOOL
+		 FROM stm_vm_resourcetree a
+		WHERE (a.INSTANCEID = #{instanceid} AND a.VMTYPE = 'Datacenter')
+		   OR a.UUID IN (SELECT DATACENTERUUID FROM stm_vm_resourcetree b WHERE b.INSTANCEID = #{instanceid})
+	</select>
+	<select id="selectClusterByInstanceId" resultType="com.mainsteam.stm.portal.vm.po.VmResourceTreePo" parameterType="long">
+		SELECT UUID,
+			   PUUID,
+			   VMTYPE,
+			   VMNAME,
+			   VMFULLNAME,
+			   RESOURCEID,
+			   VCENTERUUID,
+			   DATACENTERUUID,
+			   CLUSTERUUID,
+			   HOSTUUID,
+			   INSTANCEID ,
+			   RESOURCEPOOL
+		 FROM stm_vm_resourcetree a
+		WHERE (a.INSTANCEID = #{instanceid} AND a.RESOURCEID IN ('VMWareCluster','VMWareCluster5.5','VMWareCluster6','VMWareCluster6.5')) 
+		   OR a.UUID IN (SELECT CLUSTERUUID FROM stm_vm_resourcetree b WHERE b.INSTANCEID = #{instanceid})
+	</select>
+	<select id="selectHostByInstanceId" resultType="com.mainsteam.stm.portal.vm.po.VmResourceTreePo" parameterType="long">
+		SELECT UUID,
+			   PUUID,
+			   VMTYPE,
+			   VMNAME,
+			   VMFULLNAME,
+			   RESOURCEID,
+			   VCENTERUUID,
+			   DATACENTERUUID,
+			   CLUSTERUUID,
+			   HOSTUUID,
+			   INSTANCEID ,
+			   RESOURCEPOOL
+		 FROM stm_vm_resourcetree a
+		WHERE (a.INSTANCEID = #{instanceid} AND a.RESOURCEID IN ('VMWareESX','vmESXi5.5','vmESXi6','vmESXi6.5')) 
+		   OR a.UUID IN (SELECT HOSTUUID FROM stm_vm_resourcetree b WHERE b.INSTANCEID = #{instanceid})
+	</select>
+	
+	<select id="selectRelationIdsByInstanceId" resultType="com.mainsteam.stm.portal.vm.po.VmResourceTreePo" parameterType="java.util.List">
+		SELECT a.instanceid,
+		       (SELECT b.instanceid FROM stm_vm_resourcetree b WHERE a.VCENTERUUID = b.uuid) AS vcenterinstanceid,
+		       (SELECT b.vmname FROM stm_vm_resourcetree b WHERE a.DATACENTERUUID = b.uuid) AS datacentername,
+		       (SELECT b.instanceid FROM stm_vm_resourcetree b WHERE a.CLUSTERUUID = b.uuid) AS clusterinstanceid,
+		       (SELECT b.instanceid FROM stm_vm_resourcetree b WHERE a.HOSTUUID = b.uuid) AS hostinstanceid
+		  FROM stm_vm_resourcetree a
+		 WHERE a.INSTANCEID IN
+			 <foreach item="instanceid" index="index" collection="list" open="(" separator="," close=")">
+		       #{instanceid}
+		    </foreach>
+	</select>
+	
+	<select id="selectChildrenByInstanceId" resultType="com.mainsteam.stm.portal.vm.po.VmResourceTreePo" parameterType="long">
+		SELECT UUID,
+			   PUUID,
+			   VMTYPE,
+			   VMNAME,
+			   VMFULLNAME,
+			   RESOURCEID,
+			   VCENTERUUID,
+			   DATACENTERUUID,
+			   CLUSTERUUID,
+			   HOSTUUID,
+			   INSTANCEID ,
+			   RESOURCEPOOL
+		 FROM stm_vm_resourcetree a
+		WHERE a.PUUID IN (SELECT UUID FROM stm_vm_resourcetree b WHERE b.INSTANCEID = #{instanceid})
+	</select>
+	
+	<select id="selectAllChildrenByInstanceId" resultType="com.mainsteam.stm.portal.vm.po.VmResourceTreePo" parameterType="long">
+		SELECT UUID,
+			   PUUID,
+			   VMTYPE,
+			   VMNAME,
+			   VMFULLNAME,
+			   RESOURCEID,
+			   VCENTERUUID,
+			   DATACENTERUUID,
+			   CLUSTERUUID,
+			   HOSTUUID,
+			   INSTANCEID ,
+			   RESOURCEPOOL
+		 FROM stm_vm_resourcetree a
+		WHERE a.VCENTERUUID IN (SELECT UUID FROM stm_vm_resourcetree b WHERE b.INSTANCEID = #{instanceid})
+		OR a.CLUSTERUUID IN (SELECT UUID FROM stm_vm_resourcetree b WHERE b.INSTANCEID = #{instanceid})
+		OR a.HOSTUUID IN (SELECT UUID FROM stm_vm_resourcetree b WHERE b.INSTANCEID = #{instanceid})
+	</select>
+	
+	<delete id="delByInstanceId" parameterType="long">
+		delete from stm_vm_resourcetree where INSTANCEID = #{instanceId}
+	</delete>
+	
+	<delete id="delByUuid" parameterType="java.lang.String">
+		delete from STM_VM_RESOURCETREE  WHERE UUID = #{uuid}
+	</delete>
+	
+	<delete id="delByPuuid" parameterType="java.lang.String">
+		delete from STM_VM_RESOURCETREE  WHERE PUUID = #{puuid}
+	</delete>
+	
+	<update id="updateByUuid" parameterType="com.mainsteam.stm.portal.vm.po.VmResourceTreePo">
+		update stm_vm_resourcetree
+		<set>
+			<if test="uuid != null"> UUID = #{uuid}, </if>
+			<if test="puuid != null"> PUUID = #{puuid} ,</if>
+			<if test="vmtype != null"> VMTYPE = #{vmtype}, </if>
+			<if test="vmname != null"> VMNAME = #{vmname}, </if>
+			<if test="vmfullname != null"> VMFULLNAME = #{vmfullname}, </if>
+			<if test="resourceid != null"> RESOURCEID = #{resourceid}, </if>
+			<if test="vcenteruuid != null"> VCENTERUUID = #{vcenteruuid}, </if>
+			<if test="datacenteruuid != null"> DATACENTERUUID = #{datacenteruuid}, </if>
+			<if test="clusteruuid != null"> CLUSTERUUID = #{clusteruuid}, </if>
+			<if test="hostuuid != null"> HOSTUUID = #{hostuuid}, </if>
+			<if test="instanceid != null"> INSTANCEID = #{instanceid}, </if>
+			<if test="resourcepool != null"> RESOURCEPOOL = #{resourcepool} </if>
+		</set>
+		 where UUID = #{uuid}
+	</update>
+	<update id="updateByInstanceId" parameterType="com.mainsteam.stm.portal.vm.po.VmResourceTreePo">
+		update stm_vm_resourcetree
+		<set>
+			<if test="uuid != null"> UUID = #{uuid}, </if>
+			<if test="puuid != null"> PUUID = #{puuid} ,</if>
+			<if test="vmtype != null"> VMTYPE = #{vmtype}, </if>
+			<if test="vmname != null"> VMNAME = #{vmname}, </if>
+			<if test="vmfullname != null"> VMFULLNAME = #{vmfullname}, </if>
+			<if test="resourceid != null"> RESOURCEID = #{resourceid}, </if>
+			<if test="vcenteruuid != null"> VCENTERUUID = #{vcenteruuid}, </if>
+			<if test="datacenteruuid != null"> DATACENTERUUID = #{datacenteruuid}, </if>
+			<if test="clusteruuid != null"> CLUSTERUUID = #{clusteruuid}, </if>
+			<if test="hostuuid != null"> HOSTUUID = #{hostuuid}, </if>
+			<if test="instanceid != null"> INSTANCEID = #{instanceid}, </if>
+			<if test="resourcepool != null"> RESOURCEPOOL = #{resourcepool} </if>
+		</set>
+		 where INSTANCEID = #{instanceId}
+	</update>
+	
+	<!--查询所有topology左侧导航栏树(vecenter__datacenter)-->
+	<select id="getLeftNavigateTree" resultType="com.mainsteam.stm.portal.vm.po.VmResourceTreePo">
+		SELECT A.UUID, A.PUUID,  A.VMTYPE, A.VMNAME, A.VMFULLNAME, A.RESOURCEID, A.VCENTERUUID, A.DATACENTERUUID, A.CLUSTERUUID, A.HOSTUUID, A.INSTANCEID 
+	 		FROM STM_VM_RESOURCETREE A where A.VMTYPE = 'VCenter'
+ 		UNION ALL 
+		SELECT B.UUID, B.PUUID,  B.VMTYPE, B.VMNAME, B.VMFULLNAME, B.RESOURCEID, B.VCENTERUUID, B.DATACENTERUUID, B.CLUSTERUUID, B.HOSTUUID, B.INSTANCEID 
+	 		FROM STM_VM_RESOURCETREE B where B.VMTYPE = 'Datacenter'
+	</select>
+	<!--查询当前数据中心topology关系list数据(根据数据中心vmfullname)  mysql/oralce concat都支持连接两个字符-->
+	<select id="selectTopologyData" resultType="com.mainsteam.stm.portal.vm.po.VmResourceTreePo"
+		parameterType="com.mainsteam.stm.portal.vm.po.VmResourceTreePo">
+<!-- 		SELECT * FROM STM_VM_RESOURCETREE A WHERE A.VMFULLNAME LIKE CONCAT(#{vmfullname},'%') AND A.VMFULLNAME !=#{vmfullname} -->
+		SELECT * FROM STM_VM_RESOURCETREE A WHERE 1=1
+		AND (a.vmtype = 'ClusterComputeResource' or a.vmtype = 'HostSystem' or a.vmtype = 'VirtualMachine' or a.vmtype = 'Datastore')
+		AND a.DATACENTERUUID = #{datacenteruuid}
+	</select>
+	
+	<select id="pageSelect"  resultType="com.mainsteam.stm.portal.vm.po.VmResourceTreePo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		SELECT UUID,
+			   PUUID,
+			   VMTYPE,
+			   VMNAME,
+			   VMFULLNAME,
+			   RESOURCEID,
+			   VCENTERUUID,
+			   DATACENTERUUID,
+			   CLUSTERUUID,
+			   HOSTUUID,
+			   INSTANCEID ,
+			   RESOURCEPOOL
+		 FROM stm_vm_resourcetree T1
+		WHERE 1=1 
+		   <if test="condition != null">
+		        <if test="condition.categoryId != null">
+				 AND T1.VMTYPE = #{condition.categoryId}
+				</if>
+				<if test="condition.iPorName != null">
+				 AND (T1.VMNAME like CONCAT(CONCAT('%',#{condition.iPorName}),'%'))
+				</if>
+		   </if>
+	</select>
+	
+	<select id="selectAll"  resultType="com.mainsteam.stm.portal.vm.po.VmResourceTreePo" parameterType="com.mainsteam.stm.portal.vm.bo.VmResourceBo">
+		SELECT UUID,
+			   PUUID,
+			   VMTYPE,
+			   VMNAME,
+			   VMFULLNAME,
+			   RESOURCEID,
+			   VCENTERUUID,
+			   DATACENTERUUID,
+			   CLUSTERUUID,
+			   HOSTUUID,
+			   INSTANCEID ,
+			   RESOURCEPOOL
+		 FROM stm_vm_resourcetree T1
+		WHERE 1=1 
+	        <if test="categoryId != null">
+			 AND T1.VMTYPE = #{categoryId}
+			</if>
+			<if test="iPorName != null">
+			 AND (T1.VMNAME like CONCAT(CONCAT('%',#{iPorName}),'%'))
+			</if>
+	</select>
+	
+	<select id="getResourcePoolVM" resultType="com.mainsteam.stm.portal.vm.po.VmResourceTreePo" parameterType="String">
+		SELECT UUID,
+			   PUUID,
+			   VMTYPE,
+			   VMNAME,
+			   VMFULLNAME,
+			   RESOURCEID,
+			   VCENTERUUID,
+			   DATACENTERUUID,
+			   CLUSTERUUID,
+			   HOSTUUID,
+			   INSTANCEID ,
+			   RESOURCEPOOL
+		 FROM stm_vm_resourcetree T1
+		WHERE RESOURCEPOOL = #{poolUuid}
+	</select>
+
+	<select id="getResourcePoolVMByPage" resultType="com.mainsteam.stm.portal.vm.po.VmResourceTreePo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		SELECT UUID,
+			   PUUID,
+			   VMTYPE,
+			   VMNAME,
+			   VMFULLNAME,
+			   RESOURCEID,
+			   VCENTERUUID,
+			   DATACENTERUUID,
+			   CLUSTERUUID,
+			   HOSTUUID,
+			   INSTANCEID ,
+			   RESOURCEPOOL
+		 FROM stm_vm_resourcetree T1
+		WHERE 1=1 
+		   <if test="condition != null">
+		        <if test="condition.resourcePoolUuid != null">
+				 AND T1.RESOURCEPOOL = #{condition.resourcePoolUuid}
+				</if>
+				<if test="condition.iPorName != null">
+				 AND (T1.VMNAME like CONCAT(CONCAT('%',#{condition.iPorName}),'%'))
+				</if>
+		   </if>
+	</select>
+	
+	<delete id="delResourcePoolByUuid" parameterType="String">
+		delete from stm_vm_resourcetree where VMTYPE='ResourcePool' AND PUUID = #{uuid}
+	</delete>
+
+</mapper>

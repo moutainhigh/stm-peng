@@ -1,0 +1,611 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.portal.netflow.dao.inf.IIfAppDao">
+
+	<!-- 接口赢的流量，包，连接数总量 -->
+	<select id="getIfAppTotals" resultType="com.mainsteam.stm.portal.netflow.bo.Whole" parameterType="com.mainsteam.stm.portal.netflow.bo.NetflowParamBo">
+		
+		SELECT
+			IFNULL(sum(ifnull(in_flows, 0) + ifnull(out_flows, 0)),0) AS wholeFlows,
+			IFNULL(sum(ifnull(in_packages, 0) + ifnull(out_packages, 0)),0) AS wholePackets,
+			IFNULL(sum(ifnull(in_connects, 0) + ifnull(out_connects, 0)),0) AS wholeConnects
+		FROM
+		(
+		SELECT
+			in_flows, out_flows,
+			in_packages, out_packages,
+			in_connects, out_connects
+		FROM
+			(
+				(
+					SELECT
+						g. NAME,
+						g.id,
+						sum(octets_total) AS in_flows,
+						sum(packet_total) AS in_packages,
+						sum(flow_total) AS in_connects
+					FROM
+						CONF_APPLICATION_GROUP g
+					LEFT JOIN 
+						CONF_APPLICATION_GROUP_MAP m ON g.id = m.app_group_id
+					LEFT JOIN 
+						CONF_APPLICATION a ON m.app_id = a.id
+					LEFT JOIN 
+						ANA_IF_IN_APP_${tableSuffix} f ON a.id = f.app_id
+					<if test="ifId != null">
+						and if_in_id in (${ifId})
+					</if>
+					<if test="stime != null">
+						AND acq_time <![CDATA[ > ]]> ${stime}
+					</if>
+					<if test="etime != null">
+						AND acq_time <![CDATA[ <= ]]> ${etime}
+					</if>
+					GROUP BY g.id
+				) t1
+				LEFT JOIN (
+					SELECT
+						g. NAME,
+						g.id,
+						sum(octets_total) AS out_flows,
+						sum(packet_total) AS out_packages,
+						sum(flow_total) AS out_connects
+					FROM
+						CONF_APPLICATION_GROUP g
+					LEFT JOIN 
+						CONF_APPLICATION_GROUP_MAP m ON g.id = m.app_group_id
+					LEFT JOIN 
+						CONF_APPLICATION a ON m.app_id = a.id
+					LEFT JOIN 
+						ANA_IF_OUT_APP_${tableSuffix} f ON a.id = f.app_id
+					<if test="ifId != null">
+						and if_out_id in (${ifId})
+					</if>
+					<if test="stime != null">
+						AND acq_time <![CDATA[ > ]]> ${stime}
+					</if>
+					<if test="etime != null">
+						AND acq_time <![CDATA[ <= ]]> ${etime}
+					</if>
+					GROUP BY g.id
+				) t2 ON t1.id = t2.id
+			)
+		UNION
+			SELECT
+				in_flows, out_flows,
+				in_packages, out_packages,
+			    in_connects, out_connects 
+			FROM
+			(
+				(
+					SELECT
+						g. NAME,
+						g.id,
+						sum(octets_total) AS in_flows,
+						sum(packet_total) AS in_packages,
+						sum(flow_total) AS in_connects
+					FROM
+						CONF_APPLICATION_GROUP g
+					LEFT JOIN 
+						CONF_APPLICATION_GROUP_MAP m ON g.id = m.app_group_id
+					LEFT JOIN 
+						CONF_APPLICATION a ON m.app_id = a.id
+					LEFT JOIN 
+						ANA_IF_IN_APP_${tableSuffix} f ON a.id = f.app_id
+					<if test="ifId != null">
+						and if_in_id in (${ifId})
+					</if>
+					<if test="stime != null">
+						AND acq_time <![CDATA[ > ]]> ${stime}
+					</if>
+					<if test="etime != null">
+						AND acq_time <![CDATA[ <= ]]> ${etime}
+					</if>
+					GROUP BY g.id
+				) t1
+				RIGHT JOIN 
+				(
+					SELECT
+						g. NAME,
+						g.id,
+						sum(octets_total) AS out_flows,
+						sum(packet_total) AS out_packages,
+						sum(flow_total) AS out_connects
+					FROM
+						CONF_APPLICATION_GROUP g
+					LEFT JOIN 
+						CONF_APPLICATION_GROUP_MAP m ON g.id = m.app_group_id
+					LEFT JOIN 
+						CONF_APPLICATION a ON m.app_id = a.id
+					LEFT JOIN 
+						ANA_IF_OUT_APP_${tableSuffix} f ON a.id = f.app_id
+					<if test="ifId != null">
+						and if_out_id in (${ifId})
+					</if>
+					<if test="stime != null">
+						AND acq_time <![CDATA[ > ]]> ${stime}
+					</if>
+					<if test="etime != null">
+						AND acq_time <![CDATA[ <= ]]> ${etime}
+					</if>
+					GROUP BY g.id
+				) t2 ON t1.id = t2.id
+			)
+		) t3
+		
+	</select>
+
+	<select id="getTotalIfAppNetflows" resultType="Long" parameterType="com.mainsteam.stm.portal.netflow.bo.NetflowParamBo">
+		
+		SELECT
+			IFNULL(sum(ifnull(in_flows, 0) + ifnull(out_flows, 0)),0) AS wholeFlows
+		FROM
+		(
+		SELECT
+			in_flows,
+			out_flows
+		FROM
+			(
+				(
+					SELECT
+						g. NAME,
+						g.id,
+						sum(octets_total) AS in_flows,
+						sum(packet_total) AS in_packages
+					FROM
+						CONF_APPLICATION_GROUP g
+					LEFT JOIN 
+						CONF_APPLICATION_GROUP_MAP m ON g.id = m.app_group_id
+					LEFT JOIN 
+						CONF_APPLICATION a ON m.app_id = a.id
+					LEFT JOIN 
+						ANA_IF_IN_APP_${tableSuffix} f ON a.id = f.app_id
+					<if test="ifId != null">
+						and if_in_id in (${ifId})
+					</if>
+					<if test="stime != null">
+						AND acq_time <![CDATA[ > ]]> ${stime}
+					</if>
+					<if test="etime != null">
+						AND acq_time <![CDATA[ <= ]]> ${etime}
+					</if>
+					GROUP BY g.id
+				) t1
+				LEFT JOIN (
+					SELECT
+						g. NAME,
+						g.id,
+						sum(octets_total) AS out_flows,
+						sum(packet_total) AS out_packages
+					FROM
+						CONF_APPLICATION_GROUP g
+					LEFT JOIN 
+						CONF_APPLICATION_GROUP_MAP m ON g.id = m.app_group_id
+					LEFT JOIN 
+						CONF_APPLICATION a ON m.app_id = a.id
+					LEFT JOIN 
+						ANA_IF_OUT_APP_${tableSuffix} f ON a.id = f.app_id
+					<if test="ifId != null">
+						and if_out_id in (${ifId})
+					</if>
+					<if test="stime != null">
+						AND acq_time <![CDATA[ > ]]> ${stime}
+					</if>
+					<if test="etime != null">
+						AND acq_time <![CDATA[ <= ]]> ${etime}
+					</if>
+					GROUP BY g.id
+				) t2 ON t1.id = t2.id
+			)
+		UNION
+			SELECT
+				in_flows,
+				out_flows
+			FROM
+			(
+				(
+					SELECT
+						g. NAME,
+						g.id,
+						sum(octets_total) AS in_flows,
+						sum(packet_total) AS in_packages
+					FROM
+						CONF_APPLICATION_GROUP g
+					LEFT JOIN 
+						CONF_APPLICATION_GROUP_MAP m ON g.id = m.app_group_id
+					LEFT JOIN 
+						CONF_APPLICATION a ON m.app_id = a.id
+					LEFT JOIN 
+						ANA_IF_IN_APP_${tableSuffix} f ON a.id = f.app_id
+					<if test="ifId != null">
+						and if_in_id in (${ifId})
+					</if>
+					<if test="stime != null">
+						AND acq_time <![CDATA[ > ]]> ${stime}
+					</if>
+					<if test="etime != null">
+						AND acq_time <![CDATA[ <= ]]> ${etime}
+					</if>
+					GROUP BY g.id
+				) t1
+				RIGHT JOIN 
+				(
+					SELECT
+						g. NAME,
+						g.id,
+						sum(octets_total) AS out_flows,
+						sum(packet_total) AS out_packages
+					FROM
+						CONF_APPLICATION_GROUP g
+					LEFT JOIN 
+						CONF_APPLICATION_GROUP_MAP m ON g.id = m.app_group_id
+					LEFT JOIN 
+						CONF_APPLICATION a ON m.app_id = a.id
+					LEFT JOIN 
+						ANA_IF_OUT_APP_${tableSuffix} f ON a.id = f.app_id
+					<if test="ifId != null">
+						and if_out_id in (${ifId})
+					</if>
+					<if test="stime != null">
+						AND acq_time <![CDATA[ > ]]> ${stime}
+					</if>
+					<if test="etime != null">
+						AND acq_time <![CDATA[ <= ]]> ${etime}
+					</if>
+					GROUP BY g.id
+				) t2 ON t1.id = t2.id
+			)
+		) t3
+		
+	</select>
+
+	<select id="ifAppPageSelect" resultType="com.mainsteam.stm.portal.netflow.bo.NetflowBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		
+		select * from
+		(
+			SELECT
+				NAME,
+				id AS appId,
+
+				ifnull(in_flows, 0) AS flowIn,
+				ifnull(out_flows, 0) AS flowOut,
+				sum(ifnull(in_flows, 0) + ifnull(out_flows, 0)) AS flowTotal,
+				ifnull(in_flows, 0) / ${condition.timeInterval} AS speedIn,
+				ifnull(out_flows, 0) / ${condition.timeInterval} AS speedOut,
+				ifnull(in_flows, 0) / ${condition.timeInterval} + ifnull(out_flows, 0) / ${condition.timeInterval} AS speedTotal,
+
+				ifnull(in_packages, 0) AS packetIn,
+				ifnull(out_packages, 0) AS packetOut,
+				sum(ifnull(in_packages, 0) + ifnull(out_packages, 0)) AS packetTotal,
+				ifnull(in_packages, 0)/${condition.timeInterval} AS packetInSpeed,
+				ifnull(out_packages, 0)/${condition.timeInterval} AS packetOutSpeed,
+				sum(ifnull(in_packages, 0)+ifnull(out_packages, 0))/${condition.timeInterval} as packetTotalSpeed,
+
+				ifnull(in_connects, 0) AS connectNumberIn,
+				ifnull(out_connects, 0) AS connectNumberOut,
+				sum(ifnull(in_connects, 0)+ifnull(out_connects, 0)) AS connectNumberTotal,
+				ifnull(in_connects, 0)/${condition.timeInterval} AS connectNumberInSpeed,
+				ifnull(out_connects, 0)/${condition.timeInterval} AS connectNumberOutSpeed,
+				sum(ifnull(in_connects, 0)+ifnull(out_connects, 0))/${condition.timeInterval} AS connectNumberTotalSpeed,
+
+				(ifnull(in_flows, 0) + ifnull(out_flows, 0)) / ${condition.wholeFlows} AS flowPctge,
+				(ifnull(in_packages, 0) + ifnull(out_packages, 0)) / ${condition.wholePackets} AS packetPctge,
+				(ifnull(in_connects, 0) + ifnull(out_connects, 0)) / ${condition.wholeConnects} AS connectPctge
+			FROM
+				(
+				SELECT
+					t1. NAME,
+					t1.id,
+					ifnull(in_flows, 0) as in_flows,
+					ifnull(out_flows, 0) as out_flows,
+					ifnull(in_packages, 0) as in_packages,
+					ifnull(out_packages, 0) as out_packages,
+					ifnull(in_connects, 0) as in_connects,
+					ifnull(out_connects, 0) as out_connects 
+				FROM
+					(
+						(
+							SELECT
+								g. NAME,
+								g.id,
+								sum(octets_total) AS in_flows,
+								sum(packet_total) AS in_packages,
+								sum(flow_total) AS in_connects
+							FROM
+								CONF_APPLICATION_GROUP g
+							LEFT JOIN 
+								CONF_APPLICATION_GROUP_MAP m 
+							ON  g.id = m.app_group_id
+							LEFT JOIN 
+								CONF_APPLICATION a 
+							ON m.app_id = a.id
+							LEFT JOIN 
+								ANA_IF_IN_APP_${condition.tableSuffix} f
+							ON a.id = f.app_id
+							<if test="condition.ifId != null">
+								AND if_in_id in (${condition.ifId})
+							</if>
+							<if test="condition.stime != null">
+								AND acq_time <![CDATA[ > ]]> ${condition.stime}
+							</if>
+							<if test="condition.etime != null">
+								AND acq_time <![CDATA[ <= ]]> ${condition.etime}
+							</if>
+							GROUP BY g.id
+						) t1
+						LEFT JOIN 
+						(
+							SELECT
+								g. NAME,
+								g.id,
+								sum(octets_total) AS out_flows,
+								sum(packet_total) AS out_packages,
+								sum(flow_total) AS out_connects
+							FROM
+								CONF_APPLICATION_GROUP g
+							LEFT JOIN 
+								CONF_APPLICATION_GROUP_MAP m 
+							ON g.id = m.app_group_id
+							LEFT JOIN 
+								CONF_APPLICATION a ON m.app_id = a.id
+							LEFT JOIN 
+								ANA_IF_OUT_APP_${condition.tableSuffix} f ON a.id = f.app_id 
+							<if test="condition.ifId != null">
+								AND if_out_id in (${condition.ifId})
+							</if>
+							<if test="condition.stime != null">
+								AND acq_time <![CDATA[ > ]]> ${condition.stime}
+							</if>
+							<if test="condition.etime != null">
+								AND acq_time <![CDATA[ <= ]]> ${condition.etime}
+							</if>
+							GROUP BY g.id
+						) t2 ON t1.id = t2.id
+					)
+				UNION
+					SELECT
+						t2. NAME,
+						t2.id,
+						ifnull(in_flows, 0) as in_flows,
+						ifnull(out_flows, 0) as out_flows,
+						ifnull(in_packages, 0) as in_packages,
+						ifnull(out_packages, 0) as out_packages,
+						ifnull(in_connects, 0) as in_connects,
+						ifnull(out_connects, 0) as out_connects
+					FROM
+						(
+							(
+								SELECT
+									g. NAME,
+									g.id,
+									sum(octets_total) AS in_flows,
+									sum(packet_total) AS in_packages,
+									sum(flow_total) AS in_connects
+								FROM
+									CONF_APPLICATION_GROUP g
+								LEFT JOIN 
+									CONF_APPLICATION_GROUP_MAP m ON g.id = m.app_group_id
+								LEFT JOIN 
+									CONF_APPLICATION a ON m.app_id = a.id
+								LEFT JOIN 
+									ANA_IF_IN_APP_${condition.tableSuffix} f ON a.id = f.app_id
+								<if test="condition.ifId != null">
+									AND if_in_id in (${condition.ifId})
+								</if>
+								<if test="condition.stime != null">
+									AND acq_time <![CDATA[ > ]]> ${condition.stime}
+								</if>
+								<if test="condition.etime != null">
+									AND acq_time <![CDATA[ <= ]]> ${condition.etime}
+								</if>
+								GROUP BY g.id
+							) t1
+							RIGHT JOIN 
+							(
+								SELECT
+									g. NAME,
+									g.id,
+									sum(octets_total) AS out_flows,
+									sum(packet_total) AS out_packages,
+									sum(flow_total) AS out_connects
+								FROM
+									CONF_APPLICATION_GROUP g
+								LEFT JOIN 
+									CONF_APPLICATION_GROUP_MAP m ON g.id = m.app_group_id
+								LEFT JOIN 
+									CONF_APPLICATION a ON m.app_id = a.id
+								LEFT JOIN 
+									ANA_IF_OUT_APP_${condition.tableSuffix} f ON a.id = f.app_id
+								<if test="condition.ifId != null">
+									AND if_out_id in (${condition.ifId})
+								</if>
+								<if test="condition.stime != null">
+									AND acq_time <![CDATA[ > ]]> ${condition.stime}
+								</if>
+								<if test="condition.etime != null">
+									AND acq_time <![CDATA[ <= ]]> ${condition.etime}
+								</if>
+								GROUP BY g.id
+							) t2 ON t1.id = t2.id
+						)
+				) t3
+			group by t3.name
+		) t4
+		<if test="condition!=null">
+			order by
+	 		<if test="condition.sort != null">t4.${condition.sort}</if>
+			<if test="condition.order != null"> ${condition.order} </if>
+		</if>
+	</select>
+	
+	<select id="getIfAppChartData" parameterType="com.mainsteam.stm.portal.netflow.bo.NetflowParamBo" resultType="com.mainsteam.stm.portal.netflow.bo.NetflowBo">
+		
+		select * from
+		(
+			SELECT
+				acq_time,
+				
+				ifnull(in_flows, 0) AS flowIn,
+				ifnull(out_flows, 0) AS flowOut,
+				ifnull(sum(ifnull(in_flows, 0) + ifnull(out_flows, 0)), 0) AS flowTotal,
+				ifnull(in_flows, 0) / ${timeInterval} AS speedIn,
+				ifnull(out_flows, 0) / ${timeInterval} AS speedOut,
+				ifnull(sum(ifnull(in_flows, 0) + ifnull(out_flows, 0)) / ${timeInterval}, 0) AS speedTotal,
+
+				ifnull(in_packages, 0) AS packetIn,
+				ifnull(out_packages, 0) AS packetOut,
+				ifnull(sum(ifnull(in_packages, 0) + ifnull(out_packages, 0)), 0) AS packetTotal,
+				ifnull(in_packages, 0) / ${timeInterval} as packetInSpeed,
+				ifnull(out_packages, 0) / ${timeInterval} as packetOutSpeed,
+				ifnull(sum(ifnull(in_packages, 0) + ifnull(out_packages, 0)) / ${timeInterval}, 0) as packetTotalSpeed,
+				
+				ifnull(connectIn, 0) as connectNumberIn,
+				ifnull(connectOut, 0) as connectNumberOut, 
+				ifnull(sum(ifnull(connectIn, 0)+ifnull(connectOut, 0)), 0) as connectNumberTotal,
+				ifnull(ifnull(connectIn, 0) / ${timeInterval}, 0) as connectNumberInSpeed,
+				ifnull(ifnull(connectOut, 0) / ${timeInterval}, 0) as connectNumberOutSpeed,
+				ifnull(sum(ifnull(connectIn, 0)+ifnull(connectOut, 0)) / ${timeInterval}, 0) as  connectNumberTotalSpeed,
+
+				ifnull(sum(ifnull(in_flows, 0) + ifnull(out_flows, 0)) / ${wholeFlows}, 0) AS flowPctge,
+				ifnull(sum(ifnull(in_packages, 0) + ifnull(out_packages, 0)) / ${wholePackets}, 0) as packetPctge,
+				ifnull(sum(ifnull(connectIn, 0)+ifnull(connectOut, 0)) / ${wholeConnects}, 0) as connectPctge 
+				
+			FROM
+			(
+			SELECT
+				t1.acq_time,
+				ifnull(in_flows, 0) as in_flows,
+				ifnull(out_flows, 0) as out_flows,
+				ifnull(in_packages, 0) as in_packages,
+				ifnull(out_packages, 0) as out_packages,
+				ifnull(connectIn, 0) as connectIn,
+				ifnull(connectOut, 0) as connectOut 
+			FROM
+				(
+					(
+						SELECT
+							f.acq_time,
+							g.id,
+							sum(octets_total) AS in_flows,
+							sum(packet_total) AS in_packages,
+							sum(flow_total) as connectIn 
+						FROM
+							CONF_APPLICATION_GROUP g
+						LEFT JOIN 
+							CONF_APPLICATION_GROUP_MAP m ON g.id = m.app_group_id
+						LEFT JOIN 
+							CONF_APPLICATION a ON m.app_id = a.id
+						LEFT JOIN 
+							ANA_IF_IN_APP_${tableSuffix} f ON a.id = f.app_id
+						WHERE 1=1
+						<if test="appId != null">
+							and g.id = ${appId} 
+						</if>
+						<if test="ifId != null">
+							and if_in_id in (${ifId})
+						</if>
+						AND f.acq_time IN (${timeParam})
+						GROUP BY
+							acq_time
+					) t1
+					LEFT JOIN 
+					(
+						SELECT
+							f.acq_time,
+							g.id,
+							sum(octets_total) AS out_flows,
+							sum(packet_total) AS out_packages,
+							sum(flow_total) as connectOut  
+						FROM
+							CONF_APPLICATION_GROUP g
+						LEFT JOIN 
+							CONF_APPLICATION_GROUP_MAP m ON g.id = m.app_group_id
+						LEFT JOIN 
+							CONF_APPLICATION a ON m.app_id = a.id
+						LEFT JOIN 
+							ANA_IF_OUT_APP_${tableSuffix} f ON a.id = f.app_id
+						WHERE 1=1
+						<if test="appId != null">
+							and g.id = ${appId} 
+						</if>
+						<if test="ifId != null">
+							and if_out_id in (${ifId})
+						</if>
+						AND f.acq_time IN (${timeParam})
+						GROUP BY
+							acq_time
+					) t2 ON t1.acq_time = t2.acq_time
+				)
+			UNION
+				SELECT
+					t2.acq_time,
+					ifnull(in_flows, 0) as in_flows,
+					ifnull(out_flows, 0) as out_flows,
+					ifnull(in_packages, 0) as in_packages,
+					ifnull(out_packages, 0) as out_packages,
+					ifnull(connectIn, 0) as connectIn,
+					ifnull(connectOut, 0) as connectOut 
+				FROM
+				(
+					(
+						SELECT
+							f.acq_time,
+							g.id,
+							sum(octets_total) AS in_flows,
+							sum(packet_total) AS in_packages,
+							sum(flow_total) as connectIn 
+						FROM
+							CONF_APPLICATION_GROUP g
+						LEFT JOIN 
+							CONF_APPLICATION_GROUP_MAP m ON g.id = m.app_group_id
+						LEFT JOIN 
+							CONF_APPLICATION a ON m.app_id = a.id
+						LEFT JOIN 
+							ANA_IF_IN_APP_${tableSuffix} f ON a.id = f.app_id
+						WHERE 1=1
+						<if test="appId != null">
+							and g.id = ${appId} 
+						</if>
+						<if test="ifId != null">
+							and if_in_id in (${ifId})
+						</if>
+						AND f.acq_time IN (${timeParam})
+						GROUP BY
+							acq_time
+					) t1
+					RIGHT JOIN (
+						SELECT
+							f.acq_time,
+							g.id,
+							sum(octets_total) AS out_flows,
+							sum(packet_total) AS out_packages,
+							sum(flow_total) as connectOut 
+						FROM
+							CONF_APPLICATION_GROUP g
+						LEFT JOIN 
+							CONF_APPLICATION_GROUP_MAP m ON g.id = m.app_group_id
+						LEFT JOIN 
+							CONF_APPLICATION a ON m.app_id = a.id
+						LEFT JOIN 
+							ANA_IF_OUT_APP_${tableSuffix} f ON a.id = f.app_id
+						WHERE 1=1
+						<if test="appId != null">
+							and g.id = ${appId} 
+						</if>
+						<if test="ifId != null">
+							and if_out_id in (${ifId})
+						</if>
+						AND f.acq_time IN (${timeParam})
+						GROUP BY
+							acq_time
+					) t2 ON t1.acq_time = t2.acq_time
+				)
+			) t3
+		) t4
+		group by t4.acq_time
+	</select>
+	
+</mapper>

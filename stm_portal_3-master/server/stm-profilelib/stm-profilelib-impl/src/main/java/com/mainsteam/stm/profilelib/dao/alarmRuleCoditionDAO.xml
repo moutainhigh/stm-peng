@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.profilelib.dao.AlarmRuleConditionDAO">
+
+	<resultMap id="alarmRuleCondition" type="com.mainsteam.stm.profilelib.po.AlarmRuleConditionPO">
+		<result column="RULEID" property="ruleId"/>
+		<result column="SENDWAY" property="sendWay"/>
+		<result column="ENABLED" property="enabled"/>
+		<result column="CONTINUS" property="continus"/>
+		<result column="CONTINUS_COUNT" property="continusCount"/>
+		<result column="CONTINUS_UNIT" property="continusUnit"/>
+		<result column="ALARM_LEVEL" property="alarmLevels"/>
+		<result column="ALL_TIME" property="allTime"/>
+		<result column="SEND_INTIME" property="sendIntime"/>
+		<result column="DAY_PERIODES" property="dayPeriodes"/>
+		<result column="WEEK_PERIODES" property="weekPeriodes"/>
+		<result column="TEMPLATE_ID" property="templateId"/>
+		<result column="SEND_TIMES" property="sendTimes"/>
+	</resultMap>
+	<sql id="conditionSql">
+		where 
+		<trim prefixOverrides="and">
+			<if test="ruleId >=0">and RULEID = #{ruleId}</if>
+			<if test="sendWay != null">and SENDWAY = #{sendWay}</if>
+			<if test="enabled >=0">and ENABLED = #{enabled}</if>
+			<if test="continus >=0">and CONTINUS = #{continus}</if>
+			<if test="templateId >0">and TEMPLATE_ID = #{templateId}</if>
+		</trim>
+	</sql>
+	<insert id="insert" parameterType="com.mainsteam.stm.profilelib.po.AlarmRuleConditionPO">
+		INSERT into STM_ALARMRULE_CONDITION
+			(RULEID,SENDWAY,ENABLED,CONTINUS,CONTINUS_COUNT,CONTINUS_UNIT,ALARM_LEVEL,ALL_TIME,SEND_INTIME,DAY_PERIODES,WEEK_PERIODES,TEMPLATE_ID,SEND_TIMES)
+			values (#{ruleId},#{sendWay},#{enabled},#{continus},#{continusCount},#{continusUnit},#{alarmLevels},#{allTime},#{sendIntime},#{dayPeriodes},#{weekPeriodes},
+					#{templateId},#{sendTimes})
+	</insert>
+	<update id="update" parameterType="com.mainsteam.stm.profilelib.po.AlarmRuleConditionPO">
+		UPDATE STM_ALARMRULE_CONDITION set
+			ENABLED = #{enabled},CONTINUS = #{continus},CONTINUS_COUNT = #{continusCount},CONTINUS_UNIT = #{continusUnit},ALARM_LEVEL = #{alarmLevels},
+			ALL_TIME=#{allTime},SEND_INTIME=#{sendIntime},DAY_PERIODES=#{dayPeriodes},WEEK_PERIODES=#{weekPeriodes},TEMPLATE_ID=#{templateId},SEND_TIMES=#{sendTimes}
+		WHERE RULEID = #{ruleId} and SENDWAY=#{sendWay}
+	</update>
+	<update id="updateEnabled" parameterType="com.mainsteam.stm.profilelib.po.AlarmRuleConditionPO">
+		UPDATE STM_ALARMRULE_CONDITION set ENABLED = #{enabled} where RULEID = #{ruleId} and SENDWAY=#{sendWay}
+	</update>	
+	<delete id="delete" parameterType="com.mainsteam.stm.profilelib.po.AlarmRuleConditionPO">
+		DELETE from STM_ALARMRULE_CONDITION <include refid="conditionSql"/>
+	</delete>
+	<select id="get" parameterType="com.mainsteam.stm.profilelib.po.AlarmRuleConditionPO" resultMap="alarmRuleCondition">
+		SELECT RULEID,SENDWAY,ENABLED,CONTINUS,CONTINUS_COUNT,CONTINUS_UNIT,ALARM_LEVEL,ALL_TIME,SEND_INTIME,DAY_PERIODES,WEEK_PERIODES,TEMPLATE_ID,SEND_TIMES
+		FROM STM_ALARMRULE_CONDITION <include refid="conditionSql"/>
+	</select>
+</mapper>

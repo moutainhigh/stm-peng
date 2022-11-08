@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:context="http://www.springframework.org/schema/context" 
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                    http://www.springframework.org/schema/context
+                    http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+	<bean id="profileService" class="com.mainsteam.stm.profilelib.service.impl.ProfileServiceImpl" init-method="start">
+		<property name="profileDAO" ref="profileDAO" />
+		<property name="profileInstRelDAO" ref="profileInstanceRelationDAO" />
+		<property name="profileMetricDAO" ref="profileMetricDAO" />
+		<property name="profileThresholdDAO" ref="profileThresholdDAO" />
+		<property name="profileChangeDAO" ref="profileChangeDAO" />
+		<property name="lastProfileDAO" ref="lastProfileDAO" />
+		<property name="timelineService" ref="timelineService" />
+		<property name="capacityService" ref="capacityService" />
+		<property name="resourceInstanceService" ref="resourceInstanceService" />
+		<property name="ocProfilelibMainSequence" ref="ocProfilelibMainSequence" />
+		<property name="ocProfilelibMetricSequence" ref="ocProfilelibMetricSequence" />
+		<property name="ocProfilelibThresholdSequence" ref="ocProfilelibThresholdSequence" />
+		<property name="ocProfileChangeSequence" ref="ocProfileChangeSequence" />
+		<property name="profileMetricAlarmManager" ref="profileMetricAlarmManager"></property>
+		<property name="profileMetricMonitorManager" ref="profileMetricMonitorManager"></property>
+		<property name="profileResourceCancelMonitorManager" ref="profileResourceMonitorManager"></property>
+		<property name="profileSwitchManager" ref="profileSwitchChangeManager"></property>
+		<property name="profileCache" ref="profileCache" />
+		<property name="resourceInstanceExtendService" ref="resourceInstanceService"></property>
+	</bean>
+	<bean id="profileChangeService" class="com.mainsteam.stm.profilelib.service.impl.ProfileChangeServiceImpl">
+		<property name="profileChangeDAO" ref="profileChangeDAO" />
+		<property name="profileChangeHistoryDAO" ref="profileChangeHistoryDAO" />
+		<property name="ocProfileChangeHistorySequence" ref="ocProfileChangeHistorySequence" />
+	</bean>
+	<bean id="timelineService" class="com.mainsteam.stm.profilelib.service.impl.TimelineServiceImpl" >
+		<property name="timelineDAO" ref="timelineDAO" />
+		<property name="profileMetricDAO" ref="profileMetricDAO" />
+		<property name="profileThresholdDAO" ref="profileThresholdDAO" />
+		<property name="ocTimelineSequence" ref="ocTimelineSequence" />
+		<property name="profileChangeDAO" ref="profileChangeDAO" />
+		<property name="ocProfilelibMetricSequence" ref="ocProfilelibMetricSequence" />
+		<property name="ocProfilelibThresholdSequence" ref="ocProfilelibThresholdSequence" />
+		<property name="ocProfileChangeSequence" ref="ocProfileChangeSequence" />
+		<property name="profileCache" ref="profileCache" />
+	</bean>
+ 	<bean id="lastProfileDAO" class="com.mainsteam.stm.profilelib.dao.impl.LastProfileDAOImpl">
+ 		<property name="session" ref="sqlSession" />
+ 		<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+	</bean>
+	<bean id="profileDAO" 
+		class="com.mainsteam.stm.profilelib.dao.impl.ProfileDAOImpl">
+		<property name="session" ref="sqlSession" />
+		<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+	</bean>
+	 <bean id="profileInstanceRelationDAO" 
+		class="com.mainsteam.stm.profilelib.dao.impl.ProfileInstanceRelationDAOImpl">
+		<property name="session" ref="sqlSession" />
+		<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+	</bean>
+	<bean id="profileMetricDAO" 
+		class="com.mainsteam.stm.profilelib.dao.impl.ProfileMetricDAOImpl">
+		<property name="session" ref="sqlSession" />
+		<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+	</bean>
+	<bean id="profileThresholdDAO" 
+		class="com.mainsteam.stm.profilelib.dao.impl.ProfileThresholdDAOImpl">
+		<property name="session" ref="sqlSession" />
+		<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+	</bean>
+	<bean id="timelineDAO" 
+		class="com.mainsteam.stm.profilelib.dao.impl.TimelineDAOImpl">
+		<property name="session" ref="sqlSession" />
+	</bean>
+	<bean id="profileChangeDAO" 
+		class="com.mainsteam.stm.profilelib.dao.impl.ProfileChangeDAOImpl">
+		<property name="session" ref="sqlSession" />
+		<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+	</bean>
+	<bean id="profileChangeHistoryDAO" 
+		class="com.mainsteam.stm.profilelib.dao.impl.ProfileChangeHistoryDAOImpl">
+		<property name="session" ref="sqlSession" />
+	</bean>
+	<bean name="ocProfilelibMainSequence" factory-bean="platformSeqFactory" 
+		factory-method="getSeq">
+		<constructor-arg value="STM_PROFILELIB_MAIN" />
+	</bean>
+	<bean name="ocProfilelibMetricSequence" factory-bean="platformSeqFactory" 
+		factory-method="getSeq">
+		<constructor-arg value="STM_PROFILELIB_METRIC" />
+	</bean>
+	<bean name="ocProfilelibThresholdSequence" factory-bean="platformSeqFactory" 
+		factory-method="getSeq">
+		<constructor-arg value="STM_PROFILELIB_THRESHOLD" />
+	</bean>
+	<bean name="ocTimelineSequence" factory-bean="platformSeqFactory" 
+		factory-method="getSeq">
+		<constructor-arg value="STM_PROFILELIB_TIMELINE" />
+	</bean>
+	<bean name="ocProfileChangeSequence" factory-bean="platformSeqFactory" 
+		factory-method="getSeq">
+		<constructor-arg value="STM_PROFILELIB_CHANGE" />
+	</bean>
+	<bean name="ocProfileChangeHistorySequence" factory-bean="platformSeqFactory" 
+		factory-method="getSeq">
+		<constructor-arg value="STM_PROFILELIB_CHANGE_HISTORY" />
+	</bean>
+<!-- 配置告警规则用到的bean -->
+	<!-- 配置高规则主键产生器 -->
+	<bean name="alarmRuleServiceSequence" factory-bean="platformSeqFactory" 
+		factory-method="getSeq">
+		<constructor-arg value="STM_ALARMRULE" />
+	</bean>
+	<bean id="alarmRuleMainDAO" 
+		class="com.mainsteam.stm.profilelib.dao.impl.AlarmRuleMainDAOImpl">
+		<property name="session" ref="sqlSession" />
+	</bean>
+	<bean id="alarmRuleConditionDAO"
+		class="com.mainsteam.stm.profilelib.dao.impl.AlarmRuleConditionDAOImpl">
+		<property name="session" ref="sqlSession" />
+	</bean>
+	<bean id="alarmRuleService" class="com.mainsteam.stm.profilelib.service.impl.AlarmRuleServiceImpl">
+		<property name="mainDAO" ref="alarmRuleMainDAO" />
+		<property name="conditionDAO" ref="alarmRuleConditionDAO" />
+		<property name="sequence" ref="alarmRuleServiceSequence" />
+	</bean>	
+	
+	<bean id="removeResourceInstanceInterceptor" class="com.mainsteam.stm.profilelib.interceptor.InstancelibInterceptorRemoveImpl">
+		<property name="profileExtendService" ref="profileService"></property>
+		<property name="resourceInstanceExtendService" ref="resourceInstanceService"></property>
+	</bean>
+	<bean id="profileMetricChangeRegisterLoad" class="com.mainsteam.stm.profilelib.interceptor.ProfileMetricChangeRegisterLoad">
+		<property name="profileMetricAlarmManager" ref="profileMetricAlarmManager"></property>
+		<property name="profileMetricMonitorManager" ref="profileMetricMonitorManager"></property>
+		<property name="profileResourceMonitorManager" ref="profileResourceMonitorManager"></property>
+		<property name="profileSwitchChangeManager" ref="profileSwitchChangeManager"></property>
+	</bean>
+	<bean id="defaultProfileChangeManager" class="com.mainsteam.stm.profilelib.interceptor.impl.DefaultProfileChangeManagerImpl">
+	</bean>
+	<bean id="profileMetricMonitorManager" class="com.mainsteam.stm.profilelib.interceptor.impl.ProfileMetricAlarmManagerImpl">
+	</bean>
+	<bean id="profileMetricAlarmManager" class="com.mainsteam.stm.profilelib.interceptor.impl.ProfileMetricAlarmManagerImpl">
+	</bean>
+	<bean id="profileResourceMonitorManager" class="com.mainsteam.stm.profilelib.interceptor.impl.ProfileResourceCancelMonitorManagerImpl">
+	</bean>
+	<bean id="profileSwitchChangeManager" class="com.mainsteam.stm.profilelib.interceptor.impl.ProfileSwitchManagerImpl">
+	</bean>
+	<bean id="profileCache" class="com.mainsteam.stm.profilelib.util.ProfileCache">
+	</bean>
+	
+</beans>

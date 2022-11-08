@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.topo.dao.IMacBaseDao">
+    <resultMap type="com.mainsteam.stm.topo.bo.MacBaseBo" id="macBaseMap">
+        <id column="id" property="id"/>
+        <result column="mac" property="mac"/>
+        <result column="up_device_ip" property="upDeviceIp"/>
+        <result column="up_remarks" property="upRemarks"/>
+        <result column="up_device_interface" property="upDeviceInterface"/>
+        <result column="up_device_name" property="upDeviceName"/>
+        <result column="host_name" property="hostName"/>
+        <result column="ip" property="ip"/>
+    </resultMap>
+    <select id="selectByMacs" resultMap="macBaseMap">
+        SELECT * FROM STM_TOPO_MAC_BASE WHERE MAC IN
+        <foreach collection="macs" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+    <select id="selectByIds" resultMap="macBaseMap">
+        SELECT * FROM STM_TOPO_MAC_BASE WHERE id IN
+        <foreach collection="ids" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+    <select id="selectAll" resultMap="macBaseMap">
+		 SELECT * FROM STM_TOPO_MAC_BASE order by id desc
+	</select>
+    <select id="selectByMac" resultMap="macBaseMap" parameterType="java.util.Map">
+		 SELECT * FROM STM_TOPO_MAC_BASE where mac = #{mac}
+	</select>
+    <delete id="delAll">
+		delete from STM_TOPO_MAC_BASE
+	</delete>
+    <delete id="delByIds">
+        delete from STM_TOPO_MAC_BASE where id in
+        <foreach collection="ids" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+    <update id="updateById" parameterType="java.util.Map">
+	   UPDATE STM_TOPO_MAC_BASE
+        SET ip = #{ip},up_device_name = #{upDeviceName},up_device_ip = #{upDeviceIp},up_remarks =
+        #{upRemarks},up_device_interface = #{upDeviceInterface},host_name = #{hostName}
+	   WHERE id = #{id}
+	</update>
+    <insert id="insert" parameterType="com.mainsteam.stm.topo.bo.MacBaseBo">
+        insert into STM_TOPO_MAC_BASE (id,mac,ip,up_device_name,up_device_ip,up_remarks,up_device_interface,host_name)
+        values (#{id},#{mac},#{ip},#{upDeviceName},#{upDeviceIp},#{upRemarks},#{upDeviceInterface},#{hostName})
+	</insert>
+    <insert id="insertOrUpdate" parameterType="com.mainsteam.stm.topo.bo.MacBaseBo" databaseId="mysql">
+        insert into STM_TOPO_MAC_BASE (id,mac,ip,up_device_name,up_device_ip,up_remarks,up_device_interface,host_name)
+        values (#{id},#{mac},#{ip},#{upDeviceName},#{upDeviceIp},#{upRemarks},#{upDeviceInterface},#{hostName}) on
+        duplicate key update
+		mac = values(mac),
+		ip = values(ip),
+		up_device_name = values(up_device_name),
+		up_device_ip = values(up_device_ip),
+        up_remarks = values(up_remarks),
+		up_device_interface = values(up_device_interface),
+		host_name = values(host_name)
+	</insert>
+    <insert id="insertOrUpdate" parameterType="com.mainsteam.stm.topo.bo.MacBaseBo" databaseId="oracle">
+        merge into STM_TOPO_MAC_BASE t using (select #{id} id,#{mac} mac,#{ip} ip,#{upDeviceName}
+        upDeviceName,#{upDeviceIp} upDeviceIp,#{upRemarks} upRemarks,#{upDeviceInterface} upDeviceInterface,#{hostName}
+        hostName from dual) t1
+			on (t.mac = t1.mac)
+		when matched then
+        update set t.ip = t1.ip,t.up_device_name = t1.upDeviceName,t.up_device_ip = t1.upDeviceIp,t.up_remarks =
+        t1.upRemarks,t.up_device_interface = t1.upDeviceInterface,t.host_name = t1.hostName
+		when not matched then
+        insert (id,mac,ip,up_device_name,up_device_ip,up_remarks,up_device_interface,host_name)
+        values(t1.id,t1.mac,t1.ip,t1.upDeviceName,t1.upDeviceIp,t1.upRemarks,t1.upDeviceInterface,t1.hostName)
+	</insert>
+    <insert id="insertOrUpdate" parameterType="com.mainsteam.stm.topo.bo.MacBaseBo" databaseId="dm">
+        merge into STM_TOPO_MAC_BASE t using (select #{id} id,#{mac} mac,#{ip} ip,#{upDeviceName}
+        upDeviceName,#{upDeviceIp} upDeviceIp,#{upRemarks} upRemarks,#{upDeviceInterface} upDeviceInterface,#{hostName}
+        hostName from dual) t1
+			on (t.mac = t1.mac)
+		when matched then
+        update set t.ip = t1.ip,t.up_device_name = t1.upDeviceName,t.up_device_ip = t1.upDeviceIp,t.up_remarks =
+        t1.upRemarks,t.up_device_interface = t1.upDeviceInterface,t.host_name = t1.hostName
+		when not matched then
+        insert (id,mac,ip,up_device_name,up_device_ip,up_remarks,up_device_interface,host_name)
+        values(t1.id,t1.mac,t1.ip,t1.upDeviceName,t1.upDeviceIp,t1.upRemarks,t1.upDeviceInterface,t1.hostName)
+	</insert>
+    <insert id="insertOrUpdate" parameterType="com.mainsteam.stm.topo.bo.MacBaseBo" databaseId="oscar">
+        merge into STM_TOPO_MAC_BASE t using (select #{id} id,#{mac} mac,#{ip} ip,#{upDeviceName}
+        upDeviceName,#{upDeviceIp} upDeviceIp,#{upRemarks} upRemarks,#{upDeviceInterface} upDeviceInterface,#{hostName}
+        hostName from dual) t1
+			on (t.mac = t1.mac)
+		when matched then
+        update set t.ip = t1.ip,t.up_device_name = t1.upDeviceName,t.up_device_ip = t1.upDeviceIp,t.up_remarks =
+        t1.upRemarks,t.up_device_interface = t1.upDeviceInterface,t.host_name = t1.hostName
+		when not matched then
+        insert (id,mac,ip,up_device_name,up_device_ip,up_remarks,up_device_interface,host_name)
+        values(t1.id,t1.mac,t1.ip,t1.upDeviceName,t1.upDeviceIp,t1.upRemarks,t1.upDeviceInterface,t1.hostName)
+	</insert>
+    <select id="pageSelect" resultMap="macBaseMap"
+            parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="mysql">
+        SELECT * FROM STM_TOPO_MAC_BASE
+      <if test="condition != null">
+            <trim prefix="where" prefixOverrides="and |or ">
+				<if test="condition.searchType !=null and condition.searchType !=null and condition.searchVal != null and condition.searchVal != ''">
+					<!-- 1:IP地址, 2:Mac地址,3:上联设备名称,4:上联设备IP,5:上联设备接口-->
+					<if test="condition.searchType == 1">IP</if>
+					<if test="condition.searchType == 2">MAC</if>
+					<if test="condition.searchType == 3">up_device_ip</if>
+					<if test="condition.searchType == 4">up_device_name</if>
+					<if test="condition.searchType == 5">up_device_interface</if>
+					LIKE CONCAT('%', #{condition.searchVal}, '%')
+					<if test="condition.upDeviceIp !=null and condition.upDeviceIp !=''">
+						and up_device_ip LIKE CONCAT('%', #{condition.upDeviceIp}, ',%') or up_device_ip LIKE CONCAT('%', #{condition.upDeviceIp}, '')
+					</if>
+				</if>
+				<if test="condition.searchType ==null or condition.searchType ==null or condition.searchVal == null or condition.searchVal == ''">
+					<if test="condition.upDeviceIp !=null and condition.upDeviceIp !=''">
+						up_device_ip LIKE CONCAT('%', #{condition.upDeviceIp}, ',%') or up_device_ip LIKE CONCAT('%', #{condition.upDeviceIp}, '')
+					</if>
+				</if>
+            </trim>
+        </if>
+    </select>
+    <select id="pageSelect" resultMap="macBaseMap"
+            parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oracle">
+        SELECT * FROM STM_TOPO_MAC_BASE
+       <if test="condition != null">
+            <trim prefix="where" prefixOverrides="and |or ">
+				<if test="condition.searchType !=null and condition.searchType !=null and condition.searchVal != null and condition.searchVal != ''">
+					<!-- 1:IP地址, 2:Mac地址,3:上联设备名称,4:上联设备IP,5:上联设备接口-->
+					<if test="condition.searchType == 1">IP</if>
+					<if test="condition.searchType == 2">MAC</if>
+					<if test="condition.searchType == 3">up_device_ip</if>
+					<if test="condition.searchType == 4">up_device_name</if>
+					<if test="condition.searchType == 5">up_device_interface</if>
+						LIKE '%'||#{condition.searchVal}||'%'
+					<if test="condition.upDeviceIp !=null and condition.upDeviceIp !=''">
+						and up_device_ip LIKE '%'||#{condition.upDeviceIp}||',%' or up_device_ip LIKE '%'||#{condition.upDeviceIp}||''
+					</if>
+				</if>
+				<if test="condition.searchType ==null or condition.searchType ==null or condition.searchVal == null or condition.searchVal == ''">
+					<if test="condition.upDeviceIp !=null and condition.upDeviceIp !=''">
+						up_device_ip LIKE '%'||#{condition.upDeviceIp}||',%' or up_device_ip LIKE '%'||#{condition.upDeviceIp}||'' 
+					</if>
+				</if>
+            </trim>
+        </if>
+    </select>
+    <select id="pageSelect" resultMap="macBaseMap"
+            parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="dm">
+        SELECT * FROM STM_TOPO_MAC_BASE
+        <if test="condition != null">
+            <trim prefix="where" prefixOverrides="and |or ">
+				<if test="condition.searchType !=null and condition.searchType !=null and condition.searchVal != null and condition.searchVal != ''">
+					<!-- 1:IP地址, 2:Mac地址,3:上联设备名称,4:上联设备IP,5:上联设备接口-->
+					<if test="condition.searchType == 1">IP</if>
+					<if test="condition.searchType == 2">MAC</if>
+					<if test="condition.searchType == 3">up_device_ip</if>
+					<if test="condition.searchType == 4">up_device_name</if>
+					<if test="condition.searchType == 5">up_device_interface</if>
+						LIKE '%'||#{condition.searchVal}||'%'
+					<if test="condition.upDeviceIp !=null and condition.upDeviceIp !=''">
+						and up_device_ip LIKE '%'||#{condition.upDeviceIp}||',%' or up_device_ip LIKE '%'||#{condition.upDeviceIp}||''
+					</if>
+				</if>
+				<if test="condition.searchType ==null or condition.searchType ==null or condition.searchVal == null or condition.searchVal == ''">
+					<if test="condition.upDeviceIp !=null and condition.upDeviceIp !=''">
+						up_device_ip LIKE '%'||#{condition.upDeviceIp}||',%' or up_device_ip LIKE '%'||#{condition.upDeviceIp}||''
+					</if>
+				</if>
+            </trim>
+        </if>
+    </select>
+    <select id="pageSelect" resultMap="macBaseMap"
+            parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oscar">
+        SELECT * FROM STM_TOPO_MAC_BASE
+        <if test="condition != null">
+            <trim prefix="where" prefixOverrides="and |or ">
+				<if test="condition.searchType !=null and condition.searchType !=null and condition.searchVal != null and condition.searchVal != ''">
+					<!-- 1:IP地址, 2:Mac地址,3:上联设备名称,4:上联设备IP,5:上联设备接口-->
+					<if test="condition.searchType == 1">IP</if>
+					<if test="condition.searchType == 2">MAC</if>
+					<if test="condition.searchType == 3">up_device_ip</if>
+					<if test="condition.searchType == 4">up_device_name</if>
+					<if test="condition.searchType == 5">up_device_interface</if>
+						LIKE '%'||#{condition.searchVal}||'%'
+					<if test="condition.upDeviceIp !=null and condition.upDeviceIp !=''">
+						and up_device_ip LIKE '%'||#{condition.upDeviceIp}||',%' or up_device_ip LIKE '%'||#{condition.upDeviceIp}||''
+					</if>
+				</if>
+				<if test="condition.searchType ==null or condition.searchType ==null or condition.searchVal == null or condition.searchVal == ''">
+					<if test="condition.upDeviceIp !=null and condition.upDeviceIp !=''">
+						up_device_ip LIKE '%'||#{condition.upDeviceIp}||',%' or up_device_ip LIKE '%'||#{condition.upDeviceIp}||''
+					</if>
+				</if>
+            </trim>
+        </if>
+    </select>
+</mapper>

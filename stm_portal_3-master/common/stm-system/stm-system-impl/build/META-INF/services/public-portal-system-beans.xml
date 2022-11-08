@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-3.2.xsd
+	">
+	<context:component-scan base-package="com.mainsteam.stm"></context:component-scan>
+
+	<!-- User模块 -->
+	<bean id="server_stm_system_UserDao" class="com.mainsteam.stm.system.um.user.dao.impl.UserDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+	</bean>
+
+	<bean id="server_stm_system_UserSeq" factory-bean="platformSeqFactory"
+		factory-method="getSeq">
+		<constructor-arg value="STM_SYSTEM_USER"></constructor-arg>
+	</bean>
+
+	<bean id="systemAccessControlApi"
+		class="com.mainsteam.stm.system.accesscontrol.service.impl.AccessControlImpl"></bean>
+	<bean id="systemImageApi" class="com.mainsteam.stm.system.image.service.impl.ImageImpl"></bean>
+	<bean id="stm_system_userApi" class="com.mainsteam.stm.system.um.user.service.impl.UserImpl">
+		<property name="userDao" ref="server_stm_system_UserDao" />
+		<property name="seq" ref="server_stm_system_UserSeq" />
+		<property name="umRelationApi" ref="stm_system_UmRelationApi" />
+	</bean>
+	<!-- Relation模块 -->
+	<bean id="stm_system_UmRelationSeq" factory-bean="platformSeqFactory"
+		factory-method="getSeq">
+		<constructor-arg value="STM_SYSTEM_USER_DOMAIN_ROLE_REL"></constructor-arg>
+	</bean>
+	<bean id="stm_system_UmRelationDao"
+		class="com.mainsteam.stm.system.um.relation.dao.impl.UmRelationDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+	</bean>
+	<bean id="stm_system_UmRelationApi"
+		class="com.mainsteam.stm.system.um.relation.service.impl.UmRelationImpl">
+		<property name="umRelationDao" ref="stm_system_UmRelationDao" />
+	</bean>
+	<!-- Authentication模块 -->
+	<bean id="stm_system_AuthenticationApi"
+		class="com.mainsteam.stm.system.authentication.service.impl.AuthenticationImpl">
+	</bean>
+	<bean name="stm_system_seq" factory-bean="platformSeqFactory"
+		factory-method="getSeq">
+		<constructor-arg value="STM_SYSTEM_SEQ"></constructor-arg>
+	</bean>
+
+	<bean id="stm_system_right_dao"
+		class="com.mainsteam.stm.system.um.right.dao.impl.RightDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+	</bean>
+
+	<bean id="stm_system_right_impl"
+		class="com.mainsteam.stm.system.um.right.service.impl.RightImpl">
+		<property name="rightDao" ref="stm_system_right_dao" />
+		<property name="seq" ref="stm_system_seq" />
+	</bean>
+
+	<bean name="stm_system_role_seq" factory-bean="platformSeqFactory"
+		factory-method="getSeq">
+		<constructor-arg value="STM_SYSTEM_ROLE_SEQ"></constructor-arg>
+	</bean>
+
+	<bean name="stm_system_role_right_rel_seq" factory-bean="platformSeqFactory"
+		factory-method="getSeq">
+		<constructor-arg value="STM_SYSTEM_ROLE_RIGHT_REL_SEQ"></constructor-arg>
+	</bean>
+	<bean id="stm_system_role_dao" class="com.mainsteam.stm.system.um.role.dao.impl.RoleDAOImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+	</bean>
+	<bean id="stm_system_role_impl" class="com.mainsteam.stm.system.um.role.service.impl.RoleImpl">
+		<property name="iRoleDAO" ref="stm_system_role_dao" />
+		<property name="rightDao" ref="stm_system_right_dao" />
+		<property name="roleSeq" ref="stm_system_role_seq" />
+	</bean>
+	<!-- scriptCode模块 -->
+	<bean id="script_code_dao" class="com.mainsteam.stm.system.scriptcode.dao.impl.ScriptCodeDaoImpl">
+		<constructor-arg ref="sqlSession"></constructor-arg>
+	</bean>
+	<bean id="scriptCodeService" class="com.mainsteam.stm.system.scriptcode.service.impl.ScriptCodeServiceImpl">
+		<property name="scriptCodeDao" ref="script_code_dao" />
+	</bean>
+	<bean id="licenseCategoryRelation" class="com.mainsteam.stm.system.license.service.impl.LicenseCategoryRelation">
+		<!-- malachi in modify-->
+		<!--<property name="capacityService" ref="capacityService"></property>-->
+	</bean>
+	
+	<bean id="captchaProducer" class="com.google.code.kaptcha.impl.DefaultKaptcha">  
+        <property name="config">  
+            <bean class="com.google.code.kaptcha.util.Config">  
+                <constructor-arg>  
+                    <props>  
+                        <prop key="kaptcha.border">yes</prop>  
+                        <prop key="kaptcha.border.color">7,137,244</prop>  
+                        <prop key="kaptcha.textproducer.font.color">49,132,200</prop>
+                        <prop key="kaptcha.image.width">150</prop>  
+                        <prop key="kaptcha.image.height">36</prop>  
+                        <prop key="kaptcha.textproducer.font.size">36</prop>  
+                        <prop key="kaptcha.textproducer.char.space">10</prop>
+                        <prop key="kaptcha.session.key">code</prop>  
+                        <prop key="kaptcha.textproducer.char.length">4</prop>  
+                        <prop key="kaptcha.textproducer.font.names">Arial,Courier</prop>  
+                    </props>  
+                </constructor-arg>  
+            </bean>  
+        </property>  
+    </bean> 
+	
+</beans>

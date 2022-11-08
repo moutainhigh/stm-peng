@@ -1,0 +1,1499 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.portal.report.dao.IReportDao">
+   
+   
+   
+   
+   
+  <delete id="delReportByDirectoryId" parameterType="long">
+		delete from STM_REP_LIST where  REP_TEMP_ID = #{reportTemplateId}
+	</delete>
+   
+   
+   
+   
+   
+  <delete id="del" parameterType="long">
+		delete from STM_REP_LIST where  REP_LIST_ID = #{reportId}
+	</delete>
+   
+   
+   
+   
+   
+  <delete id="delReportList">
+		delete from STM_REP_LIST where  REP_LIST_ID IN
+		 
+		 
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+					#{item}
+		</foreach>
+	
+	
+  
+  
+  
+  
+  
+  </delete>
+   
+   
+   
+   
+   
+  <update id="reportStatusUpdate" parameterType="com.mainsteam.stm.portal.report.po.ReportPo">
+		update STM_REP_LIST
+		 
+		 
+     
+     
+     
+     
+     
+    <set>
+			REP_STATUS =#{reportStatus}
+        </set>
+		 where REP_LIST_ID = #{reportListId}
+	
+	
+  
+  
+  
+  
+  
+  </update>
+   
+   
+   
+   
+   
+  <select id="selectByReportListId" resultType="com.mainsteam.stm.portal.report.po.ReportPo" parameterType="long">
+		select REP_LIST_ID as reportListId
+		    	,REP_TEMP_ID as reportTemplateId
+		    	,REP_NAME as reportName
+		    	,REP_STATUS as reportStatus
+		    	,REP_GENERATE_TIME as reportGenerateTime 
+		    	,REP_XML_DATA as reportXmlData
+		    	,REP_MODEL_NAME as reportModelName
+		     from STM_REP_LIST where REP_LIST_ID=#{reportListId}
+	</select>
+   
+   
+   
+   
+   
+  <select id="selectByRreportXmlData" resultType="com.mainsteam.stm.portal.report.po.ReportPo">
+		select REP_LIST_ID as reportListId
+		    	,REP_TEMP_ID as reportTemplateId
+		    	,REP_NAME as reportName
+		    	,REP_STATUS as reportStatus
+		    	,REP_GENERATE_TIME as reportGenerateTime 
+		    	,REP_XML_DATA as reportXmlData
+		    	,REP_MODEL_NAME as reportModelName
+		     from STM_REP_LIST
+		     where REP_XML_DATA IN
+		      
+		 
+     
+     
+     
+     
+     
+    <foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+					#{item}
+			 </foreach>
+	
+	
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="selectByReportTemplateId" resultType="com.mainsteam.stm.portal.report.po.ReportPo" parameterType="long">
+		select REP_LIST_ID as reportListId
+		    	,REP_TEMP_ID as reportTemplateId
+		    	,REP_NAME as reportName
+		    	,REP_STATUS as reportStatus
+		    	,REP_GENERATE_TIME as reportGenerateTime 
+		    	,REP_XML_DATA as reportXmlData
+		    	,REP_MODEL_NAME as reportModelName
+		     from STM_REP_LIST where REP_TEMP_ID = #{reportTemplateId}
+	</select>
+   
+   
+   
+   
+   
+  <select id="get" resultType="com.mainsteam.stm.portal.report.po.ReportPo" parameterType="long">
+		select REP_LIST_ID as reportListId
+		    	,REP_TEMP_ID as reportTemplateId
+		    	,REP_NAME as reportName
+		    	,REP_STATUS as reportStatus
+		    	,REP_GENERATE_TIME as reportGenerateTime 
+		    	,REP_XML_DATA as reportXmlData
+		    	,REP_MODEL_NAME as reportModelName
+		     from STM_REP_LIST where REP_TEMP_ID=#{reportTemplateId}
+	</select>
+   
+   
+   
+   
+   
+  <insert id="insert" parameterType="com.mainsteam.stm.portal.report.po.ReportPo">
+	    insert into STM_REP_LIST(
+	    		 REP_LIST_ID
+		    	,REP_TEMP_ID
+		    	,REP_NAME
+		    	,REP_STATUS
+		    	,REP_GENERATE_TIME
+		    	,REP_XML_DATA
+		    	,REP_MODEL_NAME
+	    	) values (
+	    		#{reportListId}
+	    		,#{reportTemplateId}
+	    		,#{reportName}
+	    		,#{reportStatus}
+	    		,#{reportGenerateTime}
+	    		,#{reportXmlData}
+	    		,#{reportModelName}
+			)
+	</insert>
+   
+   
+   
+   
+   
+  <select id="selectByTemplateIdAndTime" resultType="com.mainsteam.stm.portal.report.bo.ReportBo" parameterType="com.mainsteam.stm.portal.report.bo.ReportQueryBo">
+		SELECT  
+		     T1.REP_LIST_ID as reportListId
+	    	,T1.REP_TEMP_ID as reportTemplateId
+	    	,T1.REP_NAME as reportName
+	    	,T1.REP_STATUS as reportStatus
+	    	,T1.REP_GENERATE_TIME as reportGenerateTime 
+	    	,T1.REP_XML_DATA as reportXmlData
+	    	,T1.REP_MODEL_NAME as reportModelName
+	    	,T2.REP_TEMP_CYCLE as reportTemplateCycle
+	    	,T3.NAME as createUserName
+		FROM STM_REP_LIST  T1  , STM_REP_TEMP_MAIN  T2 , STM_SYS_USER  T3
+		WHERE T1.REP_TEMP_ID = T2.REP_TEMP_ID AND T2.REP_TEMP_CREATE_USER_ID = T3.ID
+		        
+		         
+		 
+     
+     
+     
+     
+     
+    <if test="reportTemplateIdArr != null">
+				 AND T1.REP_TEMP_ID IN
+				 
+			 
+       
+       
+       
+       
+       
+      <foreach item="item" index="index" collection="reportTemplateIdArr" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+				
+		
+    
+    
+    
+    
+    
+    </if>
+				 
+		 
+     
+     
+     
+     
+     
+    <if test="reportDateStartSelect != null and reportDateEndSelect != null">
+				       <![CDATA[ AND (T1.REP_GENERATE_TIME  BETWEEN  #{reportDateStartSelect} AND #{reportDateEndSelect} )]]>
+				</if>
+		ORDER BY T1.REP_GENERATE_TIME DESC
+	
+	
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="pageSelect" resultType="com.mainsteam.stm.portal.report.bo.ReportBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="mysql">
+		SELECT  
+		     T1.REP_LIST_ID as reportListId
+	    	,T1.REP_TEMP_ID as reportTemplateId
+	    	,T1.REP_NAME as reportName
+	    	,T1.REP_STATUS as reportStatus
+	    	,T1.REP_GENERATE_TIME as reportGenerateTime 
+	    	,T1.REP_XML_DATA as reportXmlData
+	    	,T1.REP_MODEL_NAME as reportModelName
+	    	,T2.REP_TEMP_CYCLE as reportTemplateCycle
+	    	,T3.NAME as createUserName
+	    	,T3.ID as createUserId
+	    	,T2.REP_TEMP_DOMAIN_ID as reportTemplateDomainId
+		FROM STM_REP_LIST  T1  , STM_REP_TEMP_MAIN  T2 , STM_SYS_USER  T3
+		WHERE T1.REP_TEMP_ID = T2.REP_TEMP_ID AND T2.REP_TEMP_CREATE_USER_ID = T3.ID
+		    
+		 
+     
+     
+     
+     
+     
+    <if test="condition != null">
+		         
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportQueryStatus != null">
+				 AND T1.REP_STATUS IN
+				 
+				 
+         
+         
+         
+         
+         
+        <foreach item="item" index="index" collection="condition.reportQueryStatus" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+				
+			
+      
+      
+      
+      
+      
+      </if>
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportTemplateQueryCycle != null">
+				 AND T2.REP_TEMP_CYCLE IN
+				 
+				 
+         
+         
+         
+         
+         
+        <foreach item="item" index="index" collection="condition.reportTemplateQueryCycle" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+				
+			
+      
+      
+      
+      
+      
+      </if>
+		         
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportTemplateIdArr != null">
+				 AND T1.REP_TEMP_ID IN
+				 
+				 
+         
+         
+         
+         
+         
+        <foreach item="item" index="index" collection="condition.reportTemplateIdArr" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+				
+			
+      
+      
+      
+      
+      
+      </if>
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.userIdArr != null or condition.reportTemplateDomainId != null">
+					AND (
+					 
+				 
+         
+         
+         
+         
+         
+        <if test="condition.userIdArr != null and condition.reportTemplateDomainId == null">
+						 T2.REP_TEMP_CREATE_USER_ID IN 
+						 
+					 
+           
+           
+           
+           
+           
+          <foreach item="item" index="index" collection="condition.userIdArr" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+					
+				
+        
+        
+        
+        
+        
+        </if>
+					
+					 
+				 
+         
+         
+         
+         
+         
+        <if test="condition.userIdArr == null and condition.reportTemplateDomainId != null">
+					 T2.REP_TEMP_DOMAIN_ID IN
+					 
+					 
+           
+           
+           
+           
+           
+          <foreach item="item" index="index" collection="condition.reportTemplateDomainId" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+					
+				
+        
+        
+        
+        
+        
+        </if>
+					
+					 
+				 
+         
+         
+         
+         
+         
+        <if test="condition.userIdArr != null and condition.reportTemplateDomainId != null">
+						 T2.REP_TEMP_CREATE_USER_ID IN 
+						 
+					 
+           
+           
+           
+           
+           
+          <foreach item="item" index="index" collection="condition.userIdArr" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+						 OR T2.REP_TEMP_DOMAIN_ID IN
+						 
+					 
+           
+           
+           
+           
+           
+          <foreach item="item" index="index" collection="condition.reportTemplateDomainId" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+					
+				
+        
+        
+        
+        
+        
+        </if>
+					)
+				
+			
+      
+      
+      
+      
+      
+      </if>
+				
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportType &gt; 0">
+				AND T2.REP_TEMP_TYPE = #{condition.reportType}
+				</if>
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportQueryCreateUserName != null">
+				AND (T3.NAME like CONCAT(CONCAT('%',#{condition.reportQueryCreateUserName}),'%')) 
+				</if>
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportDateStartSelect != null and condition.reportDateEndSelect != null">
+				       <![CDATA[ AND (T1.REP_GENERATE_TIME  BETWEEN  #{condition.reportDateStartSelect} AND #{condition.reportDateEndSelect} )]]>
+				</if>
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportName != null">
+				AND (T1.REP_NAME like CONCAT(CONCAT('%',#{condition.reportName}),'%')) 
+				</if>
+		   
+		
+    
+    
+    
+    
+    
+    </if>
+		ORDER BY
+			 
+     
+     
+     
+     
+     
+    <choose>
+       
+       
+       
+       
+       
+      <when test="condition.order == 'asc'">
+					T1.REP_GENERATE_TIME ASC
+				</when>
+       
+       
+       
+       
+       
+      <when test="condition.order == 'desc'">
+					T1.REP_GENERATE_TIME DESC
+				</when>
+       
+       
+       
+       
+       
+      <otherwise>
+					T1.REP_GENERATE_TIME DESC
+				</otherwise>
+    
+    
+    
+    
+    
+    </choose>
+	
+  
+  
+  
+  
+  
+  </select>
+   
+   
+   
+   
+   
+  <select id="pageSelect" resultType="com.mainsteam.stm.portal.report.bo.ReportBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oracle">
+		SELECT  
+		     T1.REP_LIST_ID as reportListId
+	    	,T1.REP_TEMP_ID as reportTemplateId
+	    	,T1.REP_NAME as reportName
+	    	,T1.REP_STATUS as reportStatus
+	    	,T1.REP_GENERATE_TIME as reportGenerateTime 
+	    	,T1.REP_XML_DATA as reportXmlData
+	    	,T1.REP_MODEL_NAME as reportModelName
+	    	,T2.REP_TEMP_CYCLE as reportTemplateCycle
+	    	,T3.NAME as createUserName
+	    	,T3.ID as createUserId
+	    	,T2.REP_TEMP_DOMAIN_ID as reportTemplateDomainId
+		FROM STM_REP_LIST  T1  , STM_REP_TEMP_MAIN  T2 , STM_SYS_USER  T3
+		WHERE T1.REP_TEMP_ID = T2.REP_TEMP_ID AND T2.REP_TEMP_CREATE_USER_ID = T3.ID
+		    
+		 
+     
+     
+     
+     
+     
+    <if test="condition != null">
+		         
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportQueryStatus != null">
+				 AND T1.REP_STATUS IN
+				 
+				 
+         
+         
+         
+         
+         
+        <foreach item="item" index="index" collection="condition.reportQueryStatus" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+				
+			
+      
+      
+      
+      
+      
+      </if>
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportTemplateQueryCycle != null">
+				 AND T2.REP_TEMP_CYCLE IN
+				 
+				 
+         
+         
+         
+         
+         
+        <foreach item="item" index="index" collection="condition.reportTemplateQueryCycle" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+				
+			
+      
+      
+      
+      
+      
+      </if>
+		         
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportTemplateIdArr != null">
+				 AND T1.REP_TEMP_ID IN
+				 
+				 
+         
+         
+         
+         
+         
+        <foreach item="item" index="index" collection="condition.reportTemplateIdArr" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+				
+			
+      
+      
+      
+      
+      
+      </if>
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.userIdArr != null or condition.reportTemplateDomainId != null">
+					AND (
+					 
+				 
+         
+         
+         
+         
+         
+        <if test="condition.userIdArr != null and condition.reportTemplateDomainId == null">
+						 T2.REP_TEMP_CREATE_USER_ID IN 
+						 
+					 
+           
+           
+           
+           
+           
+          <foreach item="item" index="index" collection="condition.userIdArr" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+					
+				
+        
+        
+        
+        
+        
+        </if>
+					
+					 
+				 
+         
+         
+         
+         
+         
+        <if test="condition.userIdArr == null and condition.reportTemplateDomainId != null">
+					 T2.REP_TEMP_DOMAIN_ID IN
+					 
+					 
+           
+           
+           
+           
+           
+          <foreach item="item" index="index" collection="condition.reportTemplateDomainId" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+					
+				
+        
+        
+        
+        
+        
+        </if>
+					
+					 
+				 
+         
+         
+         
+         
+         
+        <if test="condition.userIdArr != null and condition.reportTemplateDomainId != null">
+						 T2.REP_TEMP_CREATE_USER_ID IN 
+						 
+					 
+           
+           
+           
+           
+           
+          <foreach item="item" index="index" collection="condition.userIdArr" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+						 OR T2.REP_TEMP_DOMAIN_ID IN
+						 
+					 
+           
+           
+           
+           
+           
+          <foreach item="item" index="index" collection="condition.reportTemplateDomainId" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+					
+				
+        
+        
+        
+        
+        
+        </if>
+					)
+				
+			
+      
+      
+      
+      
+      
+      </if>
+				
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportType &gt; 0">
+				AND T2.REP_TEMP_TYPE = #{condition.reportType}
+				</if>
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportQueryCreateUserName != null">
+				AND (T3.NAME like CONCAT(CONCAT('%',#{condition.reportQueryCreateUserName}),'%')) 
+				</if>
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportDateStartSelect != null and condition.reportDateEndSelect != null">
+				       <![CDATA[ AND (T1.REP_GENERATE_TIME  BETWEEN to_date(#{condition.reportDateStartSelect}, 'yyyy-mm-dd hh24:mi:ss') AND to_date(#{condition.reportDateEndSelect}, 'yyyy-mm-dd hh24:mi:ss') )]]>
+				</if>
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportName != null">
+				AND (T1.REP_NAME like CONCAT(CONCAT('%',#{condition.reportName}),'%')) 
+				</if>
+		   
+		
+    
+    
+    
+    
+    
+    </if>
+		ORDER BY
+			 
+     
+     
+     
+     
+     
+    <choose>
+       
+       
+       
+       
+       
+      <when test="condition.order == 'asc'">
+					T1.REP_GENERATE_TIME ASC
+				</when>
+       
+       
+       
+       
+       
+      <when test="condition.order == 'desc'">
+					T1.REP_GENERATE_TIME DESC
+				</when>
+       
+       
+       
+       
+       
+      <otherwise>
+					T1.REP_GENERATE_TIME DESC
+				</otherwise>
+    
+    
+    
+    
+    
+    </choose>
+	
+  
+  
+  
+  
+  
+  </select>
+  
+   
+  
+   
+  
+   
+  
+   
+  
+   
+  <select id="pageSelect" resultType="com.mainsteam.stm.portal.report.bo.ReportBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="dm">
+		SELECT  
+		     T1.REP_LIST_ID as reportListId
+	    	,T1.REP_TEMP_ID as reportTemplateId
+	    	,T1.REP_NAME as reportName
+	    	,T1.REP_STATUS as reportStatus
+	    	,T1.REP_GENERATE_TIME as reportGenerateTime 
+	    	,T1.REP_XML_DATA as reportXmlData
+	    	,T1.REP_MODEL_NAME as reportModelName
+	    	,T2.REP_TEMP_CYCLE as reportTemplateCycle
+	    	,T3.NAME as createUserName
+	    	,T3.ID as createUserId
+	    	,T2.REP_TEMP_DOMAIN_ID as reportTemplateDomainId
+		FROM STM_REP_LIST  T1  , STM_REP_TEMP_MAIN  T2 , STM_SYS_USER  T3
+		WHERE T1.REP_TEMP_ID = T2.REP_TEMP_ID AND T2.REP_TEMP_CREATE_USER_ID = T3.ID
+		    
+		 
+     
+     
+     
+     
+     
+    <if test="condition != null">
+		         
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportQueryStatus != null">
+				 AND T1.REP_STATUS IN
+				 
+				 
+         
+         
+         
+         
+         
+        <foreach item="item" index="index" collection="condition.reportQueryStatus" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+				
+			
+      
+      
+      
+      
+      
+      </if>
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportTemplateQueryCycle != null">
+				 AND T2.REP_TEMP_CYCLE IN
+				 
+				 
+         
+         
+         
+         
+         
+        <foreach item="item" index="index" collection="condition.reportTemplateQueryCycle" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+				
+			
+      
+      
+      
+      
+      
+      </if>
+		         
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportTemplateIdArr != null">
+				 AND T1.REP_TEMP_ID IN
+				 
+				 
+         
+         
+         
+         
+         
+        <foreach item="item" index="index" collection="condition.reportTemplateIdArr" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+				
+			
+      
+      
+      
+      
+      
+      </if>
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.userIdArr != null or condition.reportTemplateDomainId != null">
+					AND (
+					 
+				 
+         
+         
+         
+         
+         
+        <if test="condition.userIdArr != null and condition.reportTemplateDomainId == null">
+						 T2.REP_TEMP_CREATE_USER_ID IN 
+						 
+					 
+           
+           
+           
+           
+           
+          <foreach item="item" index="index" collection="condition.userIdArr" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+					
+				
+        
+        
+        
+        
+        
+        </if>
+					
+					 
+				 
+         
+         
+         
+         
+         
+        <if test="condition.userIdArr == null and condition.reportTemplateDomainId != null">
+					 T2.REP_TEMP_DOMAIN_ID IN
+					 
+					 
+           
+           
+           
+           
+           
+          <foreach item="item" index="index" collection="condition.reportTemplateDomainId" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+					
+				
+        
+        
+        
+        
+        
+        </if>
+					
+					 
+				 
+         
+         
+         
+         
+         
+        <if test="condition.userIdArr != null and condition.reportTemplateDomainId != null">
+						 T2.REP_TEMP_CREATE_USER_ID IN 
+						 
+					 
+           
+           
+           
+           
+           
+          <foreach item="item" index="index" collection="condition.userIdArr" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+						 OR T2.REP_TEMP_DOMAIN_ID IN
+						 
+					 
+           
+           
+           
+           
+           
+          <foreach item="item" index="index" collection="condition.reportTemplateDomainId" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+					
+				
+        
+        
+        
+        
+        
+        </if>
+					)
+				
+			
+      
+      
+      
+      
+      
+      </if>
+				
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportType &gt; 0">
+				AND T2.REP_TEMP_TYPE = #{condition.reportType}
+				</if>
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportQueryCreateUserName != null">
+				AND (T3.NAME like CONCAT(CONCAT('%',#{condition.reportQueryCreateUserName}),'%')) 
+				</if>
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportDateStartSelect != null and condition.reportDateEndSelect != null">
+				       <![CDATA[ AND (T1.REP_GENERATE_TIME  BETWEEN to_date(#{condition.reportDateStartSelect}, 'yyyy-mm-dd hh24:mi:ss') AND to_date(#{condition.reportDateEndSelect}, 'yyyy-mm-dd hh24:mi:ss') )]]>
+				</if>
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportName != null">
+				AND (T1.REP_NAME like CONCAT(CONCAT('%',#{condition.reportName}),'%')) 
+				</if>
+		   
+		
+    
+    
+    
+    
+    
+    </if>
+		ORDER BY
+			 
+     
+     
+     
+     
+     
+    <choose>
+       
+       
+       
+       
+       
+      <when test="condition.order == 'asc'">
+					T1.REP_GENERATE_TIME ASC
+				</when>
+       
+       
+       
+       
+       
+      <when test="condition.order == 'desc'">
+					T1.REP_GENERATE_TIME DESC
+				</when>
+       
+       
+       
+       
+       
+      <otherwise>
+					T1.REP_GENERATE_TIME DESC
+				</otherwise>
+    
+    
+    
+    
+    
+    </choose>
+	
+  
+  
+  
+  
+  
+  </select>
+  <select id="pageSelect" resultType="com.mainsteam.stm.portal.report.bo.ReportBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page" databaseId="oscar">
+		SELECT  
+		     T1.REP_LIST_ID as reportListId
+	    	,T1.REP_TEMP_ID as reportTemplateId
+	    	,T1.REP_NAME as reportName
+	    	,T1.REP_STATUS as reportStatus
+	    	,T1.REP_GENERATE_TIME as reportGenerateTime 
+	    	,T1.REP_XML_DATA as reportXmlData
+	    	,T1.REP_MODEL_NAME as reportModelName
+	    	,T2.REP_TEMP_CYCLE as reportTemplateCycle
+	    	,T3.NAME as createUserName
+	    	,T3.ID as createUserId
+	    	,T2.REP_TEMP_DOMAIN_ID as reportTemplateDomainId
+		FROM STM_REP_LIST  T1  , STM_REP_TEMP_MAIN  T2 , STM_SYS_USER  T3
+		WHERE T1.REP_TEMP_ID = T2.REP_TEMP_ID AND T2.REP_TEMP_CREATE_USER_ID = T3.ID
+		    
+		 
+     
+     
+     
+     
+     
+    <if test="condition != null">
+		         
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportQueryStatus != null">
+				 AND T1.REP_STATUS IN
+				 
+				 
+         
+         
+         
+         
+         
+        <foreach item="item" index="index" collection="condition.reportQueryStatus" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+				
+			
+      
+      
+      
+      
+      
+      </if>
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportTemplateQueryCycle != null">
+				 AND T2.REP_TEMP_CYCLE IN
+				 
+				 
+         
+         
+         
+         
+         
+        <foreach item="item" index="index" collection="condition.reportTemplateQueryCycle" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+				
+			
+      
+      
+      
+      
+      
+      </if>
+		         
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportTemplateIdArr != null">
+				 AND T1.REP_TEMP_ID IN
+				 
+				 
+         
+         
+         
+         
+         
+        <foreach item="item" index="index" collection="condition.reportTemplateIdArr" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+				
+			
+      
+      
+      
+      
+      
+      </if>
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.userIdArr != null or condition.reportTemplateDomainId != null">
+					AND (
+					 
+				 
+         
+         
+         
+         
+         
+        <if test="condition.userIdArr != null and condition.reportTemplateDomainId == null">
+						 T2.REP_TEMP_CREATE_USER_ID IN 
+						 
+					 
+           
+           
+           
+           
+           
+          <foreach item="item" index="index" collection="condition.userIdArr" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+					
+				
+        
+        
+        
+        
+        
+        </if>
+					
+					 
+				 
+         
+         
+         
+         
+         
+        <if test="condition.userIdArr == null and condition.reportTemplateDomainId != null">
+					 T2.REP_TEMP_DOMAIN_ID IN
+					 
+					 
+           
+           
+           
+           
+           
+          <foreach item="item" index="index" collection="condition.reportTemplateDomainId" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+					
+				
+        
+        
+        
+        
+        
+        </if>
+					
+					 
+				 
+         
+         
+         
+         
+         
+        <if test="condition.userIdArr != null and condition.reportTemplateDomainId != null">
+						 T2.REP_TEMP_CREATE_USER_ID IN 
+						 
+					 
+           
+           
+           
+           
+           
+          <foreach item="item" index="index" collection="condition.userIdArr" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+						 OR T2.REP_TEMP_DOMAIN_ID IN
+						 
+					 
+           
+           
+           
+           
+           
+          <foreach item="item" index="index" collection="condition.reportTemplateDomainId" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+					
+				
+        
+        
+        
+        
+        
+        </if>
+					)
+				
+			
+      
+      
+      
+      
+      
+      </if>
+				
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportType &gt; 0">
+				AND T2.REP_TEMP_TYPE = #{condition.reportType}
+				</if>
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportQueryCreateUserName != null">
+				AND (T3.NAME like CONCAT(CONCAT('%',#{condition.reportQueryCreateUserName}),'%')) 
+				</if>
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportDateStartSelect != null and condition.reportDateEndSelect != null">
+				       <![CDATA[ AND (T1.REP_GENERATE_TIME  BETWEEN to_date(#{condition.reportDateStartSelect}, 'yyyy-mm-dd hh24:mi:ss') AND to_date(#{condition.reportDateEndSelect}, 'yyyy-mm-dd hh24:mi:ss') )]]>
+				</if>
+				 
+			 
+       
+       
+       
+       
+       
+      <if test="condition.reportName != null">
+				AND (T1.REP_NAME like CONCAT(CONCAT('%',#{condition.reportName}),'%')) 
+				</if>
+		   
+		
+    
+    
+    
+    
+    
+    </if>
+		ORDER BY
+			 
+     
+     
+     
+     
+     
+    <choose>
+       
+       
+       
+       
+       
+      <when test="condition.order == 'asc'">
+					T1.REP_GENERATE_TIME ASC
+				</when>
+       
+       
+       
+       
+       
+      <when test="condition.order == 'desc'">
+					T1.REP_GENERATE_TIME DESC
+				</when>
+       
+       
+       
+       
+       
+      <otherwise>
+					T1.REP_GENERATE_TIME DESC
+				</otherwise>
+    
+    
+    
+    
+    
+    </choose>
+	
+  
+  
+  
+  
+  
+  </select>
+</mapper>

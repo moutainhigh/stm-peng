@@ -1,0 +1,585 @@
+    <div id="business-service_status" class="oc-window-rightmenutwo">
+	    <div title='<span class="textcolor-limegreen">
+			<input id="status_radio" type="radio" value="0" checked name="status_radio">
+			</span>系统默认规则
+			<span class="Spinnerdown Spinnerup"></span>' data-options="selected:true">
+			<div class="h-nobg f-right according-content">
+   				<div class="layer-notice-title">
+	                <span class="notice-ico"></span>
+	                <span>判断优先级为致命-&gt;严重-&gt;警告-&gt;正常</span>
+                </div>
+			   	<div class="layer-State-tittlebg">
+			   		<span class="light-ico redlight p-r top8">致命</span>
+		   		</div>
+			   	<div class="cell_inner">
+			   		<a class="h-ms">任意一个关联资源状态为致命</a>
+	   			</div>
+			   	<div class="layer-State-tittlebg">
+			   		<span class="light-ico orangelight p-r top8">严重</span>
+		   		</div>
+			   	<div class="cell_inner">
+			   		<a class="h-ms">任意一个关联资源状态为严重</a>
+	   			</div>
+			   	<div class="layer-State-tittlebg">
+			   		<span class="light-ico yellowlight p-r top8">警告</span>
+		   		</div>
+			   	<div class="cell_inner">
+			   		<a class="h-ms">任意一个关联资源状态为警告</a>
+		   		</div>
+			   	<div class="layer-State-tittlebg">
+			   		<span class="light-ico greenlight p-r top8">正常</span>
+		   		</div>
+			   	<div class="cell_inner">
+			   		<a class="h-ms">所有关联资源状态为正常</a>
+		   		</div>
+		   </div>
+	    </div>
+	    <div title='<span class="textcolor-limegreen">
+			<input id="status_radio" type="radio" value="1" name="status_radio">
+			自定义规则
+			</span>' data-options="">
+			<form class="bizSerStatusSelfDefine">
+				<input id="bizMainId" type="hidden"/>
+				<div  id="deathGroupDiv" class="h-bgcolor">
+					<div class="layer-State-tittlebg">
+				   		<span class="light-ico redlight p-r top8">致命</span>
+				   		<a class="ico ico-del locate-right margin-top8 delRowBtn"></a>
+				   		<a class="ico ico-add locate-right margin-top8 addRowBtn"></a>
+					</div>
+					<div>
+			        	<div class="h-line">
+				        	请选择逻辑关系 <input type="radio" value="0" name="deathRelation" class="p-r top4" checked>并<input type="radio" value="1" name="deathRelation" class="p-r top4">或
+						</div>
+		   			</div>
+   			 	</div>
+			   	<div class="h-bgcolor" id="seriousGroupDiv">
+			   		<div class="layer-State-tittlebg">
+				   		<span class="light-ico orangelight p-r top8">严重</span>
+				   		<a class="ico ico-del locate-right delRowBtn"></a> 
+				   		<a class="ico ico-add locate-right addRowBtn"></a>
+			   		</div>
+   					<div>
+   						<div class="h-line">
+      						请选择逻辑关系 <input type="radio" value="0" name="seriousRelation" checked>并<input type="radio" value="1" name="seriousRelation">或
+   						</div>
+   					</div>
+				</div>
+   				<div class="h-bgcolor" id="warningGroupDiv">
+   					<div class="layer-State-tittlebg">
+	   					<span class="light-ico yellowlight p-r top8">警告</span>
+	   					<a class="ico ico-del locate-right delRowBtn"></a>
+	   					<a class="ico ico-add locate-right addRowBtn"></a>
+   					</div>
+   					<div>
+	   					<div class="h-line">
+	  						请选择逻辑关系 <input type="radio" value="0" name="warnRelation" checked>并<input type="radio" value="1" name="warnRelation">或
+	   					</div>
+   					</div>
+   				</div>
+				<div class="h-bgcolor">
+                <div class="layer-State-tittlebg">
+					<span class="light-ico greenlight p-r top8">正常</span></div>
+                    <div class="h-line">
+					<span class="p-r top8">所有关联资源状态为正常</span>
+                    </div>
+   				</div>
+			</form>
+	    </div>
+    </div>
+<script type="text/javascript">
+	$(function(){
+		var clickData = oc.business.service.west.clickData(),bizSerStatusSelfDefineForm = $('.bizSerStatusSelfDefine'),
+		deathGroupDiv = bizSerStatusSelfDefineForm.find("#deathGroupDiv"),
+		seriousGroupDiv = bizSerStatusSelfDefineForm.find("#seriousGroupDiv"),
+		warningGroupDiv = bizSerStatusSelfDefineForm.find("#warningGroupDiv"),
+		bizStateData=null, resultData=null,relationInstances={};
+		$("#bizMainId").val(clickData);
+		oc.util.ajax({
+			 url: oc.resource.getUrl('portal/business/service/status/getBizSerState.htm'),
+			  data:null,
+			  successMsg:null,
+			  async:false,
+			  timeout:null,
+			  success: function(data){
+				  bizStateData = data.data;
+			  }
+		});
+		bizSerStatusSelfDefineForm.find(".addRowBtn").each(function(){
+			$(this).on('click',function(e){
+				e.stopPropagation();
+				if(resultData==null){
+					oc.util.ajax({
+						  url: oc.resource.getUrl('portal/business/service/status/getRelationInstances.htm?id='+clickData),
+						  data:null,
+						  successMsg:null,
+						  async:false,
+						  timeout:null,
+						  success: function(data){
+							  resultData = data.data;
+							  for(var i in resultData){
+								  relationInstances[resultData[i].id] = resultData[i];
+							  }
+							  addRowDiv($(this),clickData,bizStateData,null,null,resultData,relationInstances);
+						  }
+					});	
+				  }else{
+					addRowDiv($(this),clickData,bizStateData,null,null,resultData,relationInstances);
+				  }
+			});
+		});
+		bizSerStatusSelfDefineForm.find(".delRowBtn").each(function(){
+			var self = $(this);
+			self.on('click',function(e){
+				e.stopPropagation();
+				var me = $(this);
+				me.parent().next().find("input[type=checkbox]").each(function(){
+					var mySelf = $(this);
+					if(mySelf.is(":checked")){
+						mySelf.parent().parent().remove();
+					}
+				});
+			});
+		});
+		var bizSerStatusDiv  = $("#business-service_status").accordion({
+			fit : true,
+			border : true,
+			onSelect:function(title,index){
+				index==0?$("input[name='status_radio']").eq(0).attr("checked","checked"):
+					$("input[name='status_radio']").eq(1).attr("checked","checked");
+			}
+		});
+		$("input[name='status_radio']").each(function(){
+			var self = $(this);
+			self.on('click',function(e){
+				e.stopPropagation();
+				if($(this).is(":checked")){
+					$("#business-service_status").accordion('select',$(this).val()==0?0:1);
+				}
+			})
+		});
+		//有状态数据时
+		oc.util.ajax({
+			 url: oc.resource.getUrl('portal/business/service/status/getBizStatusSelfData.htm?bizSerId='+clickData),
+			  data:null,
+			  successMsg:null,
+			  success: function(data){
+				  var bizServiceData = eval(data.data[0]),
+				  bizStatusSelfData = data.data[1];
+				  if(resultData==null){
+					  oc.util.ajax({
+						  url: oc.resource.getUrl('portal/business/service/status/getRelationInstances.htm?id='+clickData),
+						  data:null,
+						  successMsg:null,
+						  async:false,
+						  timeout:null,
+						  success: function(data){
+							  resultData = data.data;
+							  for(var i in resultData){
+								  relationInstances[resultData[i].id] = resultData[i];
+							  }
+							  addSelect(bizServiceData,bizStatusSelfData,clickData,bizStateData,resultData,
+										deathGroupDiv,seriousGroupDiv,warningGroupDiv,bizSerStatusSelfDefineForm,bizSerStatusDiv,relationInstances);
+						  }
+					});	
+				  }else{
+					  addSelect(bizServiceData,bizStatusSelfData,clickData,bizStateData,resultData,
+								deathGroupDiv,seriousGroupDiv,warningGroupDiv,bizSerStatusSelfDefineForm,bizSerStatusDiv,relationInstances);
+				  } 
+			  }
+		});
+	
+	
+	function addSelect(bizServiceData,bizStatusSelfData,clickData,bizStateData,resultData,
+			deathGroupDiv,seriousGroupDiv,warningGroupDiv,bizSerStatusSelfDefineForm,bizSerStatusDiv,relationInstances){
+		if(bizServiceData.status_type==1){
+			  $("input[name='status_radio']").eq(1).attr("checked","checked");
+			  $("input[name='status_radio']").eq(0).removeAttr("checked");
+			  bizSerStatusDiv.accordion('select',1);
+		  }
+		  setCheckBox(bizServiceData,bizSerStatusSelfDefineForm,bizSerStatusDiv);
+		  for(var i=0;i<bizStatusSelfData.length;i++){
+			  var bizStatusSelfRow = bizStatusSelfData[i];
+			  if(bizStatusSelfRow.type==0){
+				  addRowDiv(null,clickData,bizStateData,deathGroupDiv,bizStatusSelfRow,resultData,relationInstances);
+			  }else if(bizStatusSelfRow.type==1){
+				  addRowDiv(null,clickData,bizStateData,seriousGroupDiv,bizStatusSelfRow,resultData,relationInstances);
+			  }else if(bizStatusSelfRow.type==2){
+				  addRowDiv(null,clickData,bizStateData,warningGroupDiv,bizStatusSelfRow,resultData,relationInstances);
+			  }
+		  }
+	}
+	
+	function addRowDiv(currentAddRowBtn,clickData,bizStateData,groupDiv,bizStatusSelfRow,resultData,relationInstances){
+		var activeDiv = $("<div/>");
+		if(currentAddRowBtn!=null){
+			currentAddRowBtn.parent().next('div').append(activeDiv.append("<span class='check-box'><input type='checkbox' value='' name=''></span><div class='selectDiv'/>"));
+		}
+		if(groupDiv!=null){
+			groupDiv.find(".h-line").parent().append(activeDiv.append("<span class='check-box'><input type='checkbox' value='' name=''></span><div class='selectDiv'/>"));
+		}
+		var selectDiv = activeDiv.find(".selectDiv"),
+		chooseResourceDef=null;
+		if(bizStatusSelfRow!=null){
+			selectDiv.append("<input type='hidden' id='id' name='id' value='"+bizStatusSelfRow.id+"'/>");
+		}else{
+			selectDiv.append("<input type='hidden' id='id' name='id'/>");
+		}
+		addResourceDeath(selectDiv,bizStateData,resultData,chooseResourceDef,clickData,groupDiv,bizStatusSelfRow,relationInstances);
+	}
+	
+	
+
+	
+	function setCheckBox(bizServiceData,bizSerStatusSelfDefineForm,bizSerStatusDiv){
+	  if(bizServiceData.death_relation == "1"){
+		  bizSerStatusSelfDefineForm.find("input[name='deathRelation']").eq(1).attr("checked","checked");
+		  bizSerStatusSelfDefineForm.find("input[name='deathRelation']").eq(0).removeAttr("checked");
+	  }
+	  if(bizServiceData.serious_relation == "1"){
+		  bizSerStatusSelfDefineForm.find("input[name='seriousRelation']").eq(1).attr("checked","checked");
+		  bizSerStatusSelfDefineForm.find("input[name='seriousRelation']").eq(0).removeAttr("checked");
+	  }
+	  if(bizServiceData.warn_relation == "1"){
+		  bizSerStatusSelfDefineForm.find("input[name='warnRelation']").eq(1).attr("checked","checked");
+		  bizSerStatusSelfDefineForm.find("input[name='warnRelation']").eq(0).removeAttr("checked");
+	  }
+	}
+	
+	function addMetricDefState(selectDiv,newValue,uperData,bizStatusSelfRow){
+		selectDiv.find("#metricDef").next(".combo").nextAll().remove();
+		selectDiv.find("#metricDef").next(".combo").after($("<select id='metricDefState'></select>"));
+		for(var k=0;k<uperData.length;k++){
+			if(newValue == uperData[k].id){
+				oc.util.ajax({
+					url: oc.resource.getUrl('portal/business/service/status/'+'getMetricStateByStyle.htm?style='+uperData[k].style),
+					  data:null,
+					  successMsg:null,
+					  success: function(data){
+						selectDiv.find("#metricDefState").combobox({
+							width:115,
+							valueField: 'id',
+							textField: 'name',data: data.data,
+							onChange:function(n,o){
+								selectDiv.hasClass('selected')?"":selectDiv.addClass('selected');
+							}
+						});
+						if(selectDiv.hasClass('selected'))
+							return;
+						else if(bizStatusSelfRow!=null){
+							selectDiv.find("#metricDefState").combobox("setValue",bizStatusSelfRow.state);
+						}
+					  }
+				});
+			}
+		}
+	}
+	
+	function addMetricDefByChildChange(selectDiv,resultData,bizStatusSelfRow,relationInstances){
+		resultData.children = relationInstances[resultData.id].children;
+		for(var m=0;m<resultData.children.length;m++){
+			if(resultData.children[m].id == selectDiv.find("#childResourceDef").combobox('getValue')){
+				oc.util.ajax({
+					  url: oc.resource.getUrl('portal/business/service/status/'+'getMetricDefById.htm?resourceId='+resultData.children[m].resourceId),
+					  data:null,
+					  successMsg:null,
+					  success: function(data){
+						  selectDiv.find("#childChange").next(".combo").after($("<select id='metricDef'></select>"));
+							selectDiv.find("#metricDef").combobox({
+								width:115,
+								valueField: 'id',
+								textField: 'name',data: data.data,
+								onChange:function(newValue, oldValue){
+									addMetricDefState(selectDiv,newValue,data.data,bizStatusSelfRow);
+							}});
+							if(selectDiv.hasClass('selected'))
+								return;
+							else if(bizStatusSelfRow!=null){
+								for(var i=0;i<data.data.length;i++){
+									if(bizStatusSelfRow.metric_id==data.data[i].id){
+										selectDiv.find("#metricDef").combobox("setValue",bizStatusSelfRow.metric_id);
+										break;
+									}
+								}
+							}
+					  }
+				});
+				break;
+			}
+		}
+	}
+	
+	function addIntanceState(selectDiv,bizStateData,selectId,bizStatusSelfRow){
+		selectDiv.find("#"+selectId).next(".combo").after($("<select id='intanceState'></select>"));
+		selectDiv.find("#intanceState").combobox({
+			width:115,
+			valueField: 'id',
+			textField: 'name',data: bizStateData,
+			onChange:function(newValue, oldValue){
+				selectDiv.hasClass('selected')?"":selectDiv.addClass('selected');
+			}
+		});
+		if(selectDiv.hasClass('selected'))
+			return;
+		else if(bizStatusSelfRow!=null){
+			selectDiv.find("#intanceState").combobox("setValue",bizStatusSelfRow.state);
+		}
+	}
+	
+	function addChildChange(selectDiv,bizStateData,resultData,bizStatusSelfRow,relationInstances){
+		selectDiv.find("#childResourceDef").next(".combo").nextAll().remove();
+		selectDiv.find("#childResourceDef").next(".combo").after($("<select id='childChange'></select>"));
+		selectDiv.find("#childChange").combobox({
+			width:115,
+			valueField: 'id',
+			textField: 'name',data: [{id:"0",name:"状态"},{id:"1",name:"指标"}],
+			onChange:function(newValue, oldValue){
+				selectDiv.find("#childChange").next(".combo").nextAll().remove();
+				if(newValue == 0){
+					addIntanceState(selectDiv,bizStateData,"childChange",bizStatusSelfRow);
+				}else if(newValue == 1){
+					addMetricDefByChildChange(selectDiv,resultData,bizStatusSelfRow,relationInstances);
+				}
+		}});
+		if(selectDiv.hasClass('selected'))
+			return;
+		else if(bizStatusSelfRow!=null){
+			selectDiv.find("#childChange").combobox("setValue",!bizStatusSelfRow.metric_id?"0":"1");
+		}
+	}
+	
+	function addChildResourceDef(selectDiv,resultData,bizStateData,bizStatusSelfRow,relationInstances){
+		selectDiv.find("#resourceDef").next(".combo").nextAll().remove();
+		selectDiv.find("#resourceDef").next(".combo").after($("<select id='childResourceDef'></select>"));
+		var childResourceDefData = [];
+		if(relationInstances[resultData.id].children==null 
+				|| relationInstances[resultData.id].children.length==0
+				||relationInstances[resultData.id].children==undefined){
+			oc.util.ajax({
+				url: oc.resource.getUrl('portal/business/service/status/getChildResource.htm?id='+resultData.id),
+				  data:null,
+				  successMsg:null,
+				  failureMsg:null,
+				  async:false,
+				  timeout:null,
+				  success: function(data){
+					  if(data.code&&data.code==200){
+						  childResourceDefData = data.data;
+						  relationInstances[resultData.id].children = childResourceDefData;
+					  }
+				  }
+			});
+		}else{
+			childResourceDefData = relationInstances[resultData.id].children;
+		}
+		selectDiv.find("#childResourceDef").combobox({
+			width:115,
+			valueField: 'id',
+			textField: 'text',data: childResourceDefData,
+			loadFilter:function(data){
+				var result = [],q = selectDiv.find("#resourceDef").combobox("getValue");
+				for(var i in data){
+					if(data[i].resourceId==q){
+						result.push(data[i]);
+					}
+				}
+				return result;
+			},
+			onChange:function(newValue, oldValue){
+				addChildChange(selectDiv,bizStateData,resultData,bizStatusSelfRow,relationInstances);
+			}
+		});
+		if(selectDiv.hasClass('selected'))
+			return;
+		else if(bizStatusSelfRow!=null){
+			selectDiv.find("#childResourceDef").combobox("setValue",bizStatusSelfRow.instance_id);
+		}
+	}
+	
+	function addChange1NextSelect(selectDiv,bizStateData,change1Value,resultData,chooseResourceDef,bizStatusSelfRow,relationInstances){
+		selectDiv.find("#change1").next(".combo").nextAll().remove();
+		if(change1Value == "0"){
+			addIntanceState(selectDiv,bizStateData,"change1",bizStatusSelfRow);
+		}else if(change1Value == "1" || change1Value == "2"){
+			if(change1Value == "1"){
+				selectDiv.find("#change1").next(".combo").after($("<select id='resourceDef'></select>"));
+			}else if(change1Value == "2"){
+				selectDiv.find("#change1").next(".combo").after($("<select id='metricDef'></select>"));
+			}
+			for(var i=0;i<resultData.length;i++){
+				if(selectDiv.find("#resource_death").combobox('getValue') == resultData[i].id){
+					var cUrl = 'portal/business/service/status/';
+					if(change1Value == "1"){
+						cUrl += 'getResourceDefById.htm?resourceId='+resultData[i].resourceId;
+					}else if(change1Value == "2"){
+						cUrl += 'getMetricDefById.htm?resourceId='+resultData[i].resourceId;
+					}
+					oc.util.ajax({
+						  url: oc.resource.getUrl(cUrl),
+						  data:null,
+						  successMsg:null,
+						  success: function(data){
+							  chooseResourceDef = data.data;
+							  if(change1Value == "1"){
+									selectDiv.find("#resourceDef").combobox({
+										width:115,
+										valueField: 'id',
+										textField: 'name',data: chooseResourceDef.children,
+										onChange:function(newValue, oldValue){
+											addChildResourceDef(selectDiv,resultData[i],bizStateData,bizStatusSelfRow,relationInstances);
+									}});
+									if(selectDiv.hasClass('selected'))
+										return;
+									else if(bizStatusSelfRow!=null){
+										for(var m =0;m<resultData[i].children.length;m++){
+											if(resultData[i].children[m].id == bizStatusSelfRow.instance_id){
+												selectDiv.find("#resourceDef").combobox("setValue",resultData[i].children[m].resourceId);
+												break;
+											}
+										}
+									}
+							  }else if(change1Value == "2"){
+									selectDiv.find("#metricDef").combobox({
+										width:115,
+										valueField: 'id',
+										textField: 'name',data: chooseResourceDef,
+										onChange:function(newValue, oldValue){
+											addMetricDefState(selectDiv,newValue,chooseResourceDef,bizStatusSelfRow);
+									}});
+									if(selectDiv.hasClass('selected'))
+										return;
+									else if(bizStatusSelfRow!=null){
+										for(var k=0;k<chooseResourceDef.length;k++){
+											if(chooseResourceDef[k].id==bizStatusSelfRow.metric_id){
+												selectDiv.find("#metricDef").combobox("setValue",bizStatusSelfRow.metric_id);
+												break;
+											}
+										}
+									}
+							  }
+						  }
+					});
+					break;
+				}
+			}
+			
+		}
+	}
+	
+	function addChange1(selectDiv,bizStateData,resultData,chooseResourceDef,bizStatusSelfRow,relationInstances){
+		selectDiv.find("#resource_death").next(".combo").nextAll().remove();
+		selectDiv.find("#resource_death").next(".combo").after($('<select id="change1"></select>'));	
+		selectDiv.find("#change1").combobox({
+			margin:2,
+			width:115,
+			valueField: 'id',
+			textField: 'name',
+			data:[{id:"0",name:"状态"},{id:"1",name:"组件"},{id:"2",name:"指标"}],
+			onChange:function(newValue, oldValue, newJson, oldJson){
+				addChange1NextSelect(selectDiv,bizStateData,newValue,resultData,chooseResourceDef,bizStatusSelfRow,relationInstances);
+			}
+		});
+		if(selectDiv.hasClass('selected'))
+			return;
+		else if(bizStatusSelfRow!=null){
+	 		  var childInstaceFlag = false;
+	 		  for(var i=0;i<resultData.length;i++){
+	 			  if((bizStatusSelfRow.instance_id+"") == resultData[i].id){
+	 				  childInstaceFlag = true;
+	 				  break;
+	 			  }
+	 		  }
+	 		  //添加change1 select
+	 		  if(childInstaceFlag){
+	 			  if(!bizStatusSelfRow.metric_id){
+	 				  selectDiv.find("#change1").combobox("setValue","0");
+	 			  }else{
+	 				  selectDiv.find("#change1").combobox("setValue","2");
+	 			  }
+	 		  }else{
+			  	 for(var i=0;i<resultData.length;i++){
+		 			 if(relationInstances[resultData[i].id].children==null 
+		 					|| relationInstances[resultData[i].id].children.length==0
+		 					||relationInstances[resultData[i].id].children==undefined){
+		 				oc.util.ajax({
+		 					url: oc.resource.getUrl('portal/business/service/status/getChildResource.htm?id='+resultData[i].id),
+		 					  data:null,
+		 					  successMsg:null,
+		 					  failureMsg:null,
+		 					  async:false,
+		 					  timeout:null,
+		 					  success: function(data){
+		 						  if(data.code&&data.code==200){
+		 							  relationInstances[resultData[i].id].children = data.data;
+		 							 resultData[i].children = data.data;
+		 						  }
+		 					  }
+		 				});
+		 			}
+			  		 for(var k=0;k<resultData[i].children.length;k++){
+			  			 if(resultData[i].children[k].id == (bizStatusSelfRow.instance_id+"")){
+				 			  selectDiv.find("#change1").combobox("setValue","1");
+			  				  break;
+			  			 }
+			  		 }
+		  		}
+	 		  } 
+	 	  }
+	}
+	
+	function addResourceDeath(selectDiv,bizStateData,resultData,chooseResourceDef,clickData,groupDiv,bizStatusSelfRow,relationInstances){
+		selectDiv.append($("<select id='resource_death'></select>"));
+	  	selectDiv.find("#resource_death").combobox({
+		  		width:115,
+			  	valueField: 'id',
+				textField: 'text',data: resultData,
+				onSelect:function(){
+					selectDiv.hasClass('selected')?"":selectDiv.addClass('selected');
+				},
+				onChange:function(newValue, oldValue){
+					addChange1(selectDiv,bizStateData,resultData,chooseResourceDef,bizStatusSelfRow,relationInstances);
+				}});
+	  	if(groupDiv!=null){
+			 	if(bizStatusSelfRow!=null && !selectDiv.hasClass('selected')){
+		 		  var childInstaceFlag = false;
+		 		  for(var i=0;i<resultData.length;i++){
+		 			  if((bizStatusSelfRow.instance_id+"") == resultData[i].id){
+		 				  selectDiv.find("#resource_death").combobox("setValue",resultData[i].id);
+		 				  childInstaceFlag = true;
+		 				  break;
+		 			  }
+		 		  }
+		 		  if(childInstaceFlag){
+		 		  }else{
+	 			  	 for(var i=0;i<resultData.length;i++){
+	 			  		if(relationInstances[resultData[i].id].children==null 
+			 					|| relationInstances[resultData[i].id].children.length==0
+			 					||relationInstances[resultData[i].id].children==undefined){
+			 				oc.util.ajax({
+			 					url: oc.resource.getUrl('portal/business/service/status/getChildResource.htm?id='+resultData[i].id),
+			 					  data:null,
+			 					  successMsg:null,
+			 					  failureMsg:null,
+			 					  async:false,
+			 					  timeout:null,
+			 					  success: function(data){
+			 						  if(data.code&&data.code==200){
+			 							  relationInstances[resultData[i].id].children = data.data;
+			 							 resultData[i].children = data.data;
+			 						  }
+			 					  }
+			 				});
+	 			  		}
+	 			  		 for(var k=0;k<resultData[i].children.length;k++){
+	 			  			 if(resultData[i].children[k].id == (bizStatusSelfRow.instance_id+"")){
+	 			  				selectDiv.find("#resource_death").combobox("setValue",resultData[i].id);
+ 			  				  	break;
+	 			  			 }
+	 			  		 }
+	 		  		}
+		 		  } 
+		 	  }
+		}
+	}
+	
+})
+</script>

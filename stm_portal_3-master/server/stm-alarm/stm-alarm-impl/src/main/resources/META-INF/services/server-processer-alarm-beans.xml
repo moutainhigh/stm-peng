@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+	
+	<bean id="alarmInstanceSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_ALARM_EVENT"/>
+	</bean>
+
+	<bean id="smsOrEmailTemplateSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_NOTIFY_SMS_EMAIL"/>
+	</bean>
+
+	<bean id="alarmService" class="com.mainsteam.stm.alarm.AlarmServiceImpl">
+		<property name="alarmEventService" ref="alarmEventService" />
+		<property name="sequence" ref="alarmInstanceSeq" />
+		<property name="alarmNotifyService" ref="alarmNotifyService"/>
+		<property name="alarmRuleService" ref="alarmRuleService" />
+		<property name="dataSyncService" ref="dataSyncService"/>
+		<property name="lockService" ref="lockService"/>
+		<property name="userApi" ref="stm_system_userApi" />
+		<property name="smsOrEmailNotifyTemplateService" ref="smsOrEmailNotifyTemplateService" />
+		<property name="profileService" ref="profileService"></property>
+
+	</bean>
+	
+	<bean id="alarmSyncService" class="com.mainsteam.stm.alarm.AlarmServiceSync">
+		<property name="dataSyncService" ref="dataSyncService" />
+	</bean>
+
+	<!-- 告警事件服务 -->
+	<bean id="alarmEventService" class="com.mainsteam.stm.alarm.event.AlarmEventServiceImpl">
+		<property name="alarmEventDao" ref="alarmEventDao" />
+		<property name="sequence" ref="alarmInstanceSeq" />
+		<property name="alarmEventSyncService" ref="alarmEventSyncService"></property>
+ 	</bean>
+	<bean id="alarmEventDao" class="com.mainsteam.stm.alarm.event.dao.AlarmEventDAOImpl">
+		<property name="session" ref="sqlSession" />
+	</bean>
+	
+	<!-- 告警服务 -->
+	<bean id="alarmNotifyService" class="com.mainsteam.stm.alarm.notify.AlarmNotifyServiceImpl" init-method="startRunner">
+		<property name="alarmNotifyDao" ref="alarmNotifyDAO" />
+		<property name="alarmRuleService" ref="alarmRuleService"/>
+		<property name="lockService" ref="lockService"/>
+		<property name="userApi" ref="stm_system_userApi" />
+		<property name="sequence">
+			<bean factory-bean="platformSeqFactory" factory-method="getSeq">
+				<constructor-arg value="STM_ALARM_NOTIFY"/>
+			</bean>
+		</property>
+		<property name="smsOrEmailNotifyTemplateService" ref="smsOrEmailNotifyTemplateService" />
+	</bean>
+	
+	<bean id="alarmNotifyDAO" class="com.mainsteam.stm.alarm.notify.dao.AlarmNotifyDAOImpl">
+		<property name="session" ref="sqlSession" />
+		<property name="sqlSessionFactory" ref="myBatisSqlSessionFactory" />
+	</bean>
+	
+		<!-- 短信邮件通知模板服务 -->
+	<bean id="smsOrEmailNotifyTemplateService" class="com.mainsteam.stm.alarm.notify.SmsOrEmailNotifyTemplateServiceImpl">
+		<property name="smsOrEmailNotifyTemplateDao" ref="smsOrEmailNotifyTemplateDao" />
+		<property name="sequence" ref="smsOrEmailTemplateSeq"></property>
+		<property name="alarmRuleService" ref="alarmRuleService"></property>
+	</bean>
+	<bean id="smsOrEmailNotifyTemplateDao" class="com.mainsteam.stm.alarm.notify.dao.SmsOrEmailNotifyTemplateDAOImpl">
+		<property name="session" ref="sqlSession" />
+	</bean>
+
+	<!-- 告警模板服务 -->
+	<bean id="alarmNotifyTempletService" class="com.mainsteam.stm.alarm.notify.AlarmNotifyTempletServiceImpl">
+		<property name="alarmNotifyTempletDao" ref="alarmNotifyTempletDAO" />
+	</bean>
+	<bean id="alarmNotifyTempletDAO" class="com.mainsteam.stm.alarm.notify.dao.AlarmNotifyTempletDAOImpl">
+		<property name="session" ref="sqlSession" />
+	</bean>
+	
+	<!-- ITSM接口数据同步 -->
+	<bean id="alarmEventSyncItsm" class="com.mainsteam.stm.alarm.soap.itsm.AlarmEventSyncItsm">
+		<property name="systemConfig" ref="systemConfigApi"/>
+		<property name="alarmEventDao" ref="alarmEventDao"/>
+	</bean>
+
+
+</beans>

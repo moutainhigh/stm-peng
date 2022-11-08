@@ -1,0 +1,255 @@
+<style type="text/css">
+ul {list-style: none;}
+.menu-one > li {width: 220px; height: auto; overflow: hidden; border-top: 1px solid #888;}
+.menu-one > li.firstChild {border: 0;}
+.menu-one .header {height: 35px; background: #666; line-height: 34px; text-indent: 15px; cursor: pointer;}
+.menu-one .header:hover,
+.menu-one .menuOne-current {background: #777;}
+.menu-one .header > span {display: block;}
+.menu-one .header .txt {float: left; color: #fff;}
+.menu-one .header .arrow {float: right; width: 35px; height: 35px; background: url(../images/arrow-d.png) no-repeat center center;}
+.menu-two {display: none; width: 220px; height: auto;}
+.menu-two li {width:220px; height:35px; background: #eee; border-top: 1px solid #ccc; line-height: 34px; text-indent: 40px;}
+.menu-two li.firstChild {border: 0;}
+ul.menu-two {list-style: none;}
+.menu-two li a {display: block; color: #888;}
+.menu-two li:hover,
+.menu-two li.menuTwo-current {background: #fff;}
+
+.menu-show .header {background: #777;}
+.menu-show .header .arrow {background-image: url(../images/arrow-u.png);}
+</style>
+<div id="oc_system_index" class="easyui-layout" style="width:100%;height:100%;">
+	<div data-options="region:'west'" style="width: 200px;">
+		    <div class="easyui-accordion oc-accordion-one" data-options="region:'west',ocSelected:true">
+				<div title="人员管理" class="userSettings"></div>
+		    	<div title="告警设置" class="alarmSettings"></div>
+				<div title="系统设置" class="systemSettings"></div>
+				<div title="知识管理" class="knowledgeManage"></div>
+				<div title="3D机房设置" class="thirdBuildSettings"></div>
+				<div title="大数据平台" class="bigdata"></div>
+				<div title="ITSM平台" class="itsmPlatform"></div>
+				<div title="第三方平台" class="thirdPartyPlatform">
+			</div>
+	</div>
+	</div> 
+	<div data-options="region:'center'" style="overflow: hidden;"></div> 
+	
+</div>
+<script>
+	(function(){
+		var id=oc.util.generateId(),
+			indexDiv=$('#oc_system_index').attr('id',id);
+		indexDiv.layout().find('.easyui-accordion').accordion();
+		var centerDiv=indexDiv.layout('panel','center');
+		
+		function _click(href,data,e){
+			centerDiv.children().remove();
+			if('脚本管理'==data.name||'审计日志'==data.name){
+				centerDiv.panel({
+					href:href,
+					onLoad : function(){}
+				});
+			}else{
+				$('<div style="width:100%;height:100%;"></div>').appendTo(centerDiv).panel('RenderP',{
+					title:data.hideTitle?undefined:data.name,
+					href:href
+				});
+			}
+			
+		}
+		var userPages=[],
+		user = oc.index.getUser();
+		if(user.systemUser){	//进入此菜单只有系统管理员和域管理员
+			userPages.push({
+				name:'用户管理',
+				href:oc.resource.getUrl('resource/module/system/user/user.html')
+			});
+		}
+		userPages.push({
+			name:'角色管理',
+			href:oc.resource.getUrl('resource/module/system/role/role.html')
+		});
+		var userType = user.userType;
+// 		if(userType!=1){//系统管理员和超级管理
+	//除了普通用户都可见（但是普通用户没系统设置页签）
+			userPages.push({
+				name:'域管理',
+				href:oc.resource.getUrl('resource/module/system/domain/domain.html')
+			});
+			
+			userPages.push({
+				name:'资源集合',
+				href:oc.resource.getUrl('resource/module/system/resourcegroup/resourcegroup.html')
+			});
+// 		}
+		
+		var userSettings=oc.ui.navsublist({
+			selector:indexDiv.find('.userSettings:first'),
+			data:userPages,
+			click:_click
+		});
+		//系统管理员和域管理员默认打开人员管理，管理者和普通用户移除人员管理菜单，普通用户没有系统管理页签
+		if(user.systemUser){
+			userSettings.get(0).trigger('click');
+		}else{
+			indexDiv.layout().find('.easyui-accordion').accordion('remove','人员管理');
+		}
+		
+		oc.ui.navsublist({
+			selector:indexDiv.find('.alarmSettings:first'),
+			data:[{
+				name:'告警设置',
+				href:oc.resource.getUrl('resource/module/system/warningway/warningway.html')
+			},{
+				name:'通知设置',
+				href:oc.resource.getUrl('resource/module/system/warningway/warnNotice.html')
+			}],
+			click:_click
+		});
+		
+		var systemSettingData = [
+			{
+				hideTitle:true,
+				name:'系统服务',
+				href:oc.resource.getUrl('resource/module/system/service/service.html')
+			},{
+				name:'页签管理',
+				hideTitle:true,
+				href:oc.resource.getUrl('resource/module/system/right/right.html')
+			},{
+				name:'图片管理',
+				href:oc.resource.getUrl('resource/module/system/image/systemImage.html')
+			}
+		];
+		if(oc.index.getUser().systemUser){
+			systemSettingData.push({name:'换肤管理', loaded:function(panel){}, href:oc.resource.getUrl('resource/module/system/skin/skin.html')});
+		}
+		if(oc.index.getUser().systemUser){
+			systemSettingData.push({name:'安全设置', href:oc.resource.getUrl('resource/module/system/authtype/authtype.html')});
+		}
+		systemSettingData.push({name:'审计日志', href:oc.resource.getUrl('resource/module/system/auditlog/audit.html')});
+		oc.ui.navsublist({
+			selector:indexDiv.find('.systemSettings:first'),
+			data:systemSettingData,
+			click:_click
+		});
+		/*
+		[{
+			hideTitle:true,
+			name:'系统服务',
+			href:oc.resource.getUrl('resource/module/system/service/service.html')
+		},{
+			name:'页签管理',
+			hideTitle:true,
+			href:oc.resource.getUrl('resource/module/system/right/right.html')
+		},{
+			name:'图片管理',
+			href:oc.resource.getUrl('resource/module/system/image/systemImage.html')
+		},{
+			name:'换肤管理',
+			loaded:function(panel){
+				
+			},
+			href:oc.resource.getUrl('resource/module/system/skin/skin.html')
+		},{
+			name:'模型部署',
+			href:oc.resource.getUrl('resource/module/system/matrix/matrix.html')
+		},{
+			name:'安全设置',
+			href:oc.resource.getUrl('resource/module/system/authtype/authtype.html')
+		},{
+				name:'访问设置',
+				href:oc.resource.getUrl('resource/module/system/accesscontrol/accessControl.html')
+			},{
+			name:'审计日志',
+			href:oc.resource.getUrl('resource/module/system/auditlog/audit.html')
+		}]
+		*/
+		
+		oc.ui.navsublist({
+			selector:indexDiv.find('.knowledgeManage:first'),
+			data:[{
+				name:'故障知识',
+				href:oc.resource.getUrl('resource/module/knowledge/local/localKnowledge.html')
+			},{
+				name:'能力知识',
+				href:oc.resource.getUrl('resource/module/knowledge/capacity/capacityKnowledge.html')
+			},{
+				name:'型号配置',
+				href:oc.resource.getUrl('resource/module/knowledge/modelset/modelset.html')
+			},{
+				name:'脚本管理',
+				href:oc.resource.getUrl('resource/module/knowledge/scriptmanage/scriptmanage.html')
+			},{
+				name:'快照文件',
+				href:oc.resource.getUrl('resource/module/knowledge/snapshotfile/snapshotfile.html')
+			}],
+			click:_click
+		});
+		
+		oc.ui.navsublist({
+			selector:indexDiv.find('.thirdBuildSettings:first'),
+			data:[{
+				name:'数据管理',
+				href:oc.resource.getUrl('resource/module/3d/data/data.html')
+			},{
+				name:'设备管理',
+				hideTitle:true,
+				href:oc.resource.getUrl('resource/module/3d/device/device.html')
+			},{
+				name:'设备型号管理',
+				href:oc.resource.getUrl('resource/module/3d/devicetype/devicetype.html')
+			}],
+			click:_click
+		});
+		
+		oc.ui.navsublist({
+			selector:indexDiv.find('.bigdata'),
+			data:[{
+				name:'平台配置',
+				href:oc.resource.getUrl('resource/module/system/bigdata/bigdata.html')
+			}],
+			click:_click
+		});
+		
+		oc.ui.navsublist({
+			selector:indexDiv.find('.itsmPlatform'),
+			data:[{
+				name:'ITSM配置',
+				href:oc.resource.getUrl('resource/module/system/itsm/itsm.html')
+			}],
+			click:_click
+		});
+		oc.ui.navsublist({
+			selector:indexDiv.find('.thirdPartyPlatform:first'),
+			data:[{
+				name:'ITBA配置',
+				href:oc.resource.getUrl('resource/module/system/bigdata/bigdata.html')
+			},{
+				name:'ITSM配置',
+				href:oc.resource.getUrl('resource/module/system/itsm/itsm.html')
+			},{
+				name:'CMDB配置',
+				href:oc.resource.getUrl('resource/module/system/cmdb/cmdb.html')
+			},{
+				name:'用户同步',
+				href:oc.resource.getUrl('resource/module/system/itsmuser/itsmUser.html')
+			},
+			{
+				name:'单点登录',
+				href:oc.resource.getUrl('resource/module/system/ssoforthird/ssoforthird.html')
+			}
+			],
+			click:_click
+		});
+		//为自动化测试加唯一class
+		$('.userSettings').parent().addClass('test_userSetting');
+		$('.alarmSettings').parent().addClass('test_alarmSettings');
+		$('.systemSettings').parent().addClass('test_systemSettings');
+		$('.knowledgeManage').parent().addClass('test_knowledgeManage');
+		$('.systemSettings').parent().addClass('test_systemSettings');
+		$('.thirdBuildSettings').parent().addClass('test_thirdBuildSettings');
+		$('.thirdPartyPlatform').parent().addClass('test_thirdPartyPlatform'); 
+	})();
+</script>

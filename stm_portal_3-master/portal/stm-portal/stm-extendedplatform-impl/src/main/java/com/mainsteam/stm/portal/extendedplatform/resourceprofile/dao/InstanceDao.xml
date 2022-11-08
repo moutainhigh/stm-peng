@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.mainsteam.stm.portal.extendedplatform.resourceprofile.dao.InstanceDao">
+
+	<select id="queryInstanceById" parameterType="long"
+		resultType="com.mainsteam.stm.instancelib.obj.ResourceInstance">
+		SELECT instanceId id,instanceName name,instanceShowName
+		showName,instanceType
+		childType,parentId,resourceId,categoryId,discoverWay,lifeState,discoverIP,
+		domainId,isCore FROM stm_instancelib_resource_main WHERE instanceId = #{id} or parentId = #{id}
+	</select>
+	
+	<select id="queryProfileInstancePos" parameterType="long" resultType="com.mainsteam.stm.portal.extendedplatform.resourceprofile.po.ProfileInstancePo">
+		SELECT pi.instance_id instanceId,pi.parent_instance_id parentInstanceId,p.profile_id profileId,p.profile_name profileName FROM stm_profilelib_instance pi LEFT JOIN stm_profilelib_main p on p.profile_id = pi.profile_id WHERE pi.instance_id = #{instanceId} or pi.parent_instance_id=#{instanceId}
+	</select>
+	<select id="queryProfileInstanceLastPos" parameterType="long" resultType="com.mainsteam.stm.portal.extendedplatform.resourceprofile.po.ProfileInstancePo">
+		SELECT pi.instanceId instanceId,pi.parent_instanceId parentInstanceId,p.profile_id profileId,p.profile_name profileName FROM stm_profilelib_instance_last pi LEFT JOIN stm_profilelib_main p on p.profile_id = pi.last_profileId WHERE pi.instanceId = #{instanceId} or pi.parent_instanceId=#{instanceId}
+	</select>
+	
+	<delete id="deleteProfileInstanceRel" parameterType="long">
+		DELETE FROM stm_profilelib_instance WHERE instance_id = #{instanceId} or parent_instance_id =  #{instanceId}
+	</delete>
+	
+	<delete id="deleteProfileInstanceLastRel" parameterType="long">
+		DELETE FROM stm_profilelib_instance_last WHERE instanceId =  #{instanceId} or parent_instanceId =  #{instanceId}
+	</delete>
+	
+	<delete id="deleteInstance" parameterType="long">
+		DELETE FROM stm_instancelib_resource_main WHERE instanceid = #{instanceId} or parentid = #{instanceId}
+	</delete>
+</mapper>

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.portal.statist.dao.IStatistQueryDetailDao">
+	
+	<insert id="insertSQMain" parameterType="com.mainsteam.stm.portal.statist.po.StatistQueryMainPo">
+		INSERT INTO stm_statist_query_main(
+			STAT_Q_ID,
+			STAT_Q_CREATE_USER_ID,
+			STAT_Q_CREATE_TIME,
+			STAT_Q_NAME,
+			STAT_Q_TYPE,
+			STAT_Q_CATEGORY_ID,
+			STAT_Q_SUB_RESOURCE_ID,
+			STAT_Q_IS_DELETE,
+			STAT_Q_DOMAIN_ID,
+			STAT_Q_IREPORT_ID
+		) VALUES (
+			#{id},
+			#{createUserId},
+			#{createTime},
+			#{name},
+			#{type},
+			#{categoryId},
+			#{subResourceId},
+			#{isDelete},
+			#{domainId},
+			#{iReportId}
+		)
+	</insert>
+	
+	<select id="getAllSQMain" resultType="com.mainsteam.stm.portal.statist.po.StatistQueryMainPo">
+		select STAT_Q_ID as id,
+			   STAT_Q_CREATE_USER_ID as createUserId,
+			   STAT_Q_CREATE_TIME as createTime,
+			   STAT_Q_NAME as name,
+			   STAT_Q_TYPE as type,
+			   STAT_Q_CATEGORY_ID as categoryId,
+			   STAT_Q_SUB_RESOURCE_ID as subResourceId,
+			   STAT_Q_IS_DELETE as isDelete,
+			   STAT_Q_DOMAIN_ID as domainId,
+			   STAT_Q_IREPORT_ID as iReportId
+		  from stm_statist_query_main
+		 where STAT_Q_IS_DELETE = 0
+	</select>
+	
+	<select id="getSQMainByStatQId" resultType="com.mainsteam.stm.portal.statist.po.StatistQueryMainPo">
+		select STAT_Q_ID as id,
+			   STAT_Q_CREATE_USER_ID as createUserId,
+			   STAT_Q_CREATE_TIME as createTime,
+			   STAT_Q_NAME as name,
+			   STAT_Q_TYPE as type,
+			   STAT_Q_CATEGORY_ID as categoryId,
+			   STAT_Q_SUB_RESOURCE_ID as subResourceId,
+			   STAT_Q_IS_DELETE as isDelete,
+			   STAT_Q_DOMAIN_ID as domainId,
+			   STAT_Q_IREPORT_ID as iReportId
+		  from stm_statist_query_main
+		 where STAT_Q_IS_DELETE = 0
+		   and STAT_Q_ID = #{id}
+	</select>
+	
+	<update id="delSQMainByStatQId" parameterType="java.lang.Long">
+		update stm_statist_query_main
+		   set STAT_Q_IS_DELETE = 1
+		 where STAT_Q_ID = #{statQMainId}
+	</update>
+	
+	<update id="updateStatQMain" parameterType="com.mainsteam.stm.portal.statist.po.StatistQueryMainPo">
+		update stm_statist_query_main
+		   set STAT_Q_NAME = #{name},
+		       STAT_Q_CATEGORY_ID = #{categoryId},
+		       STAT_Q_SUB_RESOURCE_ID = #{subResourceId},
+		       STAT_Q_DOMAIN_ID = #{domainId},
+			   STAT_Q_IREPORT_ID = #{iReportId}
+		 where STAT_Q_ID = #{id}
+	</update>
+	
+	<insert id="insertSQMetric" parameterType="com.mainsteam.stm.portal.statist.po.StatistQueryMetricPo">
+		INSERT INTO stm_statist_query_metric(
+			STAT_Q_METRIC_ID,
+			STAT_Q_ID,
+			METRIC_ID
+		) VALUES (
+			#{id},
+			#{statQMainId},
+			#{metricId}
+		)
+	</insert>
+	
+	<select id="getSQMetricByStatQId" resultType="com.mainsteam.stm.portal.statist.po.StatistQueryMetricPo">
+		select STAT_Q_METRIC_ID as id,
+			   STAT_Q_ID as statQMainId,
+			   METRIC_ID as metricId
+		  from stm_statist_query_metric
+		 where STAT_Q_ID = #{statQId}
+	</select>
+	
+	<delete id="delSQMetricByStatQId" parameterType="java.lang.Long">
+	    delete from stm_statist_query_metric where STAT_Q_ID = #{statQId}
+	</delete>
+	
+	<insert id="insertSQInstance" parameterType="com.mainsteam.stm.portal.statist.po.StatistQueryInstancePo">
+		INSERT INTO stm_statist_query_instance(
+			STAT_Q_INSTANCE_ID,
+			STAT_Q_ID,
+			INSTANCE_ID
+		) VALUES (
+			#{id},
+			#{statQMainId},
+			#{instanceId}
+		)
+	</insert>
+	
+	<select id="getSQInstanceByStatQId" resultType="com.mainsteam.stm.portal.statist.po.StatistQueryInstancePo">
+		select STAT_Q_INSTANCE_ID as id,
+			   STAT_Q_ID as statQMainId,
+			   INSTANCE_ID as instanceId
+		  from stm_statist_query_instance
+		 where STAT_Q_ID = #{statQId}
+	</select>
+	
+	<delete id="delSQInstanceByStatQId" parameterType="java.lang.Long">
+	    delete from stm_statist_query_instance where STAT_Q_ID = #{statQId}
+	</delete>
+	
+	<select id="getSQMainIdByInstIdList" parameterType="java.util.List" resultType="java.lang.Long">
+		SELECT a.STAT_Q_ID AS id 
+		 FROM stm_statist_query_main a, stm_statist_query_instance b
+		WHERE a.STAT_Q_ID = b.STAT_Q_ID
+		  AND a.STAT_Q_IS_DELETE = 0
+	<foreach collection="list" index="index" item="item" open="AND b.INSTANCE_ID IN(" close=")" separator=",">
+			  #{item}
+	</foreach>
+		GROUP BY a.STAT_Q_ID
+	</select>
+	
+	<select id="countSQMainByTypeAndName" parameterType="com.mainsteam.stm.portal.statist.po.StatistQueryMainPo" resultType="java.lang.Integer">
+		select count(*)
+		  from stm_statist_query_main
+		 where STAT_Q_IS_DELETE = 0
+		   and STAT_Q_NAME = #{name}
+		   and STAT_Q_TYPE = #{type}
+	   <if test="id != null">
+		   and STAT_Q_ID != #{id}
+	   </if>
+	</select>
+	
+</mapper>

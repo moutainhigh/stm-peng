@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.home.screen.dao.IScreenDao">
+	<select id="getUserBizRels" resultType="com.mainsteam.stm.home.screen.bo.Biz">
+		SELECT ID id,USER_ID userId, BIZ_ID bizId, BIZ_TYPE bizType, SORT sort ,TITLE title,DOMAIN_ID domainId,SELF_EXT selfExt
+		FROM STM_HOME_USER_SCN_REL WHERE user_id=#{userId}
+	</select>
+	<select id="getBizByid" parameterType="long" resultType="com.mainsteam.stm.home.screen.bo.Biz">
+		SELECT ID id,USER_ID userId, BIZ_ID bizId, BIZ_TYPE bizType, SORT sort ,TITLE title,DOMAIN_ID domainId,SELF_EXT selfExt
+		FROM STM_HOME_USER_SCN_REL WHERE id=#{id}
+	</select>
+	<delete id="del" parameterType="long">
+		DELETE FROM STM_HOME_USER_SCN_REL WHERE USER_ID=#{userId}
+	</delete>
+	
+	<insert id="batchInsert" parameterType="com.mainsteam.stm.home.screen.bo.Biz">
+		INSERT INTO STM_HOME_USER_SCN_REL(ID,USER_ID, BIZ_ID, BIZ_TYPE, SORT,TITLE,DOMAIN_ID,SELF_EXT)
+		VALUES(#{id},#{userId},#{bizId},#{bizType},#{sort},#{title},#{domainId},#{selfExt})
+	</insert>
+	
+	<update id="update" parameterType="com.mainsteam.stm.home.screen.bo.Biz">
+		UPDATE STM_HOME_USER_SCN_REL
+		<set>
+	        <if test="bizId != null">BIZ_ID = #{bizId},</if>
+	        <if test="title != null">TITLE = #{title},</if>
+	        <if test="sort != null">SORT = #{sort},</if>
+	        <if test="domainId != null">DOMAIN_ID = #{domainId},</if>
+	        <if test="selfExt != null">SELF_EXT = #{selfExt},</if>
+		</set>
+		WHERE ID=#{id}
+	</update>
+</mapper>

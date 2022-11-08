@@ -1,0 +1,295 @@
+<div id="discoverAccountPanel" class="oc-window-rightmenutwo">
+	<div class="newAccountPanel" title="<B>新增账户信息</B>" data-options="collapsed:false,collapsible:false" >
+		<div class="window-tips">
+			<span class="fa fa-info-circle yellow">专为操作系统设置预置账户用于发现，后续修改操作系统用户名密码时只需修改预置账户即可</span>
+		</div>
+		<form class="oc-form col1" name="accountForm">
+			<input type="hidden" name="account_id" />
+			<div class="form-group" style="text-align: left;">
+				<label><B>域：</B></label>
+				<div>
+					<select name="domain_id" required="required"></select>
+				</div>
+			</div>
+			<div class="form-group" style="text-align: left;">
+				<label><B>用户名：</B></label>
+				<div>
+					<input name="username" type="text" required="required" validType="maxLength[50]"></input>
+				</div>
+			</div>
+			<div class="form-group" style="text-align: left;">
+				<label><B>密码：</B></label>
+				<div>
+					<input name="password" type="password" required="required" type="password" validType="maxLength[50]"></input>
+				</div>
+			</div>
+			<div class="form-group" style="text-align: left;">
+				<label><B>确认密码：</B></label>
+				<div>
+					<input name="repassword" type="password" required="required" type="password" validType="maxLength[50]"></input>
+				</div>
+			</div>
+			<div class="form-group" style="text-align: left;">
+				<label><B>备注：</B></label>
+				<div style="text-align: bottom;">
+					<textarea style="resize: none; height: 60px;" rows="1" cols="1" name="comments" validType="maxLength[200]"></textarea>
+				</div>
+				<span>
+					<a class="locate-right saveBtn" style="margin-top: 30px;" onclick="fn_insert()"/>
+				</span>
+			</div>
+		</form>
+	</div>
+	<div class="accountDatagridPanel" title="<B>账户信息列表</B>" data-options="selected:true,collapsible:false,fit:true">
+		<div class="accountDatagrid"></div>
+	</div>
+	<script type="text/javascript">
+		var accountPanel;
+		var domId=oc.util.generateId();
+		var domainSelect;
+		$(function() {
+			accountPanel = $("#discoverAccountPanel").attr('id', domId);
+			accountPanel.accordion({
+				fit : true,
+				multiple : true
+			});
+			accountPanel.find(".accordion-header").css("cursor", "auto");
+			// 先渲染form
+			oc.ui.form({
+				selector : accountPanel.find("form[name='accountForm']")
+			});
+			
+			var domains = oc.index.getDomains();
+			var firstDomainId = typeof(domains[0]) == "undefined" ? '' : domains[0].id;
+			domainSelect = oc.ui.combobox({
+				selector : accountPanel.find("[name='domain_id']"),
+				placeholder : false,
+				data : domains,
+				value : firstDomainId
+			});
+			
+			var ADHeight = parseInt(accountPanel.height()) - parseInt(accountPanel.find('.newAccountPanel').height()) - 50;
+			var accountDatagrid = accountPanel.find(".accountDatagrid").height(ADHeight);
+			oc.ui.datagrid({
+				selector : accountDatagrid,
+				url : oc.resource.getUrl("portal/resource/account/getList.htm?dataType=json"),
+				fit : false,
+				height : '195px',
+				border : false,
+				pagination : false,
+				singleSelect : true,
+				remoteSort : false,
+				columns : [ [ {
+					field : 'password',
+					title : '密码',
+					hidden : true
+				},{
+					field : 'account_id',
+					title : '账户ID',
+					hidden : true
+				}, {
+					field : 'domain_id',
+					title : '域ID',
+					hidden : true
+				}, {
+					field : 'domainname',
+					title : '域',
+					width : 40,
+					align : 'center',
+					sortable : true
+				}, {
+					field : 'username',
+					title : '用户名',
+					width : 100,
+					align : 'center',
+					sortable : true
+				}, {
+					field : 'resourses',
+					title : '使用此账户的资源',
+					width : 65,
+					align : 'center',
+					sortable : true,
+					formatter : function(value, row, index){
+						var formatterString = '';
+						if(value == 0){
+							formatterString = "<b>" + value + "&nbsp;个</b><a class='oc-download'>资源</a>"
+						}else{
+							formatterString = "<b>" + value + "&nbsp;个</b><a class='oc-download'"
+							+" name='select' onclick='fn_account_select(this)'"
+							+" account_id='" + row.account_id + "'>资源</a>"
+						}
+						return formatterString;
+					}
+				}, {
+					field : 'comments',
+					title : '备注',
+					width : 140,
+					align : 'center',
+					sortable : true,
+					formatter : function(value, row, index){
+						return "<label title='" + value + "'>" + (value != null && value != undefined ? value : '') + "</label>"
+					}
+				}, {
+					field : 'operate',
+					title : '操作',
+					width : 45,
+					align : 'center',
+					formatter : function(value, row, index){
+						return "<a class='oc-download' name='update'"
+							+" onclick='fn_update(this)' account_id='" + row.account_id + "'>修改</a>"
+							+ "<a class='oc-download' name='delete'"
+							+" onclick='fn_delete(this)' account_id='" + row.account_id + "'>删除</a>";
+					}
+				} ] ] ,
+				loadFilter : function(data){
+					var dataFiltered = data.data;
+					if(data.code != 200){
+						dataFiltered = data;
+					}
+					return dataFiltered;
+				}
+			});
+			accountPanel.find(".saveBtn").linkbutton('RenderLB',{
+				text : '&nbsp;&nbsp;&nbsp;保存&nbsp;&nbsp;&nbsp;'
+			});
+		});
+		function fn_update(btn){
+			accountPanel=$('#'+domId);
+			var accountDatagrid = accountPanel.find(".accountDatagrid");
+			var rows = accountDatagrid.datagrid('getRows');
+			var row;
+			for(var i = 0 ; i < rows.length ; i ++){
+				if($(btn).attr('account_id') == rows[i].account_id){
+					row = rows[i];
+					break;
+				}
+			}
+			accountPanel.find("[name='password']").val(row.password);
+			accountPanel.find("[name='repassword']").val(row.password);
+			accountPanel.find("[name='account_id']").val(row.account_id);
+			accountPanel.find("[name='username']").val(row.username);
+			accountPanel.find("[name='comments']").val(row.comments);
+		    domainSelect.jq.combobox('setValue', row.domain_id);
+		    accountPanel.accordion('getPanel', 0).panel('setTitle', '修改账户信息');
+		}
+		function fn_insert(){
+			accountPanel = $('#'+domId);
+			var myForm = accountPanel.find("form[name='accountForm']").form();
+			if(myForm.form('validate')){
+				var password = accountPanel.find("[name='password']");
+				var repassword = accountPanel.find("[name='repassword']");
+				if(password.val() != repassword.val()){
+					alert('密码和确认密码不相同');
+					password.val('');
+					repassword.val('');
+					return false;
+				}
+				var saveBtn = accountPanel.find('.saveBtn').linkbutton('RenderLB',{
+					disabled : true
+				});
+				var URL;
+				if(accountPanel.find("[name='account_id']").val() == '' || undefined == accountPanel.find("[name='account_id']").val()){
+					URL = oc.resource.getUrl("portal/resource/account/insert.htm?dataType=json");
+				}else{
+					URL = oc.resource.getUrl("portal/resource/account/update.htm?dataType=json");
+				}
+				oc.util.ajax({
+					url : URL,
+					data : {
+						account_id : myForm.find("[name='account_id']").val(),
+						domain_id : myForm.find("[name='domain_id']").val(),
+						username : myForm.find("[name='username']").val(),
+						password : myForm.find("[name='password']").val(),
+						repassword : myForm.find("[name='repassword']").val(),
+						comments : myForm.find("[name='comments']").val(),
+					},
+					success : function(json){
+						if(json.code == 200){
+							if(json.data != -1){
+								accountPanel.find("form[name='accountForm']").form('clear');
+								accountPanel.find(".accountDatagrid").datagrid('reload');
+								alert("保存成功!");
+								accountPanel.accordion('getPanel', 0).panel('setTitle', '新增预置账户信息');
+							}else{
+								alert("预置账户信息错误!");
+							}
+						}
+						saveBtn.linkbutton('RenderLB',{
+							disabled : false
+						});
+					}
+				});
+			}
+		}
+		function fn_delete(btn){
+			accountPanel = $('#' + domId);
+			var account_id = $(btn).attr('account_id');
+			if(account_id == '' || account_id == undefined){
+				alert('请选择要删除的数据');
+			}else{
+				oc.ui.confirm('删除确认', function(){
+						oc.util.ajax({
+							url : oc.resource.getUrl("portal/resource/account/del.htm?dataType=json"),
+							data : {id:account_id},
+							success : function(json){
+								if(json.code == 200){
+									accountPanel.find("form[name='accountForm']").find(":input").val("");
+									accountPanel.find(".accountDatagrid").datagrid('reload');
+									alert("删除预置账户成功!");
+									accountPanel.accordion('getPanel', 0).panel('setTitle', '新增账户信息');
+								}
+							}
+						});
+					},
+					function(){
+						
+					}
+				);
+			}
+		}
+		function fn_account_select(btn){
+			var account_id = $(btn).attr('account_id');
+			var top = $(btn).offset().top;
+			var left = $(btn).offset().left + $(btn).width();
+			var resourceInstancePanel = $("<div><table></table></div>").dialog({
+				title : '账户资源列表',
+				width : 340,
+				height : 140,
+				top : top,
+				left : left
+			});
+			oc.ui.datagrid({
+				selector : resourceInstancePanel.find("table"),
+				url : oc.resource.getUrl("portal/resource/account/getReAccountInstanceByAccountId.htm?dataType=json"),
+				queryParams : {
+					account_id : account_id
+				},
+				fit : true,
+				pagination : false,
+				singleSelect : true,
+				fitColumns : true,
+				columns : [ [ {
+					field : 'instancename',
+					title : '资源名称',
+					align : 'center',
+					width : '35%',
+					ellipsis:true
+				}, {
+					field : 'instanceip',
+					align : 'center',
+					title : 'IP地址',
+					width : '33%'
+				}, {
+					field : 'instancetype',
+					align : 'center',
+					title : '资源类型',
+					width : '33%',
+					ellipsis:true
+				} ] ],
+				loadFilter : function(data) {
+					return data.data;
+				}
+			});
+		}
+	</script>
+</div>

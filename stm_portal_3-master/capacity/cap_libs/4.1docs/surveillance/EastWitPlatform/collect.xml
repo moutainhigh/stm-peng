@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">
+    <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0">
+        <ChangePluginInitParameter pluginid="JdbcPlugin" parameterId="dbType" propertyValue="SQLServer" parameterProperty="DefaultValue"/>
+        <ChangePluginInitParameter pluginid="JdbcPlugin" parameterId="jdbcPort" parameterProperty="DefaultValue" propertyValue="1433"/>
+    </GlobalMetricSetting>
+    <PluginClassAliasList>
+        <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+        <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+        <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+        <PluginClassAlias id="regularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+        <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+        <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+        <PluginClassAlias id="tableConverter" class="com.mainsteam.stm.plugin.common.TableResultSetConverter"/>
+    </PluginClassAliasList>
+    <MetricPlugin metricid="platformInstanceID" collectType="" pluginid="JdbcPlugin">
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="Port" value="Port"/>
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="cameraList" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="channelID,name,groupID,groupName,address,gisX,gisY,platForm,keep,chnNo,devIP,devPort,devUser,devPwd"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="select d.channelId,d.name,d.groupid,g.name,d.address,d.gisx,d.gixy,d.platfrom,d.keep,d.chnno,d.devip,d.devport,d.devuser,d.devpwd from v_device d left join v_group g on d.groupid=g.id"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="tableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="orgInfo" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="id,name,parentID"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select Id,OrgName,ParentOrgId from DevOrgInfo"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="tableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+</MetricPlugins>

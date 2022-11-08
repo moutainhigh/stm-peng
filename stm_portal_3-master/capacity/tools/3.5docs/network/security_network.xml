@@ -1,0 +1,1499 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<!-- 
+	devicetype:			设备类型名称
+	ismulticoltype:		是否允许采集方式多选
+	majortype:			主要分类（可以理解为设备类型）
+	minortype:			次要分类
+	manufacturer:		厂商
+	devicetype_zh:		设备类型中文描述
+	
+	配置注意事项
+	
+	1、关于配置“包含”和“匹配”2种运算符需要注意的事项
+
+	a、配置匹配请使用equals，如下几例：
+		1）、当前字符串值匹配"error"字符串,配置应该如下：
+			"${value}".equals("error")
+			配置到xml中，引号需要不能直接写，因此正确的配置应该为：
+			&quot;${value}&quot;.equals(&quot;不可用&quot;)
+			（注意），${value}也应该用引号引起来
+		2）、当前字符串值不匹配"error"字符串,配置应该如下：
+			!&quot;${value}&quot;.equals(&quot;不可用&quot;)
+
+	b、配置包含请使用contains
+		1）、当前字符串值包含"error"字符串，配置应该如下：
+			&quot;${value}&quot;.contains(&quot;error&quot;)
+		2）、当前字符串值不包含"error"字符串，配置应该如下：
+			!&quot;${value}&quot;.contains(&quot;error&quot;)
+		
+	c、配置表达式时，请直接遵循java代码配置即可
+	
+	 -->
+	<devicetypeinfo devicetype="security_network" ismulticoltype="true" majortype="network" minortype="Switch" manufacturer="public" devicetype_zh="Security">
+		
+		<!-- 用于定位设备为该类设备的多个sysoid标识，如果snmp采集为sysoid，如果其他方式自行定义 -->
+		<devicetypes>
+
+		</devicetypes>
+		
+		<!-- 该设备类型定义的命令，用于合并命令执行 -->
+		<commands>
+			<!-- coltype:采集方式，comid：命令ID，command：命令 -->
+		
+			<command coltype="SNMP" comid="sysObjectID" command="1.3.6.1.2.1.1.2.0"/>  <!--网络设备OID -->
+			<command coltype="SNMP" comid="ipAdEntAddr" command="1.3.6.1.2.1.4.20.1.1"/>  <!--IP地址 -->
+	
+			<command coltype="SNMP" comid="sysName" command="1.3.6.1.2.1.1.5.0"/>  <!--网络设备名称 -->
+			<command coltype="SNMP" comid="sysDescr" command="1.3.6.1.2.1.1.1.0"/>  <!--网络设备说明 -->
+			<command coltype="INNER_PROC" comid="sysUpTime" command="com.qwserv.itm.pfl.resource.innerproc.host.snmp.SysUpTime.sysUpTime"/>  <!--连续运行时间 -->
+			
+			<command coltype="SNMP" comid="icmpInMsgs" command="1.3.6.1.2.1.5.1.0"/>  <!--接收ICMP包率 -->
+			<command coltype="SNMP" comid="icmpOutMsgs" command="1.3.6.1.2.1.5.14.0"/>  <!--发送ICMP包率 -->
+			<command coltype="SNMP" comid="tcpCurrEstab" command="1.3.6.1.2.1.6.9.0"/>  <!--TCP端口连接数 -->
+
+			<command coltype="SNMP" comid="ifInMulticastPkts" command="1.3.6.1.2.1.31.1.1.1.2"/>  <!--接收组播包数32bit -->
+			<command coltype="SNMP" comid="ifOutMulticastPkts" command="1.3.6.1.2.1.31.1.1.1.4"/>  <!--发送组播包数32bit -->
+			<command coltype="SNMP" comid="ifHCInMulticastPkts" command="1.3.6.1.2.1.31.1.1.1.8"/>  <!--接收组播包数64bit -->
+			<command coltype="SNMP" comid="ifHCOutMulticastPkts" command="1.3.6.1.2.1.31.1.1.1.12"/>  <!--发送组播包数64bit -->
+			<command coltype="SNMP" comid="ifInBroadcastPkts" command="1.3.6.1.2.1.31.1.1.1.3"/>  <!--接收广播包32bit -->
+			<command coltype="SNMP" comid="ifOutBroadcastPkts" command="1.3.6.1.2.1.31.1.1.1.5"/>  <!--发送广播包32bit -->
+			<command coltype="SNMP" comid="ifHCInBroadcastPkts" command="1.3.6.1.2.1.31.1.1.1.9"/>  <!--接收广播包64bit -->
+			<command coltype="SNMP" comid="ifHCOutBroadcastPkts" command="1.3.6.1.2.1.31.1.1.1.13"/>  <!--发送广播包64bit -->
+			
+
+			<command coltype="SNMP" comid="ifIndex" command="1.3.6.1.2.1.2.2.1.1"/>  <!--索引 -->
+			<command coltype="SNMP" comid="ifName" command="1.3.6.1.2.1.31.1.1.1.1"/>  <!--端口名称 -->
+			<command coltype="SNMP" comid="ifAlias" command="1.3.6.1.2.1.31.1.1.1.18"/>  <!--端口别名 -->
+			<command coltype="SNMP" comid="ifDesc" command="1.3.6.1.2.1.2.2.1.2"/>  <!--端口描述 -->		
+			<command coltype="SNMP" comid="ifType" command="1.3.6.1.2.1.2.2.1.3"/>  <!--端口类型 -->
+			
+			<command coltype="SNMP" comid="ifSpeed1" command="1.3.6.1.2.1.31.1.1.1.15"/>  <!--端口带宽1 -->
+			<command coltype="SNMP" comid="ifSpeed2" command="1.3.6.1.2.1.2.2.1.5"/>  <!--端口带宽2 -->
+			<command coltype="SNMP" comid="ifMac" command="1.3.6.1.2.1.2.2.1.6"/>  <!--MAC地址 -->
+			<command coltype="SNMP" comid="ifAdminStatus" command="1.3.6.1.2.1.2.2.1.7"/>  <!--管理状态 -->
+			<command coltype="SNMP" comid="ifOperStatus" command="1.3.6.1.2.1.2.2.1.8"/>  <!--操作状态 -->
+			<command coltype="SNMP" comid="ifInOctets" command="1.3.6.1.2.1.2.2.1.10"/>   <!--单端口接收吞吐量32位-->
+			<command coltype="SNMP" comid="ifHCInOctets" command="1.3.6.1.2.1.31.1.1.1.6"/>   <!--单端口接收吞吐量64位-->
+			<command coltype="SNMP" comid="ifOutOctets" command="1.3.6.1.2.1.2.2.1.16"/>  <!--单端口发送吞吐量32位-->
+			<command coltype="SNMP" comid="ifHCOutOctets" command="1.3.6.1.2.1.31.1.1.1.10"/>  <!--单端口发送吞吐量64位-->
+			<command coltype="SNMP" comid="ifInDiscards" command="1.3.6.1.2.1.2.2.1.13"/>  <!--接收丢包-->
+			<command coltype="SNMP" comid="ifOutDiscards" command="1.3.6.1.2.1.2.2.1.19"/> <!--发送丢包-->
+			<command coltype="SNMP" comid="ifInUcastPkts" command="1.3.6.1.2.1.2.2.1.11"/>  <!--端口子网单播包累计接收的包数32位 -->
+			<command coltype="SNMP" comid="ifOutUcastPkts" command="1.3.6.1.2.1.2.2.1.17"/>  <!--端口子网单播包累计发送的包数32位 -->
+			<command coltype="SNMP" comid="ifHCInUcastPkts" command="1.3.6.1.2.1.31.1.1.1.7"/>  <!--端口子网单播包累计接收的包数64位 -->
+			<command coltype="SNMP" comid="ifHCOutUcastPkts" command="1.3.6.1.2.1.31.1.1.1.11"/>  <!--端口子网单播包累计发送的包数64位 -->
+			<command coltype="SNMP" comid="ifInNucastPkts" command="1.3.6.1.2.1.2.2.1.12"/>  <!--端口子网非单播包(即子网广播包或子网组播包)累计接收的包数 -->
+			<command coltype="SNMP" comid="ifOutNucastPkts" command="1.3.6.1.2.1.2.2.1.18"/>  <!--端口子网非单播包(即子网广播包或子网组播包)累计发送的包数 -->
+			<command coltype="SNMP" comid="ifInErrors" command="1.3.6.1.2.1.2.2.1.14"/>  <!-- 接收的错包数-->
+			<command coltype="SNMP" comid="ifOutErrors" command="1.3.6.1.2.1.2.2.1.20"/>  <!-- 发送的错包数-->		
+
+			<!--ARP表 -->
+			<command coltype="SNMP" comid="ipNetToMediaTable" command="1.3.6.1.2.1.4.22">
+				<columns>
+					<column key="1.3.6.1.2.1.4.22.1.1" value="端口索引"/>
+					<column key="1.3.6.1.2.1.4.22.1.2" value="MAC地址"/>
+					<column key="1.3.6.1.2.1.4.22.1.3" value="IP地址"/>
+					<column key="1.3.6.1.2.1.4.22.1.4" value="类型"/>
+				</columns>
+			</command>	
+			<!--FDB表 -->
+			<command coltype="SNMP" comid="dot1dTpFdbTable" command="1.3.6.1.2.1.17.4.3">
+				<columns>
+					<column key="1.3.6.1.2.1.17.4.3.1.1" value="MAC地址"/>
+					<column key="1.3.6.1.2.1.17.4.3.1.2" value="端口号"/>
+					<column key="1.3.6.1.2.1.17.4.3.1.3" value="状态"/>
+				</columns>
+			</command>
+			<!--BasePort表 -->
+			<command coltype="SNMP" comid="dot1dBasePortTable" command="1.3.6.1.2.1.17.1.4">
+				<columns>
+					<column key="1.3.6.1.2.1.17.1.4.1.1" value="端口号"/>
+					<column key="1.3.6.1.2.1.17.1.4.1.2" value="端口索引"/>
+					<column key="1.3.6.1.2.1.17.1.4.1.3" value="端口虚电路"/>
+					<column key="1.3.6.1.2.1.17.1.4.1.4" value="过度延迟而丢弃的帧数"/>
+					<column key="1.3.6.1.2.1.17.1.4.1.5" value="过度大小而丢弃的帧数"/>
+				</columns>
+			</command>
+			<!--路由表 -->
+			<command coltype="SNMP" comid="ipRouteTable" command="1.3.6.1.2.1.4.21">  
+				<columns>
+					<column key="1.3.6.1.2.1.4.21.1.1" value="目的IP"/>
+					<column key="1.3.6.1.2.1.4.21.1.2" value="接口索引"/>
+					<column key="1.3.6.1.2.1.4.21.1.3" value="主要的路由度量"/>
+					<column key="1.3.6.1.2.1.4.21.1.4" value="备用的路由度量1"/>
+					<column key="1.3.6.1.2.1.4.21.1.5" value="备用的路由度量2"/>
+					<column key="1.3.6.1.2.1.4.21.1.6" value="备用的路由度量3"/>
+					<column key="1.3.6.1.2.1.4.21.1.12" value="备用的路由度量4"/>
+					<column key="1.3.6.1.2.1.4.21.1.7" value="下一跳IP"/>
+					<column key="1.3.6.1.2.1.4.21.1.8" value="路由类型"/>
+					<column key="1.3.6.1.2.1.4.21.1.9" value="路由机制"/>
+					<column key="1.3.6.1.2.1.4.21.1.10" value="最后一次更新时间(s)"/>
+					<column key="1.3.6.1.2.1.4.21.1.11" value="子网掩码"/>
+					<column key="1.3.6.1.2.1.4.21.1.13" value="路由信息"/>
+				</columns>
+			</command>
+			<!--IP表 -->
+			<command coltype="SNMP" comid="ipAddrTable" command="1.3.6.1.2.1.4.20"> 
+				<columns>
+					<column key="1.3.6.1.2.1.4.20.1.1" value="IP地址"/>
+					<column key="1.3.6.1.2.1.4.20.1.2" value="端口索引"/>
+					<column key="1.3.6.1.2.1.4.20.1.3" value="子网掩码"/>
+					<column key="1.3.6.1.2.1.4.20.1.4" value="广播地址"/>
+					<column key="1.3.6.1.2.1.4.20.1.5" value="IP数据包最大长度"/>
+				</columns>
+			</command>
+			
+			<command coltype="SNMP" comid="ifIpaddress"     command="1.3.6.1.2.1.4.20.1.1"/>  <!--IP表：IP地址-->
+			<command coltype="SNMP" comid="ifIpIndex"     command="1.3.6.1.2.1.4.20.1.2"/>  <!--IP表：ifindex-->
+			
+                        <command coltype="INNER_PROC" comid="testAvail" command="com.qwserv.itm.pfl.resource.util.TestConnection.testAvail"/>  <!-- 测试是否可连接 -->
+                        <command coltype="INNER_PROC" comid="testPing" command="com.qwserv.itm.pfl.resource.util.TestConnection.testPing"/>  <!-- 测试是否可ping -->			
+		
+		</commands>
+		
+		<!-- 描述该类设备的所有指标采集,一行对应一个指标 -->
+		<!-- kpiid的命名规范：长度不超过20，命名规范，前两位为模块标识，分别以以下字符打头， N（网络）、H（主机）、D（数据库）、M（中间件）、A（应用）；第二位为数字，由模块内部进行标识定义-->
+		<resources>
+			
+			<!--  主资源 -->
+			
+			<!-- 一个resource值一个特定的kpi指标,如CPU利用率，kpiid：指标id（最大32个字符长），coltype：采集方式，value：结果计算表达式（默认为$d1） ，valuetype(Integer/Float/String)：采集值类型，unit：单位 -->
+			<!-- 设备可用性，snmpping\icmp ping都不通则不可用，否则可用 -->
+			<resource kpiid="Availability" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="testAvail" select="" merge="" deal=""/>
+				</collects>
+				<translations>
+					<translation source="-1" dest="不可用"/>
+					<translation source="0" dest="可用"/>
+				</translations>
+				
+                <kpipolicy table="res_d_Availability" field="value" fieldtype="" willalert="y"
+					alertexp1="&quot;${value}&quot;.contains(&quot;可用&quot;)" alertdesc1="设备连接正常" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;${value}&quot;.contains(&quot;不可用&quot;)" alertdesc5="设备连接失败"
+					alertcontin="1"  circle="5" storefactor="1"/>					
+			</resource>	
+			
+			<!-- 设备ICMP Ping 丢包率 -->
+			<resource kpiid="N1PingLostRate" coltype="INNER_PROC" value="" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="testPing" select="lost\t(\d+)" merge="" deal=""/>
+				</collects>
+				
+                <kpipolicy table="res_d_N1PingLostRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1" storefactor="1"/>					
+			</resource>
+			
+			<!-- 设备Ping时延 -->
+			<resource kpiid="N1ResponseTime" coltype="INNER_PROC" value="" valuetype="Integer" unit="毫秒">
+				<collects>
+					<collect exeorder="10" comid="testPing" select="delay\t([\-\d]+)" merge="" deal=""/>
+				</collects>
+				
+                <kpipolicy table="res_d_N1ResponseTime" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1" storefactor="1"/>					
+			</resource>								
+			
+			<!-- 网络设备的OID -->
+			<resource kpiid="N1sysObjectID" coltype="SNMP" value="" valuetype="String" unit="">
+			<!-- 定义采集流程 -->
+				<collects>
+				<!-- exeorder：执行序号数字越小，执行越前，comid：命令id，select：select函数，deal：函数 -->
+					<collect exeorder="10" comid="sysObjectID" select="" merge="" deal=""/>				
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<!-- 
+				table:数据库表，指标采集数据保存的地方
+				field:数据库字段名，保存的字段名
+				fieldtype:数据库字段属性String、Integer、Float
+				willalert:是否告警
+				alertexp1:告警条件1
+				alertdesc1:告警描述1
+				alertexp2:告警条件2
+				alertdesc2:告警描述2
+				alertexp3:告警条件3
+				alertdesc3:告警描述3
+				alertexp4:告警条件4
+				alertdesc4:告警描述4
+				alertexp5:告警条件5
+				alertdesc5:告警描述5
+				alertcontin:连续若干次告警
+				alertype:事件类型
+				storefactor:存盘倍数（默认值）（采集周期的倍数，0表示不存）
+				circle:采集周期(默认值)
+				 -->
+				<kpipolicy table="res_d_N1sysObjectID" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="1"/>
+					
+			</resource>
+			
+			<!-- 连续运行时间 -->
+			<resource kpiid="N1sysUpTime" coltype="INNER_PROC" value="$d1天$d2时$d3分$d4秒" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="sysUpTime" select="(\d+)days(\d+)hours(\d+)minutes(\d+)seconds" merge="" deal=""/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1sysUpTime" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="60" storefactor="1"/>
+					
+			</resource>
+			
+			<!-- 网络设备说明 -->
+			<resource kpiid="N1sysDescr" coltype="SNMP" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="sysDescr" select="" merge="" deal=""/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1sysDescr" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="1"/>
+					
+			</resource>
+			
+			<!-- IP地址 -->
+			<resource kpiid="N1ip" coltype="SNMP" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="ipAdEntAddr" select="" merge="join" deal=""/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1ip" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="60" storefactor="1"/>
+					
+			</resource>
+		
+			
+			<!-- 配置寄存器 -->
+			<!--resource kpiid="N1configRegister" coltype="MANUAL_INPUT" value="" valuetype="" unit="">
+				<collects>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1configRegister" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="2" storefactor="1"/>
+					
+			</resource>
+			
+			 配线架编号 
+			<resource kpiid="N1patchNumber" coltype="MANUAL_INPUT" value="" valuetype="" unit="">
+				<collects>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1patchNumber" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="2" storefactor="1"/>
+					
+			</resource>
+			
+			机箱序号 
+			<resource kpiid="N1chassisIndex" coltype="MANUAL_INPUT" value="" valuetype="" unit="">
+				<collects>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1chassisIndex" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="2" storefactor="1"/>
+					
+			</resource>
+			
+			机箱类型 
+			<resource kpiid="N1chassisType" coltype="MANUAL_INPUT" value="" valuetype="" unit="">
+				<collects>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1chassisType" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="2" storefactor="1"/>
+					
+			</resource>
+			
+			 机架编号 
+			<resource kpiid="N1rackNumber" coltype="MANUAL_INPUT" value="" valuetype="" unit="n">
+				<collects>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1rackNumber" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="2" storefactor="1"/>
+					
+			</resource>
+			-->
+			
+			
+			<!-- 网络端口个数 -->
+			<resource kpiid="N1ifNum" coltype="SNMP" value="" valuetype="Integer" unit="">
+				<collects>
+					<collect exeorder="10" comid="ifIndex" select="" merge="count" deal=""/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifNum" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="1"/>
+					
+			</resource>
+			
+			<!-- 网络设备名称 -->
+			<!--<resource kpiid="N1sysName" coltype="SNMP" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="sysName" select="" merge="" deal=""/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1sysName" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="1"/>
+					
+			</resource> -->
+
+			
+			<!-- 总接收吞吐量 -->
+			<!--resource kpiid="N1totalInOctets" coltype="SNMP" value="" valuetype="Float" unit="bps">
+				<collects>
+					<collect exeorder="10" comid="ifInOctets:ifHCInOctets" select="" merge="sum" deal="round_chgv"/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1totalInOctets" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource-->
+			
+			<!-- 总发送吞吐量 -->
+			<!--resource kpiid="N1totalOutOctets" coltype="SNMP" value="" valuetype="Float" unit="bps">
+				<collects>
+					<collect exeorder="10" comid="ifOutOctets:ifHCOutOctets" select="" merge="sum" deal="round_chgv"/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1totalOutOctets" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource-->	
+			
+			<!-- 吞吐量 -->
+			<!--resource kpiid="N1totalOctets" coltype="SNMP" value="$d1+$d2" valuetype="Float" unit="bps">
+				<collects>
+					<collect exeorder="10" comid="ifInOctets:ifHCInOctets" select="" merge="sum" deal="round_chgv"/>
+					<collect exeorder="20" comid="ifOutOctets:ifHCOutOctets" select="" merge="sum" deal="round_chgv"/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1totalOctets" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="5" storefactor="1"/>
+				
+			</resource-->
+			
+			<!-- 接收丢包率 -->
+			<!--resource kpiid="N1inDiscardsRate" coltype="SNMP" value="($d1/($d2+$d3))*100" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="ifInDiscards" select="" merge="sum" deal="round_chg"/>
+					<collect exeorder="20" comid="ifInUcastPkts:ifHCInUcastPkts" select="" merge="sum" deal="round_chg"/>
+					<collect exeorder="30" comid="ifInNucastPkts" select="" merge="sum" deal="round_chg"/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1inDiscardsRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource-->
+			
+			
+			<!-- 发送丢包率 -->
+			<!--resource kpiid="N1outDiscardsRate" coltype="SNMP" value="($d1/($d2+$d3))*100" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="ifOutDiscards" select="" merge="sum" deal="round_chg"/>
+					<collect exeorder="20" comid="ifOutUcastPkts:ifHCOutUcastPkts" select="" merge="sum" deal="round_chg"/>
+					<collect exeorder="30" comid="ifOutNucastPkts" select="" merge="sum" deal="round_chg"/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1outDiscardsRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource-->
+			
+			<!-- 丢包率 -->
+			<!--resource kpiid="N1discardsRate" coltype="SNMP" value="(($d1+$d4)/($d2+$d3+$d5+$d6))*100" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="ifInDiscards" select="" merge="sum" deal="round_chg"/>
+					<collect exeorder="20" comid="ifInUcastPkts:ifHCInUcastPkts" select="" merge="sum" deal="round_chg"/>
+					<collect exeorder="30" comid="ifInNucastPkts" select="" merge="sum" deal="round_chg"/>
+					<collect exeorder="40" comid="ifOutDiscards" select="" merge="sum" deal="round_chg"/>
+					<collect exeorder="50" comid="ifOutUcastPkts:ifHCOutUcastPkts" select="" merge="sum" deal="round_chg"/>
+					<collect exeorder="60" comid="ifOutNucastPkts" select="" merge="sum" deal="round_chg"/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1discardsRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="5" storefactor="1"/>
+				
+			</resource-->
+			
+			
+			
+			<!-- 接收ICMP包率 -->
+			<resource kpiid="N1icmpInMsgsRate" coltype="SNMP" value="" valuetype="Float" unit="包/秒">
+				<collects>
+					<collect exeorder="10" comid="icmpInMsgs" select="" merge="" deal="round_chgv"/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1icmpInMsgsRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 发送ICMP包率 -->
+			<resource kpiid="N1icmpOutMsgsRate" coltype="SNMP" value="" valuetype="Float" unit="包/秒">
+				<collects>
+					<collect exeorder="10" comid="icmpOutMsgs" select="" merge="" deal="round_chgv"/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1icmpOutMsgsRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource>
+				
+			<!-- TCP端口连接数 -->
+			<!--resource kpiid="N1tcpCurrEstab" coltype="SNMP" value="" valuetype="Integer" unit="">
+				<collects>
+					<collect exeorder="10" comid="tcpCurrEstab" select="" merge="" deal=""/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1tcpCurrEstab" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="5" storefactor="1"/>
+				
+			</resource -->
+			
+			<!-- 接收广播包率 -->
+			<!--resource kpiid="N1inBroadPktsRate" coltype="SNMP" value="" valuetype="Float" unit="包/秒">
+				<collects>
+					<collect exeorder="10" comid="ifInBroadcastPkts:ifHCInBroadcastPkts" select="" merge="sum" deal="round_chgv"/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1inBroadPktsRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource-->
+			
+			<!-- 发送广播包率 -->
+			<!--resource kpiid="N1outBroadPktsRate" coltype="SNMP" value="" valuetype="Float" unit="包/秒">
+				<collects>
+					<collect exeorder="10" comid="ifOutBroadcastPkts:ifHCOutBroadcastPkts" select="" merge="sum" deal="round_chgv"/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1outBroadPktsRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource-->
+			
+			<!-- 广播包率 -->
+			<!--resource kpiid="N1broadPktsRate" coltype="SNMP" value="$d1+$d2" valuetype="Float" unit="包/秒">
+				<collects>
+					<collect exeorder="10" comid="ifInBroadcastPkts:ifHCInBroadcastPkts" select="" merge="sum" deal="round_chgv"/>
+					<collect exeorder="20" comid="ifOutBroadcastPkts:ifHCOutBroadcastPkts" select="" merge="sum" deal="round_chgv"/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1broadPktsRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="5" storefactor="1"/>
+				
+			</resource-->
+			
+			<!-- 接收广播包数 -->
+			<!--resource kpiid="N1inBroadPkts" coltype="SNMP" value="" valuetype="Integer" unit="包">
+				<collects>
+					<collect exeorder="10" comid="ifInBroadcastPkts:ifHCInBroadcastPkts" select="" merge="sum" deal=""/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1inBroadPkts" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource-->
+			
+			<!-- 发送广播包数 -->
+			<!--resource kpiid="N1outBroadPkts" coltype="SNMP" value="" valuetype="Integer" unit="包">
+				<collects>
+					<collect exeorder="10" comid="ifOutBroadcastPkts:ifHCOutBroadcastPkts" select="" merge="sum" deal=""/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1outBroadPkts" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource-->
+			
+	
+<!-- 端口子资源 -->
+			
+			
+			<!-- 端口名称 -->
+			<resource kpiid="N1ifName" coltype="SNMP" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="ifName" select="" merge="" deal=""/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifName" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="0"/>
+					
+			</resource>
+			
+			<!-- 端口别名 -->
+			<resource kpiid="N1ifAlias" coltype="SNMP" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="ifAlias" select="" merge="" deal=""/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifAlias" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="0"/>
+					
+			</resource>
+			
+			<!-- 端口描述 -->
+			<resource kpiid="N1ifDesc" coltype="SNMP" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="ifDesc" select="" merge="" deal=""/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifDesc" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="0"/>
+					
+			</resource>
+			
+			<!-- 端口说明
+			<resource kpiid="N1ifBusinessName" coltype="MANUAL_INPUT" value="" valuetype="String" unit="">
+				<collects>
+								
+				</collects>
+				
+				<kpipolicy table="res_d_ifBusinessName" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="2" storefactor="1"/>
+					
+			</resource> -->
+			
+			<!-- 端口索引 -->
+			<resource kpiid="N1ifIndex" coltype="SNMP" value="" valuetype="Integer" unit="">
+				<collects>
+					<collect exeorder="10" comid="ifIndex" select="" merge="" deal=""/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifIndex" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="0"/>
+					
+			</resource>
+			
+			<!-- 端口类型 -->
+			<resource kpiid="N1ifType" coltype="SNMP" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="ifType" select="" merge="" deal=""/>				
+				</collects>
+				
+				<translations>
+					<translation dest="other" source="1" />
+					<translation dest="regular1822" source="2" />
+					<translation dest="hdh1822" source="3" />
+					<translation dest="ddnX25" source="4" />
+					<translation dest="rfc877x25" source="5" />
+					<translation dest="ethernetCsmacd" source="6" />
+					<translation dest="iso88023Csmacd" source="7" />
+					<translation dest="iso88024TokenBus" source="8" />
+					<translation dest="iso88025TokenRing" source="9" />
+					<translation dest="iso88026Man" source="10" />
+					<translation dest="starLan" source="11" />
+					<translation dest="proteon10Mbit" source="12" />
+					<translation dest="proteon80Mbit" source="13" />
+					<translation dest="hyperchannel" source="14" />
+					<translation dest="fddi" source="15" />
+					<translation dest="lapb" source="16" />
+					<translation dest="sdlc" source="17" />
+					<translation dest="ds1" source="18" />
+					<translation dest="e1" source="19" />
+					<translation dest="basicISDN" source="20" />
+					<translation dest="primaryISDN" source="21" />
+					<translation dest="propPointToPointSerial" source="22" />
+					<translation dest="ppp" source="23" />
+					<translation dest="softwareLoopback" source="24" />
+					<translation dest="eon" source="25" />
+					<translation dest="ethernet3Mbit" source="26" />
+					<translation dest="nsip" source="27" />
+					<translation dest="slip" source="28" />
+					<translation dest="ultra" source="29" />
+					<translation dest="ds3" source="30" />
+					<translation dest="sip" source="31" />
+					<translation dest="frameRelay" source="32" />
+					<translation dest="rs232" source="33" />
+					<translation dest="para" source="34" />
+					<translation dest="arcnet" source="35" />
+					<translation dest="arcnetPlus" source="36" />
+					<translation dest="atm" source="37" />
+					<translation dest="miox25" source="38" />
+					<translation dest="sonet" source="39" />
+					<translation dest="x25ple" source="40" />
+					<translation dest="iso88022llc" source="41" />
+					<translation dest="localTalk" source="42" />
+					<translation dest="smdsDxi" source="43" />
+					<translation dest="frameRelayService" source="44" />
+					<translation dest="v35" source="45" />
+					<translation dest="hssi" source="46" />
+					<translation dest="hippi" source="47" />
+					<translation dest="modem" source="48" />
+					<translation dest="aal5" source="49" />
+					<translation dest="sonetPath" source="50" />
+					<translation dest="sonetVT" source="51" />
+					<translation dest="smdsIcip" source="52" />
+					<translation dest="propVirtual" source="53" />
+					<translation dest="propMultiplexor" source="54" />
+					<translation dest="ieee80212" source="55" />
+					<translation dest="fibreChannel" source="56" />
+					<translation dest="hippiInterface" source="57" />
+					<translation dest="frameRelayInterconnect" source="58" />
+					<translation dest="aflane8023" source="59" />
+					<translation dest="aflane8025" source="60" />
+					<translation dest="cctEmul" source="61" />
+					<translation dest="fastEther" source="62" />
+					<translation dest="isdn" source="63" />
+					<translation dest="v11" source="64" />
+					<translation dest="v36" source="65" />
+					<translation dest="g703at64k" source="66" />
+					<translation dest="g703at2mb" source="67" />
+					<translation dest="qllc" source="68" />
+					<translation dest="fastEtherFX" source="69" />
+					<translation dest="channel" source="70" />
+					<translation dest="ieee80211" source="71" />
+					<translation dest="ibm370parChan" source="72" />
+					<translation dest="escon" source="73" />
+					<translation dest="dlsw" source="74" />
+					<translation dest="isdns" source="75" />
+					<translation dest="isdnu" source="76" />
+					<translation dest="lapd" source="77" />
+					<translation dest="ipSwitch" source="78" />
+					<translation dest="rsrb" source="79" />
+					<translation dest="atmLogical" source="80" />
+					<translation dest="ds0" source="81" />
+					<translation dest="ds0Bundle" source="82" />
+					<translation dest="bsc" source="83" />
+					<translation dest="async" source="84" />
+					<translation dest="cnr" source="85" />
+					<translation dest="iso88025Dtr" source="86" />
+					<translation dest="eplrs" source="87" />
+					<translation dest="arap" source="88" />
+					<translation dest="propCnls" source="89" />
+					<translation dest="hostPad" source="90" />
+					<translation dest="termPad" source="91" />
+					<translation dest="frameRelayMPI" source="92" />
+					<translation dest="x213" source="93" />
+					<translation dest="adsl" source="94" />
+					<translation dest="radsl" source="95" />
+					<translation dest="sdsl" source="96" />
+					<translation dest="vdsl" source="97" />
+					<translation dest="iso88025CRFPInt" source="98" />
+					<translation dest="myrinet" source="99" />
+					<translation dest="voiceEM" source="100" />
+					<translation dest="voiceFXO" source="101" />
+					<translation dest="voiceFXS" source="102" />
+					<translation dest="voiceEncap" source="103" />
+					<translation dest="voiceOverIp" source="104" />
+					<translation dest="atmDxi" source="105" />
+					<translation dest="atmFuni" source="106" />
+					<translation dest="atmIma" source="107" />
+					<translation dest="pppMultilinkBundle" source="108" />
+					<translation dest="ipOverCdlc" source="109" />
+					<translation dest="ipOverClaw" source="110" />
+					<translation dest="stackToStack" source="111" />
+					<translation dest="virtualIpAddress" source="112" />
+					<translation dest="mpc" source="113" />
+					<translation dest="ipOverAtm" source="114" />
+					<translation dest="iso88025Fiber" source="115" />
+					<translation dest="tdlc" source="116" />
+					<translation dest="gigabitEthernet" source="117" />
+					<translation dest="hdlc" source="118" />
+					<translation dest="lapf" source="119" />
+					<translation dest="v37" source="120" />
+					<translation dest="x25mlp" source="121" />
+					<translation dest="x25huntGroup" source="122" />
+					<translation dest="trasnpHdlc" source="123" />
+					<translation dest="interleave" source="124" />
+					<translation dest="fast" source="125" />
+					<translation dest="ip" source="126" />
+					<translation dest="docsCableMaclayer" source="127" />
+					<translation dest="docsCableDownstream" source="128" />
+					<translation dest="docsCableUpstream" source="129" />
+					<translation dest="a12MppSwitch" source="130" />
+					<translation dest="tunnel" source="131" />
+					<translation dest="coffee" source="132" />
+					<translation dest="ces" source="133" />
+					<translation dest="atmSubInterface" source="134" />
+					<translation dest="l2vlan" source="135" />
+					<translation dest="l3ipvlan" source="136" />
+					<translation dest="l3ipxvlan" source="137" />
+					<translation dest="digitalPowerline" source="138" />
+					<translation dest="mediaMailOverIp" source="139" />
+					<translation dest="dtm" source="140" />
+					<translation dest="dcn" source="141" />
+					<translation dest="ipForward" source="142" />
+					<translation dest="msdsl" source="143" />
+					<translation dest="ieee1394" source="144" />
+					<translation dest="if-gsn" source="145" />
+					<translation dest="dvbRccMacLayer" source="146" />
+					<translation dest="dvbRccDownstream" source="147" />
+					<translation dest="dvbRccUpstream" source="148" />
+					<translation dest="atmVirtual" source="149" />
+					<translation dest="mplsTunnel" source="150" />
+					<translation dest="srp" source="151" />
+					<translation dest="voiceOverAtm" source="152" />
+					<translation dest="voiceOverFrameRelay" source="153" />
+					<translation dest="idsl" source="154" />
+					<translation dest="compositeLink" source="155" />
+					<translation dest="ss7SigLink" source="156" />
+					<translation dest="propWirelessP2P" source="157" />
+					<translation dest="frForward" source="158" />
+					<translation dest="rfc1483" source="159" />
+					<translation dest="usb" source="160" />
+					<translation dest="ieee8023adLag" source="161" />
+					<translation dest="bgppolicyaccounting" source="162" />
+					<translation dest="frf16MfrBundle" source="163" />
+					<translation dest="h323Gatekeeper" source="164" />
+					<translation dest="h323Proxy" source="165" />
+					<translation dest="mpls" source="166" />
+					<translation dest="mfSigLink" source="167" />
+					<translation dest="hdsl2" source="168" />
+					<translation dest="shdsl" source="169" />
+					<translation dest="ds1FDL" source="170" />
+					<translation dest="pos" source="171" />
+					<translation dest="dvbAsiIn" source="172" />
+					<translation dest="dvbAsiOut" source="173" />
+					<translation dest="plc" source="174" />
+					<translation dest="nfas" source="175" />
+					<translation dest="tr008" source="176" />
+					<translation dest="gr303RDT" source="177" />
+					<translation dest="gr303IDT" source="178" />
+					<translation dest="isup" source="179" />
+					<translation dest="propDocsWirelessMaclayer" source="180" />
+					<translation dest="propDocsWirelessDownstream" source="181" />
+					<translation dest="propDocsWirelessUpstream" source="182" />
+					<translation dest="hiperlan2" source="183" />
+					<translation dest="propBWAp2Mp" source="184" />
+					<translation dest="sonetOverheadChannel" source="185" />
+					<translation dest="digitalWrapperOverheadChannel" source="186" />
+					<translation dest="aal2" source="187" />
+					<translation dest="radioMAC" source="188" />
+					<translation dest="atmRadio" source="189" />
+					<translation dest="imt" source="190" />
+					<translation dest="mvl" source="191" />
+					<translation dest="reachDSL" source="192" />
+					<translation dest="frDlciEndPt" source="193" />
+					<translation dest="atmVciEndPt" source="194" />
+					<translation dest="opticalChannel" source="195" />
+					<translation dest="opticalTransport" source="196" />
+					<translation dest="propAtm" source="197" />
+					<translation dest="voiceOverCable" source="198" />
+					<translation dest="infiniband" source="199" />
+					<translation dest="teLink" source="200" />
+					<translation dest="q2931" source="201" />
+					<translation dest="virtualTg" source="202" />
+					<translation dest="sipTg" source="203" />
+					<translation dest="sipSig" source="204" />
+					<translation dest="docsCableUpstreamChannel" source="205" />
+					<translation dest="econet" source="206" />
+					<translation dest="pon155" source="207" />
+					<translation dest="pon622" source="208" />
+					<translation dest="bridge" source="209" />
+					<translation dest="linegroup" source="210" />
+					<translation dest="voiceEMFGD" source="211" />
+					<translation dest="voiceFGDEANA" source="212" />
+					<translation dest="voiceDID" source="213" />
+					<translation dest="mpegTransport" source="214" />
+					<translation dest="sixToFour" source="215" />
+					<translation dest="gtp" source="216" />
+					<translation dest="pdnEtherLoop1" source="217" />
+					<translation dest="pdnEtherLoop2" source="218" />
+					<translation dest="opticalChannelGroup" source="219" />
+					<translation dest="homepna" source="220" />
+					<translation dest="gfp" source="221" />
+					<translation dest="ciscoISLvlan" source="222" />
+					<translation dest="actelisMetaLOOP" source="223" />
+					<translation dest="fcipLink" source="224" />
+					<translation dest="rpr" source="225" />
+					<translation dest="qam" source="226" /> 
+					<translation dest="lmp" source="227" /> 
+					<translation dest="cblVectaStar" source="228" /> 
+					<translation dest="docsCableMCmtsDownstream" source="229" /> 
+					<translation dest="adsl2" source="230" /> 
+					<translation dest="macSecControlledIF" source="231" /> 
+					<translation dest="macSecUncontrolledIF" source="232" /> 
+					<translation dest="aviciOpticalEther" source="233" /> 
+					<translation dest="atmbond" source="234" /> 
+					<translation dest="voiceFGDOS" source="235" /> 
+					<translation dest="mocaVersion1" source="236" /> 
+					<translation dest="ieee80216WMAN" source="237" /> 
+					<translation dest="adsl2plus" source="238" /> 
+					<translation dest="dvbRcsMacLayer" source="239" /> 
+					<translation dest="dvbTdm" source="240" /> 
+					<translation dest="dvbRcsTdma" source="241" />
+					
+					
+				</translations>
+				
+				<kpipolicy table="res_d_N1ifType" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="0"/>
+					
+			</resource>
+			
+			<!-- 端口带宽 -->
+			<resource kpiid="N1ifSpeed" coltype="SNMP" value="$d1!=0?($d1&lt;500000?($d1*1000000):$d1):($d2&lt;500000?($d2*1000000):$d2)" valuetype="Integer" unit="bps">
+				<collects>
+					<collect exeorder="10" comid="ifSpeed1:ifSpeed2" select="" merge="" deal=""/>
+					<collect exeorder="20" comid="ifSpeed2:ifSpeed1" select="" merge="" deal=""/>			
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifSpeed" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="0"/>
+					
+			</resource>
+			
+			<!--端口MAC地址 -->
+			<resource kpiid="N1ifMac" coltype="SNMP" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="ifMac" select="" merge="" deal=""/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifMac" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="0"/>
+					
+			</resource>
+			
+			<!-- 管理状态 -->
+			<resource kpiid="N1ifAdminStatus" coltype="SNMP" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="ifAdminStatus" select="" merge="" deal=""/>				
+				</collects>
+
+				<!-- 定义指标返回后的枚举翻译 -->
+				<translations>
+					<!-- source：资源采集结果值，dest：翻译值 -->
+					<translation source="1" dest="up"/>
+					<translation source="2" dest="down"/>
+					<translation source="3" dest="testing"/>
+				</translations>
+
+				<kpipolicy table="res_d_N1ifAdminStatus" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="5" storefactor="1"/>
+					
+			</resource>
+
+			<!-- 端口状态 -->
+			<resource kpiid="N1ifAvailability" coltype="SNMP" value="$d1$d2" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="ifOperStatus" select="" merge="" deal=""/>
+					<collect exeorder="20" comid="ifAdminStatus" select="" merge="" deal=""/>					
+				</collects>				
+				
+				<!-- 定义指标返回后的枚举翻译 -->
+				<translations>
+					<!-- source：资源采集结果值，dest：翻译值 -->
+					<translation source="11" dest="打开"/>
+					<translation source="default" dest="关闭"/>
+				</translations>
+
+				<kpipolicy table="res_d_N1ifAvailability" field="value" fieldtype="" willalert="y"
+					alertexp1="&quot;${value}&quot;.contains(&quot;打开&quot;)" alertdesc1="${childname}端口打开" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="&quot;${value}&quot;.contains(&quot;关闭&quot;)" alertdesc4="${childname}端口关闭" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1" storefactor="1"/>
+					
+			</resource>
+			
+			<!-- 操作状态 -->
+			<resource kpiid="N1ifOperStatus" coltype="SNMP" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="ifOperStatus" select="" merge="" deal=""/>				
+				</collects>
+				
+				<!-- 定义指标返回后的枚举翻译 -->
+				<translations>
+					<!-- source：资源采集结果值，dest：翻译值 -->
+					<translation source="1" dest="up"/>
+					<translation source="2" dest="down"/>
+					<translation source="3" dest="testing"/>
+					<translation source="4" dest="unknown"/>
+					<translation source="5" dest="dormant"/>
+					<translation source="6" dest="notPresent"/>
+					<translation source="7" dest="lowerLayerDown"/>
+				</translations>
+
+				<kpipolicy table="res_d_N1ifOperStatus" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="5" storefactor="1"/>
+					
+			</resource>
+			
+			<!-- 带宽利用率 -->
+			<resource kpiid="N1ifBandWidthUtil" coltype="SNMP" value="(($d1+$d2)*8/($N1ifSpeed*2))*100" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="ifInOctets:ifHCInOctets" select="" merge="" deal="round_chgv"/>
+					<collect exeorder="20" comid="ifOutOctets:ifHCOutOctets" select="" merge="" deal="round_chgv"/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifBandWidthUtil" field="value" fieldtype="" willalert="y"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"   circle="5" storefactor="1"/>
+					
+			</resource>
+			
+			<!-- 接收速率 -->
+			<resource kpiid="N1ifInOctetsSpeed" coltype="SNMP" value="$d1*8" valuetype="Float" unit="bps">
+				<collects>
+					<collect exeorder="10" comid="ifInOctets:ifHCInOctets" select="" merge="" deal="round_chgv"/>
+
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifInOctetsSpeed" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 发送速率 -->
+			<resource kpiid="N1ifOutOctetsSpeed" coltype="SNMP" value="$d1*8" valuetype="Float" unit="bps">
+				<collects>
+					<collect exeorder="10" comid="ifOutOctets:ifHCOutOctets" select="" merge="" deal="round_chgv"/>
+
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifOutOctetsSpeed" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 接收带宽利用率 -->
+			<resource kpiid="N1ifInBandWidthUtil" coltype="SNMP" value="(($d1*8)/$N1ifSpeed)*100" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="ifInOctets:ifHCInOctets" select="" merge="" deal="round_chgv"/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifInBandWidthUtil" field="value" fieldtype="" willalert="y"
+					alertexp1="${value}&lt;80" alertdesc1="${childname}带宽利用率恢复正常，当前值为${value}%。" alertexp2="" alertdesc2="" alertexp3="${value}>=80"
+					alertdesc3="${childname}带宽利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp4="${value}>=90" alertdesc4="${childname}带宽利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp5="" alertdesc5=""
+					alertcontin="1"   circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 发送带宽利用率 -->
+			<resource kpiid="N1ifOutBandWidthUtil" coltype="SNMP" value="(($d1*8)/$N1ifSpeed)*100" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="ifOutOctets:ifHCOutOctets" select="" merge="" deal="round_chgv"/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifOutBandWidthUtil" field="value" fieldtype="" willalert="y"
+					alertexp1="${value}&lt;80" alertdesc1="${childname}带宽利用率恢复正常，当前值为${value}%。" alertexp2="" alertdesc2="" alertexp3="${value}>=80"
+					alertdesc3="${childname}带宽利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp4="${value}>=90" alertdesc4="${childname}带宽利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp5="" alertdesc5=""
+					alertcontin="1"   circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 入丢包率 -->
+			<!-- resource kpiid="N1ifInDiscardsRate" coltype="SNMP" value="($d1/($d2+$d3))*100" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="ifInDiscards" select="" merge="" deal=""/>
+					<collect exeorder="20" comid="ifInUcastPkts:ifHCInUcastPkts" select="" merge="" deal=""/>
+					<collect exeorder="30" comid="ifInNucastPkts" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifInDiscardsRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource -->
+			
+			<!-- 出丢包率 -->
+			<!--resource kpiid="N1ifOutDiscardsRate" coltype="SNMP" value="($d1/($d2+$d3))*100" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="ifOutDiscards" select="" merge="" deal=""/>
+					<collect exeorder="20" comid="ifOutUcastPkts:ifHCOutUcastPkts" select="" merge="" deal=""/>
+					<collect exeorder="30" comid="ifOutNucastPkts" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifOutDiscardsRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource-->
+			
+			<!-- 丢包率 -->
+			<!--resource kpiid="N1ifDiscardsRate" coltype="SNMP" value="(($d1+$d4)/($d2+$d3+$d5+$d6))*100" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="ifInDiscards" select="" merge="" deal=""/>
+					<collect exeorder="20" comid="ifInUcastPkts:ifHCInUcastPkts" select="" merge="" deal=""/>
+					<collect exeorder="30" comid="ifInNucastPkts" select="" merge="" deal=""/>
+					<collect exeorder="40" comid="ifOutDiscards" select="" merge="" deal=""/>
+					<collect exeorder="50" comid="ifOutUcastPkts:ifHCOutUcastPkts" select="" merge="" deal=""/>
+					<collect exeorder="60" comid="ifOutNucastPkts" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifDiscardsRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="5" storefactor="1"/>
+				
+			</resource-->
+			
+			<!-- 入丢包速率 -->
+			<resource kpiid="N1ifInDiscardsSpeed" coltype="SNMP" value="" valuetype="Float" unit="包/秒">
+				<collects>
+					<collect exeorder="10" comid="ifInDiscards" select="" merge="" deal="round_chgv"/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifInDiscardsSpeed" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 出丢包速率 -->
+			<resource kpiid="N1ifOutDiscardsSpeed" coltype="SNMP" value="" valuetype="Float" unit="包/秒">
+				<collects>
+					<collect exeorder="10" comid="ifOutDiscards" select="" merge="" deal="round_chgv"/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifOutDiscardsSpeed" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 丢包速率 -->
+			<resource kpiid="N1ifDiscardsSpeed" coltype="SNMP" value="($d1+$d2)*100" valuetype="Float" unit="包/秒">
+				<collects>
+					<collect exeorder="10" comid="ifInDiscards" select="" merge="" deal="round_chgv"/>
+					<collect exeorder="20" comid="ifOutDiscards" select="" merge="" deal="round_chgv"/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifDiscardsSpeed" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 接收丢包数 -->
+			<resource kpiid="N1ifInDiscards" coltype="SNMP" value="" valuetype="Integer" unit="包">
+				<collects>
+					<collect exeorder="10" comid="ifInDiscards" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifInDiscards" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 发送丢包数 -->
+			<resource kpiid="N1ifOutDiscards" coltype="SNMP" value="" valuetype="Integer" unit="包">
+				<collects>
+					<collect exeorder="10" comid="ifOutDiscards" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifOutDiscards" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 接收的错包数 -->
+			<resource kpiid="N1ifInErrors" coltype="SNMP" value="" valuetype="Integer" unit="包">
+				<collects>
+					<collect exeorder="10" comid="ifInErrors" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifInErrors" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 发送的错包数 -->
+			<resource kpiid="N1ifOutErrors" coltype="SNMP" value="" valuetype="Integer" unit="包">
+				<collects>
+					<collect exeorder="10" comid="ifOutErrors" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifOutErrors" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			
+			<!-- 接收单播包率 -->
+			<resource kpiid="N1ifInUcastPktsRate" coltype="SNMP" value="" valuetype="Float" unit="包/秒">
+				<collects>
+					<collect exeorder="10" comid="ifInUcastPkts:ifHCInUcastPkts" select="" merge="" deal="round_chgv"/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifInUcastPktsRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 发送单播包率 -->
+			<resource kpiid="N1ifOutUcastPktsRate" coltype="SNMP" value="" valuetype="Float" unit="包/秒">
+				<collects>
+					<collect exeorder="10" comid="ifOutUcastPkts:ifHCOutUcastPkts" select="" merge="" deal="round_chgv"/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifOutUcastPktsRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 单播包率 -->
+			<resource kpiid="N1ifUcastPktsRate" coltype="SNMP" value="$d1+$d2" valuetype="Float" unit="包/秒">
+				<collects>
+					<collect exeorder="10" comid="ifInUcastPkts:ifHCInUcastPkts" select="" merge="" deal="round_chgv"/>
+					<collect exeorder="20" comid="ifOutUcastPkts:ifHCOutUcastPkts" select="" merge="" deal="round_chgv"/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifUcastPktsRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 接收单播包数 -->
+			<resource kpiid="N1ifInUcastPkts" coltype="SNMP" value="" valuetype="Integer" unit="包">
+				<collects>
+					<collect exeorder="10" comid="ifInUcastPkts:ifHCInUcastPkts" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifInUcastPkts" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 发送单播包数 -->
+			<resource kpiid="N1ifOutUcastPkts" coltype="SNMP" value="" valuetype="Integer" unit="包">
+				<collects>
+					<collect exeorder="10" comid="ifOutUcastPkts:ifHCOutUcastPkts" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifOutUcastPkts" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 接收广播包率 -->
+			<!--resource kpiid="N1ifInBroadPktsRate" coltype="SNMP" value="" valuetype="Float" unit="包/秒">
+				<collects>
+					<collect exeorder="10" comid="ifInBroadcastPkts:ifHCInBroadcastPkts" select="" merge="" deal="round_chgv"/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifInBroadPktsRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource-->
+			
+			<!-- 发送广播包率 -->
+			<!--resource kpiid="N1ifOutBroadPktsRate" coltype="SNMP" value="" valuetype="Float" unit="包/秒">
+				<collects>
+					<collect exeorder="10" comid="ifOutBroadcastPkts:ifHCOutBroadcastPkts" select="" merge="" deal="round_chgv"/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifOutBroadPktsRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource-->
+			
+			<!-- 广播包率 -->
+			<!--resource kpiid="N1ifBroadPktsRate" coltype="SNMP" value="$d1+$d2" valuetype="Float" unit="包/秒">
+				<collects>
+					<collect exeorder="10" comid="ifInBroadcastPkts:ifHCInBroadcastPkts" select="" merge="" deal="round_chgv"/>
+					<collect exeorder="20" comid="ifOutBroadcastPkts:ifHCOutBroadcastPkts" select="" merge="" deal="round_chgv"/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifBroadPktsRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="5" storefactor="1"/>
+				
+			</resource-->
+			
+			<!-- 接收广播包数 -->
+			<!--resource kpiid="N1ifInBroadPkts" coltype="SNMP" value="" valuetype="Integer" unit="包">
+				<collects>
+					<collect exeorder="10" comid="ifInBroadcastPkts:ifHCInBroadcastPkts" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifInBroadPkts" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource-->
+			
+			<!-- 发送广播包数 -->
+			<!--resource kpiid="N1ifOutBroadPkts" coltype="SNMP" value="" valuetype="Integer" unit="包">
+				<collects>
+					<collect exeorder="10" comid="ifOutBroadcastPkts:ifHCOutBroadcastPkts" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifOutBroadPkts" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource-->
+			
+			<!-- 接收组播包率 -->
+			<!--resource kpiid="N1ifInMultiPktsRate" coltype="SNMP" value="" valuetype="Float" unit="包/秒">
+				<collects>
+					<collect exeorder="10" comid="ifInMulticastPkts:ifHCInMulticastPkts" select="" merge="" deal="round_chgv"/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifInMultiPktsRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource-->
+			
+			<!-- 发送组播包率 -->
+			<!--resource kpiid="N1ifOutMultiPktsRate" coltype="SNMP" value="" valuetype="Float" unit="包/秒">
+				<collects>
+					<collect exeorder="10" comid="ifOutMulticastPkts:ifHCOutMulticastPkts" select="" merge="" deal="round_chgv"/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifOutMultiPktsRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource-->
+			
+			<!-- 组播包率 -->
+			<!--resource kpiid="N1ifMultiPktsRate" coltype="SNMP" value="$d1+$d2" valuetype="Float" unit="包/秒">
+				<collects>
+					<collect exeorder="10" comid="ifInMulticastPkts:ifHCInMulticastPkts" select="" merge="" deal="round_chgv"/>
+					<collect exeorder="20" comid="ifOutMulticastPkts:ifHCOutMulticastPkts" select="" merge="" deal="round_chgv"/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifMultiPktsRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="5" storefactor="1"/>
+				
+			</resource-->
+			
+			<!-- 接收组播包数 -->
+			<!--resource kpiid="N1ifInMultiPkts" coltype="SNMP" value="" valuetype="Integer" unit="包">
+				<collects>
+					<collect exeorder="10" comid="ifInMulticastPkts:ifHCInMulticastPkts" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifInMultiPkts" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource-->
+			
+			<!-- 发送组播包数 -->
+			<!--resource kpiid="N1ifOutMultiPkts" coltype="SNMP" value="" valuetype="Integer" unit="包">
+				<collects>
+					<collect exeorder="10" comid="ifOutMulticastPkts:ifHCOutMulticastPkts" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifOutMultiPkts" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource-->
+				
+			<!-- 端口子网非单播包(即子网广播包或子网组播包)累计接收的包数 -->
+			<!-- resource kpiid="N1ifInNucastPkts" coltype="SNMP" value="" valuetype="Integer" unit="包">
+				<collects>
+					<collect exeorder="10" comid="ifInNucastPkts" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifInNucastPkts" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="5" storefactor="1"/>
+				
+			</resource -->
+			
+			<!-- 端口子网非单播包(即子网广播包或子网组播包)累计发送的包数 -->
+			<!-- resource kpiid="N1ifOutNucastPkts" coltype="SNMP" value="" valuetype="Integer" unit="包">
+				<collects>
+					<collect exeorder="10" comid="ifOutNucastPkts" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifOutNucastPkts" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="5" storefactor="1"/>
+				
+			</resource -->
+			
+			<!-- 日流入量 -->
+			<!--<resource kpiid="N1ifInDayOctets" coltype="SNMP" value="" valuetype="Float" unit="Byte">
+				<collects>
+					<collect exeorder="10" comid="ifInOctets:ifHCInOctets" select="" merge="" deal="round_chg"/>
+				</collects>
+				
+				<kpipolicy table="res_d_ifInDayOctets" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="1"/>
+				
+			</resource> -->
+			
+			<!-- 日流出量 -->
+			<!--<resource kpiid="N1ifOutDayOctets" coltype="SNMP" value="" valuetype="Float" unit="Byte">
+				<collects>
+					<collect exeorder="10" comid="ifOutOctets:ifHCOutOctets" select="" merge="" deal="round_chg"/>
+				</collects>
+				
+				<kpipolicy table="res_d_ifOutDayOctets" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="1"/>
+				
+			</resource> -->
+			
+			<!-- 入错误包率 -->
+			<resource kpiid="N1ifInErrorsRate" coltype="SNMP" value="($d1/$d2)*100" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="ifInErrors" select="" merge="" deal=""/>
+					<collect exeorder="20" comid="ifInUcastPkts:ifHCInUcastPkts" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifInErrorsRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 出错误包率 -->
+			<resource kpiid="N1ifOutErrorsRate" coltype="SNMP" value="($d1/$d2)*100" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="ifOutErrors" select="" merge="" deal=""/>
+					<collect exeorder="20" comid="ifOutUcastPkts:ifHCOutUcastPkts" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifOutErrorsRate" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="15" storefactor="1"/>
+				
+			</resource>
+					
+
+<!--                ip          -->
+			<!-- IP地址 -->
+			<resource kpiid="N1ifIpaddress" coltype="SNMP" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="ifIpaddress" select="" merge="" deal=""/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifIpaddress" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="1"/>
+			</resource>
+
+			<!-- 接口索引 -->
+			<resource kpiid="N1ifIpIndex" coltype="SNMP" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="ifIpIndex" select="" merge="" deal=""/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifIpIndex" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="1440" storefactor="1"/>
+			</resource>
+
+		</resources>
+	</devicetypeinfo>
+</root>

@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<!-- devicetype: 设备类型名称 ismulticoltype: 是否允许采集方式多选 majortype: 主要分类（可以理解为设备类型） 
+		minortype: 次要分类 manufacturer: 厂商 devicetype_zh: 设备类型中文描述 -->
+	<devicetypeinfo devicetype="MW_CICS" ismulticoltype="false"
+		majortype="middleware" minortype="CICS" manufacturer="IBM"
+		devicetype_zh="CICS Client">
+		<!-- 6个指标，3个采集脚本 -->
+		<commands>
+		
+			<!-- 操作系统 主机名 内存大小 -->
+			
+			
+			<command coltype="WMI" comid="get_hostname"
+				command="root\cimv2::SELECT Name FROM Win32_ComputerSystem" />
+			<command coltype="WMI" comid="chk_os"
+				command="root\cimv2::select Caption from Win32_OperatingSystem" />
+			<command coltype="WMI" comid="get_TotalMemSize"
+				command="root\cimv2::SELECT TotalVisibleMEMorySize FROM Win32_OperatingSystem" />
+			<command coltype="WMI" comid="get_FreePhysicalMemory"
+				command="root\cimv2::Select FreePhysicalMemory from Win32_OperatingSystem" />
+				
+				<command coltype="CLI" comid="chk_os" command="/tmp/os.sh" />
+			<!-- 服务可用性 -->
+			<command coltype="WMI" comid="getStatus_wmi"
+				command="root\cimv2::SELECT State FROM Win32_Service WHERE like='%cclclnt%'" />
+				
+			<command coltype="CLI" comid="getStatus" command="/tmp/cics.sh ${InstallPath}" />
+			<!-- CPU和内存利用率 -->
+			
+			<command coltype="WMI" comid="chk_memrate"
+				command="root\cimv2::select WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name like '%cclclnt%'" />
+			<command coltype="WMI" comid="chk_cpurate"
+				command="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Process where Name like '%cclclnt%'" />
+				
+				<command coltype="CLI" comid="get_mem_cpu"
+				command="/tmp/appinfo.sh ${InstallPath}" />
+		</commands>
+
+		<resources>
+			<!-- 操作系统 	-->
+			<resource kpiid="M3OperateSystem" coltype="WMI" value=""
+				valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="chk_os" select="" merge=""
+						deal="" />
+				</collects>
+				<kpipolicy table="res_d_M3OperateSystem" field="value"
+					fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2=""
+					alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4=""
+					alertexp5="" alertdesc5="" alertcontin="1" alertype="" circle="1440"
+					storefactor="1" />
+			</resource>
+		
+			
+			<resource kpiid="M3OperateSystem" coltype="CLI" value=""
+				valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="chk_os" select="&lt;os&gt;(.+)&lt;/os&gt;"
+						merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M3OperateSystem" field="value"
+					fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2=""
+					alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4=""
+					alertexp5="" alertdesc5="" alertcontin="1" alertype="" circle="1440"
+					storefactor="1" />
+			</resource>
+			<!-- 主机名 -->
+			<resource kpiid="M3HostName" coltype="WMI" value=""
+				valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="get_hostname" select=""
+						merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M3HostName" field="value"
+					fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2=""
+					alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4=""
+					alertexp5="" alertdesc5="" alertcontin="1" alertype="" circle="1440"
+					storefactor="1" />
+			</resource>
+			
+			
+			<resource kpiid="M3HostName" coltype="CLI" value=""
+				valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="chk_os"
+						select="&lt;hostname&gt;(.+)&lt;/hostname&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M3HostName" field="value"
+					fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2=""
+					alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4=""
+					alertexp5="" alertdesc5="" alertcontin="1" alertype="" circle="1440"
+					storefactor="1" />
+			</resource>
+
+			<!-- 内存大小 -->
+			
+			<resource kpiid="M3TotalMemSize" coltype="WMI" value="$d1/1047896/1024"
+				valuetype="Integer" unit="GB">
+				<collects>
+					<collect exeorder="10" comid="get_TotalMemSize" select=""
+						merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_TotalMemSize" field="value"
+					fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2=""
+					alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4=""
+					alertexp5="" alertdesc5="" alertcontin="0" alertype="" circle="1440"
+					storefactor="1" />
+			</resource>
+			
+			
+			<resource kpiid="M3TotalMemSize" coltype="CLI" value="$d1/1024"
+				valuetype="Integer" unit="GB">
+				<collects>
+					<collect exeorder="10" comid="chk_os"
+						select="&lt;memsize&gt;(.+)&lt;/memsize&gt;" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_TotalMemSize" field="value"
+					fieldtype="" willalert="" alertexp1="" alertdesc1="" alertexp2=""
+					alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4=""
+					alertexp5="" alertdesc5="" alertcontin="0" alertype="" circle="1440"
+					storefactor="1" />
+			</resource>
+			
+			<!-- 服务可用性 -->
+			
+			<resource kpiid="M3Availability" coltype="WMI" value=""
+				valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="getStatus_wmi" select="" merge=""
+						deal="" />
+				</collects>
+             <translations>
+                <translation source="1" dest="可用"/>
+                <translation source="0" dest="连接不可用"/>
+                <translation source="-1" dest="连接不可用"/>
+             </translations>
+				<kpipolicy table="res_d_M3Availability" field="value"
+                fieldtype="" willalert="y" alertexp1="&quot;${value}&quot;.equals(&quot;可用&quot;)" alertdesc1="目标机器${ipaddress}的CICS恢复正常" alertexp2=""
+                alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4=""
+                alertexp5="!&quot;${value}&quot;.equals(&quot;可用&quot;)" alertdesc5="目标机器${ipaddress}的CICS不可用"
+                alertcontin="1" alertype="500001" circle="15" storefactor="1" />
+			</resource>
+			
+			<resource kpiid="M3Availability" coltype="CLI" value=""
+				valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="getStatus"
+						select="&lt;status&gt;(.+)&lt;/status&gt;" merge="" deal="" />
+				</collects>
+				<!--
+                <translations>
+                    <translation source="1" dest="可用"/>
+                    <translation source="0" dest="连接不可用"/>
+                    <translation source="-1" dest="连接不可用"/>
+                </translations>-->
+				<kpipolicy table="res_d_M3Availability" field="value"
+                fieldtype="" willalert="y" alertexp1="&quot;${value}&quot;.equals(&quot;可用&quot;)" alertdesc1="目标机器${ipaddress}的CICS恢复正常" alertexp2=""
+                alertdesc2="" alertexp3="" alertdesc3="" alertexp4="" alertdesc4=""
+                alertexp5="!&quot;${value}&quot;.equals(&quot;可用&quot;)" alertdesc5="目标机器${ipaddress}的CICS不可用"
+                alertcontin="1" alertype="500001" circle="15" storefactor="1" />
+			</resource>
+
+			<!-- CPU利用率 
+			<resource kpiid="M3HostCPURate" coltype="WMI" value=""
+				valuetype="Integer" unit="%">
+				<collects>
+					<collect exeorder="10" comid="chk_cpurate" select="" merge=""
+						deal="" />
+				</collects>
+				<kpipolicy table="res_d_M3HostCPURate" field="value"
+					fieldtype="" willalert="" alertexp1="${value}>0" alertdesc1="CICS所在主机CPU利用率恢复正常" alertexp2=""
+					alertdesc2="" alertexp3="${value}>70" alertdesc3="CICS所在主机CPU利用率超过${trigervalue1},当前值为${value}"
+					alertexp4="${value}>90" alertdesc4="CICS所在主机CPU利用率超过${trigervalue1},当前值为${value}" alertexp5=""
+					alertdesc5="" alertcontin="1" alertype="500002" circle="15"
+					storefactor="1" />
+			</resource>
+			
+			
+			<resource kpiid="M3HostCPURate" coltype="CLI" value=""
+				valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="get_mem_cpu"
+						select="&lt;get_cpurate&gt;(.+)&lt;/get_cpurate&gt;" merge=""
+						deal="" />
+				</collects>
+				<kpipolicy table="res_d_M3HostCPURate" field="value"
+					fieldtype="" willalert="" alertexp1="${value}>0" alertdesc1="CICS所在主机CPU利用率恢复正常" alertexp2=""
+					alertdesc2="" alertexp3="${value}>70" alertdesc3="CICS所在主机CPU利用率超过${trigervalue1},当前值为${value}"
+					alertexp4="${value}>90" alertdesc4="CICS所在主机CPU利用率超过${trigervalue1},当前值为${value}" alertexp5=""
+					alertdesc5="" alertcontin="1" circle="15" storefactor="1" />
+			</resource>
+			-->
+			<!-- 内存利用率 
+			<resource kpiid="M3HostMEMRate" coltype="WMI" value="100 * ($d2 - $d1) / $d2" valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="get_FreePhysicalMemory" select="" merge="" deal="" />
+					<collect exeorder="20" comid="get_TotalMemSize" select="" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_d_M3HostMEMRate" field="value"
+					fieldtype="" willalert="" alertexp1="${value}>0" alertdesc1="CICS所在主机内存利用率恢复正常" alertexp2=""
+					alertdesc2="" alertexp3="${value}>70" alertdesc3="CICS所在主机内存利用率超过${trigervalue1},当前值为${value}"
+					alertexp4="${value}>90" alertdesc4="CICS所在主机内存利用率超过${trigervalue1},当前值为${value}" alertexp5=""
+					alertdesc5="" alertcontin="1" alertype="500003" circle="15"
+					storefactor="1" />
+			</resource>
+			
+			
+			<resource kpiid="M3HostMEMRate" coltype="CLI" value=""
+				valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="get_mem_cpu"
+						select="&lt;get_pmemrate&gt;(.*)&lt;/get_pmemrate&gt;" merge=""
+						deal="" />
+				</collects>
+				<kpipolicy table="res_d_M3HostMEMRate" field="value"
+					fieldtype="" willalert="" alertexp1="${value}>0" alertdesc1="CICS所在主机内存利用率恢复正常" alertexp2=""
+					alertdesc2="" alertexp3="${value}>70" alertdesc3="CICS所在主机内存利用率超过${trigervalue1},当前值为${value}"
+					alertexp4="${value}>90" alertdesc4="CICS所在主机内存利用率超过${trigervalue1},当前值为${value}" alertexp5=""
+					alertdesc5="" alertcontin="1" alertype="500003" circle="15"
+					storefactor="1" />
+			</resource>
+			-->
+
+			<!-- 应用CPU利用率 -->
+			<resource kpiid="M3CPURate" coltype="WMI" value=""
+				valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="chk_cpurate" select="" merge=""
+						deal="" />
+				</collects>
+				<kpipolicy table="res_d_M3CPURate" field="value"
+					fieldtype="" willalert="" alertexp1="${value}>0" alertdesc1="CICS CPU利用率恢复正常" alertexp2=""
+					alertdesc2="" alertexp3="${value}>70" alertdesc3="CICS CPU利用率超过${trigervalue1},当前值为${value}"
+					alertexp4="${value}>90" alertdesc4="CICS CPU利用率超过${trigervalue1},当前值为${value}" alertexp5=""
+					alertdesc5="" alertcontin="1" alertype="500004"
+					circle="15" storefactor="1" />
+			</resource>
+			
+			<resource kpiid="M3CPURate" coltype="CLI" value=""
+				valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="get_mem_cpu"
+						select="&lt;get_appcpurate&gt;(.+)&lt;/get_appcpurate&gt;" merge=""
+						deal="" />
+				</collects>
+				<kpipolicy table="res_d_M3CPURate" field="value"
+					fieldtype="" willalert="" alertexp1="${value}>0" alertdesc1="CICS CPU利用率恢复正常" alertexp2=""
+					alertdesc2="" alertexp3="${value}>70" alertdesc3="CICS CPU利用率超过${trigervalue1},当前值为${value}"
+					alertexp4="${value}>90" alertdesc4="CICS CPU利用率超过${trigervalue1},当前值为${value}" alertexp5=""
+					alertdesc5="" alertcontin="1" alertype="500004"
+					circle="15" storefactor="1" />
+			</resource>
+
+			<!-- 应用内存利用率 -->
+			<resource kpiid="M3MEMRate" coltype="WMI"  value="100 * $d1 / ($d2 * 1024)" valuetype="Float" unit="%">
+                <collects>
+                    <collect exeorder="10" comid="chk_memrate" select="" merge="" deal="" />
+                    <collect exeorder="20" comid="get_TotalMemSize" select="" merge="" deal="" />
+                </collects>
+				<kpipolicy table="res_d_M3MEMRate" field="value"
+					fieldtype="" willalert="" alertexp1="${value}>0" alertdesc1="CICS内存利用率恢复正常" alertexp2=""
+					alertdesc2="" alertexp3="${value}>70" alertdesc3="CICS内存利用率超过${trigervalue1},当前值为${value}"
+					alertexp4="${value}>90" alertdesc4="CICS内存利用率超过${trigervalue1},当前值为${value}" alertexp5=""
+					alertdesc5="" alertcontin="1" alertype="500005"
+					circle="15" storefactor="1" />
+			</resource>
+			
+			<resource kpiid="M3MEMRate" coltype="CLI" value=""
+				valuetype="Float" unit="%">
+				<collects>
+					<collect exeorder="10" comid="get_mem_cpu"
+						select="&lt;get_appmemrate&gt;(.*)&lt;/get_appmemrate&gt;" merge=""
+						deal="" />
+				</collects>
+				<kpipolicy table="res_d_M3MEMRate" field="value"
+					fieldtype="" willalert="" alertexp1="${value}>0" alertdesc1="CICS内存利用率恢复正常" alertexp2=""
+					alertdesc2="" alertexp3="${value}>70" alertdesc3="CICS内存利用率超过${trigervalue1},当前值为${value}"
+					alertexp4="${value}>90" alertdesc4="CICS内存利用率超过${trigervalue1},当前值为${value}" alertexp5=""
+					alertdesc5="" alertcontin="1" alertype="500005"
+					circle="15" storefactor="1" />
+			</resource>
+		</resources>
+	</devicetypeinfo>
+</root>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.dcimmanage.dao.ISyncPropertyDao">
+	<sql id="whereIfSql">
+		<if test="condition.id != null and condition.id != ''">
+			AND sdr.ID = #{condition.id}
+		</if>
+		<if test="condition.ip != null and condition.ip != ''">
+			AND sdr.IP like CONCAT('%',#{condition.ip},'%')
+		</if>
+		<if test="condition.resourceId != null and condition.resourceId != ''">
+			AND sdr.RESOURCE_ID = #{condition.resourceId}
+		</if>
+		<if test="condition.type != null and condition.type != ''">
+			AND sdr.TYPE = #{condition.type}
+		</if>
+		<if test="condition.showName != null and condition.showName != ''">
+			AND sirm.INSTANCESHOWNAME = #{condition.showName}
+		</if>
+	</sql>
+
+	<select id="getDcimList" resultType="com.mainsteam.stm.dcimmanage.vo.DcimResourceVo">
+		SELECT a.ID,
+		a.NAME,
+		a.IP,
+		a.TYPE
+		FROM
+		STM_DCIM_RESOURCE a
+	</select>
+	<insert id="batchInsert" parameterType="com.mainsteam.stm.dcimmanage.vo.DcimResourceVo">
+		insert into
+		STM_DCIM_RESOURCE(
+		ID,
+		NAME,
+		IP
+		)values(
+		#{id},
+		#{name},
+		#{ip}
+		)
+	</insert>
+	<delete id="deleteAll">
+		delete from STM_DCIM_RESOURCE
+	</delete>
+
+	<select id="getDcimPage" resultType="com.mainsteam.stm.dcimmanage.vo.DcimResourceVo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		SELECT
+		sdr.ID AS id,
+		sdr.IP AS ip,
+		sdr.NAME AS name,
+		sdr.TYPE AS type,
+		sdr.RESOURCE_ID AS resourceId,
+		sirm.INSTANCEID AS stmId,
+		sirm.INSTANCESHOWNAME AS showName
+		FROM
+		stm_dcim_resource sdr
+		LEFT JOIN stm_dcim_relation dr ON dr.dcim_id = sdr.id
+		LEFT JOIN stm_instancelib_resource_main sirm ON sirm.INSTANCEID = dr.stm_id
+		WHERE
+			1=1
+			<include refid="whereIfSql"/>
+		ORDER BY sdr.ID ASC
+
+	</select>
+	
+	<select id="countRelationByDcim">
+		SELECT ID FROM STM_DCIM_RELATION WHERE DCIM_ID = #{dcimId}
+	</select>
+
+	<update id="updateRelation">
+		UPDATE STM_DCIM_RELATION SET STM_ID = #{stmID} WHERE DCIM_ID = #{dcimId}
+	</update>
+
+	<insert id="insertRelation">
+		INSERT INTO STM_DCIM_RELATION (DCIM_ID, STM_ID) VALUES (dcimId, stmId)
+	</insert>
+</mapper>

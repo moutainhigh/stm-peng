@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jaxws="http://cxf.apache.org/jaxws" xmlns:wsa="http://cxf.apache.org/ws/addressing"
+	xmlns:cxf="http://cxf.apache.org/core"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+				           http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+				           http://www.springframework.org/schema/aop  http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+				           http://cxf.apache.org/schemas  http://cxf.apache.org/schemas/core.xsd  
+				           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+				           http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+	<context:component-scan base-package="com.mainsteam.stm.webService" />
+	
+	<!-- Import apache CXF bean definition 固定 -->
+	<import resource="classpath:META-INF/cxf/cxf.xml" />
+	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" /> 
+
+	<!-- 平台注册/注销 -->
+	<jaxws:server id="/alarmService" address="/alarmService" serviceClass="com.mainsteam.stm.webService.alarm.AlarmWebServices">
+		<jaxws:serviceBean>
+			<bean class="com.mainsteam.stm.webService.alarm.AlarmWebServicesImpl" />
+		</jaxws:serviceBean>
+		<jaxws:inInterceptors>
+			<bean class="org.apache.cxf.interceptor.LoggingInInterceptor" />
+		</jaxws:inInterceptors>
+		<jaxws:outInterceptors>
+			<bean class="org.apache.cxf.interceptor.LoggingOutInterceptor" />
+		</jaxws:outInterceptors>
+		<!-- 
+		 <jaxws:properties>
+		   <entry key="set-jaxb-validation-event-handler" value="false"/>
+		</jaxws:properties>
+		 -->
+	</jaxws:server>
+	<jaxws:server id="/resourceService" address="/resourceService" serviceClass="com.mainsteam.stm.webService.resource.ResourceWebServices">
+		<jaxws:serviceBean>
+			<bean class="com.mainsteam.stm.webService.resource.ResourceWebServicesImpl" />
+		</jaxws:serviceBean>
+		<jaxws:inInterceptors>
+			<bean class="org.apache.cxf.interceptor.LoggingInInterceptor" />
+		</jaxws:inInterceptors>
+		<jaxws:outInterceptors>
+			<bean class="org.apache.cxf.interceptor.LoggingOutInterceptor" />
+			<!--<bean class="com.mainsteam.stm.webService.ResultGZIPInterceptor" /> -->
+		</jaxws:outInterceptors>
+	</jaxws:server>
+	<jaxws:server id="/userService" address="/userService" serviceClass="com.mainsteam.stm.webService.user.UserWebService">
+		<jaxws:serviceBean>
+			<bean class="com.mainsteam.stm.webService.user.UserWebServiceImpl" />
+		</jaxws:serviceBean>
+		<jaxws:inInterceptors>
+			<bean class="org.apache.cxf.interceptor.LoggingInInterceptor" />
+		</jaxws:inInterceptors>
+		<jaxws:outInterceptors>
+			<bean class="org.apache.cxf.interceptor.LoggingOutInterceptor" />
+			<!--<bean class="com.mainsteam.stm.webService.ResultGZIPInterceptor" /> -->
+		</jaxws:outInterceptors>
+	</jaxws:server>
+	
+	<jaxws:server id="/performanceService" address="/performanceService" serviceClass="com.mainsteam.stm.webService.performance.PerformanceWebServices">
+		<jaxws:serviceBean>
+			<bean class="com.mainsteam.stm.webService.performance.PerformanceWebServicesImpl" />
+		</jaxws:serviceBean>
+		<jaxws:inInterceptors>
+			<bean class="org.apache.cxf.interceptor.LoggingInInterceptor" />
+		</jaxws:inInterceptors>
+		<jaxws:outInterceptors>
+			<bean class="org.apache.cxf.interceptor.LoggingOutInterceptor" />
+		</jaxws:outInterceptors>
+	</jaxws:server>
+
+	<jaxws:server id="/SendITMService" address="/SendITMService" serviceClass="com.mainsteam.stm.webService.itsm.SendITMService">
+		<jaxws:serviceBean>
+			<bean class="com.mainsteam.stm.webService.itsm.SendITMServiceImpl" />
+		</jaxws:serviceBean>
+		<jaxws:inInterceptors>
+			<bean class="org.apache.cxf.interceptor.LoggingInInterceptor" />
+		</jaxws:inInterceptors>
+		<jaxws:outInterceptors>
+			<bean class="org.apache.cxf.interceptor.LoggingOutInterceptor" />
+		</jaxws:outInterceptors>
+	</jaxws:server>
+	<jaxws:server id="/SmsWebService" address="/SmsWebService" serviceClass="com.mainsteam.stm.webService.sms.SmsWebService">
+		<jaxws:serviceBean>
+			<bean class="com.mainsteam.stm.webService.sms.SmsWebServiceImpl" />
+		</jaxws:serviceBean>
+		<jaxws:inInterceptors>
+			<bean class="org.apache.cxf.interceptor.LoggingInInterceptor" />
+		</jaxws:inInterceptors>
+		<jaxws:outInterceptors>
+			<bean class="org.apache.cxf.interceptor.LoggingOutInterceptor" />
+		</jaxws:outInterceptors>
+	</jaxws:server>
+	
+	<jaxws:server id="/CmdbWebServices" address="/WsMoType" serviceClass="com.mainsteam.stm.webService.cmdb.server.CmdbWebServices">
+		<jaxws:serviceBean>
+			<bean class="com.mainsteam.stm.webService.cmdb.server.CmdbWebServicesImpl" />
+		</jaxws:serviceBean>
+		<jaxws:inInterceptors>
+			<bean class="org.apache.cxf.interceptor.LoggingInInterceptor" />
+		</jaxws:inInterceptors>
+		<jaxws:outInterceptors>
+			<bean class="org.apache.cxf.interceptor.LoggingOutInterceptor" />
+		</jaxws:outInterceptors>
+	</jaxws:server>
+	
+	<!--  
+	<jaxws:server id="/businessService" address="/businessService" serviceClass="com.mainsteam.stm.webService.business.BusinessWebServices">
+		<jaxws:serviceBean>
+			<bean class="com.mainsteam.stm.webService.business.BusinessWebServicesImpl" />
+		</jaxws:serviceBean>
+		<jaxws:inInterceptors>
+			<bean class="org.apache.cxf.interceptor.LoggingInInterceptor" />
+		</jaxws:inInterceptors>
+		<jaxws:outInterceptors>
+			<bean class="org.apache.cxf.interceptor.LoggingOutInterceptor" />
+		</jaxws:outInterceptors>
+	</jaxws:server>   -->
+	
+	<jaxws:server id="/registerService" address="/registerService" serviceClass="com.mainsteam.stm.webService.register.RegistrationApplicationServices">
+		<jaxws:serviceBean>
+			<bean class="com.mainsteam.stm.webService.register.RegistrationApplicationServicesImpl" />
+		</jaxws:serviceBean>
+		<jaxws:inInterceptors>
+			<bean class="org.apache.cxf.interceptor.LoggingInInterceptor" />
+		</jaxws:inInterceptors>
+		<jaxws:outInterceptors>
+			<bean class="org.apache.cxf.interceptor.LoggingOutInterceptor" />
+		</jaxws:outInterceptors>
+	</jaxws:server>
+	<jaxws:server id="/metricServices" address="/metricServices" serviceClass="com.mainsteam.stm.webService.metric.MetricWebServices">
+		<jaxws:serviceBean>
+			<bean class="com.mainsteam.stm.webService.metric.MetricWebServicesImpl" />
+		</jaxws:serviceBean>
+		<jaxws:inInterceptors>
+			<bean class="org.apache.cxf.interceptor.LoggingInInterceptor" />
+		</jaxws:inInterceptors>
+		<jaxws:outInterceptors>
+			<bean class="org.apache.cxf.interceptor.LoggingOutInterceptor" />
+		</jaxws:outInterceptors>
+	</jaxws:server>
+
+	<jaxws:server id="/DcimService" address="/DcimService" serviceClass="com.mainsteam.stm.webService.dcim.DcimService">
+		<jaxws:serviceBean>
+			<bean class="com.mainsteam.stm.webService.dcim.DcimServiceImpl" />
+		</jaxws:serviceBean>
+		<jaxws:inInterceptors>
+			<bean class="org.apache.cxf.interceptor.LoggingInInterceptor" />
+		</jaxws:inInterceptors>
+		<jaxws:outInterceptors>
+			<bean class="org.apache.cxf.interceptor.LoggingOutInterceptor" />
+		</jaxws:outInterceptors>
+	</jaxws:server>
+	
+</beans>

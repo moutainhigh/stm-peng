@@ -1,0 +1,771 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">  
+  <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0"> 
+  </GlobalMetricSetting>  
+  <PluginClassAliasList> 
+    <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+    <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+    <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+    <PluginClassAlias id="columnPasteProcessor" class="com.mainsteam.stm.plugin.common.ColumnPasteProcessor"/>
+    <PluginClassAlias id="RegularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+    <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+    <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+    <PluginClassAlias id="tableConverter" class="com.mainsteam.stm.plugin.common.TableResultSetConverter"/>
+    <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+    <PluginClassAlias id="ChangeRateProcessor" class="com.mainsteam.stm.plugin.common.ChangeRateProcessor"/>
+    <PluginClassAlias id="processConverter" class="com.mainsteam.stm.plugin.common.ProcessResultSetConverter"/>
+    <PluginClassAlias id="uptimeProcessor" class="com.mainsteam.stm.plugin.common.UptimeProcessor"/>
+    <PluginClassAlias id="FormatProcessor" class="com.mainsteam.stm.plugin.common.FormatProcessor"/>
+    <PluginClassAlias id="rowFilterProcessor" class="com.mainsteam.stm.plugin.common.RowFilterProcessor"/>
+    <PluginClassAlias id="columnAddProcessor" class="com.mainsteam.stm.plugin.common.ColumnAddProcessor"/>
+    <PluginClassAlias id="HostTimeProcessor" class="com.mainsteam.stm.plugin.common.HostTimeProcessor"/>
+  </PluginClassAliasList>
+    <MetricPlugin metricid="availability" collectType="" pluginid="IcmpPlugin">
+        <PluginResultMetaInfo columns="ip,availability,responseTime,packetLoss,jitter"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT availability"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="statusAvail" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="xStatus Network 1 IPv4 Address"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Network\s+(\d+)\s+IPv4 Address"/>
+            </PluginDataHandler>
+        <PluginDataHandler classKey="availableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>     
+    <MetricPlugin metricid="responseTime" collectType="" pluginid="IcmpPlugin">
+        <PluginResultMetaInfo columns="ip,availability,responseTime,packetLoss,jitter"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT responseTime"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="packetLoss" collectType="" pluginid="IcmpPlugin">
+        <PluginResultMetaInfo columns="ip,availability,responseTime,packetLoss,jitter"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT packetLoss"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin> 
+    <MetricPlugin metricid="jitter" collectType="" pluginid="IcmpPlugin">
+        <PluginResultMetaInfo columns="ip,availability,responseTime,packetLoss,jitter"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT jitter"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin> 
+  <MetricPlugin metricid="SystemTemperature" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus SystemUnit Hardware Temperature"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Temperature:\s+\&quot;([\d]{0,2}[\.]{0,1}\d+)"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin>
+  <MetricPlugin metricid="productType" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus SystemUnit ProductType"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="ProductType:\s+\&quot;(.+)\&quot;"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin> 
+  <MetricPlugin metricid="productName" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus SystemUnit ProductId"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="ProductId:\s+\&quot;(.+)\&quot;"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin> 
+  <MetricPlugin metricid="productPlatform" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus SystemUnit ProductPlatform"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="ProductPlatform:\s+\&quot;(.+)\&quot;"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin>
+  <MetricPlugin metricid="upTime" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus SystemUnit Uptime"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Uptime:\s+(\d+)"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin> 
+  <MetricPlugin metricid="softwareVersion" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus SystemUnit Software Version"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Version:\s+\&quot;(.+)\&quot;"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin> 
+  <MetricPlugin metricid="moduleNumber" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus SystemUnit Hardware Module SerialNumber"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="SerialNumber:\s+\&quot;(.+)\&quot;"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin>
+  <MetricPlugin metricid="mainBoardNumber" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus SystemUnit Hardware MainBoard SerialNumber"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="SerialNumber:\s+\&quot;(.+)\&quot;"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin> 
+   <MetricPlugin metricid="maxVideoCalls" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus SystemUnit Software MaxVideoCalls"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="MaxVideoCalls:\s+(.+)"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin>
+  <MetricPlugin metricid="maxAudioCalls" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus SystemUnit Software MaxAudioCalls"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="MaxAudioCalls:\s+(.+)"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin> 
+  <MetricPlugin metricid="macAddress" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Network 1 Ethernet MacAddress"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="MacAddress:\s+\&quot;(.+)\&quot;"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin>  
+  <MetricPlugin metricid="ipAddress" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Network 1 IPv4 Address"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Address:\s+\&quot;(.+)\&quot;"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin>
+  <MetricPlugin metricid="speed" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Network 1 Ethernet Speed"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Speed:\s+\&quot;(.+)\&quot;"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin> 
+  <MetricPlugin metricid="toneOlson" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Time ZoneOlson"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="ZoneOlson:\s+(.+)"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin> 
+  <MetricPlugin metricid="sipAddress" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus SIP Profile 1 Proxy 1 Address"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Address:\s+\&quot;(.+)\&quot;"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin> 
+  <MetricPlugin metricid="gatekeeperStatus" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus H323 Gatekeeper Status"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Status:\s+(.+)"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin> 
+  <MetricPlugin metricid="gatekeeperPort" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns=""/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus H323 Gatekeeper Port"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Port:\s+(.+)"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+  </MetricPlugin>
+    <!-- Camera --> 
+  <MetricPlugin metricid="cameraIndex" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns="cameraIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Camera"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Camera\s+(\d+)\s+Connected"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="cameraIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="cameraIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin> 
+  <MetricPlugin metricid="cameraName" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns="cameraName,cameraIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Camera"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="(Camera)\s+(\d+)\s+Connected"/> 
+      </PluginDataHandler> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter value="SELECT (cameraName+cameraIndex) as cameraName, cameraIndex" key="SELECT"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="cameraIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="cameraName"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="cameraIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>
+  <MetricPlugin metricid="cameraManufacturer" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns="cameraIndex,cameraManufacturer"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Camera"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Camera\s+(\d+)\s+Manufacturer:\s+\&quot;(.+)\&quot;"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="cameraIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="cameraManufacturer"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="cameraIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>
+  <MetricPlugin metricid="cameraModel" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns="cameraIndex,cameraModel"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Camera"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Camera\s+(\d+)\s+Model:\s+\&quot;(.+)\&quot;"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="cameraIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="cameraModel"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="cameraIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>
+  <MetricPlugin metricid="cameraSerialNumber" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns="cameraIndex,cameraSerialNumber"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Camera"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Camera\s+(\d+)\s+SerialNumber:\s+\&quot;(.+)\&quot;"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="cameraIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="cameraSerialNumber"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="cameraIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>
+  <MetricPlugin metricid="CameraifStatus" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns="cameraIndex,CameraifStatus"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Camera"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Camera\s+(\d+)\s+Connected:\s+(\S+)"/> 
+      </PluginDataHandler> 
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="CameraifStatus" value="True,1;0"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="cameraIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="CameraifStatus"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="cameraIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin> 
+  <!-- Microphone --> 
+  <MetricPlugin metricid="microphoneIndex" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns="microphoneIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Experimental Audio Input Connectors Microphone"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Microphone\s+(\d+)"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="microphoneIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="microphoneIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin> 
+  <MetricPlugin metricid="microphoneName" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns="microphoneName,microphoneIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Experimental Audio Input Connectors Microphone"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="(Microphone)\s+(\d+)"/> 
+      </PluginDataHandler> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter value="SELECT (microphoneName+microphoneIndex) as microphoneName, microphoneIndex" key="SELECT"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="microphoneIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="microphoneName"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="microphoneIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>
+  <MetricPlugin metricid="MICifStatus" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns="microphoneIndex,MICifStatus"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Experimental Audio Input Connectors Microphone"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Microphone\s+(\d+)\s+Activity:\s+(\S+)"/> 
+      </PluginDataHandler> 
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="MICifStatus" value="True,1;0"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="microphoneIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="MICifStatus"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="microphoneIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>
+    <!-- Video input --> 
+  <MetricPlugin metricid="videoInputIndex" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns="videoInputIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Video"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Video\s+Input\s+(\S+\s+\d+)\s+Connected:"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="videoInputIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="videoInputIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>
+  <MetricPlugin metricid="videoInputName" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns="videoInputName,videoInputIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Video"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Video\s+Input\s+((\S+\s+\d+))\s+Connected:"/> 
+      </PluginDataHandler> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter value="SELECT (videoInputName) as videoInputName, videoInputIndex" key="SELECT"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="videoInputIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="videoInputName"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="videoInputIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin> 
+  <MetricPlugin metricid="videoInputStatus" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns="videoInputIndex,videoInputStatus"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Video"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Video\s+Input\s+(\S+\s+\d+)\s+Connected:\s+(\S+)"/> 
+      </PluginDataHandler> 
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="videoInputStatus" value="True,1;0"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="videoInputIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="videoInputStatus"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="videoInputIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin> 
+    <!-- Video output --> 
+  <MetricPlugin metricid="videoOutputIndex" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns="videoOutputIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Video"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Video\s+Output\s+(\S+\s+\d+)\s+Connected:"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="videoOutputIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="videoOutputIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>
+  <MetricPlugin metricid="videoOutputName" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns="videoOutputName,videoOutputIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Video"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Video\s+Output\s+((\S+\s+\d+))\s+Connected:"/> 
+      </PluginDataHandler> 
+      <PluginDataHandler classKey="selectProcessor"> 
+        <Parameter value="SELECT (videoOutputName) as videoOutputName, videoOutputIndex" key="SELECT"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="videoOutputIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="videoOutputName"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="videoOutputIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin> 
+  <MetricPlugin metricid="videoOutputStatus" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns="videoOutputIndex,videoOutputStatus"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Video"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Video\s+Output\s+(\S+\s+\d+)\s+Connected:\s+(\S+)"/> 
+      </PluginDataHandler> 
+      <PluginDataHandler classKey="translateProcessor"> 
+        <Parameter type="" key="videoOutputStatus" value="True,1;0"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="videoOutputIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="videoOutputStatus"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="videoOutputIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin> 
+  <MetricPlugin metricid="videoOutputHeight" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns="videoOutputIndex,videoOutputHeight"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Video"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Video\s+Output\s+(\S+\s+\d+)\s+Resolution\s+Height:\s+(\d+)"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="videoOutputIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="videoOutputHeight"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="videoOutputIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin> 
+  <MetricPlugin metricid="videoOutputWidth" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns="videoOutputIndex,videoOutputWidth"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Video"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="Video\s+Output\s+(\S+\s+\d+)\s+Resolution\s+Width:\s+(\d+)"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="videoOutputIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="videoOutputWidth"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="videoOutputIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin> 
+   <!-- Touch --> 
+  <MetricPlugin metricid="touchIndex" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns="touchIndex"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Peripherals ConnectedDevice"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="ConnectedDevice\s+(\d+)\s+Name"/> 
+      </PluginDataHandler>  
+    </PluginDataHandlers> 
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="touchIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="touchIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin>
+  <MetricPlugin metricid="touchName" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns="touchIndex,touchName"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Peripherals ConnectedDevice"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="ConnectedDevice\s+(\d+)\s+Name:\s+\&quot;(.+)\&quot;"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="touchIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="touchName"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="touchIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin> 
+  <MetricPlugin metricid="touchType" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns="touchIndex,touchType"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Peripherals ConnectedDevice"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="ConnectedDevice\s+(\d+)\s+Type:\s+(\S+)"/> 
+      </PluginDataHandler> 
+    </PluginDataHandlers> 
+    <PluginDataConverter classKey="subInstConverter"> 
+      <Parameter type="" key="IndexColumnTitle" value="touchIndex"/>  
+      <Parameter type="" key="ValueColumnTitle" value="touchType"/>  
+      <Parameter type="ResourceProperty" key="InstPropertyKey" value="touchIndex"/> 
+    </PluginDataConverter> 
+  </MetricPlugin> 
+  <MetricPlugin metricid="touchStatus" collectType="SSH" pluginid="SshShellPlugin"> 
+    <PluginResultMetaInfo columns="touchIndex,touchStatus"/>  
+    <PluginParameter type="ArrayType"> 
+      <Parameter type="" key="COMMAND" value="xStatus Peripherals ConnectedDevice"/> 
+    </PluginParameter>  
+    <PluginDataHandlers> 
+      <PluginDataHandler classKey="RegularFilter"> 
+        <Parameter type="" key="REGULAR" value="ConnectedDevice\s+(\d+)\s+Status:\s+(\S+)"/> 
+      </PluginDataHandler> 
+        <PluginDataHandler classKey="rowFilterProcessor">
+           <Parameter type="" key="FilterColumn" value="touchIndex" />
+           <Parameter type="ResourceProperty" key="ReservedValues" value="touchIndex" />
+        </PluginDataHandler>
+      <PluginDataHandler classKey="selectProcessor"> 
+          <Parameter value="select count(touchIndex) as touchStatus" key="SELECT"/> 
+      </PluginDataHandler>
+    </PluginDataHandlers> 
+  </MetricPlugin>
+    <!-- SIP -->
+    <MetricPlugin metricid="SIPIndex" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="SIPIndex"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="xStatus SIP Profile"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="SIP Profile\s+(\d+)\s+Proxy 1 Status"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="SIPIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="SIPIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin> 
+    <MetricPlugin metricid="SIPName" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="SIPName,SIPIndex"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="xStatus SIP Profile"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(SIP) Profile\s+(\d+)\s+Proxy 1 Status"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="SELECT (SIPName+SIPIndex) as SIPName, SIPIndex" key="SELECT"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="SIPIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="SIPName"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="SIPIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="SIPRedStatus" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="SIPIndex,SIPRedStatus"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="xStatus SIP Profile"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="SIP Profile\s+(\d+)\s+Registration 1 Status:\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="SIPRedStatus" value="Registered,注册成功;注册未成功"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="SIPIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="SIPRedStatus"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="SIPIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>   
+    <MetricPlugin metricid="SIPStatus" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="SIPIndex,SIPStatus"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="xStatus SIP Profile"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="SIP Profile\s+(\d+)\s+Registration 1 Status:\s+(\S+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="SIPIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="SIPStatus"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="SIPIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>  
+    <MetricPlugin metricid="SIPAvailability" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="SIPIndex,SIPAvailability"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="xStatus SIP Profile"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="SIP Profile\s+(\d+)\s+Registration 1 Status:\s+(\S+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="SIPAvailability" value="Registered,1;0"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="SIPIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="SIPAvailability"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="SIPIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>  
+    <!-- Status -->
+    <MetricPlugin metricid="statusIndex" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="statusIndex"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="xStatus Network 1 IPv4 Address"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Network\s+(\d+)\s+IPv4"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="statusIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="statusIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="statusName" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="statusName,statusIndex"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="xStatus Network 1 IPv4 Address"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(s)\s+Network\s+(\d+)\s+IPv4"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="SELECT ('xStatu'+statusName) as statusName, statusIndex" key="SELECT"/>
+            </PluginDataHandler> 
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="statusIndex"/>
+            <Parameter type="" key="ValueColumnTitle" value="statusName"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="statusIndex"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="statusStatus" collectType="SSH" pluginid="SshShellPlugin">
+        <PluginResultMetaInfo columns="statusIndex,statusStatus"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="xStatus Network 1 IPv4 Address"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Network\s+(\d+)\s+IPv4 Address:\s+\&quot;(.+)\&quot;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="rowFilterProcessor">
+                <Parameter type="" key="FilterColumn" value="statusIndex"/>
+                <Parameter type="ResourceProperty" key="ReservedValues" value="statusIndex"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter value="select count(statusIndex) as statusStatus" key="SELECT"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>                                             
+</MetricPlugins>

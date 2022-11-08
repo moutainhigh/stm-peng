@@ -1,0 +1,1898 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">
+    <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0">
+        <ChangePluginInitParameter pluginid="WmiPlugin" parameterId="InstallPath" parameterProperty="isDisplay" propertyValue="TRUE"/>
+        <ChangePluginInitParameter pluginid="WmiPlugin" parameterId="DataPath" parameterProperty="isDisplay" propertyValue="TRUE"/>
+        <ChangePluginInitParameter pluginid="SshPlugin" parameterId="port" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="SshPlugin" parameterId="username" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="SshPlugin" parameterId="password" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="WmiPlugin" parameterId="username" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="WmiPlugin" parameterId="password" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="port" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="username" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="password" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="userprompt" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="passprompt" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="TelnetPlugin" parameterId="opprompt" parameterProperty="mustInput" propertyValue="FALSE"/>
+    </GlobalMetricSetting>
+    <PluginClassAliasList>
+        <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+        <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+        <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+        <PluginClassAlias id="columnPasteProcessor" class="com.mainsteam.stm.plugin.common.ColumnPasteProcessor"/>
+        <PluginClassAlias id="RegularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+        <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+        <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+        <PluginClassAlias id="tableConverter" class="com.mainsteam.stm.plugin.common.TableResultSetConverter"/>
+        <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+        <PluginClassAlias id="ChangeRateProcessor" class="com.mainsteam.stm.plugin.common.ChangeRateProcessor"/>
+        <PluginClassAlias id="processConverter" class="com.mainsteam.stm.plugin.common.ProcessResultSetConverter"/>
+        <PluginClassAlias id="uptimeProcessor" class="com.mainsteam.stm.plugin.common.UptimeProcessor"/>
+        <PluginClassAlias id="FormatProcessor" class="com.mainsteam.stm.plugin.common.FormatProcessor"/>
+    </PluginClassAliasList>
+    <MetricPlugin metricid="icmpDelayTime" collectType="" pluginid="IcmpPlugin">
+        <PluginResultMetaInfo columns="ip,isAlive,ResponseTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ResponseTime"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="CPU"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfOS_Processor  where name = '_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT SUM(CPU) AS cpuRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="CPU"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/appinfo.sh"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;get_cpurate&gt;(.+)&lt;/get_cpurate&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="cpuRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="CPU"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/appinfo.sh"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;get_cpurate&gt;(.+)&lt;/get_cpurate&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="Memory,totalMemSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select FreePhysicalMemory,TotalVisibleMEMorySize from Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (totalMemSize - Memory)/totalMemSize*100 AS memRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="Memory"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/appinfo.sh"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;get_pmemrate&gt;(.*)&lt;/get_pmemrate&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="Memory"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/appinfo.sh"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;get_pmemrate&gt;(.*)&lt;/get_pmemrate&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sysUpTime" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="uptime"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="up\s*([^,]+[,]*[^,]*),\s*\d+\s*user"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="uptimeProcessor"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sysUpTime" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="uptime"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="up\s*([^,]+[,]*[^,]*),\s*\d+\s*user"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="uptimeProcessor"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sysUpTime" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select systemuptime from Win32_PerfFormattedData_PerfOS_System"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="hostName" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select Name from Win32_ComputerSystem"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="availability" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_avail.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;avail&gt;(.*)&lt;/avail&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="availableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ServerPortStatus" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_avail.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;serverstatus&gt;(.*)&lt;/serverstatus&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ServerStatus" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_avail.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;avail&gt;(.*)&lt;/avail&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="" value="1,可用;0,不可用"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="AMGRStatus" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_avail.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;amgrstatus&gt;(.*)&lt;/amgrstatus&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="" value="1,可用;0,不可用"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="HTTPStatus" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_avail.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;httpstatus&gt;(.*)&lt;/httpstatus&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="" value="1,可用;0,不可用"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="appCpuRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="get_mainResource,cpuCore"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_perf.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select name from Win32_PerfFormattedData_PerfOS_Processor where name !='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;appcpurate&gt;(.*)&lt;/appcpurate&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (get_mainResource*100)/count(cpuCore) as appCpuRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="appMemRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="get_mainResource"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_perf.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;appmemrate&gt;(.*)&lt;/appmemrate&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (get_mainResource*100) as appMemRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sessioncount" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_perf.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;sessioncount&gt;(.*)&lt;/sessioncount&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="DropSessionCount" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_perf.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;dropsessioncount&gt;(.*)&lt;/dropsessioncount&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="HttpCPURate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="get_mainResource"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_perf.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;httpcpurate&gt;(.*)&lt;/httpcpurate&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (get_mainResource*100) as HttpCPURate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="HttpMemRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="get_mainResource"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_perf.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;httpmemrate&gt;(.*)&lt;/httpmemrate&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (get_mainResource*100) as HttpMemRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="HttpResponseTime" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_perf.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;httpresponsetime&gt;(.*)&lt;/httpresponsetime&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ServerName" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_conf.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;name&gt;(.*)&lt;/name&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ServerTitle" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_conf.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;title&gt;(.*)&lt;/title&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="DataDirectoryName" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_conf.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;datapath&gt;(.*)&lt;/datapath&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="NSFCount" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_conf.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;nsfcount&gt;(.*)&lt;/nsfcount&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="DataDirCount" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_dir.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;datasubdircount&gt;(.*)&lt;/datasubdircount&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalMemSize" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_conf.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;memorysize&gt;(.*)&lt;/memorysize&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="Version" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_info.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;version&gt;(.*)&lt;/version&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="OperatingSystem" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_info.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;osinfo&gt;(.*)&lt;/osinfo&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="AppUptime" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_conf.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;uptime&gt;(.*)&lt;/uptime&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ActiveTaskCount" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_info.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;activetaskcount&gt;(.*)&lt;/activetaskcount&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="servicePort" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_info.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;httpport&gt;(.*)&lt;/httpport&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="DataDirID" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="DataDirID"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_dir.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;data&gt;(\S+)\\t.*\\t.*\\t.*\\t.*\\t.*&lt;/data&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DataDirID"/>
+            <Parameter type="" key="ValueColumnTitle" value="DataDirID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="DirFullName" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="DataDirID,get_mainDir"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_dir.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;data&gt;(\S+)\\t(.*)\\t.*\\t.*\\t.*\\t.*&lt;/data&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DataDirID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_mainDir"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="DataDirID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="DirFileCount" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="DataDirID,get_mainDir"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_dir.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;data&gt;(\S+)\\t.*\\t.*\\t(.*)\\t.*\\t.*&lt;/data&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key="get_mainDir"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DataDirID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_mainDir"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="DataDirID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="datachilddirname" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="DataDirID,get_mainDir"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_dir.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;data&gt;(\S+)\\t.*\\t.*\\t.*\\t(.*)\\t.*&lt;/data&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DataDirID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_mainDir"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="DataDirID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="Size" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="DataDirID,get_mainDir"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_dir.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;data&gt;(\S+)\\t.*\\t(.*)\\t.*\\t.*\\t.*&lt;/data&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DataDirID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_mainDir"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="DataDirID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="SubDirectoryCount" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="DataDirID,get_mainDir"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_dir.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;data&gt;(\S+)\\t.*\\t.*\\t.*\\t.*\\t(.*)&lt;/data&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key="get_mainDir"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DataDirID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_mainDir"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="DataDirID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="NsfID" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="NsfID"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_nsf.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;nsf&gt;(\S+)\\t.*\\t.*\\t.*\\t.*&lt;/nsf&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="NsfID"/>
+            <Parameter type="" key="ValueColumnTitle" value="NsfID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="Title" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="NsfID,get_DominoNsf"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_nsf.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;nsf&gt;(\S+)\\t.*\\t(.*)\\t.*\\t.*&lt;/nsf&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="NsfID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_DominoNsf"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="NsfID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="NsfDirFullName" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="NsfID,get_DominoNsf"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_nsf.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;nsf&gt;(\S+)\\t.*\\t.*\\t(.*)\\t.*&lt;/nsf&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="NsfID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_DominoNsf"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="NsfID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="DataBaseName" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="NsfID,get_DominoNsf"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_nsf.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;nsf&gt;(\S+)\\t(.*)\\t.*\\t.*\\t.*&lt;/nsf&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="NsfID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_DominoNsf"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="NsfID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="DocumentCount" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="NsfID,get_DominoNsf"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_nsf.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;nsf&gt;(\S+)\\t.*\\t.*\\t.*\\t(.*)&lt;/nsf&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key="get_DominoNsf"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="NsfID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_DominoNsf"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="NsfID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="EnabledID" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="EnabledID"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_task.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;task&gt;(\S+)\\t.*\\t.*\\t.*&lt;/task&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="EnabledID"/>
+            <Parameter type="" key="ValueColumnTitle" value="EnabledID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="EnabledState" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="EnabledID,get_mainTask"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_task.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;task&gt;(\S+)\\t.*\\t.*\\t(.*)&lt;/task&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="EnabledID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_mainTask"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="EnabledID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="TaskName" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="EnabledID,get_mainTask"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_task.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;task&gt;(\S+)\\t(.*)\\t.*\\t.*&lt;/task&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="EnabledID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_mainTask"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="EnabledID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="RunStatus" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="EnabledID,get_mainTask"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="domino_task.ps1 ${InstallPath}+${DataPath}"/>
+            <Parameter type="DiscoveryInfo" key="DataPath" value="DataPath"/>
+            <Parameter type="DiscoveryInfo" key="InstallPath" value="InstallPath"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;task&gt;(\S+)\\t.*\\t(.*)\\t.*&lt;/task&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="EnabledID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_mainTask"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="EnabledID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ServerPortStatus" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_avail.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;serverstatus&gt;(.*)&lt;/serverstatus&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ServerPortStatus" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_avail.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;serverstatus&gt;(.*)&lt;/serverstatus&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="availability" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_avail.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;avail&gt;(.*)&lt;/avail&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="availableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="availability" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_avail.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;avail&gt;(.*)&lt;/avail&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="availableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ServerStatus" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_avail.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;avail&gt;(.*)&lt;/avail&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="" value="0,可用;1,不可用"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ServerStatus" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_avail.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;avail&gt;(.*)&lt;/avail&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="" value="0,可用;1,不可用"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="AMGRStatus" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_avail.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;amgrstatus&gt;(.*)&lt;/amgrstatus&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="" value="0,可用;1,不可用"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="AMGRStatus" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_avail.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;amgrstatus&gt;(.*)&lt;/amgrstatus&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="" value="0,可用;1,不可用"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="HTTPStatus" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_avail.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;httpstatus&gt;(.*)&lt;/httpstatus&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="" value="0,可用;1,不可用"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="HTTPStatus" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_avail.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;httpstatus&gt;(.*)&lt;/httpstatus&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="" value="0,可用;1,不可用"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="appCpuRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;appcpurate&gt;(.*)&lt;/appcpurate&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="appCpuRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;appcpurate&gt;(.*)&lt;/appcpurate&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="appMemRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;appmemrate&gt;(.*)&lt;/appmemrate&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="appMemRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;appmemrate&gt;(.*)&lt;/appmemrate&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sessioncount" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;sessioncount&gt;(.*)&lt;/sessioncount&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sessioncount" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;sessioncount&gt;(.*)&lt;/sessioncount&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="DropSessionCount" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;dropsessioncount&gt;(.*)&lt;/dropsessioncount&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="DropSessionCount" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;dropsessioncount&gt;(.*)&lt;/dropsessioncount&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="HttpCPURate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;httpcpurate&gt;(.*)&lt;/httpcpurate&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="HttpCPURate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;httpcpurate&gt;(.*)&lt;/httpcpurate&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="HttpMemRate" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;httpmemrate&gt;(.*)&lt;/httpmemrate&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="HttpMemRate" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;httpmemrate&gt;(.*)&lt;/httpmemrate&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="HttpResponseTime" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;httpresponsetime&gt;(.*)&lt;/httpresponsetime&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="HttpResponseTime" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;httpresponsetime&gt;(.*)&lt;/httpresponsetime&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ServerName" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;name&gt;(.*)&lt;/name&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ServerName" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;name&gt;(.*)&lt;/name&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="hostName" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;hostname&gt;(.*)&lt;/hostname&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="hostName" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;hostname&gt;(.*)&lt;/hostname&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ServerTitle" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;title&gt;(.*)&lt;/title&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ServerTitle" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;title&gt;(.*)&lt;/title&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="DataDirectoryName" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;datapath&gt;(.*)&lt;/datapath&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="DataDirectoryName" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;datapath&gt;(.*)&lt;/datapath&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="NSFCount" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;nsfcount&gt;(.*)&lt;/nsfcount&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="NSFCount" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;nsfcount&gt;(.*)&lt;/nsfcount&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="DataDirCount" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;datasubdircount&gt;(.*)&lt;/datasubdircount&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="DataDirCount" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;datasubdircount&gt;(.*)&lt;/datasubdircount&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalMemSize" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;memorysize&gt;(.*)&lt;/memorysize&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalMemSize" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;memorysize&gt;(.*)&lt;/memorysize&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="Version" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;version&gt;(.*)&lt;/version&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="Version" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;version&gt;(.*)&lt;/version&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="OperatingSystem" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/os.sh"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;os&gt;(.*)&lt;/os&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="OperatingSystem" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/os.sh"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;os&gt;(.*)&lt;/os&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="AppUptime" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;uptime&gt;(.*)&lt;/uptime&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="AppUptime" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;uptime&gt;(.*)&lt;/uptime&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ActiveTaskCount" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;activetaskcount&gt;(.*)&lt;/activetaskcount&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ActiveTaskCount" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;activetaskcount&gt;(.*)&lt;/activetaskcount&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <!--
+    <MetricPlugin metricid="HttpPort" collectType="SSH" pluginid="SshPlugin">
+      <PluginResultMetaInfo columns=""/>
+      <PluginParameter type="ArrayType">
+        <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+      </PluginParameter>
+      <PluginDataHandlers>
+        <PluginDataHandler classKey="RegularFilter">
+          <Parameter type="" key="REGULAR" value="&lt;httpport&gt;(.*)&lt;/httpport&gt;"/>
+        </PluginDataHandler>
+      </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="HttpPort" collectType="TELNET" pluginid="TelnetPlugin">
+      <PluginResultMetaInfo columns=""/>
+      <PluginParameter type="ArrayType">
+        <Parameter type="" key="COMMAND" value="/tmp/domino_common.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+      </PluginParameter>
+      <PluginDataHandlers>
+        <PluginDataHandler classKey="RegularFilter">
+          <Parameter type="" key="REGULAR" value="&lt;httpport&gt;(.*)&lt;/httpport&gt;"/>
+        </PluginDataHandler>
+      </PluginDataHandlers>
+    </MetricPlugin>
+    -->
+    <MetricPlugin metricid="DataDirID" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="DataDirID"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_dir.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;data&gt;(\S+)@\w+@\d+@\d+@\d+@.*&lt;/data&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DataDirID"/>
+            <Parameter type="" key="ValueColumnTitle" value="DataDirID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="DataDirID" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="DataDirID"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_dir.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;data&gt;(\S+)@\w+@\d+@\d+@\d+@.*&lt;/data&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DataDirID"/>
+            <Parameter type="" key="ValueColumnTitle" value="DataDirID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="DirFullName" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="DataDirID,get_dir"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_dir.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;data&gt;(\S+)@\w+@\d+@\d+@\d+@(.*)&lt;/data&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DataDirID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_dir"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="DataDirID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="DirFullName" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="DataDirID,get_dir"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_dir.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;data&gt;(\S+)@\w+@\d+@\d+@\d+@(.*)&lt;/data&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DataDirID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_dir"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="DataDirID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="DirFileCount" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="DataDirID,get_dir"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_dir.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;data&gt;(\S+)@\w+@\d+@\d+@(\d+)@.*&lt;/data&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key="get_dir"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DataDirID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_dir"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="DataDirID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="DirFileCount" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="DataDirID,get_dir"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_dir.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;data&gt;(\S+)@\w+@\d+@\d+@(\d+)@.*&lt;/data&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key="get_dir"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DataDirID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_dir"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="DataDirID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="datachilddirname" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="DataDirID,get_dir"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_dir.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;data&gt;(\S+)@(\w+)@\d+@\d+@\d+@.*&lt;/data&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DataDirID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_dir"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="DataDirID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="datachilddirname" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="DataDirID,get_dir"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_dir.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;data&gt;(\S+)@(\w+)@\d+@\d+@\d+@.*&lt;/data&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DataDirID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_dir"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="DataDirID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="Size" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="DataDirID,get_dir"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_dir.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;data&gt;(\S+)@\w+@(\d+)@\d+@\d+@.*&lt;/data&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DataDirID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_dir"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="DataDirID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="Size" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="DataDirID,get_dir"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_dir.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;data&gt;(\S+)@\w+@(\d+)@\d+@\d+@.*&lt;/data&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DataDirID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_dir"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="DataDirID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="SubDirectoryCount" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="DataDirID,get_dir"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_dir.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;data&gt;(\S+)@\w+@\d+@(\d+)@\d+@.*&lt;/data&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key="get_dir"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DataDirID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_dir"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="DataDirID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="SubDirectoryCount" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="DataDirID,get_dir"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_dir.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;data&gt;(\S+)@\w+@\d+@(\d+)@\d+@.*&lt;/data&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key="get_dir"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="DataDirID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_dir"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="DataDirID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="NsfID" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="NsfID"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_nsf.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;nsf&gt;(\S+)@[\S.]*@[\S ]*@.*@\d+&lt;/nsf&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="NsfID"/>
+            <Parameter type="" key="ValueColumnTitle" value="NsfID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="NsfID" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="NsfID"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_nsf.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;nsf&gt;(\S+)@[\S.]*@[\S ]*@.*@\d+&lt;/nsf&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="NsfID"/>
+            <Parameter type="" key="ValueColumnTitle" value="NsfID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="Title" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="NsfID,get_nsf"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_nsf.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;nsf&gt;(\S+)@[\S.]*@([\S ]*)@.*@\d+&lt;/nsf&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="NsfID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_nsf"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="NsfID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="Title" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="NsfID,get_nsf"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_nsf.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;nsf&gt;(\S+)@[\S.]*@([\S ]*)@.*@\d+&lt;/nsf&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="NsfID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_nsf"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="NsfID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="NsfDirFullName" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="NsfID,get_nsf"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_nsf.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;nsf&gt;(\S+)@[\S.]*@[\S ]*@(.*)@\d+&lt;/nsf&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="NsfID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_nsf"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="NsfID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="NsfDirFullName" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="NsfID,get_nsf"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_nsf.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;nsf&gt;(\S+)@[\S.]*@[\S ]*@(.*)@\d+&lt;/nsf&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="NsfID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_nsf"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="NsfID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="DataBaseName" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="NsfID,get_nsf"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_nsf.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;nsf&gt;(\S+)@([\S.]*)@[\S ]*@.*@\d+&lt;/nsf&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="NsfID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_nsf"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="NsfID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="DataBaseName" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="NsfID,get_nsf"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_nsf.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;nsf&gt;(\S+)@([\S.]*)@[\S ]*@.*@\d+&lt;/nsf&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="NsfID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_nsf"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="NsfID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="DocumentCount" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="NsfID,get_nsf"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_nsf.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;nsf&gt;(\S+)@[\S.]*@[\S ]*@.*@(\d+)&lt;/nsf&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key="get_nsf"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="NsfID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_nsf"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="NsfID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="DocumentCount" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="NsfID,get_nsf"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_nsf.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;nsf&gt;(\S+)@[\S.]*@[\S ]*@.*@(\d+)&lt;/nsf&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key="get_nsf"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="NsfID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_nsf"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="NsfID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="EnabledID" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="EnabledID"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_task.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;task&gt;(\S+)@\w+@\d@\d&lt;/task&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="EnabledID"/>
+            <Parameter type="" key="ValueColumnTitle" value="EnabledID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="EnabledID" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="EnabledID"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_task.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;task&gt;(\S+)@\w+@\d@\d&lt;/task&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="EnabledID"/>
+            <Parameter type="" key="ValueColumnTitle" value="EnabledID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="EnabledState" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="EnabledID,get_task"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_task.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;task&gt;(\S+)@\w+@\d@(\d)&lt;/task&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="get_task" value="1,启用;0,禁用"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="EnabledID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_task"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="EnabledID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="EnabledState" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="EnabledID,get_task"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_task.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;task&gt;(\S+)@\w+@\d@(\d)&lt;/task&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="get_task" value="1,启用;0,禁用"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="EnabledID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_task"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="EnabledID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="TaskName" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="EnabledID,get_task"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_task.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;task&gt;(\S+)@(\w+)@\d@\d&lt;/task&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="EnabledID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_task"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="EnabledID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="TaskName" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="EnabledID,get_task"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_task.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;task&gt;(\S+)@(\w+)@\d@\d&lt;/task&gt;"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="EnabledID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_task"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="EnabledID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="RunStatus" collectType="SSH" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="EnabledID,get_task"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_task.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;task&gt;(\S+)@\w+@(\d)@\d&lt;/task&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="get_task" value="1,可用;0,不可用"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="EnabledID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_task"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="EnabledID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="RunStatus" collectType="TELNET" pluginid="TelnetPlugin">
+        <PluginResultMetaInfo columns="EnabledID,get_task"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="/tmp/domino_task.sh /local/notesdata@/opt/ibm/lotus/bin"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="&lt;task&gt;(\S+)@\w+@(\d)@\d&lt;/task&gt;"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="get_task" value="1,可用;0,不可用"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="EnabledID"/>
+            <Parameter type="" key="ValueColumnTitle" value="get_task"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="EnabledID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+</MetricPlugins>

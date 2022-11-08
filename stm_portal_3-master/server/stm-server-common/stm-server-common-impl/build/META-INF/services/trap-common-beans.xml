@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                    http://www.springframework.org/schema/context
+                    http://www.springframework.org/schema/context/spring-context-2.5.xsd
+                    ">
+	
+	<bean id="metricInfoDAO" class="com.mainsteam.stm.common.metric.dao.MetricInfoDAOImpl">
+		<property name="session" ref="sqlSession" />
+		<!-- trap 不需要指标入库 -->
+		<!--<property name="metricDataBatchPersisterFactory" ref="metricDataBatchPersisterFactory" /> -->
+	</bean>
+	
+	<bean id="metricDataService" class="com.mainsteam.stm.common.metric.MetricDataServiceImpl" >
+		<property name="metricInfoDAO" ref="metricInfoDAO" />
+		<property name="metricDataDAO" ref="metricDataDAO" />
+		<property name="metricAvailableDAO" ref="metricAvailableDAO" />
+		<property name="localNodeService" ref="localNodeService"/>
+		<property name="client" ref="OCRPClient"/>
+		<property name="resourceInstanceService" ref="resourceInstanceService" />
+	</bean>
+	
+	<bean id="metricDataDAO" class="com.mainsteam.stm.common.metric.dao.MetricDataDAOImpl">
+		<property name="session" ref="sqlSession" />
+		<property name="metricTableNameCache" ref="metricTableNameManager" />
+		<!-- trap 不需要指标入库 -->
+		<!--<property name="metricDataBatchPersisterFactory" ref="metricDataBatchPersisterFactory" /> -->
+	</bean>
+
+	<bean id="metricStateService" class="com.mainsteam.stm.common.metric.MetricStateServiceImpl">
+		<property name="metricStateDAO" ref="metricStateDAO"/>
+	</bean>
+	
+	<bean id="metricSummaryService" class="com.mainsteam.stm.common.metric.MetricSummaryServiceImpl">
+		<property name="metricSummaryDAO" ref="metricSummaryDAO" />
+	</bean>
+	<bean id="metricSummaryDAO" class="com.mainsteam.stm.common.metric.dao.MetricSummaryDAOImpl" init-method="init">
+		<property name="session" ref="sqlSession" />
+		<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+		<property name="dbUrl" value="${jdbc.url}"/>
+	</bean>
+	
+	
+	
+	<bean id="instanceStateService" class="com.mainsteam.stm.common.metric.InstanceStateServiceImpl">
+		<property name="metricStateDAO" ref="metricStateDAO" />
+	</bean>
+	<bean id="metricStateDAO" class="com.mainsteam.stm.common.state.dao.MetricStateDAOImpl">
+		<property name="session" ref="sqlSession" />
+	</bean>
+	<bean id="metricTableNameManager" class="com.mainsteam.stm.common.metric.MetricTableNameManager" init-method="start">
+		<property name="session" ref="sqlSession" />
+		<property name="dbUrl" value="${jdbc.url}"/>
+	</bean>	
+	<!-- 报表接口 -->
+	<bean id="MetricDataReportService" class="com.mainsteam.stm.common.metric.report.MetricDataReportServiceImpl">
+		<property name="metricSummaryDAO" ref="metricSummaryDAO"/>
+		<property name="metricInfoDAO" ref="metricInfoDAO"/>
+	</bean>
+	
+	<bean id="instanceLifeCycleDAO" class="com.mainsteam.stm.common.instance.dao.InstanceLifeCycleDAOImpl">
+		<property name="session" ref="sqlSession" />
+	</bean>
+	
+	<bean id="availableMetricDataReportService" class="com.mainsteam.stm.common.metric.report.AvailableMetricDataReportServiceImpl">
+		<property name="metricStateDAO" ref="metricStateDAO" />
+	</bean>
+	
+	
+	<bean id="dataSyncDAO" class="com.mainsteam.stm.common.sync.dao.DataSyncDAOImpl">
+		<property name="session" ref="sqlSession"/>
+		<property name="myBatisSqlSessionFactory" ref="myBatisSqlSessionFactory" />
+		<property name="sequence">
+			<bean id="dataSyncSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+				<constructor-arg value="STM_DATA_SYNC"/>
+			</bean>
+		</property>
+	</bean>
+</beans>

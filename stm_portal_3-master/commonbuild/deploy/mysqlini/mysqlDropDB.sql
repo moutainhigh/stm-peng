@@ -1,0 +1,1 @@
+drop database oc4_int

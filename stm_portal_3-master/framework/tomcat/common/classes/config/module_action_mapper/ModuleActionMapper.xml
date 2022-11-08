@@ -1,0 +1,837 @@
+<!DOCTYPE mapper SYSTEM "ModuleActionMapper.dtd">
+<mapper>
+	<!-- 
+		module:配置一个模块，模块可以嵌套配置 其下至少需要一个module或action
+		class:模块基础包完整名，子级只需子级的完整名
+		name:模块名称，用于显示，显示时模块和子模块名称需用“-”隔开
+		id:页签吗 只有mapper的直接子元素有效,一经配置不允许修改
+	 -->
+	<module class="com.mainsteam.stm.system" name="系统管理" id="2">
+		<module class="um" name="权限管理">
+			<!-- 
+				action:配置一个action，内部需用配置至少一个method
+				class：action类名
+				name：action中文名
+			 -->
+			<action name="域管理" class="domain.web.action.DomainAction">
+				<!-- 
+					method:配置一个action的方法
+					name：方法名称
+					description：方法操作描述
+				 -->
+				<method name="insert" type="add" description="添加域"/>
+				<method name="update" type="update" description="修改域"/>
+				<method name="isDelete" type="del" description="删除域"/>
+				<method name="domainPage" type="search" description="查询域列表"/>
+			</action>
+			<action name="资源集合" class="resourcegroup.web.action.ResourceGroupAction">
+				<method name="queryAllResourceGroup" type="search" description="查询域列表"/>
+				<method name="insertResourceGroup" type="add" description="添加资源集合"/>
+				<method name="updateResourceGroup" type="update" description="修改资源集合"/>
+				<method name="deleteResourceGroup" type="del" description="删除资源集合"/>
+			</action>
+			<action name="系统服务" class="service.web.action.SystemServiceAction">
+				<method name="getAllNodeForTree" type="search" description="查询系统服务列表"/>
+				<method name="updateNodeName" type="update" description="修改服务名称"/>
+				<method name="getNodeById" type="search" description="查询服务详细信息"/>
+			</action>
+			<action name="用户管理" class="user.web.action.UserAction">
+				<method name="insert" type="add" description="添加用户"/>
+				<method name="update" type="update" description="修改用户"/>
+				<method name="del" type="del" description="删除用户"/>
+				<method name="userPage" type="search" description="查询用户列表"/>
+			</action>
+			<action name="角色管理" class="role.web.action.RoleAction">
+				<method name="insert" type="add" description="添加角色"/>
+				<method name="update" type="update" description="修改角色"/>
+				<method name="del" type="del" description="删除角色"/>
+				<method name="rolePage" type="search" description="查询角色列表"/>
+			</action>
+			<action name="页签管理" class="right.web.action.RightAction">
+				<method name="insert" type="add" description="添加页签"/>
+				<method name="update" type="update" description="修改页签"/>
+				<method name="del" type="del" description="删除页签"/>
+				<method name="getAll" type="search" description="查询所有页签"/>
+			</action>
+		</module>
+		<action class="resource.web.action.ResourceAction" name="资源权限过滤">
+			<!-- 
+				method:配置一个action的方法
+				name：方法名称
+				description：方法操作描述
+			 -->
+			<method name="getCategory" type="search" description="获取所有资源类型"/>
+		</action>
+		<action name="安全设置" class="accesscontrol.web.action.AccessControlAction">
+			<method name="updateAccessControl" type="update" description="设置IP过滤"/>
+		</action>
+		<action name="安全设置" class="authentication.web.action.AuthenticationAction">
+			<method name="insert" type="update" description="设置认证方式"/>
+		</action>
+		<action name="图片管理" class="image.web.action.ImageAction">
+			<method name="updateImageConfig" type="update" description="设置系统图片"/>
+			<method name="getLoginLofiInputStream" type="search" description="下载PSD源文件"/>
+		</action>
+		<action name="告警设置" class="alarm.web.action.AlarmAction">
+			<method name="getAlarmSetting" type="search" description="查询告警设置"/>
+			<method name="emailAlarmSetting" type="update" description="设置邮件告警"/>
+			<method name="messageAlarmSetting" type="update" description="设置短信告警"/>
+			<method name="testSendEmail" type="update" description="测试发送邮件"/>
+			<method name="testSendMessage" type="update" description="测试发送短信"/>
+		</action>
+		<action name="审计日志" class="auditlog.web.action.AuditlogAction">
+			<method name="pageSelect" type="search" description="查询审计日志"/>
+			<method name="exportLog" type="search" description="导出审计日志"/>
+			<method name="deleteAll" type="del" description="清空审计日志"/>
+			<method name="deleteSelect" type="del" description="删除审计日志"/>
+		</action>
+	</module>
+	
+	<module name="首页" class="com.mainsteam.stm.home" id="1">
+		<module name="工作台" class="workbench">
+			<action name="告警统计" class="alarm.web.action.HomeAlarmAction">
+				<method name="getHomoAlarmData" type="search" description="展示告警统计数据"/>
+			</action>
+			<action name="关注应用" class="app.web.action.AppAction">
+				<method name="getHomeAppData" type="search" description="展示关注应用数据"/>
+			</action>
+			<action name="TOPN" class="topn.web.action.TopNAction">
+				<method name="getHomeTopnData" type="search" description="展示TOPN数据"/>
+			</action>
+			<action name="告警一览" class="warning.web.action.WarningAction">
+				<method name="getAll" type="search" description="展示告警一览数据"/>
+			</action>
+			<action name="关注主机" class="host.web.action.HostAction">
+				<method name="getInitData" type="search" description="展示主机详细信息"/>
+			</action>
+			<action name="关注网络设备" class="netdevice.web.action.NetDeviceAction">
+				<method name="getInitData" type="search" description="展示网络设备详细信息"/>
+			</action>
+			<action name="资源统计" class="resource.web.action.ResourceAction">
+				<method name="getTotal" type="search" description="展示资源统计信息"/>
+			</action>
+			<action name="业务统计" class="business.web.action.HomeBusinessAction">
+				<method name="getBusinessStatistics" type="search" description="展示业务统计信息"/>
+			</action>
+		</module>
+		<action name="大屏" class="screen.web.action.ScreenAction">
+			<method name="getBiz" type="search" description="展示大屏数据"/>
+			<method name="getUserBizes" type="search" description="获取用户显示大屏"/>
+			<method name="saveUserBizRels" type="update" description="保存用户大屏设置"/>
+			<method name="updateUserBizRel" type="update" description="修改用户大屏设置"/>
+		</action>
+	</module>
+	
+	<module name="知识管理" class="com.mainsteam.stm.knowledge" id="9">
+		<action name="故障知识" class="local.web.action.LocalKnowledgeAction">
+			<method name="queryLocalKnowledge" type="search" description="查询故障知识列表"/>
+			<method name="saveLocalKnowledge" type="add" description="添加故障知识"/>
+			<method name="updateLocalKnowledge" type="update" description="修改故障知识"/>
+			<method name="removeLocalKnowledge" type="del" description="删除故障知识"/>
+			<method name="saveKnowledgeResolve" type="add" description="添加知识解决方案"/>
+			<method name="updateKnowledgeResolves" type="update" description="上传知识解决方案"/>
+		</action>
+		<action name="能力知识" class="capacity.web.action.CapacityKnowledgeAction">
+			<method name="queryAllCapacityKnowledge" type="search" description="查询能力知识列表"/>
+			<method name="deployment" type="add" description="模型部署"/>
+			<method name="reDeployment" type="update" description="重新部署模型"/>
+		</action>
+		<action name="型号配置" class="modelset.web.action.ModelSetAction">
+			<method name="page" type="search" description="查询模型配置列表"/>
+			<method name="save" type="add" description="添加SystemOID"/>
+		</action>
+	</module>
+	
+	<module name="极简模式" class="com.mainsteam.stm.simple" id="12">
+		<action name="工程师视角" class="engineer.workbench.web.action.WorkbenchAction">
+			<method name="getResolveFault" type="search" description="查询未解决问题列表"/>
+			<method name="getResolvedFault" type="search" description="查询已解决问题列表"/>
+			<method name="analyzeFault" type="search" description="启动分析引擎"/>
+			<method name="resolveFault" type="search" description="查询解决方案"/>
+			<method name="executeScriptAutoRepair" type="update" description="执行脚本自动修复"/>
+			<method name="saveResolveEvaluation" type="add" description="评价解决方案"/>
+			<method name="checkAlarmEvent" type="update" description="验证问题是否修复"/>
+		</action>
+		<action name="管理者视角" class="com.mainsteam.stm.simple.manager.workbench.web.action.WorkbenchAction">
+			<method name="queryReportTemplate" type="search" description="查询业务报表模板"/>
+			<method name="queryReportByTemplate" type="search" description="查询模板下报表列表"/>
+			<method name="getReportDetailInfo" type="search" description="查看报表详细信息"/>
+			<method name="queryExpectByReport" type="search" description="查询报表下期望值"/>
+			<method name="getExpectById" type="search" description="智能分析报表"/>
+			<method name="saveReportExpect" type="add" description="保存期望值"/>
+			<method name="deleteReportExpect" type="del" description="删除期望值"/>
+			<method name="getBizContacts" type="search" description="获取问题报表联系人"/>
+			<method name="sendEmailToContacts" type="other" description="邮件通知联系人"/>
+			<method name="sendMessageToContacts" type="other" description="短信通知联系人"/>
+		</action>
+		<action name="全局搜索" class="search.web.ation.SearchAction">
+			<method name="index" type="search" description="操作模块资源关键字查询"/>
+			<method name="knowledge" type="search" description="知识库关键字查询"/>
+		</action>
+	</module>
+	
+	<module name="登录管理" class="com.mainsteam.stm.system.um" id="13">
+		<action class="login.web.action.LoginAction" name="登陆">
+			<method name="loginOut" type="other" isAfter="false" description="登出系统"/>
+		</action>
+	</module>
+
+<!-- 	<module name="流量分析" class="com.mainsteam.stm.portal.netflow" id="7"> -->
+<!-- 		<module class="web.action" name="流量分析一览"> -->
+<!-- 			<module class="device" name="设备"> -->
+<!-- 				<action class="DeviceFlowAction" name="设备首页"> -->
+<!-- 					<method name="findManagedDeviceList" type="search" description="查询受管理的设备流量的请求处理"/> -->
+<!-- 					<method name="getDeviceChartData" type="search" description="生成设备流量图表的请求处理"/> -->
+<!-- 					<method name="exportAll" type="other" description="导出所有数据"/> -->
+<!-- 					<method name="export" type="other" description="设备首页导出"/> -->
+<!-- 				</action> -->
+<!-- 				<action class="DeviceAppNetflowAction" name="设备应用"> -->
+<!-- 					<method name="deviceAppNetflowPageSelect" type="search" description="查询设备应用流量使用方法-datagrid"/> -->
+<!-- 					<method name="getDeviceChartData" type="search" description="查询某一设备应用流量"/> -->
+<!-- 					<method name="exportDevice" type="other" description="导出"/> -->
+<!-- 				</action> -->
+<!-- 				<action class="DeviceProtoNetflowAction" name="设备协议"> -->
+<!-- 					<method name="deviceProtoNetflowPageSelect" type="search" description="查询设备协议流量处理请求"/> -->
+<!-- 					<method name="getDeviceProtoChartData" type="search" description="生成设备协议流量的处理请求"/> -->
+<!-- 					<method name="exportProto" type="other" description="导出"/> -->
+<!-- 				</action> -->
+<!-- 			</module> -->
+<!-- 			<module class="inf" name="接口"> -->
+<!-- 				<action class="InterfaceNetflowAction" name="接口首页"> -->
+<!-- 					<method name="ifListPageSelect" type="search" description="接口数据查询"/> -->
+<!-- 					<method name="getIfNetflowChartData" type="search" description="接口图形数据查询"/> -->
+<!-- 					<method name="export" type="other" description="导出"/> -->
+<!-- 				</action> -->
+<!-- 				<action class="InterfaceAppAction" name="接口应用"> -->
+<!-- 					<method name="ifAppPageSelect" type="search" description="接口应用数据查询"/> -->
+<!-- 					<method name="getIfAppChartData" type="search" description="接口应用图形数据查询"/> -->
+<!-- 					<method name="interfaceApp" type="other" description="导出"/> -->
+<!-- 				</action> -->
+<!-- 				<action class="InterfaceIpgroupAction" name="接口IP"> -->
+<!-- 					<method name="ifIpgroupPageSelect" type="search" description="处理查询接口IP分组流量的datagrid数据的请求"/> -->
+<!-- 					<method name="getIfSessionChartData" type="search" description="处理查询接口IP分组流量highcharts数据的请求"/> -->
+<!-- 					<method name="interfaceIpGroup" type="other" description="导出"/> -->
+<!-- 				</action> -->
+<!-- 				<action class="InterfaceNextHopAction" name="接口下一跳"> -->
+<!-- 					<method name="ifNextHopPageSelect" type="search" description="下一跳数据查询"/> -->
+<!-- 					<method name="getIfNextHopChartData" type="search" description="下一跳图形数据查询"/> -->
+<!-- 					<method name="interfaceNext" type="other" description="导出"/> -->
+<!-- 				</action> -->
+<!-- 				<action class="InterfaceProtoAction" name="接口协议"> -->
+<!-- 					<method name="ifProtoPageSelect" type="search" description="协议数据查询"/> -->
+<!-- 					<method name="getIfProtoChartData" type="search" description="协议图形数据查询"/> -->
+<!-- 					<method name="interfaceProto" type="other" description="导出"/> -->
+<!-- 				</action> -->
+<!-- 				<action class="InterfaceSessionAction" name="接口会话"> -->
+<!-- 					<method name="ifSessionPageSelect" type="search" description="处理接口会话流量查询请求-datagrid"/> -->
+<!-- 					<method name="getIfSessionChartData" type="search" description="处理接口会话流量查询-highcharts"/> -->
+<!-- 					<method name="interfaceSession" type="other" description="导出"/> -->
+<!-- 				</action> -->
+<!-- 				<action class="InterfaceTerminalAction" name="接口终端"> -->
+<!-- 					<method name="ifTerminalPageSelect" type="search" description="处理查询接口终端流量的请求-datagrid"/> -->
+<!-- 					<method name="getIfTerminalChartData" type="search" description="处理查询接口终端流量的请求-highcharts"/> -->
+<!-- 					<method name="interfaceTerminal" type="other" description="导出"/> -->
+<!-- 				</action> -->
+<!-- 				<action class="InterfaceTosAction" name="接口TOS"> -->
+<!-- 					<method name="ifTosPageSelect" type="search" description="处理接口tos的datagrid数据查询请求"/> -->
+<!-- 					<method name="getIfTosChartData" type="search" description="处理查询tos图表数据的请求"/> -->
+<!-- 					<method name="interfaceTos" type="other" description="导出"/> -->
+<!-- 				</action> -->
+<!-- 			</module> -->
+<!-- 			<module class="" name="终端"> -->
+<!-- 				<action class="TerminalAction" name="终端首页"> -->
+<!-- 					<method name="getAllTerminals" type="search" description="终端数据查询"/> -->
+<!-- 					<method name="terminalChartOnColumByDevice" type="search" description="终端图形数据查询"/> -->
+<!-- 					<method name="getApplicationByTerminal" type="search" description="终端应用数据查询"/> -->
+<!-- 					<method name="getApplicationChartByTerminal" type="search" description="终端应用图形数据查询"/> -->
+<!-- 					<method name="getsessionByTerminal" type="search" description="终端会话数据查询"/> -->
+<!-- 					<method name="getsessionChartOnColumByDevice" type="search" description="终端会话图形数据查询"/> -->
+<!-- 					<method name="getProtocolByTerminal" type="search" description="终端协议数据查询"/> -->
+<!-- 					<method name="getProtoChartByTerminal" type="search" description="终端协议图形数据查询"/> -->
+<!-- 					<method name="getTosByTerminal" type="search" description="终端TOS数据查询"/> -->
+<!-- 					<method name="getTosChartByTerminal" type="search" description="终端TOS图形数据查询"/> -->
+<!-- 					<method name="exportProto" type="other" description="导出协议全部数据"/> -->
+<!-- 					<method name="exportTos" type="other" description="导出TOS全部数据"/> -->
+<!-- 					<method name="exportSession" type="other" description="导出会话全部数据"/> -->
+<!-- 					<method name="exportApp" type="other" description="导出应用全部数据"/> -->
+<!-- 					<method name="export" type="other" description="首页导出"/> -->
+<!-- 				</action> -->
+<!-- 			</module> -->
+<!-- 			<module class="" name="会话"> -->
+<!-- 				<action class="SessionAction" name="会话首页"> -->
+<!-- 					<method name="getsessionByDevice" type="search" description="会话数据查询"/> -->
+<!-- 					<method name="getsessionChartOnColumByDevice" type="search" description="会话图形数据查询"/> -->
+<!-- 					<method name="getProtocolByApp" type="search" description="会话协议数据查询"/> -->
+<!-- 					<method name="getProtoChart" type="search" description="会话协议图形数据查询"/> -->
+<!-- 					<method name="getAppBySession" type="search" description="会话应用数据查询"/> -->
+<!-- 					<method name="getAppChartBySession" type="search" description="会话应用图形数据查询"/> -->
+<!-- 					<method name="exportApp" type="other" description="导出应用全部数据"/> -->
+<!-- 					<method name="exportProto" type="other" description="导出协议全部数据"/> -->
+<!-- 					<method name="export" type="other" description="首页导出"/> -->
+<!-- 				</action> -->
+<!-- 			</module> -->
+<!-- 			<module class="" name="应用"> -->
+<!-- 				<action class="ApplicationAction" name="应用首页"> -->
+<!-- 					<method name="getApplication" type="search" description="应用数据查询"/> -->
+<!-- 					<method name="applicationChart" type="search" description="应用图形数据查询"/> -->
+<!-- 					<method name="getProtocolByApp" type="search" description="应用协议数据查询"/> -->
+<!-- 					<method name="getTerminalByDevice" type="search" description="应用终端数据查询"/> -->
+<!-- 					<method name="terminalChartOnColumByDevice" type="search" description="应用终端图形数据查询"/> -->
+<!-- 					<method name="getsessionByDevice" type="search" description="应用会话数据查询"/> -->
+<!-- 					<method name="getsessionChartOnColumByDevice" type="search" description="应用会话图形数据查询"/> -->
+<!-- 					<method name="getIPGByDevice" type="search" description="应用IP分组数据查询"/> -->
+<!-- 					<method name="getIPGChartDataByApp" type="search" description="应用IP分组图形数据查询"/> -->
+<!-- 					<method name="exportProto" type="other" description="导出协议全部数据"/> -->
+<!-- 					<method name="exportIpGroup" type="other" description="导出IP分组全部数据"/> -->
+<!-- 					<method name="exportSession" type="other" description="导出会话全部数据"/> -->
+<!-- 					<method name="exportTermainl" type="other" description="导出终端全部数据"/> -->
+<!-- 					<method name="export" type="other" description="首页导出"/> -->
+<!-- 				</action> -->
+<!-- 			</module> -->
+<!-- 			<module class="" name="设备组"> -->
+<!-- 				<action class="DeviceGroupNetflowAction" name="设备组首页"> -->
+<!-- 					<method name="list" type="search" description="设备组数据查询"/> -->
+<!-- 					<method name="findManagedDeviceList" type="search" description="设备组数据查询"/> -->
+<!-- 					<method name="getDeviceChartData" type="search" description="设备组图形数据查询"/> -->
+<!-- 					<method name="export" type="other" description="首页导出"/> -->
+<!-- 				</action> -->
+<!-- 			</module> -->
+<!-- 			<module class="ifgroup" name="接口组"> -->
+<!-- 				<action class="InterfaceGroupListAction" name="接口组首页"> -->
+<!-- 					<method name="ifGroupPageSelect" type="search" description="接口组数据查询"/> -->
+<!-- 					<method name="getIfGroupChartData" type="search" description="接口组图形数据查询"/> -->
+<!-- 					<method name="export" type="other" description="首页导出"/> -->
+<!-- 				</action> -->
+<!-- 			</module> -->
+<!-- 			<module class="ipgroup.netflow" name="IP分组"> -->
+<!-- 				<action class="IpGroupNetflowAction" name="IP分组首页"> -->
+<!-- 					<method name="ipGroupPageSelect" type="search" description="IP分组数据查询"/> -->
+<!-- 					<method name="getIpGroupChartData" type="search" description="IP分组图形数据查询"/> -->
+<!-- 					<method name="export" type="other" description="首页导出"/> -->
+<!-- 				</action> -->
+<!-- 				<action class="IpGroupAppAction" name="IP分组应用"> -->
+<!-- 					<method name="ipGroupAppPageSelect" type="search" description="IP分组应用数据查询"/> -->
+<!-- 					<method name="getIpGroupAppChartData" type="search" description="IP分组应用图形数据查询"/> -->
+<!-- 					<method name="exportApp" type="other" description="导出全部应用数据"/> -->
+<!-- 				</action> -->
+<!-- 				<action class="IpGroupProtoAction" name="IP分组协议"> -->
+<!-- 					<method name="ipGroupProtoPageSelect" type="search" description="IP分组协议数据查询"/> -->
+<!-- 					<method name="getIpGroupProtoChartData" type="search" description="IP分组协议图形数据查询"/> -->
+<!-- 					<method name="exportProto" type="other" description="导出全部协议数据"/> -->
+<!-- 				</action> -->
+<!-- 				<action class="IpGroupSessionAction" name="IP分组会话"> -->
+<!-- 					<method name="ipGroupSessionPageSelect" type="search" description="IP分组会话数据查询"/> -->
+<!-- 					<method name="getIpGroupSessionChartData" type="search" description="IP分组会话图形数据查询"/> -->
+<!-- 					<method name="exportSession" type="other" description="导出全部会话数据"/> -->
+<!-- 				</action> -->
+<!-- 				<action class="IpGroupSessionAction" name="IP分组终端"> -->
+<!-- 					<method name="ipGroupTerminalPageSelect" type="search" description="IP分组终端数据查询"/> -->
+<!-- 					<method name="getIpGroupTerminalChartData" type="search" description="IP分组终端图形数据查询"/> -->
+<!-- 					<method name="exportTerminal" type="other" description="导出全部终端数据"/> -->
+<!-- 				</action> -->
+<!-- 				<action class="IpGroupTosAction" name="IP分组TOS"> -->
+<!-- 					<method name="ipGroupTosPageSelect" type="search" description="IP分组TOS数据查询"/> -->
+<!-- 					<method name="getIpGroupAppChartData" type="search" description="IP分组TOS图形数据查询"/> -->
+<!-- 					<method name="exportTos" type="other" description="导出全部TOS数据"/> -->
+<!-- 				</action> -->
+<!-- 			</module> -->
+<!-- 		</module> -->
+<!-- 		<module class="web.action" name="系统配置"> -->
+<!-- 			<action class="DeviceAction" name="设备配置"> -->
+<!-- 				<method name="list" type="search" description="查询设备列表"/> -->
+<!-- 				<method name="saveCheck" type="add" description="添加设备"/> -->
+<!-- 				<method name="confList" type="search" description="从资源库查询设备"/> -->
+<!-- 				<method name="confInterface" type="search" description="从资源库查询某个资源的接口"/> -->
+<!-- 				<method name="addInterface" type="add" description="添加某个设备的接口"/> -->
+<!-- 				<method name="delInterface" type="del" description="删除设备下的某些接口"/> -->
+<!-- 				<method name="delDevice" type="del" description="删除设备"/> -->
+<!-- 			</action> -->
+<!-- 			<action class="DeviceGroupAction" name="设备组配置"> -->
+<!-- 				<method name="getAllDevice" type="search" description="设备组查询"/> -->
+<!-- 				<method name="save" type="add" description="设备组添加"/> -->
+<!-- 				<method name="list" type="search" description="设备组查询"/> -->
+<!-- 				<method name="del" type="del" description="设备组删除"/> -->
+<!-- 			</action> -->
+<!-- 			<action class="InterfaceGroupAction" name="接口组配置"> -->
+<!-- 				<method name="deviceInterface" type="search" description="接口查询"/> -->
+<!-- 				<method name="save" type="add" description="添加接口组"/> -->
+<!-- 				<method name="list" type="search" description="接口组查询"/> -->
+<!-- 				<method name="del" type="del" description="删除接口组"/> -->
+<!-- 			</action> -->
+<!-- 			<action class="IpGroupAction" name="IP分组管理"> -->
+<!-- 				<method name="save" type="add" description="IP分组添加"/> -->
+<!-- 				<method name="list" type="search" description="IP分组查询"/> -->
+<!-- 				<method name="del" type="del" description="IP分组删除"/> -->
+<!-- 			</action> -->
+<!-- 			<action class="ApplicationManagerAction" name="应用管理"> -->
+<!-- 				<method name="protocols" type="search" description="协议查询"/> -->
+<!-- 				<method name="save" type="add" description="应用添加"/> -->
+<!-- 				<method name="list" type="search" description="应用查询"/> -->
+<!-- 				<method name="del" type="del" description="应用删除"/> -->
+<!-- 			</action> -->
+<!-- 			<action class="LicenseAction" name="采集服务器配置"> -->
+<!-- 				<method name="register" type="other" description="注册流量分析（写入license）"/> -->
+<!-- 			</action> -->
+<!-- 		</module> -->
+<!-- 	</module> -->
+
+	<module name="巡检管理" class="com.mainsteam.stm.portal.inspect.web.action" id="10">
+		<action class="InspectPlanAction" name="巡检计划">
+			<method name="list" type="search" description="巡检计划查询"/>
+			<method name="updateBasic" type="update" description="增加或更新某个巡检计划基本信息"/>
+			<method name="updateState" type="update" description="修改计划状态"/>
+			<method name="getUser" type="search" description="获取巡检人"/>
+			<method name="getResources" type="search" description="获取资源类型"/>
+			<method name="getBusiness" type="search" description="获取业务"/>
+			<method name="updateRoutine" type="update" description="修改、新增、删除（组合）计划常规信息"/>
+			<method name="loadInspectionItems" type="search" description="加载计划项信息"/>
+			<method name="loadBasic" type="search" description="加载计划项信息"/>
+			<method name="getModelTree" type="search" description="添加关联巡检项及其子项里的资源类型"/>
+			<method name="loadRoutine" type="search" description="加载常规信息"/>
+			<method name="updateConclusion" type="update" description="修改结论信息"/>
+			<method name="loadConclusions" type="search" description="加载结论信息"/>
+			<method name="getResourceInspect" type="search" description="获取资源信息"/>
+			<method name="getDomainsAllUser" type="search" description="获取用户信息"/>
+			<method name="getIndexModel" type="search" description="获取指标信息"/>
+			<method name="loadItem" type="search" description="加载项信息"/>
+			<method name="updateItem" type="update" description="更新项信息"/>
+			<method name="updateItemBasic" type="search" description="加载项信息"/>
+			<method name="updateItem" type="update" description="更新项信息"/>
+			<method name="updateItemChild" type="update" description="更新子项信息"/>
+			<method name="exec" type="other" description="执行计划"/>
+			<method name="getMetricListByResourceId" type="search" description="获取指标"/>
+			<method name="delPlan" type="del" description="删除计划"/>
+			<method name="delItems" type="del" description="删除项"/>
+			<method name="getReferenceValue" type="search" description="获取参考值"/>
+			<method name="copy" type="other" description="复制计划"/>
+			<method name="updateReportName" type="search" description="获取报告名称"/>
+			<method name="updateItems" type="update" description="更新项"/>
+			<method name="getResourceCategoryList" type="search" description="获取资源类型"/>
+			<method name="getChildResourceListByMainResourceOrCategory" type="search" description="获取子资源类型根据类别或者主资源"/>
+			<method name="getResourceInstanceList" type="search" description="获取资源实例"/>
+			<method name="filterInstanceInfoByContent" type="search" description="过滤资源实例"/>
+		</action>
+		<action class="InspectReportAction" name="巡检报告">
+			<method name="filterInstanceInfoByContent" type="search" description="获取巡检报告"/>
+			<method name="updateStatus" type="update" description="更新报告状态"/>
+			<method name="loadBasic" type="search" description="加载报告基本信息"/>
+			<method name="loadConclusions" type="search" description="加载报告结论信息"/>
+			<method name="loadInspectionItems" type="search" description="加载报告项信息"/>
+			<method name="loadItem" type="search" description="加载报告项信息"/>
+			<method name="updateBasic" type="update" description="更新巡检报告基本信息"/>
+			<method name="updateNormal" type="update" description="更新巡检报告常规信息"/>
+			<method name="updateResult" type="update" description="更新巡检报告结论"/>
+			<method name="updateItems" type="update" description="更新巡检报告巡检项"/>
+			<method name="excle" type="other" description="导出excel"/>
+			<method name="word" type="other" description="导出word"/>
+			<method name="pdf" type="other" description="导出pdf"/>
+		</action>
+	</module>
+	
+ 	<module name="资源管理" class="com.mainsteam.stm.portal.resource" id="3">
+ 		<action class="web.action.DiscoverResourceAction" name="发现资源">
+ 			<method name="discoverResource" type="add" description="单资源发现"/>
+ 			<method name="batchDiscoverResouce" type="add" description="批量资源发现"/>
+ 			<method name="handleRepeatInstance" type="other" description="处理重复资源"/>
+ 			<method name="updateInstanceName" type="update" description="修改资源显示名称"/>
+ 			<method name="joinMonitor" type="update" description="加入监控"/>
+ 			<method name="updateDiscoverParamter" type="update" description="修改发现参数"/>
+ 			<method name="reDiscover" type="update" description="重新发现"/>
+ 		</action>
+ 		<action class="web.action.ResourceDetailInfoAction" name="资源详情展示">
+ 			<method name="updateInstanceName" type="search" description="修改资源显示名称"/>
+ 			<method name="getResourceInfo" type="search" description="获取资源信息"/>
+ 			<method name="getMetric4General" type="search" description="获取资源展示布局及显示信息"/>
+ 			<method name="getChildInstanceMetric" type="search" description="获取子资源指标信息"/>
+ 			<method name="getMetric" type="search" description="获取资源指标信息"/>
+ 			<method name="getAllMetric" type="search" description="获取资源指标信息"/>
+ 		</action>
+ 		<action class="web.action.AccountAction" name="预置账户">
+ 			<method name="insert" type="add" description="新增预置账户"/>
+ 			<method name="del" type="del" description="删除预置账户"/>
+ 			<method name="update" type="update" description="修改预置账户"/>
+ 			<method name="get" type="search" description="查询预置账户"/>
+ 			<method name="getList" type="search" description="批量查询预置账户"/>
+ 			<method name="getReAccountInstanceByAccountId" type="search" description="批量查询预置账户"/>
+ 		</action>
+ 		<action class="web.action.CustomMetricAction" name="自定义指标">
+ 			<method name="getCustomMetricsByInstanceId" type="search" description="获取资源的自定义指标"/>
+ 			<method name="getCustomMetrics" type="search" description="获取自定义指标列表"/>
+ 			<method name="getUnBindResources" type="search" description="获取未绑定自定义指标的资源"/>
+ 			<method name="getBindResources" type="search" description="获取已绑定自定义指标的资源"/>
+ 			<method name="bindResources" type="add" description="绑定资源"/>
+ 			<method name="addgetCustomMetric" type="add" description="添加自定义指标列表"/>
+ 			<method name="updateCustomMetric" type="update" description="更新自定义指标列表"/>
+ 			<method name="updateCustomMetricSetting" type="update" description="更新自定义指标设置"/>
+ 			<method name="deleteCustomMetric" type="del" description="删除自定义指标列表"/>
+ 		</action>
+ 		<action class="web.action.CustomResGroupAction" name="自定义资源组">
+ 			<method name="addCustomGroup" type="add" description="添加自定义资源组"/>
+ 			<method name="editCustomGroup" type="update" description="编辑自定义资源组"/>
+ 			<method name="getAllCustomGroup" type="search" description="获取所有自定义资源组"/>
+ 			<method name="delCustomGroup" type="del" description="删除自定义资源组"/>
+ 			<method name="delResourceFromCustomGroup" type="del" description="从自定义资源组删除资源"/>
+ 			<method name="getCustomGroup" type="search" description="从自定义资源组id查询"/>
+ 			<method name="getCapacity" type="search" description="getCapacity"/>
+ 		</action>
+ 		<action class="web.action.MetricChartsDataAction" name="资源指标线性图展示">
+ 			<method name="getMetricChartsData" type="search" description="获取图表数据"/>
+ 			<method name="getMetricRandomTimeChartsData" type="search" description="获取用户选择的时间段内图表数据"/>
+ 		</action>
+ 		<action class="web.action.ProcessMetricDataAction" name="进程子资源展示">
+ 			<method name="getProcessData" type="search" description="获取指标实时数据"/>
+ 			<method name="scanProcessData" type="search" description="获取进程实时数据"/>
+ 			<method name="addProcessToMonitor" type="update" description="加入监控"/>
+ 			<method name="updateProcessInstanceRemark" type="update" description="更新进程备注"/>
+ 		</action>
+ 		<action class="web.action.ProfileAction" name="策略">
+ 			<method name="getDefaultStrategyAll" type="search" description="获取系统默认策略数据"/>
+ 			<method name="getCustomStrategyAll" type="search" description="获取系统自定义策略数据"/>
+ 			<method name="getPersonalizeStrategyAll" type="search" description="获取系统个性化策略数据"/>
+ 			<method name="getPrentStrategyType" type="search" description="获取资源策略模型父节点"/>
+ 			<method name="getChildCategoryDefById" type="search" description="根据一级菜单ID查询二级菜单"/>
+ 			<method name="getParentResourceDefAll" type="search" description="根据一级category获取所有的资源模型"/>
+ 			<method name="getResourceDefAll" type="search" description="根据二级category获取所有的资源模型"/>
+ 			<method name="getChildResourceAll" type="search" description="获取所有子模型"/>
+ 			<method name="copyDefaultStrategy" type="add" description="系统默认策略复制"/>
+ 			<method name="insertCustomStrategy" type="add" description="新增用户自定义策略"/>
+ 			<method name="delCustomStrategy" type="del" description="删除用户自定义策略"/>
+ 			<method name="batchDelCustomStrategy" type="del" description="批量删除用户自定义策略"/>
+ 			<method name="delPersonalizeStrategy" type="del" description="删除个性化策略"/>
+ 			<method name="batchDelPersonalizeStrategy" type="del" description="批量删除个性化策略"/>
+ 			<method name="getDefaultStrategy" type="search" description="根据策略ID查询策略对象"/>
+ 		</action>
+ 		<action class="web.action.ReceiveAlarmQueryAction" name="告警规则">
+ 			<method name="userPage" type="search" description="获取用户,用于告警规则添加"/>
+ 			<method name="getParentProfile" type="search" description="获取父资源模型"/>
+ 			<method name="getChildProfile" type="search" description="获取子资源模型"/>
+ 			<method name="userProfileQuery" type="search" description="用户策略查询"/>
+ 			<method name="getProfileByUserID" type="search" description="根据用户ID获取策略"/>
+ 			<method name="profileAlarmRules" type="search" description="告警规则查询"/>
+ 			<method name="getAlarmSendCondition" type="search" description="根据ruleID,sendWay查询alarmSendCondition"/>
+ 			<method name="addAlarmCondition" type="add" description="添加alarmSendCondition"/>
+ 			<method name="enableAlarmCondition" type="update" description="修改alarmSendCondition的sendWay enable"/>
+ 			<method name="deleteAlarmRule" type="del" description="删除告警规则"/>
+ 			<method name="addAlarmRule" type="add" description="添加告警规则"/>
+ 			<method name="addAlarmRuleContent" type="add" description="添加告警规则"/>
+ 		</action>
+ 		<action class="web.action.ResourceApplyAction" name="子资源展示">
+ 			<method name="getDatagridHeaderInfo" type="search" description="获取前台datagrid要显示的列"/>
+ 			<method name="getMetricInfo" type="search" description="获取资源子资源信息"/>
+ 			<method name="getStandardApplicationHeaderInfo" type="search" description="标准应用页面弹出窗动态datagrid"/>
+ 			<method name="getStandardApplicationMetricInfo" type="search" description="获取标准应用子资源信息"/>
+ 			<method name="getStandardApplicationCurrentState" type="search" description="获取标准应用子资源状态信息"/>
+ 		</action>
+ 		<action class="web.action.ResourceCategoryAction" name="资源类别展示">
+ 			<method name="getAllCategorys" type="search" description="获取所有资源类别"/>
+ 			<method name="getResourceCategorys" type="search" description="获取有资源的资源类别"/>
+ 			<method name="getAllResourceDef" type="search" description="获取所有资源类别"/>
+ 			<method name="getAllResourceInstance" type="search" description="获取所有资源类别(不过滤域)(系统管理使用)"/>
+ 			<method name="getRightResourceDef" type="search" description="获取指定id集合的资源列表"/>
+ 			<method name="getLeftResourceDef" type="search" description="获取除去指定id集合的资源列表"/>
+ 			<method name="getLeftResourceInstance" type="search" description="获取除去指定id集合的资源列表(不过滤域)"/>
+ 			<method name="getLeftResourceDefBySearchContent" type="search" description="获取除去指定id集合的资源列表(带搜索关键字)"/>
+ 			<method name="getLeftResourceInstanceBySearchContent" type="search" description="获取除去指定id集合的资源列表(不过滤域)(系统管理)(带搜索关键字)"/>
+ 		</action>
+ 		<action class="web.action.ResourceMonitorAction" name="资源列表展示">
+ 			<method name="openMonitor" type="update" description="开启监控"/>
+ 			<method name="batchOpenMonitor" type="update" description="批量开启监控"/>
+ 			<method name="closeMonitor" type="update" description="取消监控"/>
+ 			<method name="batchCloseMonitor" type="update" description="批量取消监控"/>
+ 			<method name="batchDelResource" type="del" description="批量删除资源"/>
+ 			<method name="getHaveMonitor" type="search" description="获取已监控数据"/>
+ 			<method name="getNotMonitor" type="search" description="获取未监控数据"/>
+ 			<method name="getInstanceDiscoverParamter" type="search" description="获取资源发现参数"/>
+ 		</action>
+ 		<action class="web.action.StrategyDetailAction" name="策略操作">
+ 			<method name="getStrategyById" type="search" description="获取策略信息"/>
+ 			<method name="getResourceNoStrategyVoByids" type="search" description="根据资源ID获取使用当前策略的资源"/>
+ 			<method name="getResourceExceptVoByids" type="search" description="根据资源ID获取未使用当前策略的资源"/>
+ 			<method name="getRightResourceDef" type="search" description="获取指定id集合的资源列表"/>
+ 			<method name="getLeftResourceDef" type="search" description="获取除去指定id集合的资源列表"/>
+ 			<method name="removeProfileById" type="del" description="删除子策略"/>
+ 			<method name="getMainDefaultProfile" type="search" description="获取所有默认主策略"/>
+ 			<method name="getChildProfileType" type="search" description="获取所有默认主策略"/>
+ 			<method name="addChildProfile" type="add" description="添加子策略"/>
+ 			<method name="updateBasicProfileInfo" type="update" description="修改策略基本信息"/>
+ 			<method name="updateProfileResourceByIdList" type="update" description="更新策略的资源"/>
+ 			<method name="updateMetricInfo" type="update" description="更新指标信息"/>
+ 			<method name="addProfileIntoDefultProfile" type="add" description="将指定资源实例添加进默认策略"/>
+ 			<method name="addInstanceIntoHistoryPersonalProfile" type="add" description="将指定资源实例添加进之前的个性化策略"/>
+ 			<method name="addProfileIntoSpecialProfile" type="add" description="将指定资源实例添加进自定义策略"/>
+ 			<method name="addPersonalizeProfileAndMonitor" type="add" description="添加一个个性化策略并加入监控"/>
+ 			<method name="updateProfile" type="del" description="删除一个个性化策略"/>
+ 		</action>
+ 		<action class="web.action.TimelineAction" name="基线">
+ 			<method name="getTimelines" type="search" description="获取当前策略的所有基线"/>
+ 			<method name="getTimelinesCount" type="search" description="获取当前策略的所有基线的数量"/>
+ 			<method name="getMetrics" type="search" description="获取指标"/>
+ 			<method name="getTimeline" type="search" description="根据基线ID 查询基线信息"/>
+ 			<method name="addTimeline" type="add" description="添加基线"/>
+ 			<method name="updateTimeline" type="update" description="更新基线"/>
+ 			<method name="delTimeline" type="del" description="删除基线"/>
+ 		</action>
+ 		<action class="web.action.TinyToolsAction" name="小工具">
+ 			<method name="ping" type="other" description="ping"/>
+ 			<method name="tracert" type="other" description="tracert"/>
+ 			<method name="arptable" type="other" description="arptable"/>
+ 			<method name="routeTable" type="other" description="routeTable"/>
+ 			<method name="netstat" type="other" description="netstat"/>
+ 			<method name="snmpTest" type="other" description="snmpTest"/>
+ 		</action>
+ 	</module>
+ 	<module name="报表管理" class="com.mainsteam.stm.portal.report" id="11">
+ 		<action class="web.action.ReportTemplateDetailAction" name="报表模板">
+ 			<method name="addTemplate" type="add" description="添加报表模板"/>
+ 			<method name="updateTemplate" type="update" description="修改报表模板"/>
+ 			<method name="getResourceCategoryList" type="search" description="获取资源类型"/>
+ 			<method name="getChildResourceListByMainResourceOrCategory" type="search" description="获取子资源类型根据类别或者主资源"/>
+ 			<method name="getResourceInstanceList" type="search" description="获取资源实例"/>
+ 			<method name="getMetricListByResourceId" type="search" description="获取指标"/>
+ 			<method name="filterInstanceInfoByContent" type="search" description="过滤资源实例"/>
+ 			<method name="getTemplateDetailByTemplateId" type="search" description="根据ID获取模板详情"/>
+ 			<method name="getDefaultAlarmMetricData" type="search" description="获取固定告警指标数据"/>
+ 			<method name="getDefaultTopnAlarmMetricData" type="search" description="获取固定Topn告警指标数据"/>
+ 			<method name="getDefaultAvailabilityMetricData" type="search" description="获取固定可用性指标数据"/>
+ 			<method name="resetThresholdToDefaultValue" type="search" description="恢复期望值到默认值"/>
+ 			<method name="getBusinessList" type="search" description="获取业务列表"/>
+ 			<method name="getBusinessMetricList" type="search" description="获取业务指标列表"/>
+ 		</action>
+ 		<action class="web.action.ReportTemplateListAction" name="报表页面展示">
+ 			<method name="getReportByType" type="search" description="获取报表模板"/>
+ 			<method name="delReportListById" type="del" description="reportList删除"/>
+ 			<method name="delReportListByIdArr" type="del" description="reportList批量删除"/>
+ 			<method name="delReportTemplateById" type="del" description="reportTemplate删除"/>
+ 			<method name="getReportTemplateAndreportListById" type="search" description="获取reportTemplate信息及reportList信息"/>
+ 			<method name="getSimpleReportTemplateById" type="search" description="获取reportTemplate信息"/>
+ 			<method name="getReportListByReportTemplateIdAndTime" type="search" description="即时报表 根据时间段获取reportTemplate的详细信息(包括目录,指标信息)"/>
+ 			<method name="getAllReportListByTemplateId" type="search" description="获取reportList信息"/>
+ 			<method name="getUserDomain" type="search" description="获取当前用户可操作的域信息"/>
+ 			<method name="getReportTemplateListByType" type="search" description="根据report type 查询模板列表"/>
+ 			<method name="getReportListByTemplateId" type="search" description="根据reportTemplateId查询报表"/>
+ 		</action>
+ 		<action class="web.action.ReportTemplateXmlInfoAction" name="报表页面展示">
+ 			<method name="getXmlInfo" type="search" description="报表详情页面"/>
+ 			<method name="getFileDownload" type="other" description="报表文件下载"/>
+ 		</action>
+ 	</module>
+ 	<module name="告警管理" class="com.mainsteam.stm.portal.alarm" id="6">
+ 		<action class="web.action.AlarmManagemenAction" name="告警">
+ 			<method name="getNotRestoreAlarm" type="search" description="获取未恢复告警"/>
+ 			<method name="queryAlarmKnowledgeList" type="search" description="通过告警ID查询知识库关联信息"/>
+ 			<method name="getAlarmById" type="search" description="通过告警ID查询已恢复告警对象"/>
+ 			<method name="getRestoreAlarm" type="search" description="获取已恢复告警"/>
+ 			<method name="getSyslogAlarm" type="search" description="获取系统日志告警数据"/>
+ 			<method name="getThirdPartyAlarm" type="search" description="获取系统第三方告警数据"/>
+ 			<method name="getAlarmNotify" type="search" description="通过告警ID查询发送信息"/>
+ 			<method name="getAlertMsg" type="search" description="通过告警id查询比该ID大的最新告警数据"/>
+ 		</action>
+ 	</module>
+	
+	<module name="业务管理" class="com.mainsteam.stm.portal.business.web.action" id="4">
+		<action name="业务告警设置" class="BizAlarmInfoAction">
+			<method name="insertalarmInfo" type="update" description="修改业务告警设置"/>
+			<method name="getalarmInfo" type="search" description="查询业务告警设置"/>
+			<method name="getalarmInfoByBizId" type="search" description="查询业务告警设置"/>
+			<method name="selectWarnViewPage" type="search" description="查询业务告警设置"/>
+		</action>
+		<action name="业务绘图" class="BizCanvasAction">
+			<method name="getCanvasData" type="search" description="查询业务绘图数据"/>
+			<method name="updateCanvas" type="update" description="修改业务绘图数据"/>
+			<method name="insertCanvasNode" type="add" description="添加业务绘图节点"/>
+			<method name="insertCanvasLink" type="add" description="添加业务绘图连线"/>
+			<method name="deleteCanvasLink" type="del" description="删除业务绘图连线"/>
+			<method name="deleteCanvasNode" type="del" description="删除业务绘图节点"/>
+			<method name="getInstanceNode" type="search" description="查询业务绘图节点信息"/>
+			<method name="updateInstanceNode" type="update" description="修改业务绘图节点数据"/>
+		</action>
+		<action name="业务指标" class="BizCapMetricAction">
+			<method name="getCalculateMetricInstanceList" type="search" description="查询业务容量指标"/>
+			<method name="insertUrlCapInfo" type="update" description="修改业务url指标信息"/>
+			<method name="insertCapInfo" type="update" description="修改业务容量指标信息"/>
+		</action>
+		<action name="业务图标" class="BizImageAction">
+			<method name="save" type="add" description="添加业务图标"/>
+			<method name="getImagesByType" type="search" description="查询业务图标"/>
+			<method name="deleteImagesByFiledIds" type="del" description="删除业务图标"/>
+		</action>
+		<action name="业务应用" class="BizMainAction">
+			<method name="insertBasicInfo" type="add" description="添加业务应用"/>
+			<method name="updateBasicInfo" type="update" description="修改业务基本信息"/>
+			<method name="autoBuildBussiness" type="add" description="添加自动构建节点到业务"/>
+			<method name="deleteBiz" type="del" description="删除业务应用"/>
+			<method name="updateBizStatusDefine" type="update" description="修改业务状态定义"/>
+		</action>
+		<action name="业务权限" class="BizUserRelAction">
+			<method name="update" type="update" description="修改业务权限"/>
+		</action>
+	</module>
+	
+	<module name="配置文件管理" class="com.mainsteam.stm.portal.config.web.action" id="8">
+		<action name="配置文件告警" class="ConfigWarnAction">
+			<method name="getPage" type="search" description="查询告警设置分页数据"/>
+			<method name="getWarnViewPage" type="search" description="查询告警一览分页数据"/>
+			<method name="addWarn" type="add" description="添加告警"/>
+			<method name="updateWarn" type="update" description="编辑告警"/>
+			<method name="getWarn" type="search" description="获取告警详情"/>
+			<method name="getRightResourceInstanceList" type="search" description="获取告警pickGrid右侧资源数据"/>
+			<method name="getLeftResourceInstanceList" type="search" description="获取告警pickGrid左侧资源数据"/>
+			<method name="getWarnRulesById" type="search" description="获取告警接收规则及人员"/>
+			<method name="batchDel" type="del" description="批量删除告警"/>
+			<method name="exportWarnView" type="other" description="导出告警一览列表数据"/>
+		</action>
+		<action name="设备一览" class="ConfigDeviceAction">
+			<method name="get" type="search" description="查询设备资源"/>
+			<method name="update" type="update" description="编辑设备资源"/>
+			<method name="getConfigDevicePage" type="search" description="查询设备一览分页数据"/>
+			<method name="getAllExceptionResourceInstanceList" type="search" 
+				description="查询除去已经添加进配置文件管理资源表中资源的资源"/>
+			<method name="addConfigDevice" type="add" description="导入设备资源"/>
+			<method name="delConfigDevice" type="del" description="删除设备资源"/>
+			<method name="readfilebylist" type="other" description="读取配置文件"/>
+			<method name="comparecfgfile" type="other" description="比较配置文件"/>
+			<method name="backupResourcesByIds" type="add" description="手动备份配置文件"/>
+		</action>
+		<action name="自定义配置组" class="ConfigCustomGroupAction">
+			<method name="getConfigGroupPage" type="search" description="查询自定义配置组分页数据"/>
+			<method name="moveIntoGroup" type="update" description="移入自定义配置组"/>
+			<method name="addCustomGroup" type="add" description="添加自定义配置组"/>
+			<method name="editCustomGroup" type="update" description="编辑自定义配置组"/>
+			<method name="getAllCustomGroup" type="search" description="查询所有的自定义配置组"/>
+			<method name="delCustomGroup" type="del" description="删除自定义配置组"/>
+			<method name="delResourceFromCustomGroup" type="del" description="从自定义配置组移除资源"/>
+			<method name="getCustomGroup" type="search" description="查询自定义配置组"/>
+			<method name="getAllResourceDef" type="other" description="查询所有的网络设备资源类别"/>
+			<method name="getRightResourceDef" type="other" description="查询右侧指定的资源数据集合"/>
+			<method name="getLeftResourceDef" type="other" description="查询左侧指定的资源数据集合"/>
+		</action>
+		<action name="备份日志" class="ConfigBackupLogAction">
+			<method name="getPage" type="search" description="查询备份日志分页数据"/>
+		</action>
+		<action name="备份计划" class="BackupPlanAction">
+			<method name="getAllResourceInstanceList" type="other" description="所有所有的资源集合"/>
+			<method name="getPlanDevice" type="search" description="查询计划关联的所有设备资源"/>
+			<method name="getNotPlanDevice" type="search" description="查询计划无关联的所有设备资源"/>
+			<method name="getPager" type="search" description="查询备份计划分页数据"/>
+			<method name="addPlan" type="add" description="新增备份计划"/>
+			<method name="getPlan" type="search" description="查询备份计划"/>
+			<method name="batchRemove" type="del" description="批量删除备份计划"/>
+			<method name="upateDevicePlan" type="update" description="更新备份计划"/>
+			<method name="searchDevice" type="other" description="查询所有的网络设备资源"/>
+		</action>
+	</module>
+	<module name="3D机房设置" class="com.mainsteam.stm.portal.threed.web.action" id="15">
+		<action name="3D机柜设备" class="CabinetAction">
+			<method name="getNodeTree" type="search" description="查询机柜树"/>
+			<method name="getAllResource" type="search" description="查询所有的资源"/>
+			<method name="getCabinetResource" type="search" description="查询机柜中的资源"/>
+			<method name="batchAdd" type="add" description="批量添加资源到机柜"/>
+			<method name="batchRemove" type="del" description="从机柜中批量删除资源"/>
+			<method name="update" type="update" description="设备资源U位型号"/>
+		</action>
+		<action name="3D设备模型" class="ModelAction">
+			<method name="getAll" type="search" description="查询所有的型号关联信息"/>
+			<method name="getProductInfo" type="search" description="获取产品信息"/>
+			<method name="update" type="update" description="更新资源类型设备型号关系"/>
+		</action>
+		<action name="3D集成信息" class="UrlAction">
+			<method name="get3DInfo" type="search" description="查询3D集成信息"/>
+			<method name="updateStatus" type="update" description="关闭开启3D集成"/>
+			<method name="updateIp" type="update" description="更新3D集成IP"/>
+		</action>
+	</module>
+	<module name="拓扑管理" class="com.mainsteam.stm.topo.web.action" id="5">
+		<action name="拓扑图信息" class="TopoAction">
+			<method name="saveTopo" type="add" description="保存或者更新拓扑图元信息"/>
+			<method name="replaceIcon" type="update" description="替换拓扑图元图标"/>
+			<method name="getIps" type="search" description="获取所有图元的ip地址"/>
+			<method name="query" type="search" description="查询图元表"/>
+			<method name="addSubTopo" type="add" description="新建子拓扑并向该拓扑中添加节点"/>
+			<method name="addNewElemToSubTopo" type="update" description="添加新设备到已存子拓扑中"/>
+			<method name="getSubTopo" type="search" description="获取子拓扑的图元信息"/>
+			<method name="twoSubTopos" type="search" description="获取二层拓扑的所有子拓扑列表"/>
+			<method name="allTopos" type="search" description="获取所有拓扑列表"/>
+			<method name="addMonitor" type="update" description="添加监控"/>
+			<method name="cancelMonitor" type="update" description="取消监控"/>
+			<method name="hasTopo" type="search" description="是否具有拓扑图"/>
+			<method name="refreshTopoState" type="search" description="刷新查询拓扑图的状态"/>
+			<method name="getSubToposByIp" type="search" description="通过ip模糊查询包含该ip的拓扑图列表"/>
+			<method name="getMetricInfoByInstanceId" type="search" description="拖过实例id获取该资源实例的指标信息"/>
+			<method name="updateSubTopoAttr" type="update" description="更新子拓扑的属性"/>
+			<method name="getProfileIdByInstanceId" type="search" description="拖过资源实例id获取对应的策略id"/>
+			<method name="refreshLinkDataByIds" type="search" description="通过id列表获取链路的性能属性"/>
+			<method name="refreshLifeState" type="search" description="刷新节点的设备状态信息"/>
+			<method name="deleteSubtopo" type="del" description="删除子拓扑"/>
+		</action>
+		<action name="链路信息" class="LinkAction">
+			<method name="getDetailInfo" type="search" description="获取链路的详细信息"/>
+			<method name="updateLink" type="update" description="更新链路的信息-阈值等"/>
+		</action>
+		<action name="拓扑发现" class="TopoFindAction">
+			<method name="find" type="add" description="启动远程采集器，传入发现参数开始发现网络拓扑信息"/>
+			<method name="resultInfo" type="search" description="获取拓扑发现的结果信息"/>
+			<method name="singleTopoFind" type="search" description="単资源拓扑发现"/>
+		</action>
+		<action name="拓扑权限配置" class="TopoAuthSettingAction">
+			<method name="save" type="add" description="保存拓扑权限设置"/>
+			<method name="getTopoAuthSetting" type="search" description="通过子拓扑id获取该子拓扑的权限设置"/>
+			<method name="hasAuth" type="search" description="当前用户是否具有对该子拓扑的相应权限"/>
+		</action>
+		<action name="拓扑配置参数" class="SettingAction">
+			<method name="saveSetting" type="add" description="保存拓扑的配置参数"/>
+			<method name="getCfgInfo" type="search" description="通过key获取拓扑的配置参数"/>
+		</action>
+		<action name="拓扑图片管理" class="TopoImageAction">
+			<method name="save" type="add" description="保存拓扑图标"/>
+			<method name="getImagesByType" type="search" description="通过类型获取图标列表"/>
+			<method name="deleteImagesByIds" type="del" description="通过id删除相应数据库和磁盘上的图片信息"/>
+			<method name="downLoadImage" type="search" description="下载图标"/>
+			<method name="getImage" type="search" description="获取指定状态的图标"/>
+		</action>
+		<action name="背板管理" class="BackboardAction">
+			<method name="importBackbordXml" type="search" description="将xml导入到系统背板库"/>
+			<method name="exportBackbordInfo" type="search" description="将背板导出xml格式"/>
+			<method name="getBackboard" type="search" description="获取背板信息"/>
+			<method name="save" type="add" description="保存背板信息"/>
+			<method name="categoryDeviceInfo" type="search" description="获取设备分类列表信息"/>
+			<method name="getAllIfs" type="search" description="获取指定设备的所有接口信息"/>
+		</action>
+		<action name="一览表" class="InstanceTableAction">
+			<method name="getDevicePageList" type="search" description="查询拓扑发现的设备信息"/>
+			<method name="getLinkPageList" type="search" description="查询拓扑发现的链路信息"/>
+			<method name="getLinksByInstanceIds" type="search" description="根据资源实例ids获取链路数据"/>
+			<method name="getLinkWarnSetting" type="search" description="获取链路告警设置信息"/>
+			<method name="saveLinkAlarmSetting" type="add" description="保存链路告警设置信息"/>
+			<method name="deleteLinkAlarmSetting" type="del" description="删除链路告警设置信息"/>
+			<method name="changeLinkAlarmConditionEnabled" type="update" description="改变链路告规则发送条件是否启用"/>
+			<method name="editAlarmRules" type="update" description="修改链路告警规则"/>
+		</action>
+		<action name="IP-MAC-PORT" class="MacAction">
+			<method name="importBaseMacsExcel" type="add" description="导入基准表数据excel文件到数据库"/>
+			<method name="exportBaseMacs" type="search" description="导出基准表数据到excel文件"/>
+			<method name="refreshLatestMacs" type="update" description="刷新新增mac数据"/>
+			<method name="refreshMacs" type="update" description="刷新mac实时数据"/>
+			<method name="getWarnSenders" type="search" description="获取告警人"/>
+			<method name="deleteHistoryByIds" type="del" description="删除mac历史变更数据"/>
+			<method name="deleteBaseMac" type="del" description="删除mac基本表数据"/>
+			<method name="saveBaseMac" type="add" description="保存mac基本表数据"/>
+			<method name="deleteBaseMac" type="del" description="根据ids删除基本表数据"/>
+			<method name="addAllTobase" type="add" description="全部加入基准表"/>
+			<method name="addTobase" type="add" description="将选择的mac加入基准表"/>
+			<method name="getSubHistoryPageList" type="search" description="分页查询[历史变更]列表数据"/>
+			<method name="getHistoryPageList" type="search" description="分页查询[历史变更]最新数据列表数据"/>
+			<method name="getLatestMacPageList" type="search" description="分页查询[新增MAC]列表数据"/>
+			<method name="getMacBasePageList" type="search" description="分页查询[基准表]列表数据"/>
+			<method name="getRuntimePageList" type="search" description="分页查询[实时表]列表数据"/>
+		</action>
+	</module>
+<!--	
+	
+	<module name="拓扑管理" class=""></module>
+	
+	<module name="流量分析" class=""></module>
+	
+	<module name="配置文件管理" class=""></module>
+	
+	<module name="巡检管理" class=""></module> -->
+</mapper>

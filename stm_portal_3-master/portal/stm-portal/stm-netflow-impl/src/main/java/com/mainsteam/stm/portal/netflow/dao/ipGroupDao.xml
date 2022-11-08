@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.portal.netflow.dao.IDeviceGroupDao">
+	<insert id="saveIpGroup">
+		insert CONF_IP_GROUP(id,name,description,state,ips)
+		value(#{id},#{name},#{description},1,#{ips})
+	</insert>
+
+	<insert id="saveIpGroupByAid">
+		insert CONF_IP_GROUP_AID(conf_ip_group_id)
+		value(#{groupId})
+	</insert>
+
+	<insert id="saveIpGroupByIp">
+		insert
+		CONF_IP_GROUP_IPRANGE(IP_GROUP_ID,START_IP_ADDR,END_IP_ADDR,IP_ADDR,NET_MASK)
+		value
+		(#{groupId},#{startIp},#{endIp},#{ip},#{mask})
+	</insert>
+
+	<select id="query_ip_group" resultType="com.mainsteam.stm.portal.netflow.bo.IpGroupBo">
+		SELECT
+		g.id id,g.name
+		name,group_concat(i.start_ip_addr,if(isnull(i.end_ip_addr),'','-'),ifnull(i.end_ip_addr,''))
+		ips,g.description description
+		FROM CONF_IP_GROUP g left join
+		CONF_IP_GROUP_AID a on g.id = a.conf_ip_group_id left join
+		CONF_IP_GROUP_IPRANGE i on g.id =
+		i.ip_group_id
+		<trim prefix="where" prefixOverrides="and |or ">
+			<if test="condition.description != null"> AND g.name like concat('%',#{condition.description},'%')
+			</if>
+		</trim>
+		group by g.id
+		<choose>
+			<when test="condition.ips!=null">
+				order by g.name ${condition.ips}
+			</when>
+			<otherwise>
+				order by a.create_date desc
+			</otherwise>
+		</choose>
+
+	</select>
+
+	<delete id="del_ip_group">
+		delete from CONF_IP_GROUP where id in
+		<foreach collection="ids" index="index" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<delete id="del_ip_group_iprange">
+		delete from CONF_IP_GROUP_IPRANGE where ip_group_id in
+		<foreach collection="ids" index="index" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<select id="del_ip_group_ByAid">
+		delete from CONF_IP_GROUP_AID where conf_ip_group_id in
+		<foreach collection="ids" index="index" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+	<select id="getIpGroupById" resultType="java.lang.Integer">
+		select id from
+		CONF_IP_GROUP
+	</select>
+
+	<select id="get_ip_group" resultType="com.mainsteam.stm.portal.netflow.bo.IpGroupBo"
+		parameterType="java.util.HashMap">
+		select id,name,description,ips from CONF_IP_GROUP where
+		id = #{id}
+	</select>
+
+	<select id="ip_group_getCount" resultType="java.lang.Integer"
+		parameterType="java.util.HashMap">
+		select count(1) from CONF_IP_GROUP where name = #{name}
+		<if test="id!=null">
+			and id not in(#{id})
+		</if>
+	</select>
+</mapper>

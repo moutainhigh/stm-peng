@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">
+    <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0">
+        <ChangePluginInitParameter pluginid="HttpPlugin" parameterId="serviceType" propertyValue="CiscoTelePresenceConductor" parameterProperty="DefaultValue"/>
+    </GlobalMetricSetting>
+    <PluginClassAliasList>
+        <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+        <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+        <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+        <PluginClassAlias id="regularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+        <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+        <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+        <PluginClassAlias id="tableConverter" class="com.mainsteam.stm.plugin.common.TableResultSetConverter"/>
+        <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+        <PluginClassAlias id="columnSelectProcessor" class="com.mainsteam.stm.plugin.common.ColumnSelectProcessor"/>
+    </PluginClassAliasList>
+
+    <MetricPlugin metricid="name" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="systemUnitXml"/>
+        </PluginParameter>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="model" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo columns="model,serial,softwareVersion,buildVersion,apiVersion,uptimeSeconds"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="deviceQuery"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT model"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="serial" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo columns="model,serial,softwareVersion,buildVersion,apiVersion,uptimeSeconds"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="deviceQuery"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT serial"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="softwareVersion" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo columns="model,serial,softwareVersion,buildVersion,apiVersion,uptimeSeconds"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="deviceQuery"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="columnSelectProcessor">
+                <Parameter type="" key="SELECT" value="softwareVersion"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="buildVersion" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo columns="model,serial,softwareVersion,buildVersion,apiVersion,uptimeSeconds"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="deviceQuery"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="columnSelectProcessor">
+                <Parameter type="" key="SELECT" value="buildVersion"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="apiVersion" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo columns="model,serial,softwareVersion,buildVersion,apiVersion,uptimeSeconds"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="deviceQuery"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT apiVersion"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="macAddress" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo columns="uuid,name,device,type,mac_address,ipv4_address"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="networkInterfaceXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT mac_address"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="ip" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo columns="uuid,name,device,type,mac_address,ipv4_address"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="networkInterfaceXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ipv4_address"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="uptime" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="sysUpTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.2.1.1.3.0"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT sysUpTime/100 as sysUpTime"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="cpuRate" collectType="" pluginid="SnmpPlugin">
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.2021.10.1.5.2"/>
+        </PluginParameter>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="memRate" collectType="" pluginid="SnmpPlugin">
+        <PluginResultMetaInfo columns="memTotalReal,memAvailReal,memBuffer,memCached"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="method" value="get"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.2021.4.5.0"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.2021.4.6.0"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.2021.4.14.0"/>
+            <Parameter type="" key="" value="1.3.6.1.4.1.2021.4.15.0"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ((memTotalReal-memAvailReal-memBuffer-memCached)/memTotalReal*100) AS memRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="availability" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo columns="availability"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="statusXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="availability" value="Active,1;0"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="availableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="nodeID" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo columns="uuid,peer,state"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="clusterPeerXml"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="uuid"/>
+            <Parameter type="" key="ValueColumnTitle" value="uuid"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="nodeState" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo columns="uuid,peer,state"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="clusterPeerXml"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="state" value="up,1;0"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="uuid"/>
+            <Parameter type="" key="ValueColumnTitle" value="state"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="nodeID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+
+    <MetricPlugin metricid="nodeIP" collectType="" pluginid="HttpPlugin">
+        <PluginResultMetaInfo columns="uuid,peer,state"/>
+        <PluginParameter type="ArrayType">
+            <Parameter key="method" value="clusterPeerXml"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="uuid"/>
+            <Parameter type="" key="ValueColumnTitle" value="peer"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="nodeID"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+
+</MetricPlugins>

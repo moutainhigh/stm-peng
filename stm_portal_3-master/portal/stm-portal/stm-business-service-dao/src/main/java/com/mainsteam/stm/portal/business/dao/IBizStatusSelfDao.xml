@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mainsteam.stm.portal.business.dao.IBizStatusSelfDao">
+	<select id="get" resultType="com.mainsteam.stm.portal.business.bo.BizStatusSelfBo" parameterType="long">
+		SELECT ID, BIZ_MAIN_ID, TYPE, INSTANCE_ID, METRIC_ID, STATE
+		FROM
+		STM_BIZ_STATUS_SELF
+		WHERE ID = #{id}
+	</select>
+	<select id="getByBizSerId" resultType="com.mainsteam.stm.portal.business.bo.BizStatusSelfBo" parameterType="long">
+		SELECT ID, BIZ_MAIN_ID, TYPE, INSTANCE_ID, METRIC_ID, STATE
+		FROM
+		STM_BIZ_STATUS_SELF
+		WHERE BIZ_MAIN_ID = #{bizSerId}
+	</select>
+
+	<insert id="insert" parameterType="com.mainsteam.stm.portal.business.bo.BizStatusSelfBo">
+		INSERT INTO
+		STM_BIZ_STATUS_SELF(
+		ID, BIZ_MAIN_ID, TYPE, INSTANCE_ID, METRIC_ID, STATE
+		) VALUES (
+		#{id},
+		#{biz_main_id},
+		#{type},
+		#{instance_id},
+		#{metric_id},
+		#{state}
+		)
+	</insert>
+
+	<delete id="delByBizSerId" parameterType="long">
+		DELETE FROM STM_BIZ_STATUS_SELF WHERE BIZ_MAIN_ID = #{bizSerId}
+	</delete>
+	
+	<delete id="delByInstanceId" parameterType="long">
+		DELETE FROM STM_BIZ_STATUS_SELF WHERE INSTANCE_ID = #{instanceId}
+	</delete>
+	
+	<delete id="delByBizSerIdAndInstanceIds" parameterType="map">
+		delete from stm_biz_status_self
+		where BIZ_MAIN_ID = #{bizSerId}
+		<if test="instanceIds!=null and instanceIds.length>0">
+			and INSTANCE_ID in 
+			<foreach item="instanceId" index="index" collection="instanceIds" open="(" separator="," close=")">  
+  				#{instanceId}
+	 		</foreach> 
+		</if>
+		<if test="instanceIds==null or instanceIds.length==0">
+			and INSTANCE_ID is null 
+		</if>
+	</delete>
+
+</mapper>

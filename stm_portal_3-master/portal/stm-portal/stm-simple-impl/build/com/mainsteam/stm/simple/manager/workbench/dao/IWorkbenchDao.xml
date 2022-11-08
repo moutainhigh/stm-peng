@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.simple.manager.workbench.dao.IWorkbenchDao">
+	<insert id="insert" parameterType="com.mainsteam.stm.simple.manager.workbench.report.bo.ExpectBo">
+		INSERT INTO STM_SPL_MNG_WBH_BIZ_EXP
+			(ID,REPORT_ID,AVAILABLE,MTTR,MTBF,DOWN_TIMES,DOWN_DURATION,ALARM_TIMES,UNRECOVERY_ALARM_TIMES,CREATE_TIME,CREATOR_ID,CREATOR_NAME,IS_INFORM)
+		VALUES
+		  	(#{id},#{reportId},#{available},#{mttr},#{mtbf},#{downTimes},#{downDuration},#{alarmTimes},#{unrecoveryAlarmTimes},#{createTime},#{creatorId},#{creatorName},0)
+	</insert>
+	<select id="get" parameterType="long" resultType="com.mainsteam.stm.simple.manager.workbench.report.bo.ExpectBo">
+		select
+		 ID "id",
+		 REPORT_ID "reportId", 
+		 AVAILABLE "available", 
+		 MTTR "mttr", 
+		 MTBF "mtbf", 
+		 DOWN_TIMES "downTimes", 
+		 DOWN_DURATION "downDuration", 
+		 ALARM_TIMES "alarmTimes", 
+		 UNRECOVERY_ALARM_TIMES "unrecoveryAlarmTimes", 
+		 CREATE_TIME "createTime" ,
+		 CREATOR_ID "creatorId",
+		 CREATOR_NAME "creatorName",
+		 IS_INFORM "state",
+		 INFORM_TIME="noticeDate"
+		from STM_SPL_MNG_WBH_BIZ_EXP where id=#{id}
+	</select>
+	<select id="select" parameterType="long" resultType="com.mainsteam.stm.simple.manager.workbench.report.bo.ExpectBo">
+		select
+		 ID "id",
+		 REPORT_ID "reportId", 
+		 AVAILABLE "available", 
+		 MTTR "mttr", 
+		 MTBF "mtbf", 
+		 DOWN_TIMES "downTimes", 
+		 DOWN_DURATION "downDuration", 
+		 ALARM_TIMES "alarmTimes", 
+		 UNRECOVERY_ALARM_TIMES "unrecoveryAlarmTimes", 
+		 CREATE_TIME "createTime" ,
+		 CREATOR_ID "creatorId",
+		 CREATOR_NAME "creatorName",
+		 IS_INFORM "state",
+		 INFORM_TIME="noticeDate"
+		from STM_SPL_MNG_WBH_BIZ_EXP where REPORT_ID=#{reportId} ORDER BY CREATE_TIME DESC
+	</select>
+	
+	<delete id="delete" parameterType="long">
+		delete from STM_SPL_MNG_WBH_BIZ_EXP where id=#{id}
+	</delete>
+	
+	<update id="update" parameterType="com.mainsteam.stm.simple.manager.workbench.report.bo.ExpectBo">
+		UPDATE STM_SPL_MNG_WBH_BIZ_EXP SET IS_INFORM=#{state},INFORM_TIME=#{noticeDate} WHERE ID = #{id}
+	</update>
+</mapper>

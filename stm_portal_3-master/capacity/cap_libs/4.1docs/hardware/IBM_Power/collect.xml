@@ -1,0 +1,518 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">
+    <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0">
+        <ChangePluginInitParameter pluginid="SshPlugin" parameterId="system" parameterProperty="isDisplay" propertyValue="true"/>
+    </GlobalMetricSetting>
+    <PluginClassAliasList>
+        <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+        <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+        <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+        <PluginClassAlias id="regularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+        <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+        <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+        <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+        <PluginClassAlias id="rowFilterProcessor" class="com.mainsteam.stm.plugin.common.RowFilterProcessor"/>
+    </PluginClassAliasList>
+    <MetricPlugin metricid="state" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="state"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lssyscfg -r sys -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bstate=([^,\r\n]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="state" value="Operating,1;0"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="availableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="name" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lssyscfg -r sys -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bname=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="model" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lssyscfg -r sys -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\btype_model=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="serialNum" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lssyscfg -r sys -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bserial_num=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ip" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lssyscfg -r sys -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bipaddr=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sysTime" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lssyscfg -r sys -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bsys_time=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="powerOnType" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lssyscfg -r sys -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bpower_on_type=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="installedProc" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r proc --level sys -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\binstalled_sys_proc_units=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="configurableProc" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r proc --level sys -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bconfigurable_sys_proc_units=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="deconfigProc" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r proc --level sys -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bdeconfig_sys_proc_units=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="currUsedProc" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="configurableProc,currAvailProc"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r proc --level sys -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bconfigurable_sys_proc_units=([^,\r\n]+).*\bcurr_avail_sys_proc_units=([^,\r\n]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (configurableProc-currAvailProc) AS currUsedProc"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="currAvailProc" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r proc --level sys -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bcurr_avail_sys_proc_units=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="pendUsedProc" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="configurableProc,pendAvailProc"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r proc --level sys -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bconfigurable_sys_proc_units=([^,\r\n]+).*\bpend_avail_sys_proc_units=([^,\r\n]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (configurableProc-pendAvailProc) AS currUsedProc"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="pendAvailProc" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r proc --level sys -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bpend_avail_sys_proc_units=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="installedMem" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r mem --level sys -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\binstalled_sys_mem=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="configurableMem" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r mem --level sys -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bconfigurable_sys_mem=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="deconfigMem" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r mem --level sys -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bdeconfig_sys_mem=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="currUsedMem" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="configurableMem,currAvailMem,sysFirmwareMem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r mem --level sys -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bconfigurable_sys_mem=([^,\r\n]+).*\bcurr_avail_sys_mem=([^,\r\n]+).*\bsys_firmware_mem=([^,\r\n]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (configurableMem-currAvailMem-sysFirmwareMem) AS currUsedMem"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="currAvailMem" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r mem --level sys -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bcurr_avail_sys_mem=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="pendUsedMem" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="configurableMem,pendAvailMem,sysFirmwareMem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r mem --level sys -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bconfigurable_sys_mem=([^,\r\n]+).*\bpend_avail_sys_mem=([^,\r\n]+).*\bsys_firmware_mem=([^,\r\n]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (configurableMem-pendAvailMem-sysFirmwareMem) AS pendUsedMem"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="pendAvailMem" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r mem --level sys -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bpend_avail_sys_mem=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sysFirmwareMem" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r mem --level sys -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bsys_firmware_mem=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="lparId" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="lparId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lssyscfg -r lpar -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\blpar_id=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="lparId"/>
+            <Parameter type="" key="ValueColumnTitle" value="lparId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="lparName" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="lparName,lparId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lssyscfg -r lpar -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bname=([^,\r\n]+).*\blpar_id=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="lparId"/>
+            <Parameter type="" key="ValueColumnTitle" value="lparName"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="lparId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="lparState" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="lparId,lparState"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lssyscfg -r lpar -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\blpar_id=([^,\r\n]+).*\bstate=([^,\r\n]+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="lparState" value="Running,1;0"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="lparId"/>
+            <Parameter type="" key="ValueColumnTitle" value="lparState"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="lparId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="lparOsVersion" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="lparId,lparOsVersion"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lssyscfg -r lpar -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\blpar_id=([^,\r\n]+).*\bos_version=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="lparId"/>
+            <Parameter type="" key="ValueColumnTitle" value="lparOsVersion"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="lparId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="lparCurrProc" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="lparId,lparCurrProc"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r proc --level lpar -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\blpar_id=([^,\r\n]+).*\bcurr_procs=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="lparId"/>
+            <Parameter type="" key="ValueColumnTitle" value="lparCurrProc"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="lparId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="lparPendProc" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="lparId,lparPendProc"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r proc --level lpar -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\blpar_id=([^,\r\n]+).*\bpend_procs=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="lparId"/>
+            <Parameter type="" key="ValueColumnTitle" value="lparPendProc"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="lparId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="lparRunProc" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="lparId,lparRunProc"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r proc --level lpar -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\blpar_id=([^,\r\n]+).*\brun_procs=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="lparId"/>
+            <Parameter type="" key="ValueColumnTitle" value="lparRunProc"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="lparId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="lparCurrMem" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="lparId,lparCurrMem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r mem --level lpar -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\blpar_id=([^,\r\n]+).*\bcurr_mem=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="lparId"/>
+            <Parameter type="" key="ValueColumnTitle" value="lparCurrMem"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="lparId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="lparPendMem" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="lparId,lparPendMem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r mem --level lpar -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\blpar_id=([^,\r\n]+).*\bpend_mem=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="lparId"/>
+            <Parameter type="" key="ValueColumnTitle" value="lparPendMem"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="lparId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="lparRunMem" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="lparId,lparRunMem"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r mem --level lpar -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\blpar_id=([^,\r\n]+).*\brun_mem=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="lparId"/>
+            <Parameter type="" key="ValueColumnTitle" value="lparRunMem"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="lparId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="procPoolId" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="procPoolId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r procpool -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bshared_proc_pool_id=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="procPoolId"/>
+            <Parameter type="" key="ValueColumnTitle" value="procPoolId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="procPoolName" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="procPoolName,procPoolId"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r procpool -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bname=([^,\r\n]+).*\bshared_proc_pool_id=([^,\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="procPoolId"/>
+            <Parameter type="" key="ValueColumnTitle" value="procPoolName"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="procPoolId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="procPoolLparNames" collectType="" pluginid="SshPlugin">
+        <PluginResultMetaInfo columns="procPoolId,procPoolLparNames"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="system" value="system"/>
+            <Parameter type="" key="COMMAND" value="lshwres -r procpool -m ${system}"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="regularFilter">
+                <Parameter type="" key="REGULAR" value="\bshared_proc_pool_id=([^,\r\n]+).*\blpar_names=([^&quot;\r\n]+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="procPoolId"/>
+            <Parameter type="" key="ValueColumnTitle" value="procPoolLparNames"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="procPoolId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+</MetricPlugins>

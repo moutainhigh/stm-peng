@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Plugin version="1.0" id="IpmiPlugin" name="IpmiPlugin"
+	class="com.mainsteam.stm.plugin.ipmi.IpmiPluginSession" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../schema/Plugin.xsd">
+	<!-- 最大活动session 数 -->
+	<MaxActiveSession>1</MaxActiveSession>
+	<!-- 最大空闲session 数 -->
+	<MaxidleSession>0</MaxidleSession>
+	<!-- session TTL -->
+	<SessionTTL>10000</SessionTTL>
+	<!-- 对象缓存的超时时间 -->
+	<ObjectCacheTimeout>30000</ObjectCacheTimeout>
+
+	<!-- 插件初始化参数，发现资源用 -->
+	<PluginInitParameters>
+		<parameter id="ipmiGrpBox" boxStyle="GroupBox" name="Ipmi连接信息"
+			displayOrder="1" isEdit="false" isDisplay="true" isSessionKey="false">
+			<HelpInfo>Ipmi连接信息</HelpInfo>
+		</parameter>
+
+		<!-- boxStyle输入框类型;displayOrder用于发现页面上输入项的显示顺序;isEdit可编辑;isDisplay可显示;isSessionKey区分采集会话 -->
+		<parameter id="IP" boxStyle="IPField" name="IP地址"
+			displayOrder="1" isEdit="true" isDisplay="true" isSessionKey="true"
+			mustInput="true">
+			<HelpInfo>待发现机器的IP地址</HelpInfo>
+			<errorInfo>请输入正确的IP地址</errorInfo>
+		</parameter>
+
+		<!-- valueValidate校验输入内容合法性 -->
+		<parameter id="port" boxStyle="Input"
+			valueValidate="/^([0-9]|[1-9]\d|[1-9]\d{2}|[1-9]\d{3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/"
+			name="端口" displayOrder="2" isEdit="true" isDisplay="true" mustInput="true"
+			isSessionKey="true">
+			<!-- 默认值 -->
+			<DefaultValue>623</DefaultValue>
+			<!-- 帮助信息 -->
+			<HelpInfo>Ipmi端口</HelpInfo>
+			<!-- 错误提示 -->
+			<errorInfo>请输入整数</errorInfo>
+		</parameter>
+		
+		<parameter id="interface" boxStyle="OptionBox" name="接口"
+			displayOrder="3" isEdit="true" isDisplay="true" mustInput="true"
+			isSessionKey="true">
+			<DefaultValue>lanplus</DefaultValue>
+			<!-- radiobox和下拉框都有可选值 -->
+			<SupportValues>
+				<SupportValue>
+					<!-- 可选值的名称和值 -->
+					<Name>IPMI v2.0 RMCP+ LAN Interface</Name>
+					<Value>lanplus</Value>
+				</SupportValue>
+				<SupportValue>
+					<Name>IPMI v1.5 LAN Interface</Name>
+					<Value>lan</Value>
+				</SupportValue>
+			</SupportValues>
+			<HelpInfo>IPMI接口</HelpInfo>
+		</parameter>
+
+		<parameter id="level" boxStyle="OptionBox" name="特权级别"
+			displayOrder="4" isEdit="true" isDisplay="true" mustInput="true"
+			isSessionKey="true">
+			<DefaultValue>ADMINISTRATOR</DefaultValue>
+			<!-- radiobox和下拉框都有可选值 -->
+			<SupportValues>
+				<SupportValue>
+					<!-- 可选值的名称和值 -->
+					<Name>ADMINISTRATOR</Name>
+					<Value>ADMINISTRATOR</Value>
+				</SupportValue>
+				<SupportValue>
+					<Name>CALLBACK</Name>
+					<Value>CALLBACK</Value>
+				</SupportValue>
+				<SupportValue>
+					<Name>OPERATOR</Name>
+					<Value>OPERATOR</Value>
+				</SupportValue>
+				<SupportValue>
+					<Name>USER</Name>
+					<Value>USER</Value>
+				</SupportValue>
+			</SupportValues>
+			<HelpInfo>Ipmi连接特权级别</HelpInfo>
+		</parameter>
+
+		<parameter id="authtype" boxStyle="OptionBox" name="认证类型"
+			displayOrder="5" isEdit="true" isDisplay="true" mustInput="true"
+			isSessionKey="true">
+			<DefaultValue>MD5</DefaultValue>
+			<!-- radiobox和下拉框都有可选值 -->
+			<SupportValues>
+				<SupportValue>
+					<!-- 可选值的名称和值 -->
+					<Name>MD2</Name>
+					<Value>MD2</Value>
+				</SupportValue>
+				<SupportValue>
+					<Name>MD5</Name>
+					<Value>MD5</Value>
+				</SupportValue>
+				<SupportValue>
+					<Name>PASSWORD</Name>
+					<Value>PASSWORD</Value>
+				</SupportValue>
+				<SupportValue>
+					<Name>NONE</Name>
+					<Value>NONE</Value>
+				</SupportValue>
+			</SupportValues>
+			<HelpInfo>Ipmi连接认证类型</HelpInfo>
+		</parameter>
+
+		<parameter id="username" boxStyle="Input" name="用户名"
+			displayOrder="6" isEdit="true" isDisplay="true" isSessionKey="true"
+			mustInput="true">
+			<HelpInfo>用户名</HelpInfo>
+		</parameter>
+
+		<parameter id="password" boxStyle="Input" name="密码"
+			displayOrder="7" isEdit="true" isDisplay="true" isSessionKey="true"
+			mustInput="true" isPassword="true">
+			<HelpInfo>密码</HelpInfo>
+		</parameter>
+		
+		<parameter id="KGValue" boxStyle="Input" name="KG值"
+			displayOrder="8" isEdit="true" isDisplay="true" isSessionKey="true"
+			mustInput="true" isPassword="true">
+			<DefaultValue>000000</DefaultValue>
+			<HelpInfo>KG值</HelpInfo>
+		</parameter>
+	</PluginInitParameters>
+</Plugin>

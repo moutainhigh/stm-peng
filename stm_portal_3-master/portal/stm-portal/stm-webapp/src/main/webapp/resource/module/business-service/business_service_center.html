@@ -1,0 +1,355 @@
+<script type="text/javascript" src="third/canvas/Sizer.js"></script>
+<script type="text/javascript" src="third/canvas/Util.js"></script>
+<script type="text/javascript" src="third/canvas/TextArea.js"></script>
+<script type="text/javascript" src="third/canvas/new-canvas/canvas.js"></script>
+<script type="text/javascript" src="third/canvas/physics.js"></script>
+<script type="text/javascript" src="third/canvas/resourcejs/AllEdit.js"></script>
+<link rel="stylesheet" type="text/css" href="third/carousel/css/carousel.css" />
+<script type="text/javascript" src="third/canvas/jquery-mousewheel-3.1.12/jquery.mousewheel.js"></script>
+<script type="text/javascript" src="third/carousel/js/jquery.carousel.min.js"></script>
+<script type="text/javascript" src="module/business-service/js/business_service_draw.js"></script>
+  <div id="carouselDiv" style="height: 100%;">
+  </div>
+<script type="text/javascript">
+    $(function(){
+    	
+    	oc.ns('oc.business.service.center');
+    	
+    	function loadCarousel(bizData){
+	
+    		$('#carouselDiv').html('');
+    		$('#carouselDiv').append('<ul id="carousel" style="position: absolute;bottom: 30px;left: 50%;margin-left: -435px;"></ul>');
+    		
+            var frontdbl = false;
+            var old;
+            var format = {};
+            var canvasFmt = {};
+          //针对ie9以下视窗控制
+            var vw = 800,vh = 450,first_canvas = null;
+            //请求业务服务数据
+               //获取当前皮肤
+            oc.util.ajax({
+                url: oc.resource.getUrl('system/skin/getCurrentSkin.htm'),
+                data:null,
+                successMsg:null,
+                success: function(skin){
+                	var data = bizData;
+                    var carousel = $("#carousel");
+                    //不足五个的使用示例填充
+                    while(data.length<5){
+                    	data.push({id:data.length*-1,name:"示例",status:"NORMAL",svg:""});
+    				}
+                    for(var i in data){
+                        var li = $("<li/>");
+                        var img = $("<img />").attr("src","themes/" + skin.data + "/images/bizser/indexViewdefault/ywst.jpg").attr("serviceId",data[i].id);
+                        img.appendTo(li);
+                        li.appendTo(carousel);
+                        format[data[i].id] = data[i];
+                    }
+                    var carousel = $('#carousel').carousel({
+                        width: 870,
+                        self_top:52,
+                        self_width:350,
+                        self_height:250,
+                        horizontalRadius:270,
+                        verticalRadius:15,
+                        resize:false,
+                        mouseScroll:false,
+                        mouseDrag:true,
+                        scaleRatio:0.4,
+                        scrollbar:false,
+                        tooltip:true,
+                        mouseWheel:true,
+                        mouseWheelReverse:true,
+                        itemMove:function(t,w,h){
+                        	//canvasFmt[t.data("serviceId")] && canvasFmt[t.data("serviceId")].raphael.setSize(w,h);
+                        	if(canvasFmt[t.data("serviceId")]){
+                        		if(isIeAndVersionLt9()){
+                        			//var _c = canvasFmt[t.data("serviceId")];
+                        			//_c.raphael.setSize(w,h);
+                        			/* if($.trim(t.data("serviceId")) == $.trim(first_canvas)){
+                        				_c.setViewBox(0,0,vw + 250,vh +100);
+                        			}else{
+                        				_c.setViewBox(0,0,vw,vh);	
+                        			} */
+                        			
+                        		}else{
+                        			canvasFmt[t.data("serviceId")].raphael.setSize(w,h);
+                        		}
+                        		
+                        	}
+                        },
+                        itemClick:function(t,o){
+                            if($(t).hasClass("click")){
+                                //假如两次点击的是同一个元素(说明是最前面的双击)
+                                frontdbl = (old.data("serviceId")==o.data("serviceId"));
+                            }
+                            old = o;
+                        }
+                    });
+                    var imgs = carousel.Z;
+                    for(var i=0;i<imgs.length;i++){
+                    	var obj = format[imgs[i].data("serviceId")];
+                    	if(obj.topology==null || obj.topology=="" || obj.topology==undefined) continue;
+                    	if(first_canvas == null){
+                    		first_canvas = obj.id;
+                    	}
+                    	//添加svg元素
+                        imgs[i].attr({draggable:false});
+                        imgs[i].parent().find("span").html(obj.name).attr("class",statusFormatter(obj.status)).after("<div class='rectDiv' style='width:350px;height:270px;'/>");
+                       	//初始化画布大小
+
+                        var rectDivW=  $(".rectDiv").width();
+
+                        imgs[i].parent().find(".rectDiv").width(rectDivW);
+                        imgs[i].parent().find(".rectDiv").height(imgs[i].height());
+                        var canvas = new Canvas(imgs[i].parent().find(".rectDiv")[0]);
+                    	//存储画布的引用
+                    	canvasFmt[obj.id] = canvas;
+                    	canvas.editable = false;
+                    	var data = eval("("+obj.topology+")");
+                    	var bg = data.bg;
+                    	var param = {ifAdapt:true,adaptRatio:350/250,carsoul:{width:350,height:250},id:obj.id};
+                		canvas.restore(data,param);
+                		
+                		/*if(bg){
+                			if(isIeAndVersionLt9()){
+                				canvas.setViewBox(0,0,rectDivW,imgs[i].height());
+                			}else{
+                				canvas.setViewBox(0,0,bg.w-100,bg.h);
+                			}
+                            canvas.raphael.image(bg.src,0,0,bg.w,bg.h+500).toBack();	
+                		}
+                		for(var key in canvas.lines){
+                			canvas.lines[key].attr({"stroke-width":1});
+                		}*/
+                    	imgs[i].parent().find(".carousel-item").hide();
+                        //如果有svg则给svg添加点击事件(其实是调用svg后面图片的事件)
+                        $(".rectDiv").each(function(){
+                        	$(this).unbind("bind").bind({
+    	                    	click:function(){
+    	                    		$(this).parent().find(".carousel-item").click();
+    	                    	},
+    	                    	dblclick:function(){
+    	                    		$(this).parent().find(".carousel-item").dblclick();
+    	                    	}
+    	                    })
+    	                    $(this).unbind("dblclick").bind("dblclick",function(){
+    	                        if(frontdbl){
+    	                        	if(old.data("serviceId")<=0) return;
+    	                            oc.util.ajax({
+    	                                url: oc.resource.getUrl('portal/business/service/get.htm'),
+    	                                data:{id:old.data("serviceId")},
+    	                                successMsg:null,
+    	                                success: function(data){
+    	                                    oc.index.activeContent.load(oc.resource.getUrl('resource/module/business-service/business_service_index.html'),
+    	                                            function(){
+    	                                                oc.resource.loadScript('resource/module/business-service/js/business_service_index.js',function(){
+    	                                                    oc.business.service.index.initRow(data.data);
+    	                                                });
+    	                                            });
+    	                                }
+    	                            });
+    	                        }
+    	                    })
+                        })
+                    }
+                    
+                    if($.browser.safari){  //苹果+chromen Webkit内核
+                        $("text").each(function(){
+                            var tspan = $(this).find("tspan");
+                            var html = tspan.html();
+                            if(html != "业务应用" && html != "业务单位" && html != "业务服务" && html != "支撑层"){
+                                tspan.html("...");
+                            }else{
+                                $(this).attr("transform","translate(-10,0)");
+                                tspan.html(tspan.html().replace("业务应用","应用层").replace("业务单位","单位层").replace("业务服务","服务层"));
+                            }
+                        })
+                    }
+                    //自适应快照
+                    //initAdapt();
+	             }
+	         });
+    		
+    	}
+    	
+
+        function statusFormatter(value){
+            if(!value){
+                return "light-ico greenlight ";
+            }else if(value =="CRITICAL"){
+                return "light-ico redlight";
+            }else if(value =="SERIOUS"){
+                return "light-ico orangelight";
+            }else if(value =="WARN"){
+                return "light-ico yellowlight ";
+            }else if(value =="NORMAL"){
+                return "light-ico greenlight";
+            }
+        }
+        //判断浏览器是否是ie9 以下版本
+        function isIeAndVersionLt9 (){
+        	var  browser = $.browser;
+        	return (browser.msie && parseInt(browser.version) < 9);
+        }
+        //初始化自适应
+        function initAdapt(){
+        	 
+        	 for(var key in canvasFmt){
+        		 if(isIeAndVersionLt9()){
+        			 var  _c = canvasFmt[key];
+        			 if(key  == first_canvas){
+        				 _c.setViewBox(0,0,vw + 250,vh + 100);	 
+        			 }else{
+        				 _c.setViewBox(0,0,vw,vh);
+        			 }
+                 	
+                 }else{
+                	 autoAdapt(canvasFmt[key]);
+                 }
+             }
+        }
+        
+      //找到泳道，全局引用
+		function findLane(canvas){
+    	  
+			var unit,service,app,physics;
+			for(var i in canvas.topContainers){
+				var con = canvas.topContainers[i];
+				if(con.data.type=="unit"){
+					unit = con;
+				}else if(con.data.type=="service"){
+					service = con;
+				}else if(con.data.type=="app"){
+					app = con;
+				}else if(con.data.type=="physics"){
+					physics = con;
+				}else{
+					break;
+				}
+				con.click = function(){
+					if(edit){
+						edit.setCon(this);
+						//没使用的编辑点
+			            var unuse = ["lt","tr","r","rb","bl","l","t"];
+			            for(var i=0;i<unuse.length;i++){
+			            	edit.P[unuse[i]].hide();
+			            }
+						edit.edit = function(bbox){
+							getLaneEdit(bbox,this,unit,service,app,physics);
+						};
+					}
+				}
+				//不让拖动
+				con.proxyDrag = function(dx,dy,x,y){}
+			}
+		}	
+		function checkEdit(){
+		}
+      //自适应快照尺寸
+        function autoAdapt(canvas){
+        	edit = new Edit(canvas);
+        	var unit,service,app,physics;
+    		for(var i in canvas.topContainers){
+    			var con = canvas.topContainers[i];
+    			switch(con.data.type){
+    				case "unit":
+    					unit = con;
+    					
+    					break;
+    				case "service":
+    					service = con;
+    					break;
+    				case "app":
+    					app = con;
+    					break;
+    				case "physics":
+    					physics = con;
+    					break;
+    				default :
+    					edit.hide();
+    					break;
+    			}
+    		}
+    		
+    		var _dom = $(canvas.dom);
+    		
+    		//var dom_height = unit.w / (_dom.width()/_dom.height());
+    		
+    		var dom_height = unit.w / (_dom.width()/ findMaxDom());
+    		
+    		edit.C.raphael.setSize(unit.w,dom_height);
+    		
+    		var old_new = (physics.y+physics.h)/dom_height,width = unit.w;
+    		
+    		var textWidth = edit.C.raphael.width*.17;
+    		
+    		expand(edit);
+    		
+    		
+    		findLane(canvas);
+    		
+    		unit.click();
+    		
+    		edit.edit({x:textWidth,y:1,x1:width,y1:unit.h/old_new});
+    		
+			service.click();
+    		edit.edit({x:textWidth,y:unit.y+unit.h,x1:width,y1:unit.y+unit.h+service.h/old_new});
+    		
+    		app.click();
+    		edit.edit({x:textWidth,y:service.y+service.h,x1:width,y1:service.y+service.h+app.h/old_new});
+    		
+    		physics.click();
+    		edit.edit({x:textWidth,y:app.y+app.h,x1:width,y1:app.y+app.h+physics.h/old_new});
+    		
+    		
+    		edit.hide();
+    		hideChdEdit(unit);
+    		hideChdEdit(service);
+    		hideChdEdit(app);
+    		hideChdEdit(physics);
+    		
+        };
+        /**
+        	找到最大幻灯片dom元素
+        	获取
+        */
+        function findMaxDom(){
+        	var divs = $("#carousel .rectDiv");
+        	var max_height = 0;
+        	$.each(divs,function(i,e){
+        		var _div = $(e)
+        		if(_div.height() > max_height){
+        			max_height = _div.height();
+        		}
+        	})
+        	
+        	if(max_height < 250){
+        		max_height = 250;
+        	}
+        	return max_height;
+        }
+        /**
+        	隐藏子容器编辑框，重写子容器拖拽函数
+        	params C 单指泳道
+        **/
+        function hideChdEdit(C){
+        	if(C != null && C.containers!= null){
+        		for(var chd in C.containers){
+        			var con = C.C.containers[chd]
+        			con.proxyDrag = function(dx,dy,x,y){}
+        		}
+        	}
+        }
+        
+        
+        oc.business.service.center = {
+        		reloadCarousel:function(data){
+        			loadCarousel(data.rows);
+        		}
+        };
+        
+        
+    })
+</script>

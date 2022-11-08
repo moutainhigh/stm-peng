@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.platform.sequence.dao.ISequenceDao">
+
+	<resultMap type="com.mainsteam.stm.platform.sequence.po.SequencePo" id="sequencePo">
+		<result column="SEQ_NAME" property="seqName"/>
+		<result column="CUR_VAL" property="curVal"/>
+		<result column="CACHE_COUNT" property="cacheCount"/>
+	</resultMap>
+	
+	<select id="getAll" resultMap="sequencePo">
+		select SEQ_NAME,CUR_VAL,CACHE_COUNT from STM_PLATFORM_SEQUENCE
+	</select>
+	
+	<select id="get" resultMap="sequencePo" parameterType="java.lang.String">
+		select SEQ_NAME,CUR_VAL,CACHE_COUNT from STM_PLATFORM_SEQUENCE where SEQ_NAME=#{seqName}
+	</select>
+	
+	<insert id="insert" parameterType="string">
+	    insert into STM_PLATFORM_SEQUENCE(SEQ_NAME) values (#{seqName})
+	</insert>
+	
+	<update id="update" parameterType="com.mainsteam.stm.platform.sequence.po.SequencePo">
+		update STM_PLATFORM_SEQUENCE
+		<set>
+			CUR_VAL = #{curVal}
+		</set>
+		where SEQ_NAME=#{seqName}
+	</update>
+</mapper>

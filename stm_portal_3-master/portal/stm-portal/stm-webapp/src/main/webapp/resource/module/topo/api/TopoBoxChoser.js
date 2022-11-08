@@ -1,0 +1,109 @@
+function TopoBoxChoser(args){
+	this.args = $.extend({
+		holder:null,
+		onMouseDown:null,
+		onEnd:null,
+		paper:null,
+		svgUtil:null
+	},args);
+	if(this.args.svgUtil && this.args.svgUtil instanceof TopoSvg && this.args.holder && this.args.paper){
+		this.init();
+	}else{
+		throw "bad arguments!";
+	}
+};
+TopoBoxChoser.prototype={
+	init:function(){
+		this.els=[];
+		this.rect=this.args.paper.rect(0,0,0,0).attr({
+			fill:"white",
+			"fill-opacity":0.2,
+			"stroke":"white",
+			"stroke-dasharray":"- "
+		});
+		this.rect.hide();
+		this.regEvent();
+	},
+	start:function(p){
+		this.rect.show();
+		this.args.svgUtil.convertRealPos(p);
+		this.rect.attr({
+			x:p.x,y:p.y,width:1,height:0
+		});
+		this.startPoint=p;
+	},
+	update:function(p){
+		this.args.svgUtil.convertRealPos(p);
+		var w=p.x-this.startPoint.x,
+		h=p.y-this.startPoint.y;
+		if(w>0){
+			this.rect.attr("width",w);
+		}else{
+			this.rect.attr({
+				"width":-w,
+				"x":this.startPoint.x+w
+			});
+		}
+		if(h>0){
+			this.rect.attr("height",h);
+		}else{
+			this.rect.attr({
+				"height":-h,
+				"y":this.startPoint.y+h
+			});
+		}
+	},
+	stop:function(){
+		this.rect.hide();
+		if(this.args.onEnd){
+			this.args.onEnd.call(this,this.rect.getBBox());
+		}
+	},
+	regEvent:function(){
+		var svg=$(this.args.holder)
+			mctx=this;
+		function _mouseMove(e){
+			mctx.update({
+				x:e.pageX,
+				y:e.pageY
+			});
+		};
+		var lock=true;
+		svg.on("mousedown",function(e){//鼠标左键
+			if(e.buttons==1){
+				lock=false;
+				mctx.rect.attr({
+					x:0,y:0,width:0,height:0
+				});
+				setTimeout(function(){
+					if(mctx.args.onMouseDown){
+						mctx.args.onMouseDown.call(mctx,e);
+					}
+					if(!lock){
+						mctx.start({
+							x:e.pageX,
+							y:e.pageY
+						});
+						svg.on("mousemove",_mouseMove);
+					}
+				},200);
+			}
+		});
+		$(document).on("mouseup",function(e){
+			if(!lock){
+				mctx.stop();
+				svg.unbind("mousemove",_mouseMove);
+			}
+			lock=true;
+		});
+		eve.on("element.drag.move",function(p){
+			lock=true;
+			svg.unbind("mousemove",_mouseMove);
+			mctx.rect.hide();
+			if(mctx.args.onMove){
+				mctx.args.onMove.call(mctx,p,this);
+			}
+		});
+		eve.on("element.drag.")
+	}
+};

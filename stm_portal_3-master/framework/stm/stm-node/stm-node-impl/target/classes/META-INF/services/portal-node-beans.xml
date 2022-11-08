@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd">
+	<bean id="nodeService" class="com.mainsteam.stm.node.service.NodeServiceImpl">
+		<property name="nodeDAO" ref="nodeDAO"/>
+		<property name="groupDAO" ref="groupDAO"/>
+		<property name="groupService" ref="groupService"/>
+		<property name="sequence" ref="nodeSeq"/>
+	</bean>
+	<bean id="groupService" class="com.mainsteam.stm.node.service.NodeGroupServiceImpl">
+		<property name="groupDAO" ref="groupDAO"/>
+		<property name="sequence" ref="groupSeq"/>
+	</bean>
+	<bean id="nodeDAO" class="com.mainsteam.stm.node.dao.impl.NodeDAOImpl">
+		<property name="session" ref="sqlSession"></property>
+	</bean>
+	<bean id="groupDAO" class="com.mainsteam.stm.node.dao.impl.NodeGroupDAOImpl">
+		<property name="session" ref="sqlSession"></property>
+	</bean>
+	<!-- 表 stm_node 主键序列值-->
+    <bean id="nodeSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_Node"></constructor-arg>
+	</bean>	
+	<!-- 表 stm_node_group主键序列值-->
+    <bean id="groupSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_NodeGroup"></constructor-arg>
+	</bean>	
+	<bean id="processerNodeManagerProxy" class="com.mainsteam.stm.node.service.NodeManagerProxy">
+		<property name="nodeService" ref="nodeService"/>
+		<property name="groupService" ref="groupService"/>
+		<property name="tableManager" ref="localeTableManager"/>
+		<property name="nodeDAO" ref="nodeDAO"/>
+		<property name="groupDAO" ref="groupDAO"/>		
+		<property name="nodeHeartbeatService" ref="nodeHeartbeatService"/>
+	</bean>
+	<bean id="nodeManager" class="com.mainsteam.stm.node.service.NodeManagerImpl">
+		<property name="proxy" ref="processerNodeManagerProxy"/>
+	</bean>
+	
+	<!-- 表 STM_NODE_HEARTBEAT 主键序列值-->
+    <bean id="nodeHeartbeatSeq" factory-bean="platformSeqFactory" factory-method="getSeq">
+		<constructor-arg value="STM_NODE_HEARTBEAT"></constructor-arg>
+	</bean>
+	<bean id="nodeHeartbeatDAO" class="com.mainsteam.stm.node.dao.impl.NodeHeartbeatDAOImpl">
+		<property name="session" ref="sqlSession"></property>
+	</bean>	
+	<bean id="nodeHeartbeatCheckDAO" class="com.mainsteam.stm.node.dao.impl.NodeHeartbeatCheckDAOImpl">
+		<property name="session" ref="sqlSession"></property>
+	</bean>		
+	<bean id="nodeHeartbeatService" class="com.mainsteam.stm.node.service.heartbeat.NodeHeartbeatServiceImpl">
+		<property name="heartbeatDAO" ref="nodeHeartbeatDAO"/>
+		<property name="heartbeatCheckDAO" ref="nodeHeartbeatCheckDAO"/>
+		<property name="sequence" ref="groupSeq"/>
+	</bean>
+</beans>

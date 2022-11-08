@@ -1,0 +1,1229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MetricPlugins xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:noNamespaceSchemaLocation="../../../schema/Collect.xsd">
+    <GlobalMetricSetting isEncrypt="FALSE" version="4.1.0">
+        <ChangePluginInitParameter pluginid="JdbcPlugin" parameterId="dbType" parameterProperty="DefaultValue" propertyValue="SQLServer"/>
+        <ChangePluginInitParameter pluginid="JdbcPlugin" parameterId="inputInstallPath" parameterProperty="isDisplay" propertyValue="TRUE"/>
+        <ChangePluginInitParameter pluginid="JdbcPlugin" parameterId="jdbcPort" parameterProperty="DefaultValue" propertyValue="1433"/>
+        <ChangePluginInitParameter pluginid="WmiPlugin" parameterId="username" parameterProperty="mustInput" propertyValue="FALSE"/>
+        <ChangePluginInitParameter pluginid="WmiPlugin" parameterId="password" parameterProperty="mustInput" propertyValue="FALSE"/>
+    </GlobalMetricSetting>
+    <PluginClassAliasList>
+        <PluginClassAlias id="defaultProcessor" class="com.mainsteam.stm.plugin.common.DefaultResultSetProcessor"/>
+        <PluginClassAlias id="defaultConverter" class="com.mainsteam.stm.plugin.common.DefaultResultSetConverter"/>
+        <PluginClassAlias id="selectProcessor" class="com.mainsteam.stm.plugin.common.SelectResultSetProcessor"/>
+        <PluginClassAlias id="columnPasteProcessor" class="com.mainsteam.stm.plugin.common.ColumnPasteProcessor"/>
+        <PluginClassAlias id="RegularFilter" class="com.mainsteam.stm.plugin.common.RegularFilter"/>
+        <PluginClassAlias id="subInstConverter" class="com.mainsteam.stm.plugin.common.SubInstResultSetConverter"/>
+        <PluginClassAlias id="availableConverter" class="com.mainsteam.stm.plugin.common.AvailableConverter"/>
+        <PluginClassAlias id="tableConverter" class="com.mainsteam.stm.plugin.common.TableResultSetConverter"/>
+        <PluginClassAlias id="translateProcessor" class="com.mainsteam.stm.plugin.common.TranslateResultSetProcessor"/>
+        <PluginClassAlias id="ChangeRateProcessor" class="com.mainsteam.stm.plugin.common.ChangeRateProcessor"/>
+        <PluginClassAlias id="processConverter" class="com.mainsteam.stm.plugin.common.ProcessResultSetConverter"/>
+        <PluginClassAlias id="FormatProcessor" class="com.mainsteam.stm.plugin.common.FormatProcessor"/>
+    </PluginClassAliasList>
+    <MetricPlugin metricid="cpuRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="CPU"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfOS_Processor  where name = '_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="memRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="Memory,totalMemSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select FreePhysicalMemory,TotalVisibleMEMorySize from Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (totalMemSize - Memory)/totalMemSize*100 AS memRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sqlTop10CPUTime" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="CPU占用TOP10 SQL语句"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="SELECT TOP 10 dest.[text] AS 'sql' FROM sys.[dm_exec_requests] AS der CROSS APPLY sys.[dm_exec_sql_text](der.[sql_handle]) AS dest WHERE [session_id]&gt;50  ORDER BY [cpu_time] DESC"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="tableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="availability" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select count(1) from dbo.sysdatabases"/>
+            <Parameter type="" key="IS_AVAIL" value="true"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="" value="0,0;1"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="OperatingSystem" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::SELECT Caption from Win32_OperatingSystem"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="hostName" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::SELECT Name FROM Win32_ComputerSystem"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="totalMemSize" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="chk_totalMemSize_wmi"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::SELECT TotalVisibleMEMorySize FROM Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (chk_totalMemSize_wmi/1024/1024) as totalMemSize"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="appCpuRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="chk_cpurate_wmi,cpuCore"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Thread where Name like 'sqlservr%'"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::select name from Win32_PerfFormattedData_PerfOS_Processor where name !='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (sum(chk_cpurate_wmi))/count(cpuCore) as appCpuRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="appMemRate" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="Memory,totalMemSize"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name like 'sqlservr%'"/>
+            <Parameter type="" key="COMMAND" value="root\cimv2::SELECT TotalVisibleMEMorySize FROM Win32_OperatingSystem"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (100*sum(Memory)/totalMemSize/1024) as appMemRate"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter type="" key="" value="TO_HUNDRED"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="sysUpTime" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="sysUpTime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="SELECT DateDiff(second, crdate, CURRENT_TIMESTAMP) FROM master.dbo.sysdatabases WHERE name = 'tempdb'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="memPoolUsed" collectType="WMI" pluginid="WmiPlugin">
+        <PluginResultMetaInfo columns="chk_memrate_wmi"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="COMMAND" value="root\cimv2::select WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name like 'sqlservr%'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT sum(chk_memrate_wmi/1024) as memPoolUsed"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="TotalWrite" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="SELECT @@TOTAL_WRITE AS 'write'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="TotalRead" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="SELECT @@TOTAL_READ AS 'read'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="TotalError" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="SELECT @@TOTAL_ERRORS AS 'Errors'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="PackageSent" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="SELECT @@PACK_SENT  AS 'sent'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="PackageReceived" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="SELECT @@PACK_RECEIVED AS 'received'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="curSessionCount" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select count(spid) as value from dbo.sysprocesses"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="CacheUseCount" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select cntr_value from master.dbo.sysperfinfo where lower(counter_name) like '%cache use counts/sec%' and  lower(instance_name)='_total'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="IOCpuUsage" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="cpubusy,cpuidle,iobusy"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="SELECT @@CPU_BUSY AS 'cpubusy'"/>
+            <Parameter type="" key="SQL" value="SELECT @@IDLE AS 'cpuidle'"/>
+            <Parameter type="" key="SQL" value="SELECT @@IO_BUSY AS 'iobusy'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (iobusy*100/(cpubusy+cpuidle)) as IOCpuUsage"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="BusyCpuUsage" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="cpubusy,cpuidle"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="SELECT @@CPU_BUSY AS 'cpubusy'"/>
+            <Parameter type="" key="SQL" value="SELECT @@IDLE AS 'cpuidle'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (cpubusy*100/(cpubusy+cpuidle)) as BusyCpuUsage"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="IdleCpuUsage" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="cpubusy,cpuidle"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="SELECT @@CPU_BUSY AS 'cpubusy'"/>
+            <Parameter type="" key="SQL" value="SELECT @@IDLE AS 'cpuidle'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (cpuidle*100/(cpubusy+cpuidle)) as IdleCpuUsage"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="OptMemSize" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="select counter_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name in ('Target Server Memory (KB)','Optimizer Memory (KB)','SQL Cache Memory (KB)','Total Server Memory (KB)','Lock Memory (KB)','User Connections','Logins/sec','Logouts/sec','SQL Re-Compilations/sec','Batch Requests/sec','SQL Compilations/sec','Page reads/sec','Page writes/sec','Connection Memory (KB)')"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Optimizer Memory \(KB\)\s+\\t(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="dbBufferCacheSize" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="select counter_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name in ('Target Server Memory (KB)','Optimizer Memory (KB)','SQL Cache Memory (KB)','Total Server Memory (KB)','Lock Memory (KB)','User Connections','Logins/sec','Logouts/sec','SQL Re-Compilations/sec','Batch Requests/sec','SQL Compilations/sec','Page reads/sec','Page writes/sec','Connection Memory (KB)')"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="SQL Cache Memory \(KB\)\s+\\t(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="numberOfDatabase" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select count(1) from dbo.sysdatabases"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="Version" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="SELECT  SERVERPROPERTY('productversion')"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="PatchVersion" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select @@version"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="(Build \d+: Service Pack \d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ActiveMemSize" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="select counter_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name in ('Target Server Memory (KB)','Optimizer Memory (KB)','SQL Cache Memory (KB)','Total Server Memory (KB)','Lock Memory (KB)','User Connections','Logins/sec','Logouts/sec','SQL Re-Compilations/sec','Batch Requests/sec','SQL Compilations/sec','Page reads/sec','Page writes/sec','Connection Memory (KB)')"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Total Server Memory \(KB\)\s*\\t(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="installDirectory" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="SELECT filename from dbo.sysfiles where name= '${dbName}'"/>
+            <Parameter type="DiscoveryInfo" key="dbName" value="dbName"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="ProductName" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select @@version"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="LockMemSize" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="select counter_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name in ('Target Server Memory (KB)','Optimizer Memory (KB)','SQL Cache Memory (KB)','Total Server Memory (KB)','Lock Memory (KB)','User Connections','Logins/sec','Logouts/sec','SQL Re-Compilations/sec','Batch Requests/sec','SQL Compilations/sec','Page reads/sec','Page writes/sec','Connection Memory (KB)')"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Lock Memory \(KB\)\s*\\t(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="maxConnCount" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select @@max_connections"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="AuthMode" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="SELECT  cast(SERVERPROPERTY('IsIntegratedSecurityOnly') as varchar)"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="" value="1,Windows 身份验证模式;0,SQL Server 和 Windows 身份验证模式"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="UserRole" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="角色权限,用户名,用户SID"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="sp_helpsrvrolemember 'sysadmin'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="tableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="LockInfo" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="会话ID,数据库名,对象名称,索引标识,锁类型,锁模式,锁状态"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="select convert (smallint, req_spid) As spid,db_name(rsc_dbid) As dbid,isnull(object_name(rsc_objid),rsc_objid) As ObjId,rsc_indid As IndId,substring (v.name, 1, 4) As Type,substring (u.name, 1, 8) As Mode,substring (x.name, 1, 5) As Status from  master.dbo.syslockinfo,master.dbo.spt_values v,master.dbo.spt_values x,master.dbo.spt_values u where   master.dbo.syslockinfo.rsc_type = v.number and v.type = 'LR' and master.dbo.syslockinfo.req_status = x.number and x.type = 'LS' and master.dbo.syslockinfo.req_mode + 1 = u.number and u.type = 'L' order by spid"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="tableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <!--
+    <MetricPlugin metricid="DeadLockInfo" collectType="" pluginid="JdbcPlugin">
+      <PluginResultMetaInfo columns="死锁会话ID,执行SQL用户,执行SQL主机,状态,CPU时间,内存使用,最后请求开始时间,死锁SQL"/>
+      <PluginParameter type="ArrayType">
+        <Parameter type="" key="SQL" value="WITH CTE_SID ( BSID, SID, sql_handle ) AS ( SELECT   blocking_session_id , session_id , sql_handle FROM sys.dm_exec_requests WHERE blocking_session_id &lt;&gt; 0 UNION ALL SELECT A.blocking_session_id , A.session_id , A.sql_handle FROM sys.dm_exec_requests A JOIN CTE_SID B ON A.SESSION_ID = B.BSID ) SELECT  C.SID, S.login_name, S.host_name, S.status, S.cpu_time ,S.memory_usage ,S.last_request_start_time ,q.text FROM CTE_SID C JOIN sys.dm_exec_sessions S ON C.sid = s.session_id CROSS APPLY sys.dm_exec_sql_text(C.sql_handle) Q ORDER BY sid"/>
+      </PluginParameter>
+      <PluginDataHandlers>
+        <PluginDataHandler classKey="tableConverter"/>
+      </PluginDataHandlers>
+    </MetricPlugin>
+    -->
+    <MetricPlugin metricid="cacheHitRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="select round((1.0*aa.value1 /bb.value2)*100,2) from (select object_name,counter_name,instance_name,cntr_value value1 from master.dbo.sysperfinfo where object_name like '%Buffer Manager%' and (counter_name='Buffer cache hit ratio')) aa,(select object_name,counter_name,instance_name,cntr_value value2 from master.dbo.sysperfinfo where object_name like '%Buffer Manager%' and counter_name='Buffer cache hit ratio base' and cntr_value !=0) bb"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="CachePageCount" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select cntr_value from dbo.sysperfinfo where counter_name ='Cache Pages' and instance_name='_Total'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="CacheObjectCount" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select cntr_value from dbo.sysperfinfo where counter_name ='Cache Object Counts' and instance_name='_Total'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="userConnCount" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="select counter_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name in ('Target Server Memory (KB)','Optimizer Memory (KB)','SQL Cache Memory (KB)','Total Server Memory (KB)','Lock Memory (KB)','User Connections','Logins/sec','Logouts/sec','SQL Re-Compilations/sec','Batch Requests/sec','SQL Compilations/sec','Page reads/sec','Page writes/sec','Connection Memory (KB)')"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="User Connections\s+\\t(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="UserConnRatio" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="memory,UserMaxConnCount"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="select counter_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name in ('Target Server Memory (KB)','Optimizer Memory (KB)','SQL Cache Memory (KB)','Total Server Memory (KB)','Lock Memory (KB)','User Connections','Logins/sec','Logouts/sec','SQL Re-Compilations/sec','Batch Requests/sec','SQL Compilations/sec','Page reads/sec','Page writes/sec','Connection Memory (KB)')"/>
+            <Parameter type="" key="SQL" value="select @@max_connections"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="User Connections\s*\\t(\d+)"/>
+                <Parameter type="" key="REGULAR" value="(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (100*(1.0*memory/UserMaxConnCount)) as UserConnRatio"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="LoginRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="select counter_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name in ('Target Server Memory (KB)','Optimizer Memory (KB)','SQL Cache Memory (KB)','Total Server Memory (KB)','Lock Memory (KB)','User Connections','Logins/sec','Logouts/sec','SQL Re-Compilations/sec','Batch Requests/sec','SQL Compilations/sec','Page reads/sec','Page writes/sec','Connection Memory (KB)')"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Logins/sec\s*\\t(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="LogoutRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="select counter_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name in ('Target Server Memory (KB)','Optimizer Memory (KB)','SQL Cache Memory (KB)','Total Server Memory (KB)','Lock Memory (KB)','User Connections','Logins/sec','Logouts/sec','SQL Re-Compilations/sec','Batch Requests/sec','SQL Compilations/sec','Page reads/sec','Page writes/sec','Connection Memory (KB)')"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Logouts/sec\s*\\t(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="BlockedProCount" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select count(1) from master.dbo.sysprocesses where blocked != 0 and waittype &lt; 0x16"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="deadLockCount" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select count(1) from master..sysprocesses where blocked &gt; 0"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="TransactionRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select cntr_value from master.dbo.sysperfinfo where object_name like '%Databases%' and instance_name = '_Total' and counter_name='Transactions/sec'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ActiveTransRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select cntr_value from master.dbo.sysperfinfo where object_name like '%Databases%' and instance_name = '_Total' and counter_name='Active Transactions'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="SQLReCompileRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="memory"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="select counter_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name in ('Target Server Memory (KB)','Optimizer Memory (KB)','SQL Cache Memory (KB)','Total Server Memory (KB)','Lock Memory (KB)','User Connections','Logins/sec','Logouts/sec','SQL Re-Compilations/sec','Batch Requests/sec','SQL Compilations/sec','Page reads/sec','Page writes/sec','Connection Memory (KB)')"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="SQL Re-Compilations/sec\s*\\t(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (60*memory) as SQLReCompileRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="BatchRequestRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="memory"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="select counter_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name in ('Target Server Memory (KB)','Optimizer Memory (KB)','SQL Cache Memory (KB)','Total Server Memory (KB)','Lock Memory (KB)','User Connections','Logins/sec','Logouts/sec','SQL Re-Compilations/sec','Batch Requests/sec','SQL Compilations/sec','Page reads/sec','Page writes/sec','Connection Memory (KB)')"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Batch Requests/sec\s*\\t(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (60*memory) as BatchRequestRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="SQLCompileRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="memory"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="select counter_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name in ('Target Server Memory (KB)','Optimizer Memory (KB)','SQL Cache Memory (KB)','Total Server Memory (KB)','Lock Memory (KB)','User Connections','Logins/sec','Logouts/sec','SQL Re-Compilations/sec','Batch Requests/sec','SQL Compilations/sec','Page reads/sec','Page writes/sec','Connection Memory (KB)')"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="SQL Compilations/sec\s*\\t(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (60*memory) as SQLCompileRate"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="PageReadRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="select counter_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name in ('Target Server Memory (KB)','Optimizer Memory (KB)','SQL Cache Memory (KB)','Total Server Memory (KB)','Lock Memory (KB)','User Connections','Logins/sec','Logouts/sec','SQL Re-Compilations/sec','Batch Requests/sec','SQL Compilations/sec','Page reads/sec','Page writes/sec','Connection Memory (KB)')"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Page reads/sec\s*\\t(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="PageWriteRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="select counter_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name in ('Target Server Memory (KB)','Optimizer Memory (KB)','SQL Cache Memory (KB)','Total Server Memory (KB)','Lock Memory (KB)','User Connections','Logins/sec','Logouts/sec','SQL Re-Compilations/sec','Batch Requests/sec','SQL Compilations/sec','Page reads/sec','Page writes/sec','Connection Memory (KB)')"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Page writes/sec\s*\\t(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ConnMemory" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="select counter_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name in ('Target Server Memory (KB)','Optimizer Memory (KB)','SQL Cache Memory (KB)','Total Server Memory (KB)','Lock Memory (KB)','User Connections','Logins/sec','Logouts/sec','SQL Re-Compilations/sec','Batch Requests/sec','SQL Compilations/sec','Page reads/sec','Page writes/sec','Connection Memory (KB)')"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Connection Memory \(KB\)\s*\\t(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="PackegeError" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="SELECT @@PACKET_ERRORS AS 'Errors'"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="dbdataBaseName" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select name from dbo.sysdatabases"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column1"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="dbdatabaseSpace" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2,column3,column4,column5,column6,column7"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="dbo.sp_helpdb"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column2"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="dbdataBaseName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="dbdataFileSize" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select instance_name,cntr_value from dbo.sysperfinfo where counter_name like '%Data File(s) Size (KB)%'"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column2"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="dbdataBaseName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="dbLogFileSize" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="SELECT instance_name AS 'Database Name',     MAX(CASE WHEN counter_name = 'Log File(s) Size (KB)' THEN cntr_value ELSE 0 END) AS 'Log File(s) Size (KB)' FROM sysperfinfo  WHERE counter_name = 'Log File(s) Size (KB)' AND instance_name != '_total' GROUP BY instance_name"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column2"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="dbdataBaseName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="dbdataFiles" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select filename from ${childid}.dbo.sysfiles where filename like '%.mdf%' or filename like '%.ndf%'"/>
+            <Parameter type="ResourceProperty" key="childid" value="dbdataBaseName"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (join(column1)) as column"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="dbLogFiles" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select filename from ${childid}.dbo.sysfiles where filename like '%.ldf%'"/>
+            <Parameter type="ResourceProperty" key="childid" value="dbdataBaseName"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT (join(column1)) as column"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="dbLogFileUsedSize" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="SELECT instance_name AS 'Database Name',     MAX(CASE WHEN counter_name = 'Log File(s) Used Size (KB)' THEN cntr_value ELSE 0 END) AS 'Log File(s) Used Size (KB)' FROM sysperfinfo  WHERE counter_name = 'Log File(s) Used Size (KB)' AND instance_name != '_total' GROUP BY instance_name"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column2"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="dbdataBaseName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="dbAvailability" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="Select CAST (DatabasePropertyEx ('${childid}','Status')as varchar)"/>
+            <Parameter type="ResourceProperty" key="childid" value="dbdataBaseName"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="translateProcessor">
+                <Parameter type="" key="" value="ONLINE,1;OFFLINE,0"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="dbLogSpUtilRatio" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="SELECT instance_name AS 'Database Name',     MAX(CASE WHEN counter_name = 'Percent Log Used' THEN cntr_value ELSE 0 END) AS 'Percent Log Used' FROM sysperfinfo  WHERE counter_name = 'Percent Log Used' AND instance_name != '_total' GROUP BY instance_name"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column2"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="dbdataBaseName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="dbTransCount" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select instance_name,cntr_value from master.dbo.sysperfinfo where object_name like '%Databases%' and counter_name='Transactions/sec'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="COLUMNINDEX" value="column1"/>
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key="column2"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column2"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="dbdataBaseName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="dbActiveTransCount" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="column1,column2"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select instance_name,cntr_value from master.dbo.sysperfinfo where object_name like '%Databases%' and counter_name='Active Transactions'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key="column2"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="column1"/>
+            <Parameter type="" key="ValueColumnTitle" value="column2"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="dbdataBaseName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="lockRequireRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select instance_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name='Lock Requests/sec'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="_Total\s*\\t(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="dblockReqRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select instance_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name='Lock Requests/sec'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Database\s*\\t(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="extlockReqRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select instance_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name='Lock Requests/sec'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Extent\s*\\t(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="majorlockReqRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select instance_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name='Lock Requests/sec'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Key\s*\\t(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="pagelockReqRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select instance_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name='Lock Requests/sec'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Page\s*\\t(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ridlockReqRate" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select instance_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name='Lock Requests/sec'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="RID\s*\\t(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="ChangeRateProcessor">
+                <Parameter type="" key="FUNCTION" value="CHGV"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="dblockwaittime" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select instance_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name='Lock Wait Time (ms)'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Database\s*\\t(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="extlockwaittime" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select instance_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name='Lock Wait Time (ms)'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Extent\s*\\t(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="majorlockwaittime" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select instance_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name='Lock Wait Time (ms)'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Key\s*\\t(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="pagelockwaittime" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select instance_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name='Lock Wait Time (ms)'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Page\s*\\t(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ridlockwaittime" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select instance_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name='Lock Wait Time (ms)'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="RID\s*\\t(\d+)"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="dblockReqWait" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="lockReqSql,lockReqWaitPerc"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select instance_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name='Lock Requests/sec'"/>
+            <Parameter type="" key="SQL" value="select instance_name + '\t' + cast(cntr_value as varchar(20)) from master.dbo.sysperfinfo where counter_name='Lock Waits/sec'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Database\s*\\t(\d+)"/>
+                <Parameter type="" key="REGULAR" value="Database\s*\\t(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ((lockReqWaitPerc/lockReqSql)*100) as dblockReqWait"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="extlockReqWait" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="lockReqSql,lockReqWaitPerc"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select instance_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name='Lock Requests/sec'"/>
+            <Parameter type="" key="SQL" value="select instance_name + '\t' + cast(cntr_value as varchar(20)) from master.dbo.sysperfinfo where counter_name='Lock Waits/sec'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Extent\s*\\t(\d+)"/>
+                <Parameter type="" key="REGULAR" value="Extent\s*\\t(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ((lockReqWaitPerc/lockReqSql)*100) as extlockReqWait"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="majorlockReqWait" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="lockReqSql,lockReqWaitPerc"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select instance_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name='Lock Requests/sec'"/>
+            <Parameter type="" key="SQL" value="select instance_name + '\t' + cast(cntr_value as varchar(20)) from master.dbo.sysperfinfo where counter_name='Lock Waits/sec'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Key\s*\\t(\d+)"/>
+                <Parameter type="" key="REGULAR" value="Key\s*\\t(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ((lockReqWaitPerc/lockReqSql)*100) as majorlockReqWait"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="pagelockReqWait" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="lockReqSql,lockReqWaitPerc"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select instance_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name='Lock Requests/sec'"/>
+            <Parameter type="" key="SQL" value="select instance_name + '\t' + cast(cntr_value as varchar(20)) from master.dbo.sysperfinfo where counter_name='Lock Waits/sec'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="Page\s*\\t(\d+)"/>
+                <Parameter type="" key="REGULAR" value="Page\s*\\t(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ((lockReqWaitPerc/lockReqSql)*100) as pagelockReqWait"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="ridlockReqWait" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="lockReqSql,lockReqWaitPerc"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select instance_name + '\t' + cast(cntr_value as varchar(20)) as column1 from master.dbo.sysperfinfo where counter_name='Lock Requests/sec'"/>
+            <Parameter type="" key="SQL" value="select instance_name + '\t' + cast(cntr_value as varchar(20)) from master.dbo.sysperfinfo where counter_name='Lock Waits/sec'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="RegularFilter">
+                <Parameter type="" key="REGULAR" value="RID\s*\\t(\d+)"/>
+                <Parameter type="" key="REGULAR" value="RID\s*\\t(\d+)"/>
+            </PluginDataHandler>
+            <PluginDataHandler classKey="selectProcessor">
+                <Parameter type="" key="SELECT" value="SELECT ((lockReqWaitPerc/lockReqSql)*100) as ridlockReqWait"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="curLockCount" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="select  count(1) from  master.dbo.syslockinfo,master.dbo.spt_values v,master.dbo.spt_values x,master.dbo.spt_values u where   master.dbo.syslockinfo.rsc_type = v.number and v.type ='LR' and master.dbo.syslockinfo.req_status = x.number and x.type = 'LS' and master.dbo.syslockinfo.req_mode + 1 = u.number and u.type = 'L'"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key=""/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="dbcurSession" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="dbName, connectionCnt"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select db.name dbname, count(process.kpid) cnt from sysdatabases db left join sysprocesses process on db.dbid = process.dbid and process.kpid != 0 group by db.name"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="FormatProcessor">
+                <Parameter value="INTEGER" type="" key="connectionCnt"/>
+            </PluginDataHandler>
+        </PluginDataHandlers>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="dbName"/>
+            <Parameter type="" key="ValueColumnTitle" value="connectionCnt"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="dbdataBaseName"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="SessionInfo" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="会话ID,Windows线程ID,用户名,数据库名,进程累计CPU时间,分派内存页数,登录时间,主机名,应用程序名,当前正在执行的命令"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select spid,kpid,rtrim(loginame),isnull(db_name(dbid),'ResourceDb') name,cpu,memusage,login_time,rtrim(hostname),rtrim(program_name),cmd from master.dbo.sysprocesses where hostname!=''"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="tableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+    <MetricPlugin metricid="mssqljobId" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="job_id,job_name,server,creator,description,enabled,date_created,date_modified,delete_level"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="SELECT job_id, name, originating_server, SUSER_SNAME(owner_sid) AS creator, description, CASE enabled WHEN 1 THEN 'Is enabled' WHEN 0 THEN 'Is not enabled' END AS enabled, date_created, date_modified, CASE delete_level WHEN 0 THEN 'Never' WHEN 1 THEN 'When the job succeeds' WHEN 2 THEN 'When the job fails' WHEN 3 THEN 'Whenever the job completes (regardless of the job outcome)' END AS delete_level FROM msdb.dbo.sysjobs"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="job_id"/>
+            <Parameter type="" key="ValueColumnTitle" value="job_id"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="mssqljobname" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="job_id,job_name,server,creator,description,enabled,date_created,date_modified,delete_level"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="SELECT job_id, name, originating_server, SUSER_SNAME(owner_sid) AS creator, description, CASE enabled WHEN 1 THEN 'Is enabled' WHEN 0 THEN 'Is not enabled' END AS enabled, date_created, date_modified, CASE delete_level WHEN 0 THEN 'Never' WHEN 1 THEN 'When the job succeeds' WHEN 2 THEN 'When the job fails' WHEN 3 THEN 'Whenever the job completes (regardless of the job outcome)' END AS delete_level FROM msdb.dbo.sysjobs"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="job_id"/>
+            <Parameter type="" key="ValueColumnTitle" value="job_name"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="mssqljobId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="mssqljobcreator" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="job_id,job_name,server,creator,description,enabled,date_created,date_modified,delete_level"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="SELECT job_id, name, originating_server, SUSER_SNAME(owner_sid) AS creator, description, CASE enabled WHEN 1 THEN 'Is enabled' WHEN 0 THEN 'Is not enabled' END AS enabled, date_created, date_modified, CASE delete_level WHEN 0 THEN 'Never' WHEN 1 THEN 'When the job succeeds' WHEN 2 THEN 'When the job fails' WHEN 3 THEN 'Whenever the job completes (regardless of the job outcome)' END AS delete_level FROM msdb.dbo.sysjobs"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="job_id"/>
+            <Parameter type="" key="ValueColumnTitle" value="creator"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="mssqljobId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="mssqljobdesc" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="job_id,job_name,server,creator,description,enabled,date_created,date_modified,delete_level"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="SELECT job_id, name, originating_server, SUSER_SNAME(owner_sid) AS creator, description, CASE enabled WHEN 1 THEN 'Is enabled' WHEN 0 THEN 'Is not enabled' END AS enabled, date_created, date_modified, CASE delete_level WHEN 0 THEN 'Never' WHEN 1 THEN 'When the job succeeds' WHEN 2 THEN 'When the job fails' WHEN 3 THEN 'Whenever the job completes (regardless of the job outcome)' END AS delete_level FROM msdb.dbo.sysjobs"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="job_id"/>
+            <Parameter type="" key="ValueColumnTitle" value="description"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="mssqljobId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="mssqljobenable" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="job_id,job_name,server,creator,description,enabled,date_created,date_modified,delete_level"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="SELECT job_id, name, originating_server, SUSER_SNAME(owner_sid) AS creator, description, CASE enabled WHEN 1 THEN 'Is enabled' WHEN 0 THEN 'Is not enabled' END AS enabled, date_created, date_modified, CASE delete_level WHEN 0 THEN 'Never' WHEN 1 THEN 'When the job succeeds' WHEN 2 THEN 'When the job fails' WHEN 3 THEN 'Whenever the job completes (regardless of the job outcome)' END AS delete_level FROM msdb.dbo.sysjobs"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="job_id"/>
+            <Parameter type="" key="ValueColumnTitle" value="enabled"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="mssqljobId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="mssqljobcreattime" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="job_id,job_name,server,creator,description,enabled,date_created,date_modified,delete_level"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="SELECT job_id, name, originating_server, SUSER_SNAME(owner_sid) AS creator, description, CASE enabled WHEN 1 THEN 'Is enabled' WHEN 0 THEN 'Is not enabled' END AS enabled, date_created, date_modified, CASE delete_level WHEN 0 THEN 'Never' WHEN 1 THEN 'When the job succeeds' WHEN 2 THEN 'When the job fails' WHEN 3 THEN 'Whenever the job completes (regardless of the job outcome)' END AS delete_level FROM msdb.dbo.sysjobs"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="job_id"/>
+            <Parameter type="" key="ValueColumnTitle" value="date_created"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="mssqljobId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="mssqljobmodtime" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="job_id,job_name,server,creator,description,enabled,date_created,date_modified,delete_level"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="SELECT job_id, name, originating_server, SUSER_SNAME(owner_sid) AS creator, description, CASE enabled WHEN 1 THEN 'Is enabled' WHEN 0 THEN 'Is not enabled' END AS enabled, date_created, date_modified, CASE delete_level WHEN 0 THEN 'Never' WHEN 1 THEN 'When the job succeeds' WHEN 2 THEN 'When the job fails' WHEN 3 THEN 'Whenever the job completes (regardless of the job outcome)' END AS delete_level FROM msdb.dbo.sysjobs"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="job_id"/>
+            <Parameter type="" key="ValueColumnTitle" value="date_modified"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="mssqljobId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="mssqljobrunserver" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="job_id,job_name,server,creator,description,enabled,date_created,date_modified,delete_level"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="SELECT job_id, name, originating_server, SUSER_SNAME(owner_sid) AS creator, description, CASE enabled WHEN 1 THEN 'Is enabled' WHEN 0 THEN 'Is not enabled' END AS enabled, date_created, date_modified, CASE delete_level WHEN 0 THEN 'Never' WHEN 1 THEN 'When the job succeeds' WHEN 2 THEN 'When the job fails' WHEN 3 THEN 'Whenever the job completes (regardless of the job outcome)' END AS delete_level FROM msdb.dbo.sysjobs"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="job_id"/>
+            <Parameter type="" key="ValueColumnTitle" value="server"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="mssqljobId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <!-- <MetricPlugin metricid="mssqljobsch" collectType="" pluginid="JdbcPlugin">
+      <PluginResultMetaInfo columns="column1,column2,column3,column4,column5,column6,column7,column8,column9,column10,column11"/>
+      <PluginParameter type="ArrayType">
+        <Parameter type="" key="SQL" value="SELECT  [sJOB].[job_id] AS [Unique ID of the job] ,  [sJOB].[name] AS [Name of the job] ,  [sDBP].[name] AS [Job owner] ,  [sJOB].[description] AS [Description for the job] ,  CASE [sJOB].[enabled]  WHEN 1 THEN 'Is enabled'  WHEN 0 THEN 'Is not enabled'  END AS [Whether to enable] ,[sJOB].[date_created] AS [Date the job was created] ,  [sJOB].[date_modified] AS [Date the job was last modified] ,  [sSVR].[name] AS [ Job to run the server] ,   CASE WHEN [sSCH].[schedule_uid] IS NULL THEN 'No'  ELSE 'Yes'  END AS [Is_distributed] ,   [sSCH].[name] AS [User-defined name] ,  CASE [sJOB].[delete_level]  WHEN 0 THEN '不删除'  WHEN 1 THEN '成功后删除'  WHEN 2 THEN '失败后删除'  WHEN 3 THEN '完成时删除'  END AS [完成时删除作业级别] FROM    [msdb].[dbo].[sysjobs] AS [sJOB]  LEFT JOIN [msdb].[sys].[servers] AS [sSVR] ON [sJOB].[originating_server_id] = [sSVR].[server_id]  LEFT JOIN [msdb].[dbo].[syscategories] AS [sCAT] ON [sJOB].[category_id] = [sCAT].[category_id]  LEFT JOIN [msdb].[dbo].[sysjobsteps] AS [sJSTP] ON [sJOB].[job_id] = [sJSTP].[job_id]  AND [sJOB].[start_step_id] = [sJSTP].[step_id]  LEFT JOIN [msdb].[sys].[database_principals] AS [sDBP] ON [sJOB].[owner_sid] = [sDBP].[sid]  LEFT JOIN [msdb].[dbo].[sysjobschedules] AS [sJOBSCH] ON [sJOB].[job_id] = [sJOBSCH].[job_id]  LEFT JOIN [msdb].[dbo].[sysschedules] AS [sSCH] ON [sJOBSCH].[schedule_id] = [sSCH].[schedule_id]  ORDER BY [作业名称]"/>
+      </PluginParameter>
+      <PluginDataConverter classKey="subInstConverter">
+        <Parameter type="" key="IndexColumnTitle" value="column1"/>
+        <Parameter type="" key="ValueColumnTitle" value="column9"/>
+        <Parameter type="ResourceProperty" key="InstPropertyKey" value="mssqljobId"/>
+      </PluginDataConverter>
+    </MetricPlugin> -->
+    <MetricPlugin metricid="mssqljobcustname" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="job_id, custom_name, next_run_datetime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="SELECT job.job_id, jobschedule.name, CASE WHEN jobschedule.next_run_date = 0 THEN NULL ELSE STUFF(STUFF(CAST(jobschedule.next_run_date AS VARCHAR(8)), 5, 0, '-'), 8, 0, '-') + ' '  + STUFF(STUFF(RIGHT('00000' + CAST(jobschedule.next_run_time AS VARCHAR(6)), 6), 3, 0, ':'), 6, 0, ':') END AS next_run_datetime FROM msdb.dbo.sysjobs AS job LEFT JOIN msdb.dbo.sysjobschedules AS jobschedule ON jobschedule.job_id = job.job_id"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="job_id"/>
+            <Parameter type="" key="ValueColumnTitle" value="custom_name"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="mssqljobId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="mssqljobdellevel" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="job_id,job_name,server,creator,description,enabled,date_created,date_modified,delete_level"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="SELECT job_id, name, originating_server, SUSER_SNAME(owner_sid) AS creator, description, CASE enabled WHEN 1 THEN 'Is enabled' WHEN 0 THEN 'Is not enabled' END AS enabled, date_created, date_modified, CASE delete_level WHEN 0 THEN 'Never' WHEN 1 THEN 'When the job succeeds' WHEN 2 THEN 'When the job fails' WHEN 3 THEN 'Whenever the job completes (regardless of the job outcome)' END AS delete_level FROM msdb.dbo.sysjobs"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="job_id"/>
+            <Parameter type="" key="ValueColumnTitle" value="delete_level"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="mssqljobId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="mssqljobrtime" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="job_id,last_run_datetime,last_run_duration,last_run_outcome,last_outcome_message"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="SELECT job.job_id, CASE WHEN jobserver.last_run_date IS NULL THEN NULL ELSE STUFF(STUFF(CAST(jobserver.last_run_date AS VARCHAR(8)), 5, 0, '-'), 8, 0, '-') + ' '  + STUFF(STUFF(RIGHT('00000' + CAST(jobserver.last_run_time AS VARCHAR(6)), 6), 3, 0, ':'), 6, 0, ':') END AS last_run_datetime, jobserver.last_run_duration, CASE jobserver.last_run_outcome WHEN 0 THEN 'Fail' WHEN 1 THEN 'Succeed' WHEN 3 Then 'Cancel' END AS last_run_outcome, jobserver.last_outcome_message FROM msdb.dbo.sysjobs AS job LEFT JOIN msdb.dbo.sysjobservers AS jobserver ON jobserver.job_id = job.job_id AND jobserver.last_run_date &gt; 0"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="job_id"/>
+            <Parameter type="" key="ValueColumnTitle" value="last_run_datetime"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="mssqljobId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="mssqljobrstatus" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="job_id,last_run_datetime,last_run_duration,last_run_outcome,last_outcome_message"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="SELECT job.job_id, CASE WHEN jobserver.last_run_date IS NULL THEN NULL ELSE STUFF(STUFF(CAST(jobserver.last_run_date AS VARCHAR(8)), 5, 0, '-'), 8, 0, '-') + ' '  + STUFF(STUFF(RIGHT('00000' + CAST(jobserver.last_run_time AS VARCHAR(6)), 6), 3, 0, ':'), 6, 0, ':') END AS last_run_datetime, jobserver.last_run_duration, CASE jobserver.last_run_outcome WHEN 0 THEN 'Fail' WHEN 1 THEN 'Succeed' WHEN 3 Then 'Cancel' END AS last_run_outcome, jobserver.last_outcome_message FROM msdb.dbo.sysjobs AS job LEFT JOIN msdb.dbo.sysjobservers AS jobserver ON jobserver.job_id = job.job_id AND jobserver.last_run_date &gt; 0"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="job_id"/>
+            <Parameter type="" key="ValueColumnTitle" value="last_run_outcome"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="mssqljobId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="mssqljobrmessage" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="job_id,last_run_datetime,last_run_duration,last_run_outcome,last_outcome_message"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="SELECT job.job_id, CASE WHEN jobserver.last_run_date IS NULL THEN NULL ELSE STUFF(STUFF(CAST(jobserver.last_run_date AS VARCHAR(8)), 5, 0, '-'), 8, 0, '-') + ' '  + STUFF(STUFF(RIGHT('00000' + CAST(jobserver.last_run_time AS VARCHAR(6)), 6), 3, 0, ':'), 6, 0, ':') END AS last_run_datetime, jobserver.last_run_duration, CASE jobserver.last_run_outcome WHEN 0 THEN 'Fail' WHEN 1 THEN 'Succeed' WHEN 3 Then 'Cancel' END AS last_run_outcome, jobserver.last_outcome_message FROM msdb.dbo.sysjobs AS job LEFT JOIN msdb.dbo.sysjobservers AS jobserver ON jobserver.job_id = job.job_id AND jobserver.last_run_date &gt; 0"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="job_id"/>
+            <Parameter type="" key="ValueColumnTitle" value="last_outcome_message"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="mssqljobId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="mssqljoblasttime" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="job_id,last_run_datetime,last_run_duration,last_run_outcome,last_outcome_message"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="SELECT job.job_id, CASE WHEN jobserver.last_run_date IS NULL THEN NULL ELSE STUFF(STUFF(CAST(jobserver.last_run_date AS VARCHAR(8)), 5, 0, '-'), 8, 0, '-') + ' '  + STUFF(STUFF(RIGHT('00000' + CAST(jobserver.last_run_time AS VARCHAR(6)), 6), 3, 0, ':'), 6, 0, ':') END AS last_run_datetime, jobserver.last_run_duration, CASE jobserver.last_run_outcome WHEN 0 THEN 'Fail' WHEN 1 THEN 'Succeed' WHEN 3 Then 'Cancel' END AS last_run_outcome, jobserver.last_outcome_message FROM msdb.dbo.sysjobs AS job LEFT JOIN msdb.dbo.sysjobservers AS jobserver ON jobserver.job_id = job.job_id AND jobserver.last_run_date &gt; 0"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="job_id"/>
+            <Parameter type="" key="ValueColumnTitle" value="last_run_duration"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="mssqljobId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="mssqljobnexttime" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="job_id, custom_name, next_run_datetime"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL"
+                       value="SELECT job.job_id, jobschedule.name, CASE WHEN jobschedule.next_run_date = 0 THEN NULL ELSE STUFF(STUFF(CAST(jobschedule.next_run_date AS VARCHAR(8)), 5, 0, '-'), 8, 0, '-') + ' '  + STUFF(STUFF(RIGHT('00000' + CAST(jobschedule.next_run_time AS VARCHAR(6)), 6), 3, 0, ':'), 6, 0, ':') END AS next_run_datetime FROM msdb.dbo.sysjobs AS job LEFT JOIN msdb.dbo.sysjobschedules AS jobschedule ON jobschedule.job_id = job.job_id"/>
+        </PluginParameter>
+        <PluginDataConverter classKey="subInstConverter">
+            <Parameter type="" key="IndexColumnTitle" value="job_id"/>
+            <Parameter type="" key="ValueColumnTitle" value="next_run_datetime"/>
+            <Parameter type="ResourceProperty" key="InstPropertyKey" value="mssqljobId"/>
+        </PluginDataConverter>
+    </MetricPlugin>
+    <MetricPlugin metricid="SQLServersInstanceID" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns=""/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="DiscoveryInfo" key="Port" value="Port"/>
+            <Parameter type="DiscoveryInfo" key="IP" value="IP"/>
+        </PluginParameter>
+    </MetricPlugin>
+    <MetricPlugin metricid="deadlockTable" collectType="" pluginid="JdbcPlugin">
+        <PluginResultMetaInfo columns="sid,username,lockwait,status,machine,program"/>
+        <PluginParameter type="ArrayType">
+            <Parameter type="" key="SQL" value="select a.spid,a.loginame,b.client_net_address,a.status,a.hostname,a.program_name  from sys.sysprocesses a left join sys.dm_exec_connections b on a.spid=b.session_id where a.blocked &lt;&gt; 0"/>
+        </PluginParameter>
+        <PluginDataHandlers>
+            <PluginDataHandler classKey="tableConverter"/>
+        </PluginDataHandlers>
+    </MetricPlugin>
+</MetricPlugins>

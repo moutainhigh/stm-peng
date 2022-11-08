@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root> <import src="security_network.xml" />
+	<!-- 
+	devicetype:			设备类型名称
+	ismulticoltype:		是否允许采集方式多选
+	majortype:			主要分类（可以理解为设备类型）
+	minortype:			次要分类
+	manufacturer:		厂商
+	devicetype_zh:		设备类型中文描述
+	 -->
+	<devicetypeinfo devicetype="NSFOCUS_SAS" ismulticoltype="true" majortype="network" minortype="Firewall" manufacturer="NSFOCUS" devicetype_zh="绿盟安全审计系统">
+		
+		<!-- 用于定位设备为该类设备的多个sysoid标识，如果snmp采集为sysoid，如果其他方式自行定义 -->
+		<devicetypes>
+			<devicetype sysoid="1.3.6.1.4.1.19849"/>
+		</devicetypes>
+		
+		<!-- 该设备类型定义的命令，用于合并命令执行 -->
+		<commands>
+			<!-- coltype:采集方式，comid：命令ID，command：命令 -->			
+			<command coltype="SNMP" comid="cpuUsage1" command="1.3.6.1.4.1.19849.2.3.1.0"/>  <!--CPU平均利用率1-->
+			<command coltype="SNMP" comid="memUsage1"  command="1.3.6.1.4.1.19849.2.3.2.0"/>   <!--内存平均利用率1-->
+			<command coltype="SNMP" comid="tcpCurrEstab" command="1.3.6.1.4.1.19849.2.2.3.0"/>  <!--TCP端口连接数 -->
+			<command coltype="SNMP" comid="packetsPerSecond" command="1.3.6.1.4.1.19849.2.2.1.0"/>  <!--每秒接收包数 -->
+			<command coltype="SNMP" comid="bytesPerSecond" command="1.3.6.1.4.1.19849.2.2.2.0"/>  <!--每秒接收字节数 -->
+			<command coltype="SNMP" comid="availableStorageSpace" command="1.3.6.1.4.1.19849.2.3.3.0"/>  <!--Available storage space (MB) -->
+
+		</commands>
+		
+		<!-- 描述该类设备的所有指标采集,一行对应一个指标 -->
+		<resources>
+			
+			<!-- CPU平均利用率 -->
+			<resource kpiid="N1cpuUsage" coltype="SNMP" value="" valuetype="Float" unit="%">		
+				<collects>				
+					<collect exeorder="10" comid="cpuUsage1" select="" merge="" deal=""/>
+				</collects>			
+				
+				<kpipolicy table="res_d_N1cpuUsage" field="value" fieldtype="" willalert="y"
+					alertexp1="${value}&lt;85" alertdesc1="CPU平均利用率恢复正常，当前值为${value}%。" alertexp2="" alertdesc2="" alertexp3="${value}>=85"
+					alertdesc3="CPU平均利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp4="${value}>=95" alertdesc4="CPU平均利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp5="" alertdesc5=""
+					alertcontin="1"   circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 内存利用率 -->
+			<resource kpiid="N1memUsage" coltype="SNMP" value="" valuetype="Float" unit="%">
+				<collects>	
+					<collect exeorder="10" comid="memUsage1" select="" merge="" deal=""/>		
+				</collects>
+				
+				<kpipolicy table="res_d_N1memUsage" field="value" fieldtype="" willalert="y"
+					alertexp1="${value}&lt;85" alertdesc1="内存利用率恢复正常，当前值为${value}%。" alertexp2="" alertdesc2="" alertexp3="${value}>=85"
+					alertdesc3="内存利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp4="${value}>=95" alertdesc4="内存利用率大于等于${trigervalue1}%，当前值为${value}%。" alertexp5="" alertdesc5=""
+					alertcontin="1"   circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			
+			<!-- TCP端口连接数 -->
+			<resource kpiid="N1tcpCurrEstab" coltype="SNMP" value="" valuetype="Integer" unit="">
+				<collects>
+					<collect exeorder="10" comid="tcpCurrEstab" select="" merge="" deal=""/>				
+				</collects>
+				
+				<kpipolicy table="res_d_N1tcpCurrEstab" field="value" fieldtype="" willalert="n"
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1"  circle="5" storefactor="1"/>
+				
+			</resource>
+				
+			
+			<!-- 接收的包数 -->
+			<resource kpiid="N1ifInTCPPktCount" coltype="SNMP" value="" valuetype="Integer" unit="包/s">
+				<collects>
+					<collect exeorder="10" comid="packetsPerSecond" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1ifInTCPPktCount" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="15" storefactor="1"/>
+				
+			</resource>			
+			
+			<!-- 可用存储空间 -->
+			<resource kpiid="N1availableStorageSpace" coltype="SNMP" value="" valuetype="Integer" unit="MB">
+				<collects>
+					<collect exeorder="10" comid="availableStorageSpace" select="" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_d_N1availableStoSpace" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="15" storefactor="1"/>
+				
+			</resource>
+			
+		</resources>
+	</devicetypeinfo>
+</root>

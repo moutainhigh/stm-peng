@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.alarm.confirm.dao.AlarmConfirmDAO">
+
+	<sql id="tableColumns">
+		CONFIRM_ID as confirmId,
+		INSTANCE_ID as instanceId,
+		METRIC_ID as metricId,
+		CONFIRM_TIME as confirmTime,
+		IS_OTHER_ALARM as isOtherAlarm
+	</sql>
+
+	<sql id="deleteConditions">
+		<where>
+			<if test="confirmId !=0">
+				CONFIRM_ID=#{confirmId}
+			</if>
+			<if test="instanceId !=0">
+				AND INSTANCE_ID=#{instanceId}
+			</if>
+			<if test="metricId !=null">
+				AND METRIC_ID=#{metricId}
+			</if>
+		</where>
+	</sql>
+	
+	<insert id="addAlarmConfirm"  parameterType="com.mainsteam.stm.alarm.obj.AlarmConfirm">
+	    INSERT INTO STM_ALARM_CONFIRM(CONFIRM_ID,INSTANCE_ID,METRIC_ID,CONFIRM_TIME,IS_OTHER_ALARM)
+	    VALUES 
+	 	(#{confirmId},#{instanceId},#{metricId},#{confirmTime},#{isOtherAlarm})
+	</insert>
+
+	<select id="findAlarmConfirm" parameterType="com.mainsteam.stm.alarm.obj.AlarmConfirm" resultType="com.mainsteam.stm.alarm.obj.AlarmConfirm">
+		SELECT <include refid="tableColumns"></include>
+		from STM_ALARM_CONFIRM
+		<include refid="deleteConditions"></include>
+
+	</select>
+
+	<delete id="deleteAlarmConfirm" parameterType="com.mainsteam.stm.alarm.obj.AlarmConfirm">
+		DELETE FROM STM_ALARM_CONFIRM
+		<include refid="deleteConditions"></include>
+	</delete>
+	
+	<select id="findAll" resultType="com.mainsteam.stm.alarm.obj.AlarmConfirm">
+		SELECT <include refid="tableColumns"></include>
+		FROM STM_ALARM_CONFIRM
+	</select>
+	
+</mapper>

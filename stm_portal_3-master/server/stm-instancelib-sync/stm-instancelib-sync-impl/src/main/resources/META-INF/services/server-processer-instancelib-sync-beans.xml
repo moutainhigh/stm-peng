@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                    http://www.springframework.org/schema/context
+                    http://www.springframework.org/schema/context/spring-context-2.5.xsd
+                    ">
+	<!-- 拦截添加资源实例 -->
+	<bean id="addResourceInstanceInterceptor" class="com.mainsteam.stm.instancelib.interceptor.InstancelibInterceptorAddImpl">
+		<property name="client" ref="OCRPClient"></property>
+		<property name="localNodeService" ref="localNodeService" />
+	</bean>
+	<bean id="updateDiscoverPropResourceInstanceInterceptor" class="com.mainsteam.stm.instancelib.interceptor.DiscoverPropInterceptorUpdateImpl">
+		<property name="client" ref="OCRPClient"></property>
+		<property name="localNodeService" ref="localNodeService" />
+		<property name="resourceInstanceService" ref="resourceInstanceService" />
+	</bean>
+	<bean id="updateModulePropResourceInstanceInterceptor" class="com.mainsteam.stm.instancelib.interceptor.ModulePropInterceptorUpdateImpl">
+		<property name="client" ref="OCRPClient"></property>
+		<property name="localNodeService" ref="localNodeService" />
+		<property name="resourceInstanceService" ref="resourceInstanceService" />
+	</bean>
+<!-- 	<bean id="addResourceInstanceListener" class="com.mainsteam.stm.instancelib.interceptor.InstancelibListenerAddImpl">
+		<property name="capacityService" ref="capacityService"></property>
+		<property name="relationshipOperateService" ref="relationshipOperateService"></property>
+	</bean> -->
+	<!--<bean id="addResourceInstanceForLinkListener" class="com.mainsteam.stm.instancelib.interceptor.InstancelibListenerLinkAddImpl">
+		<property name="capacityService" ref="capacityService"></property>
+		 <property name="relationshipOperateService" ref="relationshipOperateService"></property> 
+		<property name="resourceInstanceService" ref="resourceInstanceService"></property>
+		<property name="coreResourceInstanceService" ref="coreResourceInstanceService"></property>
+	</bean>-->
+	<bean id="compositeInstancelibRelationListener" class="com.mainsteam.stm.instancelib.interceptor.CompositeInstancelibListenerRelation">
+		<property name="capacityService" ref="capacityService"></property>
+		<!-- <property name="relationshipOperateService" ref="relationshipOperateService"></property> -->
+		<property name="resourceInstanceService" ref="resourceInstanceService"></property>
+	</bean>
+	<bean id="refreshResourceInstanceInterceptor" class="com.mainsteam.stm.instancelib.interceptor.InstancelibInterceptorRefreshImpl">
+		<property name="client" ref="OCRPClient"></property>
+		<property name="localNodeService" ref="localNodeService" />
+	</bean>
+	<bean id="metricDataModulePropSync" class="com.mainsteam.stm.instancelib.remote.MetricDataModulePropSync" init-method="start" destroy-method="stop">
+		<property name="modulePropService" ref="modulePropService"></property>
+		<property name="customModulePropService" ref="customModulePropService"></property>
+	</bean>
+</beans>

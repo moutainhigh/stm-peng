@@ -1,0 +1,336 @@
+<style type="text/css">
+	.tabh1{
+		background-color: #0F3566;
+	}
+</style>
+<div class="pop-middle-l" style="height:100%">
+   <div class="pop-middle-r" style="height:100%">
+       <div class="pop-middle-m" style="height:100%">
+           <div class="pop-middle-m-content" style="height:100%">
+               <div class="pop-content" style="height:100%">
+                   <div class="pop-con" style="height:100%">
+                       <div class="locate-left" style="width:50%;height:100%">
+                           <div class="pop-s-tittle" id="leftTitle"></div>
+                           <div class="pop-main-container" style="height:100%">
+                               <div style="height:100%">
+                                   <div style="height:100%">
+                                       <div style="height:100%" id="leftFileContentDiv">
+                      		           		<div id="div1" onscroll="document.all.div2.scrollTop=document.all.div1.scrollTop;document.all.div2.scrollLeft=document.all.div1.scrollLeft" style="height:95%;overflow:auto;width:100%;border:0px solid #B4D1FE;">   
+								         		<table border="0" align="center" cellpadding="0" cellspacing="0" id="table1" width="100%">
+										     	</table>
+								       		</div>   
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>
+                       </div>
+                       <div class="locate-left" style="width:50%;height:100%">
+                            <div class="pop-s-tittle" id="rigthTitle"></div>
+                            <div class="pop-main-container" style="height:100%">
+                                <div id="u6" style="height:100%">
+                                    <div id="u7" style="height:100%">
+                                        <div style="height:100%" id="rightFileContentDiv">
+                               	       		<div id="div2" onscroll="document.all.div1.scrollTop=document.all.div2.scrollTop;document.all.div1.scrollLeft=document.all.div2.scrollLeft" style="height:95%;overflow:auto;width:100%;border:0px solid #B4D1FE;">  
+								     			<table border="0" align="center" cellpadding="0" cellspacing="0" id="table2" width="100%">
+							     				</table>
+        									</div>   
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="u8">
+                                    <div id="u8_img"></div>
+                                    <div id="u9">
+                                        <div id="u9_rtf"></div>
+                                    </div>
+                                </div>
+                                <div id="u10">
+                                    <div id="u10_img"></div>
+                                    <div id="u11">
+                                        <div id="u11_rtf"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+(function($){
+	oc.ns('oc.module.config.device.backup.history');
+	oc.module.config.device.backup.history={
+		open:function(type,row1,row2,ipAddress){
+			open(type,row1,row2,ipAddress);
+		}
+	};
+	function open(type,row1,row2,ipAddress){
+		//第一个文件内容
+	 	oc.util.ajax({
+		 	url:oc.resource.getUrl('portal/config/device/readfilebylist.htm?filePath='+row1.fileId),			            
+		 	successMsg:null,
+		 	success:function(d1){
+			 	var file1Data = d1.data,leftFileContentDiv = $("#leftFileContentDiv"),
+			 	file2Data,rightFileContentDiv = $("#rightFileContentDiv");
+			 	$("#leftTitle").append(ipAddress+"-/"+row1.fileName);
+			 	for(var i in file1Data){
+				 	if(file1Data[i]==""){
+					 	leftFileContentDiv.find("#table1").append("<tr><td nowrap>"+"&nbsp"+"</td></tr>");
+	   			 	}else{
+					 	leftFileContentDiv.find("#table1").append("<tr><td nowrap>"+file1Data[i]+"</td></tr>");
+	   			 	}
+			 	}
+			 	if(row2!=null){
+			 		$("#rigthTitle").append(ipAddress+"-/"+row2.fileName);
+				 	//第二个文件内容
+				 	oc.util.ajax({
+					 	url:oc.resource.getUrl('portal/config/device/readfilebylist.htm?filePath='+row2.fileId),			            
+					 	successMsg:null,
+					 	success:function(d2){
+						 	file2Data = d2.data;
+						 	for(var i in file2Data){
+							 	if(file2Data[i]==""){
+								 	rightFileContentDiv.find("#table2").append("<tr><td nowrap>"+"&nbsp"+"</td></tr>");
+				   			 	}else{
+								 	rightFileContentDiv.find("#table2").append("<tr><td nowrap>"+file2Data[i]+"</td></tr>");
+				   			 	}
+						 	}
+						 	if(type=="compare") ajaxData(row1,row2);
+					 	}
+				 	});
+			 	}else{
+			 		//查看一个文件
+			 		$('div.locate-left').eq(1).remove();
+			 		$('div.locate-left,#div1').css({width:'100%',border:0});
+			 	}
+		 	}
+	 	});
+	}
+})(jQuery);
+</script>
+
+<script language="JavaScript">
+
+function ajaxData(row1,row2){
+	oc.util.ajax({
+		url:oc.resource.getUrl('portal/config/device/comparecfgfile.htm?filePath1='+row1.fileId+'&filePath2='+row2.fileId),			            
+	 	successMsg:null,
+	 	success:function(d3){
+			var file3Data = d3.data;
+			var table1row=file3Data[0];
+			var table2row=file3Data[1];
+			var colorrow=file3Data[2];
+			var tablerow=new Array();
+			var count=0;
+			for(var i=0;i<table1row.length;i++){
+				var index=parseInt(table1row[i]);
+			  	tablerow[count]=index;
+		      	count++;
+			}
+		    for(var j=0;j<table2row.length;j++){
+			  	var index=parseInt(table2row[j]);
+			  	tablerow[count]=index;
+		      	count++;
+			}
+		    tablerow.sort(sortfunction);
+			for(var n=0;n<tablerow.length;n++){
+				var row=tablerow[n];
+				var t=0;
+				for(var i=0;i<table1row.length;i++){
+					var index=parseInt(table1row[i]);
+					if(row==index){
+				  		t=1;
+					  	break;
+					}
+				}
+				if(t==0){
+				 	for(var j=0;j<table2row.length;j++){
+				       	var index=parseInt(table2row[j]);
+					   	if(row==index){
+						  	t=2;
+						  	break;
+						}
+				 	}
+				}
+				if(t==1){
+			      	var tr=document.getElementById("table1").insertRow(index);
+		          	var td=tr.insertCell();
+		          	td.innerHTML="&nbsp;";
+		          	document.getElementById("table2").rows[index].cells[0].className="tabh1";
+				}else if(t==2){
+			        var tr=document.getElementById("table2").insertRow(index);
+		            var td=tr.insertCell();
+		            td.innerHTML="&nbsp;";
+		            document.getElementById("table1").rows[index].cells[0].className="tabh1";
+				}
+			}
+		    for(var k=0;k<colorrow.length;k++){
+			  	var index=parseInt(colorrow[k]);
+			  	document.getElementById("table1").rows[index].cells[0].className="tabh1";
+			  	document.getElementById("table2").rows[index].cells[0].className="tabh1";
+			}
+		    compare();
+	 	}
+	});
+}
+
+function sortfunction(x,y){ 
+	var num1=parseInt(x);   
+	var num2=parseInt(y);   
+	if(num1>num2){   
+  		return 1;  
+ 	}else{   
+	   	if(num1==num2){   
+	    	return 0; 
+	   	}else{   
+	    	return -1;  
+	   	}   
+  	}
+} 
+
+function compare(){
+	if(document.getElementById("table1").rows.length<=document.getElementById("table2").rows.length){
+  		var length=document.getElementById("table2").rows.length-document.getElementById("table1").rows.length;
+  		var table1length=document.getElementById("table1").rows.length;
+  		for(var n=0;n<length;n++){
+   			var tr=document.getElementById("table1").insertRow(table1length+n);
+   			var td=tr.insertCell();
+   			td.innerHTML="&nbsp;";
+   			document.getElementById("table2").rows[table1length+n].cells[0].className="tabh1";
+  		}
+ 	}else if(document.getElementById("table2").rows.length<document.getElementById("table1").rows.length){
+  		var length=document.getElementById("table1").rows.length-document.getElementById("table2").rows.length;
+  		var table2length=document.getElementById("table2").rows.length;
+  		for(var n=0;n<length;n++){
+   			var tr=document.getElementById("table2").insertRow(table2length+n);
+   			var td=tr.insertCell();
+   			td.innerHTML="&nbsp;";
+   			document.getElementById("table1").rows[table2length+n].cells[0].className="tabh1";
+  		}
+ 	}
+	//delete blank row
+	var length=document.getElementById("table1").rows.length;
+	var indexlist1=new Array();
+	var indexlist2=new Array();
+	var count1=0;
+	var count2=0;
+	var index=0;
+	for(var i=index;i<length;i++){
+  		var midindex=i;
+  		var endindex=i;
+ 		var str1=document.getElementById("table1").rows[i].cells[0].innerHTML;
+  		var str2=document.getElementById("table2").rows[i].cells[0].innerHTML;
+  		var classname1=document.getElementById("table1").rows[i].cells[0].className;
+  		var classname2=document.getElementById("table2").rows[i].cells[0].className;
+  		var count=0;
+  		if(classname1=="tabh1"&&str2=="&nbsp;"){
+	   		for(var j=i+1;j<length;j++){
+	     		endindex=j-1;
+	     		var nextstr1=document.getElementById("table1").rows[j].cells[0].innerHTML;
+	     		var nextstr2=document.getElementById("table2").rows[j].cells[0].innerHTML;
+	     		var nextclassname1=document.getElementById("table1").rows[j].cells[0].className;
+	     		var nextclassname2=document.getElementById("table2").rows[j].cells[0].className;
+	     		if(nextclassname1=="tabh1"&&nextstr2=="&nbsp;"){
+	      			continue;
+	     		}else if(nextclassname2=="tabh1"&&nextstr1=="&nbsp;"){
+	      		for(var n=j+1;n<length;n++){
+		   			var next2str1=document.getElementById("table1").rows[n].cells[0].innerHTML;
+	       			var next2str2=document.getElementById("table2").rows[n].cells[0].innerHTML;
+	       			var next2classname1=document.getElementById("table1").rows[n].cells[0].className;
+	       			var next2classname2=document.getElementById("table2").rows[n].cells[0].className;
+	       			if(next2classname2=="tabh1"&&next2str1=="&nbsp;"){
+	         			continue;
+	       			}else{
+		     			endindex=n-1;
+		     			break;
+		   			}
+		  		}
+	      		midindex=j-1;
+		  		break;
+	     	}else{
+		   		break;
+		 	}
+	   	}
+	   	var countm=Math.min((parseInt(midindex)+parseInt(1))-parseInt(i),parseInt(endindex)-parseInt(midindex));
+	   	if(countm!=0){
+	     	for(var m=0;m<countm;m++){
+			   	indexlist2[count2]=midindex-m;
+			   	count2++;
+		 	}
+		 	for(var k=0;k<countm;k++){
+		   		indexlist1[count1]=(parseInt(midindex)+parseInt(1))+k;
+		   		count1++;
+		 	}
+		}
+	   	i=endindex;
+	  	}else if(classname2=="tabh1"&&str1=="&nbsp;"){
+	    	for(var j=i+1;j<length;j++){
+		     	endindex=j-1;
+		     	var nextstr1=document.getElementById("table1").rows[j].cells[0].innerHTML;
+		     	var nextstr2=document.getElementById("table2").rows[j].cells[0].innerHTML;
+		     	var nextclassname1=document.getElementById("table1").rows[j].cells[0].className;
+		     	var nextclassname2=document.getElementById("table2").rows[j].cells[0].className;
+	     		if(nextclassname2=="tabh1"&&nextstr1=="&nbsp;"){
+	      			continue;
+	     		}else if(nextclassname1=="tabh1"&&nextstr2=="&nbsp;"){
+	      			for(var n=j+1;n<length;n++){
+		   				var next2str1=document.getElementById("table1").rows[n].cells[0].innerHTML;
+	       				var next2str2=document.getElementById("table2").rows[n].cells[0].innerHTML;
+	      	 			var next2classname1=document.getElementById("table1").rows[n].cells[0].className;
+	       				var next2classname2=document.getElementById("table2").rows[n].cells[0].className;
+	       				if(next2classname1=="tabh1"&&next2str2=="&nbsp;"){
+	         				continue;
+	       				}else{
+		     				endindex=n-1;
+		     				break;
+		   				}
+		  			}
+	      			midindex=j-1;
+		  			break;
+	     		}else{
+		   			break;
+		 		}
+	   		}
+	   		var countm=Math.min((parseInt(midindex)+parseInt(1))-parseInt(i),parseInt(endindex)-parseInt(midindex));
+	   		if(countm!=0){
+		     	for(var m=0;m<countm;m++){
+			   		indexlist1[count1]=midindex-m;
+			   		count1++;
+			 	}
+			 	for(var k=0;k<countm;k++){
+			   		indexlist2[count2]=(parseInt(midindex)+parseInt(1))+k;
+			   		count2++;
+			 	}
+	   		}
+	   		i=endindex;
+	  	}
+ 	}
+	indexlist1.sort(sortfunction);
+	indexlist2.sort(sortfunction);
+	if(indexlist1.length>0){
+  		for(var i=0;i<indexlist1.length;i++){
+  			document.getElementById("table1").deleteRow(parseInt(indexlist1[i])-parseInt(i));
+  		}
+	}
+	if(indexlist2.length>0){
+  		for(var i=0;i<indexlist2.length;i++){
+  			document.getElementById("table2").deleteRow(parseInt(indexlist2[i])-parseInt(i));
+  		}
+	}
+}
+function sortfunction(x,y) { 
+	var num1=parseInt(x);   
+ 	var num2=parseInt(y);   
+ 	if(num1>num2){   
+  		return 1;  
+ 	}else{   
+   		if(num1==num2){   
+    		return 0; 
+   		}else{   
+    		return -1;  
+   		}   
+  	}
+} 
+</script>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.mainsteam.stm.portal.config.dao.IConfigWarnDao">
+	
+	<select id="pageSelect" resultType="com.mainsteam.stm.portal.config.bo.ConfigWarnBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		SELECT A.ID,A.NAME,A.ENTRY_ID AS ENTRYID,A.ENTRY_DATETIME AS ENTRYDATETIME,
+		A.UPDATE_ID AS UPDATEID,A.UPDATE_DATETIME AS UPDATEDATETIME, B.NAME AS ENTRYUSERNAME,C.NAME AS UPDATEUSERNAME
+		FROM STM_CONFIG_WARN A
+		LEFT JOIN STM_SYS_USER B ON A.ENTRY_ID = B.ID
+		LEFT JOIN STM_SYS_USER C ON A.UPDATE_ID = C.ID
+	</select>
+	
+	<insert id="insert" parameterType="com.mainsteam.stm.portal.config.bo.ConfigWarnBo" >
+		INSERT INTO STM_CONFIG_WARN
+		(ID,NAME,ENTRY_ID,ENTRY_DATETIME,UPDATE_ID,UPDATE_DATETIME)
+			VALUES(
+			#{id},
+			#{name},
+			#{entryId},
+			#{entryDateTime},
+			#{updateId},
+			#{updateDateTime}
+		)
+	</insert>
+	
+	<select id="checkNameIsExsit" resultType="Integer" parameterType="String">
+		SELECT COUNT(*) FROM STM_CONFIG_WARN  WHERE NAME=#{id}
+	</select>
+	
+	<insert id="batchInsertWarnResource" parameterType="com.mainsteam.stm.portal.config.bo.ConfigWarnResourceBo">
+		INSERT INTO STM_CONFIG_WARN_RESOURCE
+		(WARN_ID,RESOURCE_ID)
+			VALUES(
+			#{warnId},
+			#{resourceId}
+		)
+	</insert>
+	
+	<delete id="del" parameterType="Long">
+		DELETE FROM STM_CONFIG_WARN WHERE ID=#{id}
+	</delete>
+	
+	<delete id="delWarnResourcesById" parameterType="Long">
+		DELETE FROM STM_CONFIG_WARN_RESOURCE WHERE WARN_ID=#{id}
+	</delete>
+	
+	<update id="update" parameterType="com.mainsteam.stm.portal.config.bo.ConfigWarnBo">
+		UPDATE STM_CONFIG_WARN
+		<set>
+			<if test="name != null"> NAME = #{name}, </if>
+			<if test="updateId != null"> UPDATE_ID = #{updateId}, </if>
+			<if test="updateDateTime != null"> UPDATE_DATETIME = #{updateDateTime}, </if>
+		</set>
+		WHERE ID=#{id}
+	</update>
+	
+	<select id="getWarnResourcesById" resultType="com.mainsteam.stm.portal.config.bo.ConfigWarnResourceBo" parameterType="Long">
+		SELECT WARN_ID AS WARNID,RESOURCE_ID AS RESOURCEID FROM STM_CONFIG_WARN_RESOURCE WHERE WARN_ID=#{id}
+	</select>
+	
+	<delete id="batchDelConfigWarn">
+		DELETE FROM STM_CONFIG_WARN WHERE ID IN
+		 <foreach item="ids" index="index" collection="array" open="(" separator="," close=")">  
+  			#{ids}
+ 		 </foreach> 
+	</delete>
+	
+	<delete id="batchDelConfigWarnResource">
+		DELETE FROM STM_CONFIG_WARN_RESOURCE WHERE WARN_ID IN
+		 <foreach item="ids" index="index" collection="array" open="(" separator="," close=")">  
+  			#{ids}
+ 		 </foreach> 
+	</delete>
+	
+	<delete id="batchDelCWRByResourceIds">
+		DELETE FROM STM_CONFIG_WARN_RESOURCE WHERE RESOURCE_ID IN
+		 <foreach item="ids" index="index" collection="array" open="(" separator="," close=")">  
+  			#{ids}
+ 		 </foreach> 
+	</delete>
+	
+	<select id="get" parameterType="Long" resultType="com.mainsteam.stm.portal.config.bo.ConfigWarnBo">
+		SELECT ID,NAME,ENTRY_ID AS ENTRYID,ENTRY_DATETIME AS ENTRYDATETIME,
+		UPDATE_ID AS UPDATEID,UPDATE_DATETIME AS UPDATEDATETIME FROM STM_CONFIG_WARN WHERE ID = #{id}
+	</select>
+	
+	<select id="getWarnIdByResourceId" parameterType="java.lang.Long" resultType="java.lang.Long">
+		SELECT WARN_ID FROM STM_CONFIG_WARN_RESOURCE WHERE RESOURCE_ID = #{id}
+	</select>
+</mapper>

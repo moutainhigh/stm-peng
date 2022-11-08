@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.topo.dao.IOthersNodeDao">
+	
+	<select id="getAll" resultType="com.mainsteam.stm.topo.bo.OtherNodeBo">
+		select * from STM_TOPO_OTHERS
+	</select>
+	<insert id="save" parameterType="com.mainsteam.stm.topo.bo.OtherNodeBo">
+		insert into STM_TOPO_OTHERS
+			(id,attr,subTopoId,visible)
+		values
+			(#{id},#{attr},#{subTopoId},#{visible})
+	</insert>
+	<update id="update" parameterType="com.mainsteam.stm.topo.bo.OtherNodeBo">
+		update STM_TOPO_OTHERS
+		set
+			attr=#{attr},subTopoId=#{subTopoId},visible=#{visible}
+		where
+			id=#{id}
+	</update>
+	
+	<update id="updateOtherZIndexById" parameterType="hashmap">
+		update STM_TOPO_OTHERS
+		set
+			zindex=#{zIndex},zindextime=#{currentdate}
+		where
+			id=#{id}
+	</update>
+	
+	<delete id="deleteByIds" parameterType="list">
+		delete from STM_TOPO_OTHERS
+		<where>
+			id in
+			<foreach collection="list" item="id" open="(" close=")" separator=",">
+				#{id}
+			</foreach>
+		</where>
+	</delete>
+	<select id="getBySubTopoId" parameterType="map" resultType="com.mainsteam.stm.topo.bo.OtherNodeBo">
+		select * from STM_TOPO_OTHERS
+		<where>
+			<if test="id==null">
+				subTopoId is null
+			</if>
+			<if test="id!=null">
+				subTopoId=#{id}
+			</if>
+		</where>
+		order by zindextime ASC
+	</select>
+	<select id="getById" resultType="com.mainsteam.stm.topo.bo.OtherNodeBo" parameterType="map">
+		select 
+			* 
+		from STM_TOPO_OTHERS
+		<where>
+			id=#{id} 
+		</where>
+		
+	</select>
+	<update id="updateAttr" parameterType="com.mainsteam.stm.topo.bo.OtherNodeBo">
+		update STM_TOPO_OTHERS
+		<set>
+			attr=#{attr}
+		</set>
+		<where>
+			id=#{id}
+		</where>
+	</update>
+	<select id="isCabinetRepeatName" parameterType="map" resultType="int">
+		select count(id) from STM_TOPO_OTHERS
+		<where>
+			subTopoId=#{subTopoId}
+			and
+			attr like ${cabinet}
+			and 
+			attr like ${name}
+		</where>
+	</select>
+	<select id="getAllCabinets" resultType="com.mainsteam.stm.topo.bo.OtherNodeBo" parameterType="map">
+		select 
+			* 
+		from STM_TOPO_OTHERS
+		where
+			attr like ${cabinet}
+	</select>
+	<select id="findCabinetInRoom" resultType="com.mainsteam.stm.topo.bo.OtherNodeBo" parameterType="map">
+		select 
+			* 
+		from STM_TOPO_OTHERS
+		where
+			attr like ${cabinet}
+			and
+			subTopoId=#{subTopoId}
+	</select>
+	<select id="getByIds" resultType="com.mainsteam.stm.topo.bo.OtherNodeBo" parameterType="map">
+		select
+			attr,id
+		from STM_TOPO_OTHERS
+		<where>
+			<foreach collection="ids" open="id in (" close=")" item="id" separator=",">#{id}</foreach>
+		</where>
+	</select>
+</mapper>

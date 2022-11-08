@@ -1,0 +1,229 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link type="text/css" href="lib/jquery-ui-1.8.4.custom/css/smoothness/jquery-ui-1.8.4.custom.css" rel="stylesheet" />
+<script type="text/javascript" src="lib/jquery-ui-1.8.4.custom/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="lib/raphael.js"></script>
+<script type="text/javascript" src="lib/raphael-fn.js"></script>
+<script type="text/javascript" src="lib/jquery-ui-1.8.4.custom/js/jquery-ui-1.8.4.custom.min.js"></script>
+<script type="text/javascript" src="demo.js"></script>
+<script type="text/javascript">
+	$(function() {
+		var containerJSON = {containers:[{x:500,y:350,w:65,h:80,
+//			handler:{rx:0,ry:0,w:65,h:50},
+			texts:[{text:"192.168.2.12",rx:42.5,ry:95,type:"text_ip"}],
+			imgs:[{src:"img/top/router.png",type:"img_bg",rx:0,ry:0,w:85,h:85}],
+			rects:[],
+			containers:[]}]}
+		var canvas = $("#myflow").canvas({a:10});
+//		canvas.raphael.path(Raphael.format("M{0},{1}L{2},{3}", 200, 200, 200, 200))
+//			.attr({stroke: "green",fill: "green","stroke-width": 3}).animate({path:Raphael.format("M{0},{1}L{2},{3}", 200, 200, 1500, 200)},2000);
+		var compay = canvas.container(100,360,200,200).addImg(canvas.raphael.image("ys_img/fz.png",0,0,200,200),0,0).ready();
+		var container = canvas.container(350,10,1000,450).ready(0,0,0,0)//.ready(0,0,1000,50,true);
+		var syc = canvas.childcontainer(200,60,900,150);
+		syc.addText(canvas.raphael.text(0, 0,"使用层").attr({stroke:"white","font-size": 18,fill:"white"}),-50,75).ready(0,0,1,0);
+		syc.addRect(canvas.raphael.rect(0, 0,1000,1).attr({fill:"#006400","stroke-width":1,"stroke-dasharray":"- "}),-100,149);
+		var ywc = canvas.childcontainer(200,60,900,150);
+		ywc.addText(canvas.raphael.text(0, 0,"业务层").attr({stroke:"white","font-size": 18,fill:"white"}),-50,75).ready(0,0,1,0)//.ready(0,0,1000,100,true);
+		ywc.addRect(canvas.raphael.rect(0, 0,1000,1).attr({fill:"#006400","stroke-width":1,"stroke-dasharray":"- "}),-100,149);
+		var wlc = canvas.childcontainer(200,60,900,150);
+		wlc.addText(canvas.raphael.text(0, 0,"物理层").attr({stroke:"white","font-size": 18,fill:"white"}),-50,75).ready(0,0,1,0)//.ready(0,0,1000,100,true);
+		wlc.addRect(canvas.raphael.rect(0, 0,1000,1).attr({fill:"#006400","stroke-width":1,"stroke-dasharray":"- "}),-100,149);
+		container.addContainer(syc,100,0);
+		container.addContainer(ywc,100,150);
+		container.addContainer(wlc,100,300);
+		container.frame.attr({"stroke-width": 2,stroke:"#006400","stroke-dasharray":"- "});
+		container.addRect(canvas.raphael.rect(0, 0,100,450).attr({fill:"#006400","fill-opacity":0.2,"stroke-width": 0,}),0,0);
+		
+		//canvas.restore(containerJSON);	
+		$("#myflow_tools .state").each(function() {
+                $(this).draggable({
+					//拖拽的时候拖拽实体为克隆对象
+                    helper: "clone"
+                })
+        });
+		$("#myflow_tools").draggable({
+                handle: "#myflow_tools_handle"
+            }).css({left:10,top:10});
+            $("#myflow_tools .node").hover(function() {
+                $(this).addClass("mover")
+            },
+            function() {
+                $(this).removeClass("mover")
+        });
+		$("#myflow").droppable({
+                accept: ".state",
+                drop: function(c, i) {
+					containerJSON.containers[0].imgs[0].src = i.helper.find("img").attr("src");
+					containerJSON.containers[0].texts[0].text = i.helper.text();
+					var con;
+					if(i.helper.attr("type")=="syc"){
+						containerJSON.containers[0].imgs[1] = {src:"ys_img/bj.png",type:"img_bg",rx:0,ry:0,w:0,h:0};
+						con = syc;
+					}else if(i.helper.attr("type")=="ywc"){
+						containerJSON.containers[0].imgs[1] = {src:"ys_img/bj.png",type:"img_bg",rx:0,ry:0,w:0,h:0};
+						con = ywc;
+					}else{
+						con = wlc;
+						containerJSON.containers[0].imgs[1] = {src:"ys_img/bj.png",type:"img_bg",rx:60,ry:55,w:40,h:40};
+						containerJSON.containers[0].imgs[2] = {src:"ys_img/email.png",type:"img_bg",rx:-10,ry:40,w:35,h:30};						
+					}
+					con.addContainer(canvas.childcontainer(i.helper.offset().left,i.helper.offset().top,85,100).set(containerJSON.containers[0])
+//					.addText(canvas.raphael.text(0, 0,"交换机"),55,150)
+//					.addImg(canvas.raphael.image("zj2.png", 0, 0, 110, 140), 0, 0)
+//					.addImg(canvas.raphael.image("start_event_empty.png", 0, 0, 40, 50), 0, 100)
+//					.addImg(canvas.raphael.image("start_event_empty.png", 70, 0, 40, 50), 70, 100)					
+//					.ready(0,0,110,20)
+					,i.helper.offset().left-con.x,25);
+					//canvas.rect(i.helper.offset().left,i.helper.offset().top);
+                }
+            });
+		$("#myflow_save").click(function(){
+			var data = canvas.getData();
+			 alert(data);
+			 canvas.raphael.clear();
+			
+			canvas.restore(eval("("+data+")"))
+		})
+		$("#path").click(function(){
+			canvas.isEditable = canvas.isEditable?false:true;
+		})
+		/**
+		var pper = Raphael("myflow",1000,1000);
+		pper.arrow({x:200,y:200},{x:250,y:300},{x:300,y:200},{stroke:"#808080",fill:"#808080","stroke-width":"2"}).red().green()
+		pper.turn();
+		pper.polic(300,500,10);
+		pper.polic(350,500,10);
+		pper.polic(300,450,10);
+		pper.polic(350,450,10);*/
+	});
+</script>
+<style type="text/css">
+body {
+	margin: 0;
+	pading: 0;
+	text-align: left;
+	font-family: Arial, sans-serif, Helvetica, Tahoma;
+	font-size: 12px;
+	line-height: 1.5;
+	color: black;
+	background-image: url(bg.png);
+}
+
+.node {
+	width: 90px;
+	text-align: left;
+	vertical-align: middle;
+	border: 1px solid #fff;
+	cursor:url('img/16/gateway_parallel.png')
+}
+
+.mover {
+	border: 1px solid #ddd;
+	background-color: #ddd;
+}
+
+.selected {
+	background-color: #ddd;
+}
+
+.state {
+	
+}
+
+#myflow_props table {
+	
+}
+
+#myflow_props th {
+	letter-spacing: 2px;
+	text-align: left;
+	padding: 6px;
+	background: #ddd;
+}
+
+#myflow_props td {
+	background: #fff;
+	padding: 6px;
+}
+
+#pointer {
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+#path {
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+#task {
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+#state {
+	background-repeat: no-repeat;
+	background-position: center;
+}
+</style>
+</head>
+<body>
+<div id="myflow"></div>
+<div id="myflow_tools"
+	style="position: absolute; top: 10; left: 10; background-color: #fff; width: 90px; cursor: default; padding: 3px;"
+	class="ui-widget-content">
+<div id="myflow_tools_handle" style="text-align: center;"
+	class="ui-widget-header">工具集</div>
+
+
+<div class="node" id="myflow_save"><img src="img/save.gif" />&nbsp;&nbsp;保存</div>
+<div>
+<hr />
+</div>
+<div class="node selectable" id="pointer"><img
+	src="img/select16.gif" />&nbsp;&nbsp;选择</div>
+<div class="node selectable" id="path"><img
+	src="img/16/flow_sequence.png" />&nbsp;&nbsp;连接</div>
+<div>
+<hr />
+</div>
+<div class="node state" id="end" type="syc"><img
+	src="ys_img/bussniess.png" width="16" height="16"/>&nbsp;&nbsp;销售部</div>
+<div class="node state" id="end-cancel" type="syc"><img
+	src="ys_img/cs.png" width="16" height="16"/>海外发展部</div>
+<div class="node state" id="end-error" type="syc"><img
+	src="ys_img/ll.png" width="16" height="16"/>&nbsp;&nbsp;财务部</div>
+	<div class="node state" id="start" type="syc"><img
+	src="ys_img/user.png" width="16" height="16" />&nbsp;&nbsp;人事部</div>
+<div class="node state" id="state" type="syc"><img
+	src="ys_img/buss.png" width="16" height="16"/>&nbsp;&nbsp;运营中心</div>
+<div>
+<hr />
+</div>
+<div class="node state" id="task" type="ywc"><img
+	src="ys_img/iphone.png"  width="16" height="16"/>时间同步系统</div>
+<div class="node state" id="fork" type="ywc"><img
+	src="ys_img/gloab.png"  width="16" height="16"/>DNS系统</div>
+<div class="node state" id="join" type="ywc"><img
+	src="ys_img/com.png"  width="16" height="16"/>FTP系统</div>
+<div class="node state" id="join" type="ywc"><img
+	src="ys_img/exp.png"  width="16" height="16"/>WebSphare</div>
+<div class="node state" id="join" type="ywc"><img
+	src="ys_img/internet.png"  width="16" height="16"/>Domino</div>
+<div>
+<hr/>
+</div>
+<div class="node state" id="start" type="wlc"><img
+	src="ys_img/router.png" width="16" height="16"/>&nbsp;&nbsp;路由器</div>
+<div class="node state" id="state" type="wlc"><img
+	src="ys_img/zj2.png" width="16" height="16"/>&nbsp;&nbsp;主机</div>
+<div class="node state" id="task" type="wlc"><img
+	src="ys_img/hl.png"  width="16" height="16"/>&nbsp;&nbsp;硬件</div>
+<div class="node state" id="fork" type="wlc"><img
+	src="ys_img/dyj.png"  width="16" height="16"/>&nbsp;&nbsp;打印机</div>
+<div class="node state" id="join" type="wlc"><img
+	src="ys_img/mla.png"  width="16" height="16"/>&nbsp;&nbsp;未知</div>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.metric.dao.CustomMetricThresholdDAO">
+
+	<sql id="CustomMetricThresholdColumn"> 
+		metricId,metricState,expressionOperator,thresholdValue,expressionDesc,ALARMTEMPLATE
+	</sql>
+	<sql id="CustomMetricThresholdColumnValue">
+		#{metricId},#{metricState},#{expressionOperator},#{thresholdValue},#{expressionDesc},#{alarmTemplate}
+	</sql>
+	<sql id="table">
+		 STM_CUSTOM_METRIC_THRESHOLD
+	</sql>
+	<sql id="selectSql">
+		select <include refid="CustomMetricThresholdColumn"/>
+		from   <include refid="table"/>
+	</sql>
+	<insert id="insertCustomMetricThreshold" 
+		parameterType="com.mainsteam.stm.metric.dao.pojo.CustomMetricThresholdDO">
+		insert into <include refid="table"/>
+		(<include refid="CustomMetricThresholdColumn"/>) 
+		values(<include refid="CustomMetricThresholdColumnValue"/>) 
+	</insert>
+	<select id="getCustomMetricThresholdsByMetricId" 
+		resultType="com.mainsteam.stm.metric.dao.pojo.CustomMetricThresholdDO"
+		parameterType="String"> 
+		<include refid="selectSql"/>
+		where metricId = #{metricId}
+	</select>
+	<delete id="removeThresholdsByMetricId" parameterType="String"> 
+		delete from <include refid="table"/> where metricId = #{metricId} 
+	</delete>
+	
+	<update id="updateCustomMetricThreshold" 
+		parameterType="com.mainsteam.stm.metric.dao.pojo.CustomMetricThresholdDO">
+		update <include refid="table"/>
+		<set>
+			<if test="metricState != null">  metricState =#{metricState},</if>
+			<if test="expressionOperator != null">  expressionOperator= #{expressionOperator},</if>
+			<if test="thresholdValue != null"> thresholdValue=#{thresholdValue}, </if>
+			<if test="expressionDesc != null"> expressionDesc=#{expressionDesc},</if>
+			<if test="alarmTemplate != null"> ALARMTEMPLATE=#{alarmTemplate},</if>
+		</set>	
+		where metricId = #{metricId}
+    </update>
+	<!-- <delete id="removeThresholdByProfileIds" parameterType="java.util.List"> 
+		delete from stm_metric_THRESHOLD where PROFILE_ID in <foreach
+		item="item" index="index" collection="list" open="(" 
+		separator="," close=")"> #{item} </foreach> and (timeline_id != 0 and timeline_id is not null) </delete>
+	<delete id="removeThresholdByTimelineId" parameterType="long"> 
+		delete from stm_metric_THRESHOLD where TIMELINE_ID = #{timelineId}
+	</delete>
+	<delete id="removeThresholdByTimelineIds" parameterType="java.util.List"> 
+		delete from stm_metric_THRESHOLD where TIMELINE_ID in <foreach
+		item="item" index="index" collection="list" open="(" 
+		separator="," close=")"> #{item} </foreach>
+	</delete>
+	
+	<select id="getThresholdByProfileId" 
+		resultType="com.mainsteam.stm.metric.po.CustomMetricThresholdDO"
+		parameterType="long"> select MK_ID as mkId,PROFILE_ID as 
+		profileId,METRIC_ID as metricId,DICT_METRIC_STATE as 
+		dictMetricState,EXPRESSION_OPERATOR as expressionOperator, EXPRESSION_DESC as 
+		expressionDesc,THRESHOLD_VALUE as thresholdValue,TIMELINE_ID as timelineId from 
+		stm_metric_THRESHOLD where PROFILE_ID = #{profileId} and (TIMELINE_ID is null or TIMELINE_ID=0)</select>
+	<select id="getThresholdByProfileIdAndMetricId" 
+		resultType="com.mainsteam.stm.metric.po.CustomMetricThresholdDO"
+		parameterType="java.util.Map"> select MK_ID as mkId,PROFILE_ID as 
+		profileId,METRIC_ID as metricId,DICT_METRIC_STATE as 
+		dictMetricState,EXPRESSION_OPERATOR as expressionOperator, EXPRESSION_DESC as 
+		expressionDesc,THRESHOLD_VALUE as thresholdValue,TIMELINE_ID as timelineId from 
+		stm_metric_THRESHOLD where PROFILE_ID = #{profileId}
+		and (TIMELINE_ID is null or TIMELINE_ID=0)
+		and METRIC_ID = #{metricId}
+		</select>
+			
+		<select id="getThresholdByTimelineId" 
+		resultType="com.mainsteam.stm.metric.po.CustomMetricThresholdDO"
+		parameterType="long"> select MK_ID as mkId,PROFILE_ID as 
+		profileId,METRIC_ID as metricId,DICT_METRIC_STATE as 
+		dictMetricState,EXPRESSION_OPERATOR as expressionOperator, EXPRESSION_DESC as 
+		expressionDesc,THRESHOLD_VALUE as thresholdValue,TIMELINE_ID as timelineId from 
+		stm_metric_THRESHOLD where TIMELINE_ID = #{timelineId} </select>
+ -->
+ </mapper>

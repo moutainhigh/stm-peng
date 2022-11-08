@@ -1,0 +1,488 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.portal.netflow.dao.inf.IIfTosDao">
+
+	<select id="getTotalIfTosNetflows" resultType="Long" parameterType="com.mainsteam.stm.portal.netflow.bo.NetflowParamBo">
+		
+		select  
+			ifnull(sum(flowTotal), 0) as wholeFlows
+		from
+		(
+			select 
+				sum(ifnull(t1.flowIn, 0) + ifnull(t2.flowOut, 0)) as flowTotal,
+				t1.tosId
+			from
+			(
+				select 
+					sum(octets_total) as flowIn, 
+					tos as tosId
+				from 
+					ANA_IF_IN_TOS_PROTO_${tableSuffix}  
+				where 
+					if_in_id in (${ifId}) and acq_time <![CDATA[ > ]]> #{stime} and acq_time <![CDATA[ <= ]]> #{etime} 
+				group by TOS 
+			) t1 left join
+			(
+				select 
+					sum(octets_total) as flowOut, 
+					tos as tosId
+				from 
+					ANA_IF_OUT_TOS_PROTO_${tableSuffix} 
+				where 
+					if_out_id in (${ifId}) and acq_time <![CDATA[ > ]]> #{stime} and acq_time <![CDATA[ <= ]]> #{etime} 
+				group by TOS
+			) t2
+			on t1.tosId = t2.tosId
+			group by t1.tosId
+			union
+			select 
+				sum(ifnull(t4.flowIn, 0) + ifnull(t3.flowOut, 0)) as flowTotal,
+				t3.tosId
+			from
+			(
+				select 
+					sum(octets_total) as flowOut, 
+					tos as tosId
+				from 
+					ANA_IF_OUT_TOS_PROTO_${tableSuffix} 
+				where 
+					if_out_id in (${ifId}) and acq_time <![CDATA[ > ]]> #{stime} and acq_time <![CDATA[ <= ]]> #{etime} 
+				group by TOS
+			) t3 left join
+			(
+			
+				select 
+					sum(octets_total) as flowIn, 
+					sum(packet_total) as packetIn, 
+					tos as tosId
+				from 
+					ANA_IF_IN_TOS_PROTO_${tableSuffix}  
+				where 
+					if_in_id in (${ifId}) and acq_time <![CDATA[ > ]]> #{stime} and acq_time <![CDATA[ <= ]]> #{etime} 
+				group by TOS 
+			) t4
+			on t3.tosId = t4.tosId
+			group by t3.tosId
+		) tall
+		
+	</select>
+	
+	<!-- 流量，包，连接数 -->
+	<select id="getIfTosTotals" resultType="com.mainsteam.stm.portal.netflow.bo.Whole" parameterType="com.mainsteam.stm.portal.netflow.bo.NetflowParamBo">
+		
+		select  
+			ifnull(sum(flowTotal), 0) as wholeFlows,
+			ifnull(sum(packetTotal), 0) as wholePackets,
+			ifnull(sum(connectTotal), 0) as wholeConnects
+		from
+		(
+			select 
+				sum(ifnull(t1.flowIn, 0) + ifnull(t2.flowOut, 0)) as flowTotal,
+				t1.tosId, 
+				sum(ifnull(t1.pakcetIn, 0)+ifnull(t2.packetOut, 0)) as packetTotal,
+				sum(ifnull(t1.connectIn, 0)+ifnull(t2.connectOut, 0)) as connectTotal
+			from
+			(
+				select 
+					sum(octets_total) as flowIn, 
+					tos as tosId,
+					sum(packet_total) as pakcetIn,
+					sum(flow_total) as connectIn 
+				from 
+					ANA_IF_IN_TOS_PROTO_${tableSuffix}  
+				where 
+					if_in_id in (${ifId}) and acq_time <![CDATA[ > ]]> #{stime} and acq_time <![CDATA[ <= ]]> #{etime} 
+				group by TOS 
+			) t1 left join
+			(
+				select 
+					sum(octets_total) as flowOut, 
+					tos as tosId,
+					sum(packet_total) as packetOut,
+					sum(flow_total) as connectOut
+				from 
+					ANA_IF_OUT_TOS_PROTO_${tableSuffix} 
+				where 
+					if_out_id in (${ifId}) and acq_time <![CDATA[ > ]]> #{stime} and acq_time <![CDATA[ <= ]]> #{etime} 
+				group by TOS
+			) t2
+			on t1.tosId = t2.tosId
+			group by t1.tosId
+			union
+			select 
+				sum(ifnull(t4.flowIn, 0) + ifnull(t3.flowOut, 0)) as flowTotal,
+				t3.tosId,
+				sum(ifnull(t4.packetIn, 0)+ifnull(t3.packetOut, 0)) as packetTotal,
+				sum(ifnull(t4.connectIn, 0)+ifnull(t3.connectOut, 0)) as connectTotal
+			from
+			(
+				select 
+					sum(octets_total) as flowOut, 
+					tos as tosId, 
+					sum(packet_total) as packetOut,
+					sum(flow_total) as connectOut
+				from 
+					ANA_IF_OUT_TOS_PROTO_${tableSuffix} 
+				where 
+					if_out_id in (${ifId}) and acq_time <![CDATA[ > ]]> #{stime} and acq_time <![CDATA[ <= ]]> #{etime} 
+				group by TOS
+			) t3 left join
+			(
+			
+				select 
+					sum(octets_total) as flowIn, 
+					sum(packet_total) as packetIn, 
+					tos as tosId,
+					sum(flow_total) as connectIn
+				from 
+					ANA_IF_IN_TOS_PROTO_${tableSuffix}  
+				where 
+					if_in_id in (${ifId}) and acq_time <![CDATA[ > ]]> #{stime} and acq_time <![CDATA[ <= ]]> #{etime} 
+				group by TOS 
+			) t4
+			on t3.tosId = t4.tosId
+			group by t3.tosId
+		) tall
+		
+	</select>
+	
+
+	<select id="ifTosPageSelect" resultType="com.mainsteam.stm.portal.netflow.bo.NetflowBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+		
+		select * from
+		(
+			select 
+				m.id as tosId,
+				m.NAME,
+				
+				ifnull(t_all.flowIn, 0) as flowIn,
+				ifnull(t_all.flowOut, 0) as flowOut,
+				ifnull(t_all.flowTotal, 0) as flowTotal,
+				ifnull(t_all.speedIn, 0) as speedIn,
+				ifnull(t_all.speedOut, 0) as speedOut,
+				ifnull(t_all.speedTotal, 0) as speedTotal,
+
+				ifnull(t_all.packetIn, 0) as packetIn,
+				ifnull(t_all.packetOut, 0) as packetOut,
+				ifnull(t_all.packetTotal, 0) as packetTotal,
+				ifnull(t_all.packetInSpeed, 0) as packetInSpeed,
+				ifnull(t_all.packetOutSpeed, 0) as packetOutSpeed,
+				ifnull(t_all.packetTotalSpeed, 0) as packetTotalSpeed,
+				
+				ifnull(t_all.connectNumberIn, 0) as connectNumberIn,
+				ifnull(t_all.connectNumberOut, 0) as connectNumberOut,
+				ifnull(t_all.connectNumberTotal, 0) as connectNumberTotal,
+				ifnull(t_all.connectNumberInSpeed, 0) as connectNumberInSpeed,
+				ifnull(t_all.connectNumberOutSpeed, 0) as connectNumberOutSpeed,
+				ifnull(t_all.connectNumberTotalSpeed, 0) as connectNumberTotalSpeed,
+
+				ifnull(t_all.flowPctge, 0) as flowPctge,
+				ifnull(t_all.packetPctge, 0) as packetPctge,
+				ifnull(t_all.connectPctge, 0) as connectPctge
+				
+			from
+				CONF_TOS m
+			left join
+			(
+				select 
+					t12_1.*,
+					t12_1.flowTotal / ${condition.wholeFlows} as flowPctge,
+					t12_1.packetTotal / ${condition.wholePackets} as packetPctge,
+					t12_1.connectNumberTotal / ${condition.wholeConnects} as connectPctge
+				from
+				(	
+					select 
+						t1.tosId,
+
+						ifnull(t1.flowIn, 0) as flowIn, 
+						ifnull(t2.flowOut, 0) as flowOut, 
+						sum(ifnull(t1.flowIn, 0) + ifnull(t2.flowOut, 0)) as flowTotal,
+						ifnull(t1.flowIn, 0)/${condition.timeInterval} as speedIn,
+						ifnull(t2.flowOut, 0)/${condition.timeInterval} as speedOut,
+						sum(ifnull(t1.flowIn, 0)+ifnull(t2.flowOut, 0))/${condition.timeInterval} as speedTotal,
+
+						ifnull(t1.packetIn, 0) as packetIn, 
+						ifnull(t2.packetOut, 0) as packetOut,
+						sum(ifnull(t1.packetIn, 0) + ifnull(t2.packetOut, 0)) as packetTotal,
+						ifnull(t1.packetIn, 0)/${condition.timeInterval} as packetInSpeed,
+						ifnull(t2.packetOut, 0)/${condition.timeInterval} as packetOutSpeed,
+						sum(ifnull(t1.packetIn, 0)+ifnull(t2.packetOut, 0))/${condition.timeInterval} as packetTotalSpeed,
+						
+						ifnull(t1.connectIn, 0) as connectNumberIn,
+						ifnull(t2.connectOut, 0) as connectNumberOut,
+						sum(ifnull(t1.connectIn, 0)+ifnull(t2.connectOut, 0)) as connectNumberTotal,
+						ifnull(t1.connectIn, 0)/${condition.timeInterval} as connectNumberInSpeed,
+						ifnull(t2.connectOut, 0)/${condition.timeInterval} as connectNumberOutSpeed,
+						sum(ifnull(t1.connectIn, 0)+ifnull(t2.connectOut, 0))/${condition.timeInterval} as connectNumberTotalSpeed
+						
+					from
+					(
+						select 
+							sum(octets_total) as flowIn, 
+							sum(packet_total) as packetIn, 
+							tos as tosId,
+							sum(flow_total) as connectIn
+						from 
+							ANA_IF_IN_TOS_PROTO_${condition.tableSuffix}  
+						where 
+							if_in_id in (${condition.ifId}) and acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime}
+						group by TOS 
+					) t1 left join
+					(
+						select 
+							sum(octets_total) as flowOut, 
+							sum(packet_total) as packetOut, 
+							tos as tosId,
+							sum(flow_total) as connectOut
+						from 
+							ANA_IF_OUT_TOS_PROTO_${condition.tableSuffix} 
+						where 
+							if_out_id in (${condition.ifId}) and acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime}
+						group by TOS
+					) t2
+					on t1.tosId = t2.tosId
+					group by t1.tosId
+				) t12_1
+				group by t12_1.tosId
+			) t_all
+			on m.ID=t_all.tosId
+			group by m.name
+			union			
+			select 
+				m.id as tosId,
+				m.NAME,
+
+				ifnull(t_all_2.flowIn, 0) as flowIn,
+				ifnull(t_all_2.flowOut, 0) as flowOut,
+				ifnull(t_all_2.flowTotal, 0) as flowTotal,
+				ifnull(t_all_2.speedIn, 0) as speedIn,
+				ifnull(t_all_2.speedOut, 0) as speedOut,
+				ifnull(t_all_2.speedTotal, 0) as speedTotal,
+				
+				ifnull(t_all_2.packetIn, 0) as packetIn,
+				ifnull(t_all_2.packetOut, 0) as packetOut,
+				ifnull(t_all_2.packetTotal, 0) as packetTotal,
+				ifnull(t_all_2.packetInSpeed, 0) as packetInSpeed,
+				ifnull(t_all_2.packetOutSpeed, 0) as packetOutSpeed,
+				ifnull(t_all_2.packetTotalSpeed, 0) as packetTotalSpeed,
+
+				ifnull(t_all_2.connectNumberIn, 0) as connectNumberIn,
+				ifnull(t_all_2.connectNumberOut, 0) as connectNumberOut,
+				ifnull(t_all_2.connectNumberTotal, 0) as connectNumberTotal,
+				ifnull(t_all_2.connectNumberInSpeed, 0) as connectNumberInSpeed,
+				ifnull(t_all_2.connectNumberOutSpeed, 0) as connectNumberOutSpeed,
+				ifnull(t_all_2.connectNumberTotalSpeed, 0) as connectNumberTotalSpeed,
+
+				ifnull(t_all_2.flowPctge, 0) as flowPctge,
+				ifnull(t_all_2.packetPctge, 0) as packetPctge,
+				ifnull(t_all_2.connectPctge, 0) as connectPctge
+			from
+				CONF_TOS m
+			left join
+			(
+				select
+					t34_1.*,
+					t34_1.flowTotal / ${condition.wholeFlows} as flowPctge,
+					t34_1.packetTotal / ${condition.wholePackets} as packetPctge,
+					t34_1.connectNumberTotal / ${condition.wholeConnects} as connectPctge
+				from
+				(
+					select 
+						t3.tosId,
+
+						ifnull(t4.flowIn, 0) as flowIn, 
+						ifnull(t3.flowOut, 0) as flowOut, 
+						sum(ifnull(t4.flowIn, 0) + ifnull(t3.flowOut, 0)) as flowTotal,
+						ifnull(t4.flowIn, 0)/${condition.timeInterval} as speedIn,
+						ifnull(t3.flowOut, 0)/${condition.timeInterval} as speedOut,
+						sum(ifnull(t4.flowIn, 0)+ifnull(t3.flowOut, 0))/${condition.timeInterval} as speedTotal,
+
+						ifnull(t4.packetIn, 0) as packetIn, 
+						ifnull(t3.packetOut, 0) as packetOut,
+						sum(ifnull(t4.packetIn, 0) + ifnull(t3.packetOut, 0)) as packetTotal,
+						ifnull(t4.packetIn, 0)/${condition.timeInterval} as packetInSpeed,
+						ifnull(t3.packetOut, 0)/${condition.timeInterval} as packetOutSpeed,
+						sum(ifnull(t4.packetIn, 0)+ifnull(t3.packetOut, 0))/${condition.timeInterval} as packetTotalSpeed,
+						
+						ifnull(t4.connectIn, 0) as connectNumberIn,
+						ifnull(t3.connectOut, 0) as connectNumberOut,
+						sum(ifnull(t4.connectIn, 0)+ifnull(t3.connectOut, 0)) as connectNumberTotal,
+						ifnull(t4.connectIn, 0)/${condition.timeInterval} as connectNumberInSpeed,
+						ifnull(t3.connectOut, 0)/${condition.timeInterval} as connectNumberOutSpeed,
+						sum(ifnull(t4.connectIn, 0)+ifnull(t3.connectOut, 0))/${condition.timeInterval} as connectNumberTotalSpeed
+						
+					from
+					(
+						select 
+							sum(octets_total) as flowOut, 
+							sum(packet_total) as packetOut, 
+							tos as tosId,
+							sum(flow_total) as connectOut
+						from 
+							ANA_IF_OUT_TOS_PROTO_${condition.tableSuffix} 
+						where 
+							if_out_id in (${condition.ifId}) and acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime}
+						group by TOS
+					) t3 left join
+					(
+					
+						select 
+							sum(octets_total) as flowIn, 
+							sum(packet_total) as packetIn, 
+							tos as tosId,
+							sum(flow_total) as connectIn
+						from 
+							ANA_IF_IN_TOS_PROTO_${condition.tableSuffix}  
+						where 
+							if_in_id in (${condition.ifId}) and acq_time <![CDATA[ > ]]> ${condition.stime} and acq_time <![CDATA[ <= ]]> ${condition.etime}
+						group by TOS 
+					) t4
+					on t3.tosId = t4.tosId
+					group by t3.tosId
+				) t34_1
+			) t_all_2
+			on m.id=t_all_2.tosId
+			group by m.name
+		) tall
+		group by tall.name
+		<if test="condition!=null">
+			order by
+	 		<if test="condition.sort != null">tall.${condition.sort}</if>
+			<if test="condition.order != null"> ${condition.order} </if>
+		</if>
+	</select>
+	
+	<select id="getIfTosChartData" parameterType="com.mainsteam.stm.portal.netflow.bo.NetflowParamBo" resultType="com.mainsteam.stm.portal.netflow.bo.NetflowBo">
+		
+		select * from
+		(
+			select 
+				t12_1.*,
+				t12_1.flowTotal / ${wholeFlows} as flowPctge,
+				t12_1.packetTotal / ${wholePackets} as packetPctge,
+				t12_1.connectNumberTotal / ${wholeConnects} as connectPctge 
+			from
+			(	
+				select 
+					t1.acq_time,
+
+					ifnull(t1.flowIn, 0) as flowIn, 
+					ifnull(t2.flowOut, 0) as flowOut, 
+					sum(ifnull(t1.flowIn, 0) + ifnull(t2.flowOut, 0)) as flowTotal,
+					ifnull(t1.flowIn, 0)/${timeInterval} as speedIn,
+					ifnull(t2.flowOut, 0)/${timeInterval} as speedOut,
+					sum(ifnull(t1.flowIn, 0)+ifnull(t2.flowOut, 0))/${timeInterval} as speedTotal,
+
+					ifnull(t1.packetIn, 0) as packetIn, 
+					ifnull(t2.packetOut, 0) as packetOut,
+					sum(ifnull(t1.packetIn, 0) + ifnull(t2.packetOut, 0)) as packetTotal,
+					ifnull(t1.packetIn, 0)/${timeInterval} as packetInSpeed,
+					ifnull(t2.packetOut, 0)/${timeInterval} as packetOutSpeed,
+					sum(ifnull(t1.packetIn, 0)+ifnull(t2.packetOut, 0))/${timeInterval} as packetTotalSpeed,
+					
+					ifnull(t1.connectIn, 0) as connectNumberIn,
+					ifnull(t2.connectOut, 0) as connectNumberOut,
+					sum(ifnull(t1.connectIn, 0)+ifnull(t2.connectOut, 0)) as connectNumberTotal,
+					ifnull(t1.connectIn, 0)/${timeInterval} as connectNumberInSpeed,
+					ifnull(t2.connectOut, 0)/${timeInterval} as connectNumberOutSpeed,
+					sum(ifnull(t1.connectIn, 0)+ifnull(t2.connectOut, 0))/${timeInterval} as connectNumberTotalSpeed
+					
+				from
+				(
+					select 
+						sum(octets_total) as flowIn, 
+						sum(packet_total) as packetIn, 
+						acq_time,
+						sum(flow_total) as connectIn 
+					from 
+						ANA_IF_IN_TOS_PROTO_${tableSuffix}  
+					where 
+						if_in_id in (${ifId}) and tos=${tosId} and acq_time in (${timeParam})
+					group by acq_time 
+				) t1 left join
+				(
+					select 
+						sum(octets_total) as flowOut, 
+						sum(packet_total) as packetOut, 
+						acq_time,
+						sum(flow_total) as connectOut 
+					from 
+						ANA_IF_OUT_TOS_PROTO_${tableSuffix} 
+					where 
+						if_out_id in (${ifId}) and tos=${tosId} and acq_time in (${timeParam})
+					group by TOS
+				) t2
+				on t1.acq_time = t2.acq_time
+				group by t1.acq_time
+			) t12_1
+			group by t12_1.acq_time
+		union
+			select
+				t34_1.*,
+				t34_1.flowTotal / ${wholeFlows} as flowPctge,
+				t34_1.packetTotal / ${wholePackets} as packetPctge,
+				t34_1.connectNumberTotal / ${wholeConnects} as connectPctge 
+			from
+			(
+				select 
+					t3.acq_time,
+
+					ifnull(t4.flowIn, 0) as flowIn, 
+					ifnull(t3.flowOut, 0) as flowOut, 
+					sum(ifnull(t4.flowIn, 0) + ifnull(t3.flowOut, 0)) as flowTotal,
+					ifnull(t4.flowIn, 0)/${timeInterval} as speedIn,
+					ifnull(t3.flowOut, 0)/${timeInterval} as speedOut,
+					sum(ifnull(t4.flowIn, 0)+ifnull(t3.flowOut, 0))/${timeInterval} as speedTotal,
+
+					ifnull(t4.packetIn, 0) as packetIn, 
+					ifnull(t3.packetOut, 0) as packetOut,
+					sum(ifnull(t4.packetIn, 0) + ifnull(t3.packetOut, 0)) as packetTotal,
+					ifnull(t4.packetIn, 0)/${timeInterval} as packetInSpeed,
+					ifnull(t3.packetOut, 0)/${timeInterval} as packetOutSpeed,
+					sum(ifnull(t4.packetIn, 0)+ifnull(t3.packetOut, 0))/${timeInterval} as packetTotalSpeed,
+					
+					ifnull(t4.connectIn, 0) as connectNumberIn,
+					ifnull(t3.connectOut, 0) as connectNumberOut,
+					sum(ifnull(t4.connectIn, 0)+ifnull(t3.connectOut, 0)) as connectNumberTotal,
+					ifnull(t4.connectIn, 0)/${timeInterval} as connectNumberInSpeed,
+					ifnull(t3.connectOut, 0)/${timeInterval} as connectNumberOutSpeed,
+					sum(ifnull(t4.connectIn, 0)+ifnull(t3.connectOut, 0))/${timeInterval} as connectNumberTotalSpeed
+					
+				from
+				(
+					select 
+						sum(octets_total) as flowOut, 
+						sum(packet_total) as packetOut, 
+						acq_time,
+						sum(flow_total) as connectOut 
+					from 
+						ANA_IF_OUT_TOS_PROTO_${tableSuffix} 
+					where 
+						if_out_id in (${ifId}) and tos=${tosId} and acq_time in (${timeParam})
+					group by acq_time
+				) t3 left join
+				(
+				
+					select 
+						sum(octets_total) as flowIn, 
+						sum(packet_total) as packetIn, 
+						acq_time,
+						sum(flow_total) as connectIn 
+					from 
+						ANA_IF_IN_TOS_PROTO_${tableSuffix}  
+					where 
+						if_in_id in (${ifId}) and tos=${tosId} and acq_time in (${timeParam})
+					group by TOS 
+				) t4
+				on t3.acq_time = t4.acq_time
+				group by t3.acq_time
+			) t34_1
+			group by t34_1.acq_time
+		) tall
+		group by tall.acq_time
+	</select>
+	
+</mapper>

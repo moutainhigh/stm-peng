@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.knowledge.local.dao.IKnowledgeAttachmentDao">
+    <insert id="insert" parameterType="com.mainsteam.stm.knowledge.local.bo.KnowledgeAttachmentBo">
+        INSERT INTO STM_KNG_RESOLVE_ATMT_REL (RESOLVE_ID, FILE_ID,FILE_NAME,UPLOAD_TIME,SORT)
+         VALUES (#{resolveId,jdbcType=NUMERIC}, #{fileId,jdbcType=NUMERIC},#{fileName,jdbcType=VARCHAR},#{uploadDate,jdbcType=DATE},#{sort,jdbcType=NUMERIC})
+    </insert>
+    <delete id="delete" parameterType="com.mainsteam.stm.knowledge.local.bo.KnowledgeAttachmentBo">
+        DELETE from STM_KNG_RESOLVE_ATMT_REL WHERE RESOLVE_ID = #{resolveId}
+        <if test="fileId!=null and fileId!=0">
+            and FILE_ID = #{fileId}
+        </if>
+    </delete>
+    <select id="select" parameterType="long" resultType="com.mainsteam.stm.knowledge.local.bo.KnowledgeAttachmentBo">
+        SELECT 
+			kra.RESOLVE_ID "resolveId",kra.FILE_ID "fileId",kra.FILE_NAME "fileName",kra.UPLOAD_TIME "uploadDate",kra.SORT "sort"
+		from 
+			STM_KNG_RESOLVE_ATMT_REL kra
+		WHERE kra.RESOLVE_ID = #{resolveId}  ORDER BY kra.SORT
+    </select>
+</mapper>

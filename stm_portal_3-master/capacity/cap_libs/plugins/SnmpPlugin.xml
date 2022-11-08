@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Plugin version="1.0" id="SnmpPlugin" name="SnmpPlugin"
+	class="com.mainsteam.stm.plugin.snmp.SnmpPluginSession" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../schema/Plugin.xsd">
+	<!-- 最大活动session 数 -->
+	<MaxActiveSession>5</MaxActiveSession>
+	<!-- 最大空闲session 数 -->
+	<MaxidleSession>0</MaxidleSession>
+	<!-- session TTL -->
+	<SessionTTL>10000</SessionTTL>
+	<!-- 对象缓存的超时时间 -->
+	<ObjectCacheTimeout>30000</ObjectCacheTimeout>
+
+
+	<!-- 插件初始化参数，发现资源用 -->
+	<PluginInitParameters>
+	
+	<parameter id="snmpGrpBox" boxStyle="GroupBox" name="SNMP连接信息"
+			displayOrder="1" isEdit="false" isDisplay="true" isSessionKey="false">
+			<DefaultValue />
+			<HelpInfo>SNMP连接信息</HelpInfo>
+		</parameter>
+	
+		<!-- boxStyle输入框类型;displayOrder用于发现页面上输入项的显示顺序;isEdit可编辑;isDisplay可显示;isSessionKey区分采集会话 -->
+		<parameter id="IP" boxStyle="IPField" name="IP地址"
+			displayOrder="1" isEdit="true" isDisplay="true" isSessionKey="true" mustInput="true">
+			<!-- 默认值 -->
+			<DefaultValue></DefaultValue>
+			<!-- 帮助信息 -->
+			<HelpInfo>待发现机器的IP地址</HelpInfo>
+		</parameter>
+		<!-- valueValidate校验输入内容合法性 -->
+		<parameter id="snmpPort" boxStyle="Input" valueValidate="/^([0-9]|[1-9]\d|[1-9]\d{2}|[1-9]\d{3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/"
+			name="SNMP 端口" displayOrder="2" isEdit="true" isDisplay="true"
+			mustInput="true" isSessionKey="true">
+			<DefaultValue>161</DefaultValue>
+			<HelpInfo>SNMPUDP端口</HelpInfo>
+		</parameter>
+		<!-- group分组用于显示和隐藏分组; -->
+		<parameter group="v12group" id="community" boxStyle="Input"
+			name="共同体名" displayOrder="3" isEdit="true" isDisplay="true"
+			isPassword="true" mustInput="true" isSessionKey="true">
+			<DefaultValue>public</DefaultValue>
+			<HelpInfo>SNMP团体(community)，用来控制代理和管理站之间的认证和访问控制关系</HelpInfo>
+		</parameter>
+
+		<parameter id="snmpVersion" boxStyle="RadioBox" name="SNMP版本"
+			displayOrder="4" isEdit="true" isDisplay="true" isSessionKey="true">
+			<DefaultValue>1</DefaultValue>
+			<!-- radiobox和下拉框都有可选值 -->
+			<SupportValues>
+				<SupportValue>
+					<!-- 可选值的名称和值 -->
+					<Name>SNMP v1</Name>
+					<Value>0</Value>
+					<!-- 显示某组 -->
+					<ShowGroup>v12group</ShowGroup>
+					<!-- 隐藏某组 -->
+					<HideGroup>v3group,v3groupAuth,v3groupPriv</HideGroup>
+				</SupportValue>
+				<SupportValue>
+					<Name>SNMP v2</Name>
+					<Value>1</Value>
+					<ShowGroup>v12group</ShowGroup>
+					<HideGroup>v3group,v3groupAuth,v3groupPriv</HideGroup>
+					
+				</SupportValue>
+				<SupportValue>
+					<Name>SNMP v3</Name>
+					<Value>3</Value>
+					<ShowGroup>v3group,v3groupAuth,v3groupPriv</ShowGroup>
+					<HideGroup>v12group</HideGroup>
+				</SupportValue>
+			</SupportValues>
+			<HelpInfo>SNMP版本</HelpInfo>
+		</parameter>
+		
+		<parameter group="v3group" id="securityName" boxStyle="Input"
+			name="用户名" displayOrder="5" isEdit="true" isDisplay="true" mustInput="true" isSessionKey="true">
+			<HelpInfo>用户名</HelpInfo>
+		</parameter>
+
+		<parameter group="v3group" id="securityLevel" boxStyle="OptionBox"
+			name="安全级别" displayOrder="6" isEdit="true" isDisplay="true" isSessionKey="true">
+			<DefaultValue>3</DefaultValue>
+			<SupportValues>
+				<SupportValue>
+					<Name>NOAUTH_NOPRIV</Name>
+					<Value>1</Value>
+					<HideGroup>v3groupAuth,v3groupPriv</HideGroup>
+				</SupportValue>
+				<SupportValue>
+					<Name>AUTH_NOPRIV</Name>
+					<Value>2</Value>
+					<ShowGroup>v3groupAuth</ShowGroup>
+					<HideGroup>v3groupPriv</HideGroup>
+				</SupportValue>
+				<SupportValue>
+					<Name>AUTH_PRIV</Name>
+					<Value>3</Value>
+					<ShowGroup>v3groupAuth,v3groupPriv</ShowGroup>
+				</SupportValue>
+			</SupportValues>
+			<HelpInfo>SNMP安全级别(snmp v3)</HelpInfo>
+		</parameter>
+
+		<parameter group="v3groupAuth" id="authProtocol" boxStyle="OptionBox"
+			name="认证协议" displayOrder="7" isEdit="true" isDisplay="true" isSessionKey="true">
+			<DefaultValue>md5</DefaultValue>
+			<SupportValues>
+				<SupportValue>
+					<Name>MD5</Name>
+					<Value>md5</Value>
+				</SupportValue>
+				<SupportValue>
+					<Name>SHA</Name>
+					<Value>sha</Value>
+				</SupportValue>
+			</SupportValues>
+			<HelpInfo>有验证情况下，验证使用的协议，支持MD5和SHA</HelpInfo>
+		</parameter>
+		
+		<parameter group="v3groupAuth" id="authPassphrase" boxStyle="Input"
+			name="认证密码" displayOrder="8" isEdit="true" isDisplay="true" mustInput="true" isPassword="true" isSessionKey="true">
+			<HelpInfo>SNMP认证密码</HelpInfo>
+		</parameter>
+
+		<parameter group="v3groupPriv" id="privacyProtocol" boxStyle="OptionBox"
+			name="加密协议" displayOrder="9" isEdit="true" isDisplay="true" isSessionKey="true">
+			<DefaultValue>des</DefaultValue>
+			<SupportValues>
+				<SupportValue>
+					<Name>DES</Name>
+					<Value>des</Value>
+				</SupportValue>
+				<SupportValue>
+					<Name>3DES</Name>
+					<Value>3des</Value>
+				</SupportValue>
+				<SupportValue>
+					<Name>AES128</Name>
+					<Value>aes128</Value>
+				</SupportValue>
+				<SupportValue>
+					<Name>AES192</Name>
+					<Value>aes192</Value>
+				</SupportValue>
+				<SupportValue>
+					<Name>AES256</Name>
+					<Value>aes256</Value>
+				</SupportValue>
+			</SupportValues>
+			<HelpInfo>有验证情况下，验证使用的协议，支持DES和AES</HelpInfo>
+		</parameter>
+
+		<parameter group="v3groupPriv" id="privacyPassphrase" boxStyle="Input"
+			name="加密密码" displayOrder="10" isEdit="true" isDisplay="true" mustInput="true"
+			isPassword="true" isSessionKey="true">
+			<HelpInfo>加密密码</HelpInfo>
+		</parameter>
+
+		<parameter id="snmpRetry" boxStyle="Input" name="重试次数"  valueValidate="/\d+/" 
+			displayOrder="11" isEdit="true" isDisplay="false">
+			<DefaultValue>3</DefaultValue>
+			<HelpInfo>重试次数</HelpInfo>
+		</parameter>
+
+		<parameter id="snmpTimeout" boxStyle="Input" name="超时时间"  valueValidate="/\d+/" 
+			displayOrder="12" isEdit="true" isDisplay="false" unit="ms">
+			<DefaultValue>10000</DefaultValue>
+			<HelpInfo>超时时间</HelpInfo>
+		</parameter>
+
+	</PluginInitParameters>
+</Plugin>

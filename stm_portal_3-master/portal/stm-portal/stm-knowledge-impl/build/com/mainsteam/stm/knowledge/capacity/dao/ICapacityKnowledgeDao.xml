@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.knowledge.capacity.dao.ICapacityKnowledgeDao">
+    <select id="pageSelect" resultType="com.mainsteam.stm.knowledge.capacity.bo.CapacityKnowledgeBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+    	select * from 
+    	(
+    		SELECT ID "id",NAME "name",FIELD_ID "fileId",DEPLOY_TIME "deployTime" FROM STM_KNG_CAPACITY  ORDER BY name,id DESC
+    	) s
+<!--     	<if test="sort != null"> -->
+<!-- 			ORDER BY  convert(${sort} USING gbk) COLLATE gbk_chinese_ci ${order} -->
+<!-- 		</if> -->
+    </select>
+    
+    <select id="get" resultType="com.mainsteam.stm.knowledge.capacity.bo.CapacityKnowledgeBo" parameterType="long">
+    	SELECT ID "id",NAME "name",FIELD_ID "fileId",DEPLOY_TIME "deployTime" FROM STM_KNG_CAPACITY WHERE ID = #{id}
+    </select>
+    
+    <insert id="insert" parameterType="com.mainsteam.stm.knowledge.capacity.bo.CapacityKnowledgeBo">
+    	insert into STM_KNG_CAPACITY(ID,NAME,FIELD_ID,DEPLOY_TIME) values(#{id,jdbcType=NUMERIC},#{name,jdbcType=VARCHAR},#{fileId,jdbcType=NUMERIC},#{deployTime,jdbcType=DATE})
+    </insert>
+    
+    <update id="update" parameterType="com.mainsteam.stm.knowledge.capacity.bo.CapacityKnowledgeBo">
+    	update STM_KNG_CAPACITY set NAME=#{name,jdbcType=VARCHAR},FIELD_ID=#{fileId,jdbcType=VARCHAR},DEPLOY_TIME=#{deployTime,jdbcType=DATE} where id=#{id,jdbcType=NUMERIC}
+    </update>
+</mapper>

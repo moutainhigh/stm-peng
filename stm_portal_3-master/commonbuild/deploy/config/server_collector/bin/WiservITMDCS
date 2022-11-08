@@ -1,0 +1,71 @@
+#!/bin/sh
+# chkconfig: 345 93 41
+# Description: WiservITManage is mainsteam digital monitoring software products.
+### BEGIN INIT INFO
+# Provides:
+# Required-Start: 
+# Required-Stop:
+# Should-Start:
+# Should-Stop:
+# Default-Start: 3 4 5
+# Default-Stop: 0 1 2 6
+# Short-Description: start and stop WiservITManager
+# Description: WiservITManager
+### END INIT INFO
+
+# source function library
+. /etc/rc.d/init.d/functions
+
+#ITM_ROOT=<ITM_ROOT>
+ITM_ROOT=/opt/OneCenter4/WiservOCDCS/
+
+prog="WiservITMDCS"
+pidfile=${PIDFILE-/var/run/OneCenter4/$prog}
+start()
+{
+	#psid=`ps -ef |grep -v grep |grep WiservOCDCS|awk '{print $2}'`
+	psid=
+	if expr "$psid" \= "" >/dev/null 2>&1; then
+		echo $"Starting $prog... "
+		cd ${ITM_ROOT}/bin
+		mv nohup.out nohup.out.`date '+%Y.%m.%d.%H.%M.%S'` >/dev/null 2>/dev/null
+		chmod +x startup.sh
+		nohup ./startup.sh >> nohup.out &
+	else
+		echo $prog has started,do nothing.
+		exit 0;
+	fi
+}
+
+stop()
+{
+	echo $"Stopping $prog... "
+	cd ${ITM_ROOT}/bin
+	chmod +x stop.sh
+	./stop.sh > /dev/null 2>&1 &	
+		psid=`ps -ef |grep -v grep |grep WiservOCDCS|awk '{print $2}'`
+	if expr "$psid" \= "" >/dev/null 2>&1; then
+	  echo ""
+	else
+		kill -9 "$psid"
+	fi 
+}
+
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	status)
+		status -p $pidfile $prog
+		RETVAL=$?
+		;;
+	restart)
+		stop
+		sleep 3
+		start
+		;;
+esac
+

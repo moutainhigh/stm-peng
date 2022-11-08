@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.common.instance.dao.InstanceLifeCycleDAO">
+	
+	<insert id="addLifeCycle"  parameterType="com.mainsteam.stm.common.instance.dao.obj.InstanceLifeCycle">
+	    INSERT INTO STM_PROFILELIB_LIFE_HISTORY (instanceid,state,change_time)
+	    VALUES (#{instanceID},#{state}, #{changeTime})
+	</insert>
+	
+	<select id="findLifeCycle" parameterType="map" resultType="com.mainsteam.stm.common.instance.dao.obj.InstanceLifeCycle">
+		SELECT instanceid as instanceID,state,change_time as changeTime
+		FROM STM_PROFILELIB_LIFE_HISTORY
+		where instanceid in (<foreach collection="instanceIDes" item="id" separator=",">#{id}</foreach>)
+		AND change_time &gt; #{startTime} AND change_time &lt; #{endTime}
+	</select>
+		
+</mapper>

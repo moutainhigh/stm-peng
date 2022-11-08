@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd">
+
+    <!-- 加载配置文件 -->
+    <context:property-placeholder location="classpath*:properties/*.properties" />
+    
+    <!-- 数据源 -->
+	<bean id="defaultDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"  destroy-method="close">  
+	    <property name="driverClass" value="${jdbc.driverClassName}"></property>  
+	    <property name="jdbcUrl" value="${jdbc.url}"></property>  
+	    <property name="user" value="${jdbc.username}"></property>  
+	    <property name="password" value="${jdbc.password}"></property>  
+	    <property name="acquireIncrement" value="${jdbc.acquireIncrement}"></property>  
+	    <property name="initialPoolSize" value="${jdbc.initialPoolSize}"></property>  
+	    <property name="maxIdleTime" value="${jdbc.maxIdleTime}"></property>  
+	    <property name="maxPoolSize" value="${jdbc.maxPoolSize}"></property>  
+	    <property name="minPoolSize" value="${jdbc.minPoolSize}"></property>  
+	    
+	    <property name="acquireRetryDelay" value="1000"></property>  
+	    <property name="acquireRetryAttempts" value="60"></property>  
+	    <!-- C3P0会有一个Task检测pool内的连接是否正常，此参数就是Task运行的频率  mysql 的 wait_timeout=28800  该值远大于idleConnectionTestPeriod 设置的值-->
+	    <property name="idleConnectionTestPeriod" value="14400"></property>    
+	</bean>
+
+	<!-- dataSourceproxy 配置代理管理事务 -->
+    <bean id="transactionDataSourceProxy" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
+        <property name="targetDataSource" ref="defaultDataSource" />
+    </bean>
+    
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="transactionDataSourceProxy"/>
+	</bean>
+	
+	<!-- 事务管理配置 -->
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="transactionDataSourceProxy" />
+    </bean>	
+    
+	<!-- 配置事务特性 ，配置add、delete和update开始的方法，事务传播特性为required -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="save*" propagation="REQUIRED" />
+			<tx:method name="add*" propagation="REQUIRED" />
+			<tx:method name="create*" propagation="REQUIRED" />
+			<tx:method name="insert*" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+			<tx:method name="merge*" propagation="REQUIRED" />
+			<tx:method name="del*" propagation="REQUIRED" />
+			<tx:method name="remove*" propagation="REQUIRED" />
+			<tx:method name="put*" propagation="REQUIRED" />
+			<tx:method name="use*" propagation="REQUIRED" />
+			<tx:method name="lock*" propagation="REQUIRED" />
+			<tx:method name="unlock*" propagation="REQUIRED" />			
+			<tx:method name="init*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="get*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="count*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="find*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="query*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="select*" propagation="SUPPORTS" read-only="true" />
+		</tx:attributes>
+	</tx:advice>
+	
+	<aop:config>
+		<aop:pointcut id="allManagerMethod"
+			expression="execution (* com.mainsteam.stm..*.service..*.*(..))" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="allManagerMethod" />
+	</aop:config>
+	<!--开启注解方式AOP-->
+	<aop:aspectj-autoproxy />
+	<!--开启注解方式事务管理，prox-traget-class设置为true表示基于类的代理，false为标准JDK接口代理-->
+	<tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="false"></tx:annotation-driven>
+</beans>

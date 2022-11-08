@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mainsteam.stm.node.dao.pojo.NodeGroupDAO">
+	<resultMap id="nodeGroupMap" type="com.mainsteam.stm.node.dao.pojo.NodeGroupDO">
+		<result column="ID" javaType="int" jdbcType="INTEGER" property="id"></result>
+		<result column="NAME" javaType="string" jdbcType="VARCHAR" property="name"></result>
+		<result column="FUNC" javaType="string" jdbcType="VARCHAR" property="func"></result>
+		<result column="PARENTID" javaType="int" jdbcType="INTEGER" property="parentId"></result>
+		<result column="GROUPLEVEL" javaType="int" jdbcType="INTEGER" property="level"></result>
+		<result column="UPDATETIME" javaType="long" jdbcType="NUMERIC" property="updateTime"></result>
+	</resultMap>
+	<insert id="insert"  parameterType="com.mainsteam.stm.node.dao.pojo.NodeGroupDO">
+	    insert into STM_NODE_GROUP(ID,NAME,FUNC,PARENTID,GROUPLEVEL,UPDATETIME) VALUES (#{id},#{name},#{func},#{parentId},#{level},#{updateTime})
+	</insert>
+	<update id="update" parameterType="com.mainsteam.stm.node.dao.pojo.NodeGroupDO">
+		update STM_NODE_GROUP
+		<set>
+			<if test="name != null">NAME = #{name},</if>	
+			<if test="func != null">FUNC = #{ip},</if>	
+			<if test="parentId != null">PARENTID = #{parentId},</if>	
+			<if test="level != null">GROUPLEVEL = #{level},</if>
+			<if test="updateTime != null">UPDATETIME = #{updateTime}</if>
+		</set>
+		where ID = #{id}
+	</update>
+	<delete id="delete" parameterType="int">
+		delete from STM_NODE_GROUP where ID = #{id}
+	</delete>
+	<select id="selectByExample" parameterType="com.mainsteam.stm.node.dao.pojo.NodeGroupDO"  resultMap="nodeGroupMap">
+		select ID,NAME,FUNC,PARENTID,GROUPLEVEL from STM_NODE_GROUP
+		<where>
+			<trim suffixOverrides=",">
+				<if test="id != null">ID = #{id}</if>	
+				<if test="name != null">NAME = #{name},</if>	
+				<if test="func != null">FUNC = #{ip},</if>	
+				<if test="parentId != null">PARENTID = #{parentId},</if>	
+				<if test="level != null">GROUPLEVEL = #{level}</if>
+			</trim>
+		</where>
+	</select>
+	<select id="selectById" parameterType="int" resultMap="nodeGroupMap">
+			select ID,NAME,FUNC,PARENTID,GROUPLEVEL from STM_NODE_GROUP where ID = #{id}
+	</select>
+	<select id="selectGroupCount" resultType="int">
+		select count(ID) from STM_NODE_GROUP
+	</select>	
+	<select id="selectMaxUpdateTime" resultType="long">
+		select max(UPDATETIME) as UPDATETIME from STM_NODE_GROUP
+	</select>
+</mapper>

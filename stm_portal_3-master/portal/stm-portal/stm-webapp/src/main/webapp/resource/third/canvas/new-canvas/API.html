@@ -1,0 +1,170 @@
+﻿<body>
+<head>
+<title>canvas API</title>
+<style>
+	body{background:url(API_BG.jpg);}
+	#title{text-align:center;}
+	a{text-decoration:none;}
+</style>
+</head>
+<div id="title"><h1>Canvas API</h1>@author <a href="javascript:alert('QQ:2572530269\nTel:18111249357\nEmail:kalpka@sina.cn')">Liupeng</a></div>
+<hr/>
+
+<B>Canvas构造函数:</B>　　Canvas(dom)　　dom:承载svg的DOM元素<br/>
+
+<B>Canvas成员变量:</B>	dom,containers,topContainers,lines,idMap,seq,coe,raphael,node,editable,isAuto<br/>
+
+Canvas成员函数:<br/>
+
+setSize(w,h)　　设置画布大小<br/>
+
+setViewBox(x,y,w,h,fit)　　设置画布视窗<br/>
+
+container(x,y,w,h,ID)　　生成容器,ID参数为反序列化时提供给idMap作映射<br/>
+
+onLine(f,t,o)　　连线,o参数为线条相关设置参数<br/>
+
+nextSeq()　　获取下一个序列号,用于作为唯一标识<br/>
+
+click(o)　　画布元素点击事件回调函数<br/>
+
+remove()　　删除已点击元素<br/>
+
+beginAuto() 开启自动模式(主要是为还原时不做备份)<br/>
+
+endAuto()   结束自动模式<br/>
+
+event(fname,obj)　　画布事件处理函数,fname包括container、onLine、remove、drag.该方法用于备份还原<br/>
+
+getJson()　　获取画布序列化json数据<br/>
+
+getData()　　获取画布序列化字符串数据<br/>
+
+restore(data)　　反序列化<br/>
+
+============================================================================<br/>
+
+Line构造函数　　Line(f,t,o,C)　　f:fromContainer,t:toContainer,o:定义line的相关属性,C:Canvas<br/>
+
+Line成员变量:f,t,C,ID,type,size,arrow,path<br/>
+
+Line成员函数:<br/>
+
+init(o)　　初始化设置成员变量<br/>
+
+create()　　生成线条,箭头等svg元素<br/>
+
+click()　　点击线条处理函数<br/>
+
+drag()　　连线对象拖拽处理函数<br/>
+
+remove()　　删除线条对象<br/>
+
+getData()　　获取线条序列化数据<br/>
+
+attr(attr)　　设置线条属性<br/>
+
+============================================================================<br/>
+
+Container构造函数　　Container(x,y,w,h,C)　　C:Canvas<br/>
+
+Container成员变量:C,x,y,w,h,ID,rx,ry,RX,RY,parent,imgs,rects,texts,containers,lines,data<br/>
+
+Container成员函数:<br/>
+
+init()　　初始化容器中心和角度<br/>
+
+addImg(o,rx,ry,isDrag)　　添加图片元素<br/>
+
+addText(o,rx,ry,isDrag,attr)　　添加文字元素<br/>
+
+addRect(o,rx,ry,isDrag,attr)　　添加图形元素<br/>
+
+addLine(line)　　添加连线元素<br/>
+
+addContainer(con,RX,RY)　　添加子容器<br/>
+
+set(json)　　使用json数据设置容器元素<br/>
+
+dragabble(ele,isDrag)　　设置拖拽控制元素<br/>
+
+dblclick()　　拖拽控制元素双击处理函数<br/>
+
+click()　　拖拽控制元素单击处理函数<br/>
+
+start(x,y)  拖拽元素拖拽开始处理函数<br/>
+
+end()   拖拽元素拖拽结束处理函数<br/>
+
+proxyDrag(dx,dy,x,y)　　代理拖拽函数,当不想触发容器被拖拽且希望保留其可拖拽行为时可重写该函数<br/>
+
+drag(dx,dy,x,y)　　拖拽容器<br/>
+
+remove()　　删除容器<br/>
+
+get()　　获取容器上绑定的业务数据<br/>
+
+getData()　　获取序列化数据<br/>
+
+setBBox(bbox)　　设置容器边界(bbox格式:{x:0,y:0,x1:0,y1:0})<br/>
+
+getBBox()　　获取容器边界<br/>
+
+============================================================================<br/>
+
+BaseRect构造函数　　BaseRect(type,w,h,r,c)　　c:Container,type:0代表圆(r)  1代表椭圆(w,h)  2代表矩形(w,h) 3 代表圆角矩形(w,h,r)<br/>
+
+BaseRect成员变量:type,c,w,h,r,ele<br/>
+
+BaseRect成员函数:<br/>
+
+init()　　生成图形svg元素<br/>
+
+drag(x,y)　　拖拽图形<br/>
+
+attr(attr)　　设置图形属性<br/>
+
+remove()　　删除图形<br/>
+
+getData()　　获取图形序列化数据<br/>
+
+====================================================================================================<br/>
+Edit 编辑器插件 Edit(C) C:代表canvas对象<br/>
+init()  生成编辑器插件<br/>
+start(T,x,y)  拖拽开始函数<br/>
+end() 拖拽完成<br/>
+setCon(con) 设置要拖拽的容器<br/>
+around(bbox) 将编辑器附到拖拽容器上<br/>
+drag(T,dx,dy,x,y) 拖拽容器<br/>
+dragEdit(bbox) 代理编辑方法，当不想拖拽时触发可重写该方法<br/>
+edit(bbox) 编辑规则,该编辑器如何编辑容器,不同编辑器重写改规则<br/>
+show() 显示编辑器<br/>
+hide() 隐藏编辑器<br/>
+-----------------------------以下函数由weilu扩展主要用于放大缩小容器限制----------------------------------<br/>
+调整编辑框边界bbox数值实现<br/>
+1.容器最大最小限制<br/>
+2.泳道最高最低最宽限制<br/>
+在 this.drag(T,dx,dy,x,y)函数中调用<br/>
+p_type 编辑器圆点方向<br/>
+bbox  左上角，右下角 坐标值<br/>
+adBBox(p_type,bbox) <br/>
+<br/>
+<br/>
+泳道最高最低限制<br/>
+p_type 编辑器圆点方向<br/>
+bbox  左上角，右下角 坐标值<br/>
+adLaneBBox(p_type,bbox)<br/>
+<br/>
+<br/>
+<br/>
+容器边界调整方法<br/>
+p_type 编辑器圆点方向，<br/>
+bbox 左上角，右下角 坐标值<br/>
+min 容器最小像素高，宽<br/>
+max_height 容器最高像素<br/>
+max_width  容器最宽像素<br/>
+adConBBox(p_type,bbox,min,max_height,max_width)<br/>
+<br/>
+===============================================================================================================<br/>
+
+</body>

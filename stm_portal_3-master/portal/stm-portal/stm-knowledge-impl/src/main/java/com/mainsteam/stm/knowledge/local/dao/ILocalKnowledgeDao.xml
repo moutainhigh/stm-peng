@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mainsteam.stm.knowledge.local.dao.ILocalKnowledgeDao">
+    <select id="pageSelect" resultType="com.mainsteam.stm.knowledge.bo.KnowledgeBo" parameterType="com.mainsteam.stm.platform.mybatis.plugin.pagination.Page">
+    	SELECT ID AS "id", KNOWLEDGE_TYPE_CODE AS "knowledgeTypeCode", ISCLOUDY  AS "isCloudy",KEYWORDS AS "keywords", SOURCE_CONTENT AS "sourceContent",CREATER_USER_ID AS "createUserId",CREATED_TIME "createTime" from STM_KNG
+    </select>
+    
+     <select id="getAll" resultType="com.mainsteam.stm.knowledge.bo.KnowledgeBo">
+    	SELECT ID AS "id", KNOWLEDGE_TYPE_CODE AS "knowledgeTypeCode", ISCLOUDY  AS "isCloudy",KEYWORDS AS "keywords", SOURCE_CONTENT AS "sourceContent",CREATER_USER_ID AS "createUserId",CREATED_TIME "createTime" from STM_KNG
+    </select>
+    
+    <select id="get" parameterType="long" resultType="com.mainsteam.stm.knowledge.bo.KnowledgeBo">
+        SELECT ID AS "id", KNOWLEDGE_TYPE_CODE AS "knowledgeTypeCode", ISCLOUDY  AS "isCloudy",KEYWORDS AS "keywords", SOURCE_CONTENT AS "sourceContent",CREATER_USER_ID AS "createUserId",CREATED_TIME "createTime" from STM_KNG WHERE ID = #{id}
+    </select>
+        
+     <insert id="insert" parameterType="com.mainsteam.stm.knowledge.bo.KnowledgeBo">
+        INSERT INTO STM_KNG
+        	(ID, KNOWLEDGE_TYPE_CODE, ISCLOUDY, KEYWORDS, SOURCE_CONTENT,CREATER_USER_ID,CREATED_TIME) 
+        VALUES 
+        	(#{id}, #{knowledgeTypeCode}, 0, #{keywords}, #{sourceContent}, #{createUserId},#{createTime})
+    </insert>
+    
+    
+    <update id="update">
+        UPDATE STM_KNG SET
+         KNOWLEDGE_TYPE_CODE = #{knowledgeTypeCode,jdbcType=VARCHAR},
+         KEYWORDS=#{keywords,jdbcType=VARCHAR},
+         SOURCE_CONTENT=#{sourceContent,jdbcType=VARCHAR}
+		WHERE ID = #{id,jdbcType=NUMERIC}
+    </update>
+    <delete id="batchDel">
+		DELETE from STM_KNG WHERE ID = #{id}
+	</delete>
+	
+	<select id="queryKnowledgeByType" parameterType="com.mainsteam.stm.knowledge.service.bo.FaultBo" resultType="com.mainsteam.stm.knowledge.bo.KnowledgeBo">
+		SELECT
+		 k.ID "id",k.KNOWLEDGE_TYPE_CODE "knowledgeTypeCode",k.KEYWORDS "keywords",k.SOURCE_CONTENT "sourceContent" 
+		FROM STM_KNG k
+		where (k.KNOWLEDGE_TYPE_CODE LIKE CONCAT('%',#{coludyType}) or k.KNOWLEDGE_TYPE_CODE LIKE CONCAT('%',#{localType}))
+	</select>
+</mapper>

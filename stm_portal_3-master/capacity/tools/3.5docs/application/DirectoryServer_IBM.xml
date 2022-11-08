@@ -1,0 +1,531 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<!-- 
+	devicetype:			设备类型名称
+	ismulticoltype:		是否允许采集方式多选
+	majortype:			主要分类（可以理解为设备类型）
+	minortype:			次要分类
+	manufacturer:		厂商
+	devicetype_zh:		设备类型中文描述
+	 -->
+	<devicetypeinfo devicetype="DIR_IBM" ismulticoltype="false" majortype="application" minortype="IBMDirectoryServer" manufacturer="IBM" devicetype_zh="IBM Tivoli Directory Server">
+		<!-- 该设备类型定义的命令，用于合并命令执行 -->
+		<commands>
+			<!-- coltype:采集方式，comid：命令ID，command：命令 -->
+			<!--IBM服务可用性 -->
+			<command coltype="INNER_PROC" comid="Availability" command="com.qwserv.itm.pal.appmdl.ldap.IBMLDAPQuery.searchAvailability"/>
+			<!-- CPU利用率 -->
+			<command coltype="WMI" comid="chk_cpurate" command="root\cimv2::select PercentProcessorTime from Win32_PerfFormattedData_PerfProc_Process where Name like '%slapd%'"/>
+			<!-- 内存利用率 -->
+			<command coltype="WMI" comid="chk_memrate" command="root\cimv2::select WorkingSet from Win32_PerfFormattedData_PerfProc_Process where Name like '%slapd%'"/>
+			<!-- 当前连接数 -->
+			<command coltype="INNER_PROC" comid="CurConnCount" command="com.qwserv.itm.pal.appmdl.ldap.IBMLDAPQuery.searchCurConnCount"/>
+			<!-- 当前工作队列数 -->
+			<command coltype="INNER_PROC" comid="CurWorkqueueCount" command="com.qwserv.itm.pal.appmdl.ldap.IBMLDAPQuery.searchCurWorkqueueCount"/>
+			<!-- 当前读操作等待数 -->
+			<command coltype="INNER_PROC" comid="CurReadwaiterCount" command="com.qwserv.itm.pal.appmdl.ldap.IBMLDAPQuery.searchCurReadwaiterCount"/>
+			<!-- 当前写操作等待数 -->
+			<command coltype="INNER_PROC" comid="CurWritewaiterCount" command="com.qwserv.itm.pal.appmdl.ldap.IBMLDAPQuery.searchCurWritewaiterCount"/>
+			<!-- ServerID -->
+			<command coltype="INNER_PROC" comid="ServerId" command="com.qwserv.itm.pal.appmdl.ldap.IBMLDAPQuery.searchServerId"/>
+			<!-- Server显示名称 -->
+			<command coltype="INNER_PROC" comid="ServerDisplayName" command="com.qwserv.itm.pal.appmdl.ldap.IBMLDAPQuery.searchServerDisplayName"/>
+			<!-- Server名称-->
+			<command coltype="INNER_PROC" comid="ServerName" command="com.qwserv.itm.pal.appmdl.ldap.IBMLDAPQuery.searchServerName"/>
+			<!-- 主机名称-->
+			<command coltype="WMI" comid="chk_hostname" command="root\cimv2::select Name from Win32_ComputerSystem"/>
+			<!--主机说明 -->
+			<command coltype="WMI" comid="systemInfo" command="root\cimv2::select description from Win32_OperatingSystem"/>
+			<!-- 操作系统-->
+			<command coltype="WMI" comid="chk_os" command="root\cimv2::select Caption from Win32_OperatingSystem"/>
+			<!--操作系统版本 -->
+			<command coltype="WMI" comid="osVersion" command="root\cimv2::select version from Win32_OperatingSystem"/>
+			<!-- 系统可管理内存-->
+			<command coltype="WMI" comid="chk_pmemcap" command="root\cimv2::select TotalVisibleMemorySize from Win32_OperatingSystem"/>
+			<!--MAC地址 -->
+			<command coltype="WMI" comid="macAddress" command="root\cimv2::select macaddress from Win32_NetworkAdapter WHERE macaddress!=null"/>
+			
+			<!-- CLI方式操作系统、系统可管理内存、主机名称 -->
+			<command coltype="CLI" comid="chk_common" command="/tmp/os.sh" />
+			
+			<command coltype="CLI" comid="chk_memcpu" command="/tmp/appinfo.sh slapd" />
+			
+			<!-- 版本-->
+			<command coltype="INNER_PROC" comid="Version" command="com.qwserv.itm.pal.appmdl.ldap.IBMLDAPQuery.searchVersion"/>
+			<!-- 实例安装路径-->
+			<command coltype="INNER_PROC" comid="InstancDirectory" command="com.qwserv.itm.pal.appmdl.ldap.IBMLDAPQuery.searchInstancDirectory"/>
+			<!-- 最大连接数-->
+			<command coltype="INNER_PROC" comid="MaxConnSize" command="com.qwserv.itm.pal.appmdl.ldap.IBMLDAPQuery.searchMaxConnSize"/>
+			<!-- 搜索返回的最大条目数-->
+			<command coltype="INNER_PROC" comid="MaxReturnCount" command="com.qwserv.itm.pal.appmdl.ldap.IBMLDAPQuery.searchMaxReturnCount"/>
+			<!-- 数据库实例名称-->
+			<command coltype="INNER_PROC" comid="DatabaseInstance" command="com.qwserv.itm.pal.appmdl.ldap.IBMLDAPQuery.searchDatabaseInstance"/>
+			<!--数据库名称-->
+			<command coltype="INNER_PROC" comid="DatabaseName" command="com.qwserv.itm.pal.appmdl.ldap.IBMLDAPQuery.searchDatabaseName"/>
+			<!-- 数据库链接帐号-->
+			<command coltype="INNER_PROC" comid="DatabaseUserId" command="com.qwserv.itm.pal.appmdl.ldap.IBMLDAPQuery.searchDatabaseUserId"/>
+			<!-- 数据库链接密码-->
+			<command coltype="INNER_PROC" comid="DatabasePassword" command="com.qwserv.itm.pal.appmdl.ldap.IBMLDAPQuery.searchDatabasePassword"/>
+			<!-- 数据库链接数-->
+			<command coltype="INNER_PROC" comid="DatabaseConnCount" command="com.qwserv.itm.pal.appmdl.ldap.IBMLDAPQuery.searchDatabaseConnCount"/>
+			<!-- 最大工作队列数-->
+			<command coltype="INNER_PROC" comid="MaxWorkqueueCount" command="com.qwserv.itm.pal.appmdl.ldap.IBMLDAPQuery.searchMaxWorkqueueCount"/>
+			
+		</commands>
+		
+		<!-- 描述该类设备的所有指标采集,一行对应一个指标 -->
+		<resources>
+			
+			<!-- 一个resource值一个特定的kpi指标,如CPU利用率，kpiid：指标id，coltype：采集方式，value：结果计算表达式（默认为$d1） ，valuetype(Integer/Float/String)：采集值类型，unit：单位 -->
+			<!-- 服务可用性-->
+			<resource kpiid="A6Availability" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<!-- exeorder：执行序号数字越小，执行越前，comid：命令id，select：select函数，deal：函数 -->
+					<collect exeorder="10" comid="Availability" select="" merge="" deal=""/>
+				</collects>
+			
+				<!-- 定义存储和告警策略 -->
+				<!-- 
+				table:数据库表，指标采集数据保存的地方
+				field:数据库字段名，保存的字段名
+				fieldtype:数据库字段属性String、Integer、Float
+				willalert:是否告警
+				alertexp1:告警条件1
+				alertdesc1:告警描述1
+				alertexp2:告警条件2
+				alertdesc2:告警描述2
+				alertexp3:告警条件3
+				alertdesc3:告警描述3
+				alertexp4:告警条件4
+				alertdesc4:告警描述4
+				alertexp5:告警条件5
+				alertdesc5:告警描述5
+				alertcontin:连续若干次告警
+				alertype:事件类型
+				storefactor:存盘倍数（默认值）（采集周期的倍数，0表示不存）
+				circle:采集周期(默认值)
+				 -->
+				<kpipolicy table="res_a6_avail" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="&quot;0&quot;.equals(&quot;${value}&quot;)" alertdesc5="目录服务器不可用"
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- macAddress -->
+			<resource kpiid="A6macAddress" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="macAddress" select="" merge="join" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a2_macAddress" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+				
+			</resource>
+			
+			<!-- 当前连接数 -->
+			<resource kpiid="A6CurConnCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="CurConnCount" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_curconn" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;100"
+					alertdesc3="当前连接数超过{trigervalue1},当前值为${value}" alertexp4="${value}&gt;200" alertdesc4="当前连接数超过{trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+
+			<!--当前工作队列数 -->
+			<resource kpiid="A6CurWorkqueueCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="CurWorkqueueCount" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_curworkqueue" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;50"
+					alertdesc3="当前工作队列数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;100" alertdesc4="当前工作队列数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+
+			<!-- 当前读操作等待数 -->
+			<resource kpiid="A6CurReadwaitCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="CurReadwaiterCount" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_curreadwait" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;100"
+					alertdesc3="当前读操作等待数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;200" alertdesc4="当前读操作等待数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			<!-- 当前写操作等待数 -->
+			<resource kpiid="A6CurWritewaitCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="CurWritewaiterCount" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_curwritewait" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;50"
+					alertdesc3="当前写操作等待数超过${trigervalue1},当前值为${value}" alertexp4="${value}&gt;100" alertdesc4="当前写操作等待数超过${trigervalue1},当前值为${value}" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			<!-- Server ID -->
+			<resource kpiid="A6ServerId" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="ServerId" select="(.+)" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_serverid" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+
+			<!--Server显示名称
+			<resource kpiid="A6ResDisplayName" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="ServerDisplayName" select="(.+)" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a6_displayname" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			-->
+
+			<!-- Server名称-->
+			<resource kpiid="A6ServerName" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="ServerName" select="(.+)" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_servername" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 版本-->
+			<resource kpiid="A6Version" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="Version" select="(.+)" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_version" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 实例安装路径
+			<resource kpiid="A6InstanceDirectory" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<collects>
+					<collect exeorder="10" comid="InstancDirectory" select="" merge="" deal="" />
+				</collects>
+				<kpipolicy table="res_a6_instanceDir" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="15" storefactor="1"/>
+			</resource>
+			-->
+			<!-- 数据库实例名称-->
+			<resource kpiid="A6DatabaseInstance" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="DatabaseInstance" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_dbinstance" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<!-- 数据库名称-->
+			<resource kpiid="A6DatabaseName" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="DatabaseName" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_dbname" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<!-- 数据库链接帐号-->
+			<resource kpiid="A6DatabaseUserId" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="DatabaseUserId" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_dbuser" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<!-- 数据库链接密码-->
+			<resource kpiid="A6DatabasePassword" coltype="INNER_PROC" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="DatabasePassword" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_dbpassword" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!-- 数据库链接数-->
+			<resource kpiid="A6DatabaseConnCount" coltype="INNER_PROC" value="" valuetype="String" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="DatabaseConnCount" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_dbconn" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			<!-- 最大连接数-->
+			<resource kpiid="A6MaxConnSize" coltype="INNER_PROC" value="" valuetype="String" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="MaxConnSize" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_maxconn" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<!-- 搜索返回的最大条目数-->
+			<resource kpiid="A6MaxReturnCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="MaxReturnCount" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_maxreturn" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<!--最大工作队列数-->
+			<resource kpiid="A6MaxWorkqueueCount" coltype="INNER_PROC" value="" valuetype="Integer" unit="个">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="MaxWorkqueueCount" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_maxworkqueue" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<!-- WMI方式采集 -->
+			<!-- 物理内存-->
+			<resource kpiid="A6TotalMemSize" coltype="WMI" value="$d1/1024/1024" valuetype="Integer" unit="GB">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_pmemcap" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_totalmem_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<!-- CPU利用率 -->
+			<resource kpiid="A6CPURate" coltype="WMI" value="" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_cpurate" select="" merge="sum" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_cpurate_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;60"
+					alertdesc3="CPU使用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;90" alertdesc4="CPU使用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			
+			<!-- Directory Server 内存利用率  -->
+			<resource kpiid="A6MEMRate" coltype="WMI" value="$d1/$d2/1024*100" valuetype="Float" unit="%">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_memrate" select="" merge="sum" deal=""/>
+					<collect exeorder="20" comid="chk_pmemcap" select="" merge="" deal=""/>
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_memrate_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;60"
+					alertdesc3="内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;80" alertdesc4="内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			<!-- 主机名称-->
+			<resource kpiid="A6hostName" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_hostname" select="(.+)" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_hostname_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<!-- 主机说明-->
+			<resource kpiid="A6SystemInfo" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="systemInfo" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_sysInfo_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>			
+			<!--操作系统-->
+			<resource kpiid="A6OperationSystem" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_os" select="(.+)" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_os_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<!--操作系统版本-->
+			<resource kpiid="A6OsVersion" coltype="WMI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="osVersion" select="" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_osVersion_wmi" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<!--CLI方式 CPU利用率 Directory Server 内存利用率 操作系统 物理内存 主机名称-->
+			
+			<resource kpiid="A6CPURate" coltype="CLI" value="" valuetype="Float" unit="%">
+				
+				<collects>
+					<collect exeorder="10" comid="chk_memcpu" select="&lt;get_cpurate&gt;(.*)&lt;/get_cpurate&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a6_cpurate_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;60"
+					alertdesc3="CPU使用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;90" alertdesc4="CPU使用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+				
+			</resource>
+			
+			
+			<resource kpiid="A6MEMRate" coltype="CLI" value="" valuetype="Float" unit="%">
+				
+				<collects>
+					<collect exeorder="10" comid="chk_memcpu" select="&lt;get_appmemrate&gt;(.*)&lt;/get_appmemrate&gt;" merge="" deal=""/>
+				</collects>
+				
+				<kpipolicy table="res_a6_memrate_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3="${value}&gt;60"
+					alertdesc3="内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp4="${value}&gt;80" alertdesc4="内存利用率超过${trigervalue1}%,当前值为${value}%" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="5" storefactor="1"/>
+			</resource>
+			
+			
+			<resource kpiid="A6OperationSystem" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;os&gt;(.*)&lt;/os&gt;" merge="" deal="" />
+				</collects>
+				
+				<kpipolicy table="res_a6_os_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<resource kpiid="A6OsVersion" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;osversion&gt;(.*)&lt;/osversion&gt;" merge="" deal="" />
+				</collects>
+				
+				<kpipolicy table="res_a6_osVersion_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<resource kpiid="A6macAddress" coltype="CLI" value="" valuetype="String" unit="">
+				
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;macaddress&gt;(.*)&lt;/macaddress&gt;" merge="" deal="" />
+				</collects>
+				
+				<kpipolicy table="res_a6_osVersion_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			
+			<resource kpiid="A6TotalMemSize" coltype="CLI" value="$d1/1024" valuetype="Integer" unit="GB">			
+				<collects>
+					<collect exeorder="10" comid="chk_memcpu" select="&lt;memsize&gt;(\w+)&lt;/memsize&gt;" merge="" deal="" />
+				</collects>
+				
+				<kpipolicy table="res_a6_totalmem_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>			
+			
+			<resource kpiid="A6hostName" coltype="CLI" value="" valuetype="String" unit="">	
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;hostname&gt;(\w+)&lt;/hostname&gt;" merge="" deal="" />
+				</collects>
+				
+				<kpipolicy table="res_a6_hostname_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>
+			<!-- 主机说明-->
+			<resource kpiid="A6SystemInfo" coltype="CLI" value="" valuetype="String" unit="">
+				<!-- 定义采集流程 -->
+				<collects>
+					<collect exeorder="10" comid="chk_common" select="&lt;systeminfo&gt;(\w+)&lt;/systeminfo&gt;" merge="" deal="" />
+				</collects>
+				<!-- 定义存储和告警策略 -->
+				<kpipolicy table="res_a6_sysInfo_cli" field="value" fieldtype="" willalert=""
+					alertexp1="" alertdesc1="" alertexp2="" alertdesc2="" alertexp3=""
+					alertdesc3="" alertexp4="" alertdesc4="" alertexp5="" alertdesc5=""
+					alertcontin="1" alertype="" circle="1440" storefactor="1"/>
+			</resource>		
+
+		</resources>
+	</devicetypeinfo>
+</root>

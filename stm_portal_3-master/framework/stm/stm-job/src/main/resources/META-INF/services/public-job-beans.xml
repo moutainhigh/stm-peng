@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+<!-- 
+	<bean id="quartzdataSource" class="org.apache.commons.dbcp.BasicDataSource" > 
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+ 
+		<property name="url" value="jdbc:mysql://172.16.7.143:3306/oc4db" />
+		<property name="url" value="jdbc:mysql://localhost:3306/quartz" />
+	
+		<property name="url" value="jdbc:mysql://172.16.7.143:3306/oc4db" />
+		<property name="username" value="dev" />
+		<property name="password" value="dev" />
+	</bean>
+		-->
+	<!-- defaultDataSource -->
+	<!-- default quartzScheduler -->
+	<bean id="quartzScheduler" name="quartzScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="dataSource" ref="defaultDataSource" />   
+		<property name="configLocation" value="classpath:/properties/quartz_default.properties" />
+		<property name="applicationContextSchedulerContextKey" value="applicationContextKey" />
+		<property name="autoStartup" value="false"/>  
+	</bean>
+	
+	<bean id="scheduleManager" class="com.mainsteam.stm.job.ScheduleManager" init-method="start">
+		<property name="scheduler" ref="quartzScheduler" />
+	</bean>
+	
+	<!-- all namespace quartzScheduler -->
+	<bean id="allQuartzScheduler" name="allQuartzScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="dataSource" ref="defaultDataSource" />   
+		<property name="configLocation" value="classpath:/properties/quartz.properties" />
+		<property name="applicationContextSchedulerContextKey" value="applicationContextKey" />
+		<property name="autoStartup" value="false"/>  
+	</bean>
+	
+	<bean id="allScheduleManager" class="com.mainsteam.stm.job.ScheduleManager" init-method="start">
+		<property name="scheduler" ref="allQuartzScheduler" />
+	</bean>
+</beans>
