@@ -259,6 +259,165 @@ public class LoginAction extends BaseAction {
 			return toJsonObject(205,"您的ip不被允许访问！");
 		}
 	}
+
+
+	@RequestMapping("/loginSkipverification")
+	public JSONObject loginSkipverification(HttpServletRequest hreq, HttpServletResponse response, HttpSession session)
+			throws LicenseNotFoundException, LicenseCheckException {
+		String account=hreq.getParameter(ACCOUNT);
+
+		try {
+			response.sendRedirect("http://" + hreq.getServerName()+ ":" + hreq.getServerPort()+"/resource/index.html");
+		} catch (Exception e) {
+			return null;
+		}
+		hreq.getSession().setAttribute(ILoginUser.SESSION_LOGIN_USER,loginApi.login(account));
+
+		/*String password=hreq.getParameter(PASSWORD);*/
+		LoginUser user = loginApi.login(account);
+		String password=user.getPassword();
+		String vCode=hreq.getParameter("vCode");
+
+		//第三方跳过验证码参数
+		if("off".equals(vCode)){
+			verificationCode="0";
+		}
+
+		//开启验证码功能
+		if(verificationCode.equals("1")){
+			String code=hreq.getParameter(CODE);
+			String kaptchaExpected = (String) hreq.getSession().getAttribute(Constants.KAPTCHA_SESSION_KEY);
+			if(code==null || kaptchaExpected==null || !code.equals(kaptchaExpected)){
+				insertLoginErrorAuditlog(WebUtil.getRemoteIp(hreq),account,"验证码输入错误！");
+				return toJsonObject(207, "验证码输入错误！");
+			}
+		}
+
+		if(accessControlApi.checkIpIsAllow(WebUtil.getRemoteIp(hreq))){
+			if(Util.isEmpty(account)||Util.isEmpty(password)){
+				return toJsonObject(201, "请输入用户名或密码！");
+			}else{
+				AccessControl accessControl = accessControlApi.getAccessControlIP();
+				/*LoginUser user = loginApi.login(account);*/
+				if(user == null){
+					insertLoginErrorAuditlog(WebUtil.getRemoteIp(hreq),account,"用户名或密码输入错误！");
+					return toJsonObject(202,"用户名或密码输入错误！");
+				}
+				// 登陆提示信息
+				String loginMsg = "登录成功！";
+				// 账户已被管理员锁定，不再做任何操作即判断！
+				if (user.getStatus() == UserConstants.USER_STATUS_DISABLE
+						&& user.getLockType() == UserConstants.USER_LOCK_TYPE_MANUAL) {
+					insertLoginErrorAuditlog(WebUtil.getRemoteIp(hreq),account,"账号已被停用，请联系管理员恢复！");
+					return toJsonObject(204, "账号已被停用，请联系管理员恢复！");
+				}
+				// 验证密码是否正确
+				if(password.equals(user.getPassword())){
+					// 账户已被锁定
+					if(user.getStatus()==UserConstants.USER_STATUS_DISABLE){
+						switch (user.getLockType()) {
+							case UserConstants.USER_LOCK_TYPE_ERRORPASS:
+								// 如果自动解锁可用 则判断是否已经解锁
+								if(accessControl.getLoginDeblockIsEnable()){
+									long recoverTime = new Date().getTime() - user.getLockTime().getTime();
+									int minutes = (int)(recoverTime / (1000 * 60));
+									int gapMinutes = Integer.valueOf(accessControl.getLoginDeblockMinutes()) - minutes;
+									if(gapMinutes <= 0){
+										user.setStatus(UserConstants.USER_STATUS_ENABLE);
+										user.setPassErrorCnt(0);
+										user.setPassword("");
+										userApi.update(user);
+									}else{
+										loginMsg = "登录失败超过" + accessControl.getLoginFailTime() + "次，" + "账户被锁定，请联系系统管理员解锁或者"
+												+ gapMinutes + "分钟后登录系统。";
+										insertLoginErrorAuditlog(WebUtil.getRemoteIp(hreq),account,loginMsg);
+										return toJsonObject(204, loginMsg);
+									}
+								}else{
+									loginMsg = "登录失败超过" + accessControl.getLoginFailTime() + "次，" + "账户被锁定，请联系系统管理员解锁";
+									insertLoginErrorAuditlog(WebUtil.getRemoteIp(hreq),account,loginMsg);
+									return toJsonObject(204, loginMsg);
+								}
+								break;
+							case UserConstants.USER_LOCK_TYPE_OVERDUEPASS:
+								if(accessControl.getLoginPassValidityIsEnable()){
+									long upPassTimes = new Date().getTime() - user.getUpPassTime().getTime();
+									int validityDays = (int)(upPassTimes / (1000 * 60 * 60 * 24));
+									// 如果现在修改了全局配置，同时不满足锁定要求则解锁用户
+									if(validityDays < Integer.valueOf(accessControl.getLoginPassValidityDays())){
+										user.setStatus(UserConstants.USER_STATUS_ENABLE);
+										user.setPassword("");
+										userApi.update(user);
+									}else{
+										return toJsonObject(206, "密码已过期，请修改密码。");
+									}
+								}
+								break;
+							default:
+								insertLoginErrorAuditlog(WebUtil.getRemoteIp(hreq),account,"账号已被停用，请联系管理员恢复！");
+								return toJsonObject(204, "账号已被停用，请联系管理员恢复！");
+						}
+					}
+					// 是否设置的账户密码有效期
+					if (accessControl.getLoginPassValidityIsEnable()
+							&& user.getUserType() != UserConstants.USER_TYPE_SUPER_ADMIN) {
+						long upPassTimes = new Date().getTime() - user.getUpPassTime().getTime();
+						int validityDays = (int)(upPassTimes / (1000 * 60 * 60 * 24));
+						if(validityDays >= Integer.valueOf(accessControl.getLoginPassValidityDays())){
+							user.setStatus(UserConstants.USER_STATUS_DISABLE);
+							user.setLockType(UserConstants.USER_LOCK_TYPE_OVERDUEPASS);
+							user.setLockTime(new Date());
+							user.setPassword("");
+							userApi.update(user);
+							return toJsonObject(206, "密码已过期，请修改密码。");
+						}
+						int validityAlertDays = Integer.valueOf(accessControl.getLoginPassValidityDays())
+								- validityDays;
+						if(validityAlertDays <= Integer.valueOf(accessControl.getLoginPassValidityAlertDays())){
+							loginMsg += "您的密码将在" + validityAlertDays + "天后过期，请及时修改密码";
+						}
+					}
+					// 登陆成功则清除登陆失败次数
+					if(user.getPassErrorCnt() > 0){
+						user.setPassErrorCnt(0);
+						user.setPassword("");
+						userApi.update(user);
+					}
+
+					loginApi.setLoginUserRight(user);
+					user.setUserType();
+					session.setAttribute(ILoginUser.SESSION_LOGIN_USER, user);
+					insertLoginSuccessAuditlog(WebUtil.getRemoteIp(hreq),account);
+					return toJsonObject(200, loginMsg);
+				}else{
+					// 密码错误要判断是否有设置密码输入错误次数控制 不包括超级系统管理员
+					String errorMsg = "用户名或密码输入错误！";
+					if (accessControl.getLoginFailTimeIsEnable()
+							&& user.getUserType() != UserConstants.USER_TYPE_SUPER_ADMIN) {
+						user.setPassErrorCnt(user.getPassErrorCnt() + 1);
+						if(Integer.valueOf(accessControl.getLoginFailTime()) - user.getPassErrorCnt() < 0){
+							if(user.getStatus() == UserConstants.USER_STATUS_ENABLE){
+								user.setStatus(UserConstants.USER_STATUS_DISABLE);
+								user.setLockType(UserConstants.USER_LOCK_TYPE_ERRORPASS);
+								user.setLockTime(new Date());
+							}
+							errorMsg += "登录失败超过" + accessControl.getLoginFailTime() + "次，账户被锁定，请联系系统管理员解锁";
+							if(accessControl.getLoginDeblockIsEnable()){
+								errorMsg += "或者" + accessControl.getLoginDeblockMinutes() + "分钟后登录系统。";
+							}
+						}
+						user.setPassword("");
+						userApi.update(user);
+					}
+					insertLoginErrorAuditlog(WebUtil.getRemoteIp(hreq),account,errorMsg);
+					return toJsonObject(203, errorMsg);
+				}
+			}
+		}else{
+			insertLoginErrorAuditlog(WebUtil.getRemoteIp(hreq),account,"您的ip不被允许访问！");
+			return toJsonObject(205,"您的ip不被允许访问！");
+		}
+	}
 	
 	private JSONObject insertLoginErrorAuditlog(String ip,String userName,String descripstion){
 		AuditlogBo auditlogBo = new AuditlogBo();
